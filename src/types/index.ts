@@ -63,3 +63,59 @@ export interface DailyHours {
   hours: number;
   isToday: boolean;
 }
+
+/** Configuração de meta de estudo do usuário */
+export interface StudyGoal {
+  weeklyGoalHours: number;
+  updatedAt?: string;
+}
+
+/** Métricas de consistência e progresso da meta semanal */
+export interface StudyConsistency {
+  currentStreak: number;
+  bestStreak: number;
+  daysStudiedThisWeek: number;
+  weeklyGoalHours: number;
+  weeklyTotalSeconds: number;
+  weeklyProgressPercent: number;
+  remainingSeconds: number;
+}
+
+/** Peso de cada matéria no plano de estudo (0-100, soma = 100) */
+export interface SubjectWeight {
+  subject: string;
+  weight: number; // percentual planejado (0-100)
+}
+
+/** Plano de estudo salvo no Firestore */
+export interface StudyPlan {
+  subjects: SubjectWeight[];
+  updatedAt?: string;
+}
+
+/** Comparação planejado vs real por matéria */
+export interface PlanVsActual {
+  subject: string;
+  plannedPercent: number;  // peso definido pelo usuário
+  actualPercent: number;   // % real baseado nas sessões do mês
+  actualHours: number;
+  deviation: number;       // actual - planned (positivo = acima, negativo = abaixo)
+  status: 'ok' | 'neglected' | 'over';
+}
+
+/** Filtros para busca no histórico */
+export interface SessionFilters {
+  subject?: string;
+  dateFrom?: string;   // YYYY-MM-DD
+  dateTo?: string;     // YYYY-MM-DD
+  minDuration?: number; // segundos
+}
+
+/** Insight automático gerado pela análise dos dados */
+export interface StudyInsight {
+  type: 'neglected' | 'suggestion' | 'streak' | 'balance' | 'celebrate';
+  title: string;
+  message: string;
+  icon: string; // nome do ícone lucide
+  color: string; // tailwind color class
+}

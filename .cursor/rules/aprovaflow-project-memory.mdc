@@ -1,0 +1,93 @@
+---
+description: Memória completa do projeto AprovaFlow — arquitetura, o que foi feito, e roadmap das próximas fases
+alwaysApply: true
+---
+
+# AprovaFlow — Memória do Projeto
+
+## O que é
+Plataforma de estudo para concursos. Rastreia horas líquidas de estudo, visualiza progresso por matéria, define metas e gera insights automáticos.
+
+## Stack
+- Next.js 16 (App Router) + TypeScript
+- Tailwind CSS + Lucide React + framer-motion
+- Firebase (Auth Google + Firestore)
+- Recharts (Radar + Barras)
+- Integração futura: Google Gemini API
+
+## Estrutura de Pastas
+```
+src/
+├── app/              # Pages, layout, globals.css
+├── components/       # Todos os componentes de UI
+├── contexts/         # AuthContext (Provider global)
+├── hooks/            # useAuth, useStudyTimer (Page Visibility API)
+├── lib/firebase/     # config.ts, sessions.ts (serviço Firestore)
+├── lib/utils.ts      # formatDuration, exportCSV, etc.
+└── types/index.ts    # Todos os tipos centrais
+```
+
+## Firestore Schema
+- **sessions/{id}** — userId, subject, subtopic, startTime, endTime, duration, date, createdAt
+- **user_stats/{userId}** — weeklyGoalHours, planSubjects[], planUpdatedAt, updatedAt
+
+## Componentes Existentes
+- LoginScreen, Header, Dashboard
+- StudyTimer (anel SVG + Page Visibility API para horas líquidas)
+- SummaryCards (Hoje/Semana/Mês com animação staggered)
+- SubjectRadarChart (radar 3+ matérias, barras horizontais 1-2 matérias)
+- WeeklyBarChart (barras Seg-Dom, dia atual destacado)
+- RecentSessions (últimas 5 sessões com badges)
+- GoalAndStreakCard (meta semanal, streak atual/melhor, barra de progresso)
+- StudyPlanCard (pesos por matéria, planejado vs real, status por matéria)
+- InsightsPanel (motor de regras: negligenciada, sugestão, streak, equilíbrio, meta)
+- DailySummaryCard (resumo do dia: total, foco, pendente)
+- SessionHistory (filtros por matéria/período/duração + exportar CSV + paginação)
+
+## O que já foi entregue
+
+### Fase 1 (COMPLETA)
+1. Login social Google
+2. Cronômetro com horas líquidas (Page Visibility API)
+3. Dashboard com cards (Hoje/Semana/Mês)
+4. Gráfico de Radar por matéria (com fallback 1-2 matérias)
+5. Gráfico de Barras semanal
+6. Histórico de sessões recentes
+7. Meta semanal + streak
+8. Plano de estudo com pesos (planejado vs real)
+9. Insights automáticos (motor de regras local)
+10. Histórico com filtros + exportar CSV
+11. Resumo diário automático
+12. UI premium: framer-motion, anel SVG, glow, animações staggered
+
+## Roadmap — Fase 2 (Diferenciais Competitivos)
+1. **Integração Google Gemini** — enviar JSON de estudo da semana, receber parágrafo motivacional + sugestão de matéria baseada no radar (PRÓXIMO)
+2. **Heatmap de atividade** — grid mensal tipo GitHub (cor = intensidade de estudo), clique no dia mostra sessões daquele dia
+3. **Pomodoro avançado** — protocolos 50/10, 45/15, revisão espaçada, modo questões
+4. **Módulo de questões (MVP)** — registrar acertos/erros por matéria, cruzar com tempo
+5. **Notificações inteligentes** — push "faltam 25min para meta", "3 dias sem estudar X"
+
+## Roadmap — Fase 3 (Escala e Monetização)
+1. Benchmark anônimo — comparar constância com usuários similares
+2. Mentoria IA semanal — relatório + plano de recuperação
+3. **Calendário com agenda** — planejar estudo futuro por dia, arrastar matérias, novo schema scheduledSessions
+4. Modo prova — simulado temporizado + análise pós-prova
+5. PWA — instalar como app, funcionar offline
+6. Plano Pro — IA avançada, relatórios, múltiplos planos
+
+## Roadmap — Fase Final (Pós-implementação)
+1. **Tutorial interativo de onboarding** — guia passo a passo para novos usuários:
+   - Tour guiado na primeira visita (tooltip/overlay em cada seção do dashboard)
+   - Passos: criar conta > configurar plano de matérias > definir meta > usar cronômetro > ver progresso
+   - Opção de "pular" e "ver depois"
+   - Página /tutorial acessível pelo menu para revisitar a qualquer momento
+   - Considerar lib tipo intro.js ou driver.js, ou implementar com framer-motion
+
+## Convenções de Código
+- Componentes: PascalCase, 'use client' no topo, framer-motion para animações
+- Hooks: camelCase, prefixo use
+- Serviços Firestore: funções async exportadas em sessions.ts
+- Tipos: tudo centralizado em types/index.ts
+- Estilo: dark mode, gradientes violeta/azul neon, Tailwind CSS
+- Resiliência: fetchData separa dados essenciais de opcionais (user_stats pode falhar)
+- Idioma: interface em português, código/variáveis em inglês

@@ -13,13 +13,29 @@ import {
   where,
   getDocs,
   orderBy,
-  Timestamp,
+  doc,
+  getDoc,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from './config';
-import { StudySession, StudySummary, SubjectHours, DailyHours } from '@/types';
+import {
+  StudySession,
+  StudySummary,
+  SubjectHours,
+  DailyHours,
+  StudyGoal,
+  StudyConsistency,
+  StudyPlan,
+  SubjectWeight,
+  PlanVsActual,
+  StudyInsight,
+  SessionFilters,
+} from '@/types';
 import { getDayName, getTodayISO } from '@/lib/utils';
 
 const SESSIONS_COLLECTION = 'sessions';
+const USER_STATS_COLLECTION = 'user_stats';
+const DEFAULT_WEEKLY_GOAL_HOURS = 10;
 
 /**
  * Salva uma nova sessão de estudo no Firestore
@@ -182,4 +198,327 @@ export async function getRecentSessions(
   return sessions
     .sort((a, b) => b.startTime.localeCompare(a.startTime))
     .slice(0, limit);
+}
+
+/**
+ * Retorna a meta semanal do usuário
+ */
+export async function getWeeklyGoal(userId: string): Promise<StudyGoal> {
+  const ref = doc(db, USER_STATS_COLLECTION, userId);
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) {
+    return { weeklyGoalHours: DEFAULT_WEEKLY_GOAL_HOURS };
+  }
+
+  const data = snap.data() as Partial<StudyGoal>;
+  return {
+    weeklyGoalHours:
+      typeof data.weeklyGoalHours === 'number'
+        ? data.weeklyGoalHours
+        : DEFAULT_WEEKLY_GOAL_HOURS,
+    updatedAt: data.updatedAt,
+  };
+}
+
+/**
+ * Atualiza a meta semanal do usuário
+ */
+export async function setWeeklyGoal(
+  userId: string,
+  weeklyGoalHours: number
+): Promise<void> {
+  const normalized = Math.max(1, Math.min(80, Math.round(weeklyGoalHours)));
+  const ref = doc(db, USER_STATS_COLLECTION, userId);
+  await setDoc(
+    ref,
+    {
+      weeklyGoalHours: normalized,
+      updatedAt: new Date().toISOString(),
+    },
+    { merge: true }
+  );
+}
+
+/**
+ * Calcula métricas de consistência:
+ * - streak atual
+ * - melhor streak histórico
+ * - progresso da meta semanal
+ */
+export async function getStudyConsistency(userId: string): Promise<StudyConsistency> {
+  const [goal, weeklyData] = await Promise.all([
+    getWeeklyGoal(userId),
+    getWeeklyHours(userId),
+  ]);
+
+  const weeklyTotalSeconds = weeklyData.reduce(
+    (acc, day) => acc + Math.round(day.hours * 3600),
+    0
+  );
+  const weeklyGoalSeconds = goal.weeklyGoalHours * 3600;
+  const weeklyProgressPercent = Math.min(
+    100,
+    Math.round((weeklyTotalSeconds / weeklyGoalSeconds) * 100)
+  );
+  const remainingSeconds = Math.max(0, weeklyGoalSeconds - weeklyTotalSeconds);
+  const daysStudiedThisWeek = weeklyData.filter((d) => d.hours > 0).length;
+
+  // Busca sessões do último ano para cálculo de streak
+  const from = new Date();
+  from.setFullYear(from.getFullYear() - 1);
+  const fromDate = from.toISOString().split('T')[0];
+  const sessions = await getSessionsFromDate(userId, fromDate);
+
+  const dateSet = new Set(sessions.map((s) => s.date));
+  const sortedDates = Array.from(dateSet).sort();
+
+  // Melhor streak histórico
+  let bestStreak = 0;
+  let runningBest = 0;
+  let prevDate: Date | null = null;
+  for (const dateStr of sortedDates) {
+    const current = new Date(`${dateStr}T00:00:00`);
+    if (!prevDate) {
+      runningBest = 1;
+    } else {
+      const diffDays = Math.round(
+        (current.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      runningBest = diffDays === 1 ? runningBest + 1 : 1;
+    }
+    bestStreak = Math.max(bestStreak, runningBest);
+    prevDate = current;
+  }
+
+  // Streak atual: conta de hoje; se não houver hoje, começa de ontem
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+  let cursor: Date | null = null;
+  if (dateSet.has(todayStr)) {
+    cursor = new Date(`${todayStr}T00:00:00`);
+  } else if (dateSet.has(yesterdayStr)) {
+    cursor = new Date(`${yesterdayStr}T00:00:00`);
+  }
+
+  let currentStreak = 0;
+  while (cursor) {
+    const key = cursor.toISOString().split('T')[0];
+    if (!dateSet.has(key)) break;
+    currentStreak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return {
+    currentStreak,
+    bestStreak,
+    daysStudiedThisWeek,
+    weeklyGoalHours: goal.weeklyGoalHours,
+    weeklyTotalSeconds,
+    weeklyProgressPercent,
+    remainingSeconds,
+  };
+}
+
+// ==========================================================
+// Plano de Estudo (pesos por matéria)
+// ==========================================================
+
+/**
+ * Retorna o plano de estudo do usuário (pesos por matéria)
+ */
+export async function getStudyPlan(userId: string): Promise<StudyPlan> {
+  const ref = doc(db, USER_STATS_COLLECTION, userId);
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) return { subjects: [] };
+
+  const data = snap.data();
+  return {
+    subjects: Array.isArray(data.planSubjects) ? data.planSubjects : [],
+    updatedAt: data.planUpdatedAt,
+  };
+}
+
+/**
+ * Salva o plano de estudo (pesos por matéria)
+ */
+export async function setStudyPlan(
+  userId: string,
+  subjects: SubjectWeight[]
+): Promise<void> {
+  const ref = doc(db, USER_STATS_COLLECTION, userId);
+  await setDoc(
+    ref,
+    {
+      planSubjects: subjects,
+      planUpdatedAt: new Date().toISOString(),
+    },
+    { merge: true }
+  );
+}
+
+/**
+ * Compara o plano (pesos) com o real (horas do mês)
+ */
+export async function getPlanVsActual(userId: string): Promise<PlanVsActual[]> {
+  const [plan, subjectHours] = await Promise.all([
+    getStudyPlan(userId),
+    getHoursBySubject(userId),
+  ]);
+
+  if (plan.subjects.length === 0) return [];
+
+  const totalHours = subjectHours.reduce((acc, s) => acc + s.hours, 0);
+  const hoursMap = new Map(subjectHours.map((s) => [s.subject, s.hours]));
+
+  return plan.subjects.map((pw) => {
+    const actualHours = hoursMap.get(pw.subject) || 0;
+    const actualPercent = totalHours > 0
+      ? Math.round((actualHours / totalHours) * 100)
+      : 0;
+    const deviation = actualPercent - pw.weight;
+    const status: PlanVsActual['status'] =
+      deviation < -10 ? 'neglected' : deviation > 15 ? 'over' : 'ok';
+
+    return {
+      subject: pw.subject,
+      plannedPercent: pw.weight,
+      actualPercent,
+      actualHours,
+      deviation,
+      status,
+    };
+  });
+}
+
+// ==========================================================
+// Insights Automáticos
+// ==========================================================
+
+/**
+ * Gera insights acionáveis baseados nos dados de estudo
+ */
+export async function generateInsights(
+  userId: string,
+  consistency: StudyConsistency,
+  planVsActual: PlanVsActual[]
+): Promise<StudyInsight[]> {
+  const insights: StudyInsight[] = [];
+
+  // 1. Matéria mais negligenciada
+  const neglected = planVsActual
+    .filter((p) => p.status === 'neglected')
+    .sort((a, b) => a.deviation - b.deviation);
+
+  if (neglected.length > 0) {
+    const worst = neglected[0];
+    insights.push({
+      type: 'neglected',
+      title: 'Matéria negligenciada',
+      message: `${worst.subject} está ${Math.abs(worst.deviation)}% abaixo do planejado. Considere focar nela hoje.`,
+      icon: 'AlertTriangle',
+      color: 'text-amber-400',
+    });
+  }
+
+  // 2. Sugestão do dia
+  if (neglected.length > 0) {
+    insights.push({
+      type: 'suggestion',
+      title: 'Sugestão para hoje',
+      message: `Estude ${neglected[0].subject} para equilibrar seu radar.`,
+      icon: 'Lightbulb',
+      color: 'text-violet-400',
+    });
+  } else if (planVsActual.length > 0) {
+    const leastStudied = [...planVsActual].sort(
+      (a, b) => a.actualHours - b.actualHours
+    )[0];
+    insights.push({
+      type: 'suggestion',
+      title: 'Sugestão para hoje',
+      message: `${leastStudied.subject} é a matéria com menos horas. Que tal dedicar um tempo a ela?`,
+      icon: 'Lightbulb',
+      color: 'text-violet-400',
+    });
+  }
+
+  // 3. Streak
+  if (consistency.currentStreak >= 7) {
+    insights.push({
+      type: 'celebrate',
+      title: 'Sequência incrível!',
+      message: `${consistency.currentStreak} dias seguidos estudando. Você está construindo um hábito sólido!`,
+      icon: 'Trophy',
+      color: 'text-amber-400',
+    });
+  } else if (consistency.currentStreak >= 3) {
+    insights.push({
+      type: 'streak',
+      title: 'Boa sequência!',
+      message: `${consistency.currentStreak} dias seguidos. Continue assim para chegar a 7!`,
+      icon: 'Flame',
+      color: 'text-orange-400',
+    });
+  }
+
+  // 4. Equilíbrio geral
+  const balanced = planVsActual.filter((p) => p.status === 'ok').length;
+  if (planVsActual.length > 0 && balanced === planVsActual.length) {
+    insights.push({
+      type: 'balance',
+      title: 'Estudos equilibrados',
+      message: 'Todas as matérias estão dentro do planejado. Excelente distribuição!',
+      icon: 'CheckCircle',
+      color: 'text-emerald-400',
+    });
+  }
+
+  // 5. Meta semanal
+  if (consistency.weeklyProgressPercent >= 100) {
+    insights.push({
+      type: 'celebrate',
+      title: 'Meta semanal batida!',
+      message: 'Você atingiu sua meta da semana. Parabéns pelo comprometimento!',
+      icon: 'Star',
+      color: 'text-yellow-400',
+    });
+  } else if (consistency.weeklyProgressPercent >= 70) {
+    insights.push({
+      type: 'streak',
+      title: 'Quase lá!',
+      message: `Faltam apenas ${Math.round(consistency.remainingSeconds / 60)} minutos para bater a meta semanal.`,
+      icon: 'Target',
+      color: 'text-cyan-400',
+    });
+  }
+
+  return insights;
+}
+
+// ==========================================================
+// Histórico com Filtros
+// ==========================================================
+
+/**
+ * Busca sessões aplicando filtros opcionais (matéria, período, duração mínima)
+ */
+export async function getFilteredSessions(
+  userId: string,
+  filters: SessionFilters
+): Promise<StudySession[]> {
+  const fromDate = filters.dateFrom || '2020-01-01';
+  const sessions = await getSessionsFromDate(userId, fromDate);
+
+  return sessions.filter((s) => {
+    if (filters.subject && s.subject !== filters.subject) return false;
+    if (filters.dateTo && s.date > filters.dateTo) return false;
+    if (filters.minDuration && s.duration < filters.minDuration) return false;
+    return true;
+  });
 }

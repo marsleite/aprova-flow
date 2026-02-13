@@ -17,14 +17,36 @@ import {
   getHoursBySubject,
   getWeeklyHours,
   getRecentSessions,
+  getStudyConsistency,
+  setWeeklyGoal,
+  getStudyPlan,
+  setStudyPlan,
+  getPlanVsActual,
+  generateInsights,
+  getFilteredSessions,
 } from '@/lib/firebase/sessions';
-import { StudySummary, SubjectHours, DailyHours, StudySession } from '@/types';
+import { getTodayISO } from '@/lib/utils';
+import {
+  StudySummary,
+  SubjectHours,
+  DailyHours,
+  StudySession,
+  StudyConsistency,
+  SubjectWeight,
+  PlanVsActual,
+  StudyInsight,
+} from '@/types';
 import Header from './Header';
 import SummaryCards from './SummaryCards';
 import StudyTimer from './StudyTimer';
 import SubjectRadarChart from './SubjectRadarChart';
 import WeeklyBarChart from './WeeklyBarChart';
 import RecentSessions from './RecentSessions';
+import GoalAndStreakCard from './GoalAndStreakCard';
+import StudyPlanCard from './StudyPlanCard';
+import InsightsPanel from './InsightsPanel';
+import SessionHistory from './SessionHistory';
+import DailySummaryCard from './DailySummaryCard';
 import { TrendingUp } from 'lucide-react';
 
 const sectionVariants = {
@@ -46,11 +68,17 @@ export default function Dashboard() {
   const [subjectData, setSubjectData] = useState<SubjectHours[]>([]);
   const [weeklyData, setWeeklyData] = useState<DailyHours[]>([]);
   const [recentData, setRecentData] = useState<StudySession[]>([]);
+  const [consistency, setConsistency] = useState<StudyConsistency | null>(null);
+  const [planVsActual, setPlanVsActual] = useState<PlanVsActual[]>([]);
+  const [planWeights, setPlanWeights] = useState<SubjectWeight[]>([]);
+  const [insights, setInsights] = useState<StudyInsight[]>([]);
+  const [todaySessions, setTodaySessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
     try {
+      // Busca dados essenciais primeiro
       const [summaryRes, subjectsRes, weeklyRes, recentRes] = await Promise.all([
         getStudySummary(user.uid),
         getHoursBySubject(user.uid),
@@ -61,6 +89,42 @@ export default function Dashboard() {
       setSubjectData(subjectsRes);
       setWeeklyData(weeklyRes);
       setRecentData(recentRes);
+
+      // Sessões de hoje para o resumo diário
+      const today = getTodayISO();
+      const todayRes = await getFilteredSessions(user.uid, { dateFrom: today, dateTo: today });
+      setTodaySessions(todayRes);
+
+      // Busca dados que dependem de user_stats (pode falhar se regras não atualizadas)
+      try {
+        const [consistencyRes, planRes, pvaRes] = await Promise.all([
+          getStudyConsistency(user.uid),
+          getStudyPlan(user.uid),
+          getPlanVsActual(user.uid),
+        ]);
+        setConsistency(consistencyRes);
+        setPlanWeights(planRes.subjects);
+        setPlanVsActual(pvaRes);
+
+        // Gera insights
+        const insightsRes = await generateInsights(user.uid, consistencyRes, pvaRes);
+        setInsights(insightsRes);
+      } catch (err) {
+        console.warn('Erro ao carregar dados avançados (atualize as regras do Firestore):', err);
+        const weeklyTotalSeconds = weeklyRes.reduce(
+          (acc, d) => acc + Math.round(d.hours * 3600), 0
+        );
+        const defaultGoalHours = 10;
+        setConsistency({
+          currentStreak: 0,
+          bestStreak: 0,
+          daysStudiedThisWeek: weeklyRes.filter((d) => d.hours > 0).length,
+          weeklyGoalHours: defaultGoalHours,
+          weeklyTotalSeconds,
+          weeklyProgressPercent: Math.min(100, Math.round((weeklyTotalSeconds / (defaultGoalHours * 3600)) * 100)),
+          remainingSeconds: Math.max(0, defaultGoalHours * 3600 - weeklyTotalSeconds),
+        });
+      }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     } finally {
@@ -74,6 +138,18 @@ export default function Dashboard() {
 
   const handleSessionSaved = () => {
     fetchData();
+  };
+
+  const handleSaveGoal = async (hours: number) => {
+    if (!user) return;
+    await setWeeklyGoal(user.uid, hours);
+    await fetchData();
+  };
+
+  const handleSavePlan = async (subjects: SubjectWeight[]) => {
+    if (!user) return;
+    await setStudyPlan(user.uid, subjects);
+    await fetchData();
   };
 
   if (!user) return null;
@@ -99,9 +175,25 @@ export default function Dashboard() {
           </p>
         </motion.div>
 
-        {/* Cards de Resumo */}
+        {/* Resumo Diário */}
         <motion.div
           custom={1}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mb-6"
+        >
+          <DailySummaryCard
+            todaySessions={todaySessions}
+            totalTodaySeconds={summary.totalToday}
+            planVsActual={planVsActual}
+            loading={loading}
+          />
+        </motion.div>
+
+        {/* Cards de Resumo */}
+        <motion.div
+          custom={2}
           variants={sectionVariants}
           initial="hidden"
           animate="show"
@@ -116,7 +208,7 @@ export default function Dashboard() {
 
         {/* Linha 1: Cronômetro + Radar */}
         <motion.div
-          custom={2}
+          custom={3}
           variants={sectionVariants}
           initial="hidden"
           animate="show"
@@ -128,7 +220,7 @@ export default function Dashboard() {
 
         {/* Linha 2: Barras Semanal + Histórico */}
         <motion.div
-          custom={3}
+          custom={4}
           variants={sectionVariants}
           initial="hidden"
           animate="show"
@@ -136,6 +228,49 @@ export default function Dashboard() {
         >
           <WeeklyBarChart data={weeklyData} loading={loading} />
           <RecentSessions sessions={recentData} loading={loading} />
+        </motion.div>
+
+        {/* Linha 3: Meta + Plano de Estudo */}
+        <motion.div
+          custom={5}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mt-6 grid gap-6 lg:grid-cols-2"
+        >
+          <GoalAndStreakCard
+            data={consistency}
+            loading={loading}
+            onSaveGoal={handleSaveGoal}
+          />
+          <StudyPlanCard
+            planVsActual={planVsActual}
+            currentWeights={planWeights}
+            loading={loading}
+            onSavePlan={handleSavePlan}
+          />
+        </motion.div>
+
+        {/* Linha 4: Insights */}
+        <motion.div
+          custom={6}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mt-6"
+        >
+          <InsightsPanel insights={insights} loading={loading} />
+        </motion.div>
+
+        {/* Linha 5: Histórico Completo */}
+        <motion.div
+          custom={7}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mt-6"
+        >
+          <SessionHistory userId={user.uid} />
         </motion.div>
       </main>
     </div>
