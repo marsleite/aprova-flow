@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AprovaFlow
 
-## Getting Started
+Plataforma inteligente de estudo para concursos. Rastreie horas líquidas de estudo, visualize seu progresso por matéria e mantenha a consistência nos estudos.
 
-First, run the development server:
+## Stack Técnica
+
+- **Framework:** Next.js 16 (App Router) + TypeScript
+- **Estilização:** Tailwind CSS + Lucide React (ícones)
+- **Backend:** Firebase (Authentication + Firestore)
+- **Gráficos:** Recharts (preparado para Radar e Barras)
+- **IA:** Integração futura com Google Gemini API
+
+## Funcionalidades
+
+- **Login social** com Google via Firebase Auth
+- **Cronômetro inteligente** com cálculo de horas líquidas (Page Visibility API)
+- **Pausa automática** quando a aba fica inativa
+- **Dashboard** com resumo diário, semanal e mensal
+- **Seleção de matérias** padrão para concursos
+
+## Como Iniciar
+
+### 1. Instalar dependências
+
+```bash
+npm install
+```
+
+### 2. Configurar Firebase
+
+1. Crie um projeto no [Firebase Console](https://console.firebase.google.com)
+2. Ative **Authentication** > **Google** como provedor de login
+3. Crie um banco **Firestore Database**
+4. Adicione um **app Web** e copie as credenciais
+5. Copie `.env.local.example` para `.env.local` e preencha:
+
+```bash
+cp .env.local.example .env.local
+```
+
+### 3. Rodar o projeto
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estrutura do Projeto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── globals.css          # Estilos globais (dark mode)
+│   ├── layout.tsx           # Layout raiz
+│   └── page.tsx             # Página principal (Login/Dashboard)
+├── components/
+│   ├── Dashboard.tsx         # Dashboard principal
+│   ├── Header.tsx            # Header com logo e logout
+│   ├── LoginScreen.tsx       # Tela de login
+│   ├── StudyTimer.tsx        # Cronômetro de estudo
+│   └── SummaryCards.tsx      # Cards de resumo
+├── contexts/
+│   └── AuthContext.tsx       # Contexto de autenticação
+├── hooks/
+│   ├── useAuth.ts            # Hook de autenticação Firebase
+│   └── useStudyTimer.ts      # Hook do cronômetro (Page Visibility API)
+├── lib/
+│   ├── firebase/
+│   │   ├── config.ts         # Configuração do Firebase
+│   │   └── sessions.ts       # CRUD de sessões no Firestore
+│   └── utils.ts              # Funções utilitárias
+└── types/
+    └── index.ts              # Tipos TypeScript
+```
 
-## Learn More
+## Schema do Firestore
 
-To learn more about Next.js, take a look at the following resources:
+**Coleção:** `sessions`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Campo      | Tipo   | Descrição                          |
+|------------|--------|------------------------------------|
+| userId     | string | UID do usuário                     |
+| subject    | string | Matéria estudada                   |
+| subtopic   | string | Subtópico (opcional)               |
+| startTime  | string | ISO String do início               |
+| endTime    | string | ISO String do fim                  |
+| duration   | number | Duração líquida em segundos        |
+| date       | string | Data (YYYY-MM-DD)                  |
+| createdAt  | string | Timestamp de criação               |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Horas Líquidas — Como Funciona
 
-## Deploy on Vercel
+O cronômetro usa a **Page Visibility API** do navegador para garantir que apenas tempo ativo de estudo seja contabilizado:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Quando o usuário inicia o cronômetro, o tempo começa a contar
+2. Se a aba ficar **inativa** (troca de aba, minimizar), o timer **pausa automaticamente**
+3. Ao **retornar** para a aba, o timer **retoma** de onde parou
+4. Ao parar, apenas o tempo líquido é salvo no Firestore
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Próximos Passos
+
+- [ ] Gráfico de Radar por matéria (Recharts)
+- [ ] Gráfico de Barras — evolução semanal
+- [ ] Integração com Google Gemini para sugestões de estudo
+- [ ] Histórico detalhado de sessões
+- [ ] Edição/exclusão de sessões
+- [ ] PWA (Progressive Web App) para uso mobile
