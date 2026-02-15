@@ -426,7 +426,7 @@ export default function Dashboard() {
           />
         </motion.div>
 
-        {/* Linha 4.5: Mentor AprovaFlow */}
+        {/* Linha 4.5: Mentor AprovaMind */}
         <motion.div
           custom={9}
           variants={sectionVariants}

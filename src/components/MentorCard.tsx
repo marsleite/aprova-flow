@@ -1,5 +1,5 @@
 /**
- * Card do Mentor AprovaFlow — Motor de regras local
+ * Card do Mentor AprovaMind — Motor de regras local
  *
  * Análise 100% local (zero chamadas à IA):
  * - Equilíbrio de matérias (plano vs real)
@@ -384,7 +384,7 @@ export default function MentorCard({
             <Shield className="h-5 w-5 text-amber-300" />
           </div>
           <div>
-            <span className="text-sm font-semibold text-white">Mentor AprovaFlow</span>
+            <span className="text-sm font-semibold text-white">Mentor AprovaMind</span>
             <p className="text-[11px] text-gray-500">Análise estratégica dos seus estudos</p>
           </div>
         </div>
@@ -422,7 +422,7 @@ export default function MentorCard({
               <Shield className="h-5 w-5 text-amber-300" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-white">Mentor AprovaFlow</span>
+              <span className="text-sm font-semibold text-white">Mentor AprovaMind</span>
               <p className="text-[11px] text-gray-500">Análise estratégica dos seus estudos</p>
             </div>
           </div>

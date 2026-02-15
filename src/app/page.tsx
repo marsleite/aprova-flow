@@ -1,5 +1,5 @@
 /**
- * Página Principal do AprovaFlow
+ * Página Principal do AprovaMind
  * 
  * Redireciona para Login ou Dashboard baseado no estado de autenticação.
  */

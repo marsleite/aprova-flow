@@ -57,7 +57,7 @@ function buildSystemPrompt(ctx: StudyContext): string {
         .join('\n')
     : '  Sem plano configurado.';
 
-  return `Você é o Coach de Estudos do AprovaFlow, assistente pessoal para concurseiros brasileiros.
+  return `Você é o Coach de Estudos do AprovaMind, assistente pessoal para concurseiros brasileiros.
 
 PERSONALIDADE:
 - Motivador, direto e prático. Fala como um mentor experiente.

@@ -1,5 +1,5 @@
 /**
- * API Route — Mentoria Semanal AprovaFlow
+ * API Route — Mentoria Semanal AprovaMind
  *
  * Análise profunda gerada 1x por semana, salva no Firestore pelo client.
  * Recebe dados completos da semana e retorna:
@@ -81,7 +81,7 @@ function buildPrompt(ctx: WeeklyMentoringRequest): string {
       : '  Nenhuma questão registrada.';
 
   return `PERSONA:
-Você é o "Mentor AprovaFlow", especialista em aprovação em concursos públicos de alto nível.
+Você é o "Mentor AprovaMind", especialista em aprovação em concursos públicos de alto nível.
 Esta é a MENTORIA SEMANAL — uma análise profunda e estratégica entregue 1x por semana.
 
 TOM DE VOZ:

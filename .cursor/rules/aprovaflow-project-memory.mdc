@@ -1,9 +1,9 @@
 ---
-description: Memória completa do projeto AprovaFlow — arquitetura, o que foi feito, e roadmap das próximas fases
+description: Memória completa do projeto AprovaMind — arquitetura, o que foi feito, e roadmap das próximas fases
 alwaysApply: true
 ---
 
-# AprovaFlow — Memória do Projeto
+# AprovaMind — Memória do Projeto
 
 ## O que é
 Plataforma de estudo para concursos. Rastreia horas líquidas de estudo, visualiza progresso por matéria, define metas e gera insights automáticos com IA. Suporta múltiplos editais (PGE, Magistratura, etc.) com dashboards filtrados por plano.
@@ -96,7 +96,7 @@ src/
 5. ✅ Contexto enriquecido — Coach recebe evolução semanal + últimas 5 sessões
 6. ✅ Heatmap de atividade — grid mensal tipo GitHub
 7. ✅ Pomodoro avançado — modos 25/5, 50/10, 45/15, fases automáticas, skip, som
-8. ✅ Mentor AprovaFlow — motor de regras LOCAL (equilibrio, fadiga, constância × precisão, ação imediata)
+8. ✅ Mentor AprovaMind — motor de regras LOCAL (equilibrio, fadiga, constância × precisão, ação imediata)
 9. ✅ Módulo de questões (MVP) — QuestionTrackerCard + AccuracyChart (RadialBar)
 10. ✅ Multi-Edital — study_plans, PlanSelector, PlanManager, filtros por planId, migração
 11. ✅ Importação de Edital PDF — Gemini extrai matérias/pesos/nome/meta de um PDF de edital

@@ -1,5 +1,5 @@
 /**
- * Tipos centrais da aplicação AprovaFlow
+ * Tipos centrais da aplicação AprovaMind
  * Define a estrutura de dados para sessões de estudo e usuário
  */
 

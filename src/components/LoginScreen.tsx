@@ -32,7 +32,7 @@ export default function LoginScreen() {
               <Zap className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-white">
-              Aprova<span className="text-violet-400">Flow</span>
+              Aprova<span className="text-violet-400">Mind</span>
             </h1>
             <p className="mt-2 text-center text-sm text-gray-400">
               Rastreie seu tempo de estudo e acelere sua aprovação

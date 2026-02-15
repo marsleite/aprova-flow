@@ -37,7 +37,7 @@ export default function Header({
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">
-              Aprova<span className="text-violet-400">Flow</span>
+              Aprova<span className="text-violet-400">Mind</span>
             </h1>
             <p className="hidden text-xs text-gray-500 sm:block">
               Rastreie seu progresso

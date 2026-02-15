@@ -1,5 +1,5 @@
 /**
- * Funções utilitárias do AprovaFlow
+ * Funções utilitárias do AprovaMind
  */
 
 /**
@@ -85,7 +85,7 @@ export function exportSessionsCSV(
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `aprovaflow-sessoes-${new Date().toISOString().split('T')[0]}.csv`;
+  link.download = `aprovamind-sessoes-${new Date().toISOString().split('T')[0]}.csv`;
   link.click();
   URL.revokeObjectURL(url);
 }

@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AprovaFlow - Rastreie seu Progresso nos Estudos",
+  title: "AprovaMind — Inteligência para Concursos",
   description:
-    "Plataforma inteligente de estudo para concursos. Rastreie horas líquidas, visualize progresso e estude de forma eficiente.",
+    "Plataforma inteligente de estudo para concursos. Rastreie horas líquidas, visualize progresso e estude de forma estratégica com IA.",
   icons: {
     icon: "/favicon.ico",
   },

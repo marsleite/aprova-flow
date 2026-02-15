@@ -1,4 +1,4 @@
-# AprovaFlow
+# AprovaMind
 
 **Plataforma inteligente de estudo para concursos públicos.**
 
@@ -29,7 +29,7 @@ Rastreia horas líquidas de estudo, gerencia múltiplos editais, visualiza progr
 
 ## Visão do Produto
 
-O AprovaFlow resolve um problema real de concurseiros: **falta de visibilidade sobre onde o tempo de estudo está indo**. Quem estuda para PGE e Magistratura ao mesmo tempo precisa saber exatamente quantas horas dedicou a cada edital, qual matéria está sendo negligenciada, e se a estratégia está funcionando.
+O AprovaMind resolve um problema real de concurseiros: **falta de visibilidade sobre onde o tempo de estudo está indo**. Quem estuda para PGE e Magistratura ao mesmo tempo precisa saber exatamente quantas horas dedicou a cada edital, qual matéria está sendo negligenciada, e se a estratégia está funcionando.
 
 ### Proposta de Valor
 
@@ -82,7 +82,7 @@ O app **não ensina matéria** — ele é o **coach de rotina** que garante que 
 
 ### IA Integrada (Google Gemini)
 - **Coach IA**: Chat conversacional para dúvidas de rotina
-- **Mentor AprovaFlow**: Análise estratégica proativa com cruzamento constância × precisão
+- **Mentor AprovaMind**: Análise estratégica proativa com cruzamento constância × precisão
 - **Feedback pós-sessão**: Toast automático ao parar o cronômetro
 - Todos os prompts são "grounded" nos dados reais do Firestore
 
@@ -215,7 +215,7 @@ src/
 │   ├── Header.tsx                   # Logo + PlanSelector + user
 │   ├── InsightsPanel.tsx            # Insights automáticos (regras locais)
 │   ├── LoginScreen.tsx              # Tela de login
-│   ├── MentorCard.tsx               # Card do Mentor AprovaFlow (IA)
+│   ├── MentorCard.tsx               # Card do Mentor AprovaMind (IA)
 │   ├── PlanManager.tsx              # Modal CRUD de editais
 │   ├── PlanSelector.tsx             # Dropdown de editais no Header
 │   ├── PostSessionToast.tsx         # Toast de feedback pós-sessão
