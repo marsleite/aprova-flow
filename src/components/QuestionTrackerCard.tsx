@@ -23,11 +23,14 @@ import {
   AlertTriangle,
   Loader2,
 } from 'lucide-react';
-import { DEFAULT_SUBJECTS } from '@/types';
+import { DEFAULT_SUBJECTS, SubjectWeight } from '@/types';
 import { saveQuestionSession } from '@/lib/firebase/questions';
 
 interface QuestionTrackerCardProps {
   userId: string;
+  planId?: string;
+  /** Matérias do plano ativo (usa DEFAULT_SUBJECTS se não houver) */
+  planSubjects?: SubjectWeight[];
   /** Matéria da última sessão de estudo (para auto-seleção) */
   lastSessionSubject?: string | null;
   onSaved?: () => void;
@@ -35,6 +38,8 @@ interface QuestionTrackerCardProps {
 
 export default function QuestionTrackerCard({
   userId,
+  planId,
+  planSubjects,
   lastSessionSubject,
   onSaved,
 }: QuestionTrackerCardProps) {
@@ -46,6 +51,14 @@ export default function QuestionTrackerCard({
   const [savedAccuracy, setSavedAccuracy] = useState<number | null>(null);
   const [savedSubject, setSavedSubject] = useState('');
   const hasAutoSelected = useRef(false);
+
+  // Matérias: usa as do plano ativo, senão DEFAULT_SUBJECTS
+  const subjectList = useMemo(() => {
+    if (planSubjects && planSubjects.length > 0) {
+      return planSubjects.map((s) => s.subject);
+    }
+    return DEFAULT_SUBJECTS;
+  }, [planSubjects]);
 
   // Auto-seleção: pré-seleciona matéria da última sessão (só 1x)
   useEffect(() => {
@@ -87,6 +100,7 @@ export default function QuestionTrackerCard({
 
       await saveQuestionSession({
         userId,
+        planId: planId || undefined,
         subject,
         totalQuestions: total,
         correctAnswers: correct,
@@ -145,7 +159,7 @@ export default function QuestionTrackerCard({
                        disabled:opacity-50"
           >
             <option value="">Selecione...</option>
-            {DEFAULT_SUBJECTS.map((s) => (
+            {subjectList.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>

@@ -31,11 +31,14 @@ import {
   StudyInsight,
   SessionFilters,
   DayActivity,
+  WeeklyMentoring,
+  WeeklyMentoringContent,
 } from '@/types';
 import { getDayName, getTodayISO } from '@/lib/utils';
 
 const SESSIONS_COLLECTION = 'sessions';
 const USER_STATS_COLLECTION = 'user_stats';
+const WEEKLY_MENTORING_COLLECTION = 'weekly_mentoring';
 const DEFAULT_WEEKLY_GOAL_HOURS = 10;
 
 function formatDateLocal(date: Date): string {
@@ -57,11 +60,13 @@ export async function saveSession(session: Omit<StudySession, 'id' | 'createdAt'
 }
 
 /**
- * Busca sessões de estudo de um usuário a partir de uma data
+ * Busca sessões de estudo de um usuário a partir de uma data.
+ * Se planId for fornecido, filtra client-side por planId.
  */
 export async function getSessionsFromDate(
   userId: string,
-  fromDate: string
+  fromDate: string,
+  planId?: string
 ): Promise<StudySession[]> {
   const q = query(
     collection(db, SESSIONS_COLLECTION),
@@ -71,16 +76,23 @@ export async function getSessionsFromDate(
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
+  let sessions = snapshot.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
   })) as StudySession[];
+
+  // Filtra por planId client-side (evita index composto obrigatório)
+  if (planId) {
+    sessions = sessions.filter((s) => s.planId === planId);
+  }
+
+  return sessions;
 }
 
 /**
  * Calcula o resumo de horas de estudo (hoje, semana, mês)
  */
-export async function getStudySummary(userId: string): Promise<StudySummary> {
+export async function getStudySummary(userId: string, planId?: string): Promise<StudySummary> {
   const now = new Date();
   
   // Data de início do mês atual (YYYY-MM-01)
@@ -89,7 +101,7 @@ export async function getStudySummary(userId: string): Promise<StudySummary> {
     .split('T')[0];
 
   // Busca todas as sessões do mês
-  const sessions = await getSessionsFromDate(userId, monthStart);
+  const sessions = await getSessionsFromDate(userId, monthStart, planId);
 
   const today = now.toISOString().split('T')[0];
   
@@ -122,13 +134,13 @@ export async function getStudySummary(userId: string): Promise<StudySummary> {
 /**
  * Calcula horas por matéria para o gráfico de radar
  */
-export async function getHoursBySubject(userId: string): Promise<SubjectHours[]> {
+export async function getHoursBySubject(userId: string, planId?: string): Promise<SubjectHours[]> {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
     .toISOString()
     .split('T')[0];
 
-  const sessions = await getSessionsFromDate(userId, monthStart);
+  const sessions = await getSessionsFromDate(userId, monthStart, planId);
 
   // Agrupa duração por matéria
   const subjectMap = new Map<string, number>();
@@ -148,7 +160,7 @@ export async function getHoursBySubject(userId: string): Promise<SubjectHours[]>
 /**
  * Retorna horas estudadas por dia na semana atual (Seg–Dom)
  */
-export async function getWeeklyHours(userId: string): Promise<DailyHours[]> {
+export async function getWeeklyHours(userId: string, planId?: string): Promise<DailyHours[]> {
   const now = new Date();
   const today = getTodayISO();
 
@@ -159,7 +171,7 @@ export async function getWeeklyHours(userId: string): Promise<DailyHours[]> {
   monday.setDate(now.getDate() - mondayOffset);
 
   const weekStartStr = monday.toISOString().split('T')[0];
-  const sessions = await getSessionsFromDate(userId, weekStartStr);
+  const sessions = await getSessionsFromDate(userId, weekStartStr, planId);
 
   // Mapa de data → duração total
   const dayMap = new Map<string, number>();
@@ -192,7 +204,8 @@ export async function getWeeklyHours(userId: string): Promise<DailyHours[]> {
  */
 export async function getRecentSessions(
   userId: string,
-  limit: number = 5
+  limit: number = 5,
+  planId?: string
 ): Promise<StudySession[]> {
   const now = new Date();
   // Busca sessões do último mês para garantir que temos suficientes
@@ -200,7 +213,7 @@ export async function getRecentSessions(
     .toISOString()
     .split('T')[0];
 
-  const sessions = await getSessionsFromDate(userId, monthStart);
+  const sessions = await getSessionsFromDate(userId, monthStart, planId);
 
   // Ordena por startTime decrescente e limita
   return sessions
@@ -254,17 +267,20 @@ export async function setWeeklyGoal(
  * - melhor streak histórico
  * - progresso da meta semanal
  */
-export async function getStudyConsistency(userId: string): Promise<StudyConsistency> {
+export async function getStudyConsistency(userId: string, planId?: string, planGoalHours?: number): Promise<StudyConsistency> {
   const [goal, weeklyData] = await Promise.all([
     getWeeklyGoal(userId),
-    getWeeklyHours(userId),
+    getWeeklyHours(userId, planId),
   ]);
+
+  // Usa goal do plano se fornecido, senão usa goal global
+  const effectiveGoalHours = planGoalHours ?? goal.weeklyGoalHours;
 
   const weeklyTotalSeconds = weeklyData.reduce(
     (acc, day) => acc + Math.round(day.hours * 3600),
     0
   );
-  const weeklyGoalSeconds = goal.weeklyGoalHours * 3600;
+  const weeklyGoalSeconds = effectiveGoalHours * 3600;
   const weeklyProgressPercent = Math.min(
     100,
     Math.round((weeklyTotalSeconds / weeklyGoalSeconds) * 100)
@@ -276,7 +292,7 @@ export async function getStudyConsistency(userId: string): Promise<StudyConsiste
   const from = new Date();
   from.setFullYear(from.getFullYear() - 1);
   const fromDate = from.toISOString().split('T')[0];
-  const sessions = await getSessionsFromDate(userId, fromDate);
+  const sessions = await getSessionsFromDate(userId, fromDate, planId);
 
   const dateSet = new Set(sessions.map((s) => s.date));
   const sortedDates = Array.from(dateSet).sort();
@@ -325,7 +341,7 @@ export async function getStudyConsistency(userId: string): Promise<StudyConsiste
     currentStreak,
     bestStreak,
     daysStudiedThisWeek,
-    weeklyGoalHours: goal.weeklyGoalHours,
+    weeklyGoalHours: effectiveGoalHours,
     weeklyTotalSeconds,
     weeklyProgressPercent,
     remainingSeconds,
@@ -371,12 +387,17 @@ export async function setStudyPlan(
 }
 
 /**
- * Compara o plano (pesos) com o real (horas do mês)
+ * Compara o plano (pesos) com o real (horas do mês).
+ * Se planSubjects for fornecido, usa esses pesos em vez do user_stats.
  */
-export async function getPlanVsActual(userId: string): Promise<PlanVsActual[]> {
+export async function getPlanVsActual(
+  userId: string,
+  planId?: string,
+  planSubjects?: SubjectWeight[]
+): Promise<PlanVsActual[]> {
   const [plan, subjectHours] = await Promise.all([
-    getStudyPlan(userId),
-    getHoursBySubject(userId),
+    planSubjects ? Promise.resolve({ subjects: planSubjects }) : getStudyPlan(userId),
+    getHoursBySubject(userId, planId),
   ]);
 
   if (plan.subjects.length === 0) return [];
@@ -521,7 +542,7 @@ export async function getFilteredSessions(
   filters: SessionFilters
 ): Promise<StudySession[]> {
   const fromDate = filters.dateFrom || '2020-01-01';
-  const sessions = await getSessionsFromDate(userId, fromDate);
+  const sessions = await getSessionsFromDate(userId, fromDate, filters.planId);
 
   return sessions.filter((s) => {
     if (filters.subject && s.subject !== filters.subject) return false;
@@ -541,13 +562,14 @@ export async function getFilteredSessions(
 export async function getMonthlyActivity(
   userId: string,
   year: number,
-  month: number // 0-indexed (0=Jan, 11=Dez)
+  month: number, // 0-indexed (0=Jan, 11=Dez)
+  planId?: string
 ): Promise<DayActivity[]> {
   const monthStart = formatDateLocal(new Date(year, month, 1));
   const monthEnd = formatDateLocal(new Date(year, month + 1, 0));
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const sessions = await getSessionsFromDate(userId, monthStart);
+  const sessions = await getSessionsFromDate(userId, monthStart, planId);
   // Filtra apenas sessões do mês pedido
   const filtered = sessions.filter((s) => s.date <= monthEnd);
 
@@ -589,4 +611,69 @@ export async function getMonthlyActivity(
   }
 
   return result;
+}
+
+// ==========================================================
+// Mentoria Semanal (cache Firestore)
+// ==========================================================
+
+/**
+ * Retorna a segunda-feira da semana atual (YYYY-MM-DD)
+ */
+export function getCurrentWeekStart(): string {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - mondayOffset);
+  return formatDateLocal(monday);
+}
+
+/**
+ * Busca a mentoria semanal da semana atual (se existir no cache)
+ */
+export async function getWeeklyMentoring(
+  userId: string,
+  planId?: string
+): Promise<WeeklyMentoring | null> {
+  const weekStart = getCurrentWeekStart();
+
+  const q = query(
+    collection(db, WEEKLY_MENTORING_COLLECTION),
+    where('userId', '==', userId),
+    where('weekStart', '==', weekStart),
+    orderBy('generatedAt', 'desc')
+  );
+
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return null;
+
+  // Filtra por planId client-side
+  const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as WeeklyMentoring));
+  const match = planId
+    ? docs.find((d) => d.planId === planId)
+    : docs.find((d) => !d.planId) || docs[0];
+
+  return match || null;
+}
+
+/**
+ * Salva a mentoria semanal no Firestore
+ */
+export async function saveWeeklyMentoring(
+  userId: string,
+  content: WeeklyMentoringContent,
+  planId?: string
+): Promise<string> {
+  const weekStart = getCurrentWeekStart();
+
+  const docRef = await addDoc(collection(db, WEEKLY_MENTORING_COLLECTION), {
+    userId,
+    planId: planId || null,
+    weekStart,
+    generatedAt: new Date().toISOString(),
+    content,
+  });
+
+  return docRef.id;
 }

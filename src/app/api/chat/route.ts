@@ -32,6 +32,7 @@ interface StudyContext {
   todayDominantSubject: string | null;
   weeklyBreakdown: { day: string; hours: number; isToday: boolean }[];
   recentSessions: { subject: string; duration: number; date: string; startTime: string }[];
+  activePlanName?: string | null;
 }
 
 interface ChatRequest {
@@ -71,6 +72,7 @@ REGRAS ABSOLUTAS:
 - Responda sempre em português brasileiro.
 
 DADOS DO ESTUDANTE "${ctx.userName}":
+${ctx.activePlanName ? `- EDITAL EM FOCO: ${ctx.activePlanName}` : '- Visão GERAL (todos os editais)'}
 - Streak: ${ctx.currentStreak} dias (melhor: ${ctx.bestStreak})
 - Meta semanal: ${ctx.weeklyGoalHours}h | Estudado: ${ctx.weeklyTotalHours.toFixed(1)}h (${ctx.weeklyProgressPercent}%)
 - Dias estudados esta semana: ${ctx.daysStudiedThisWeek}/7

@@ -7,6 +7,7 @@
 export interface StudySession {
   id?: string;
   userId: string;
+  planId?: string;        // ID do plano/edital (study_plans)
   subject: string;        // Matéria (ex: "Direito Constitucional")
   subtopic?: string;      // Subtópico opcional (ex: "Direitos Fundamentais")
   startTime: string;      // ISO String do início
@@ -146,6 +147,7 @@ export interface PlanVsActual {
 /** Filtros para busca no histórico */
 export interface SessionFilters {
   subject?: string;
+  planId?: string;     // ID do plano/edital
   dateFrom?: string;   // YYYY-MM-DD
   dateTo?: string;     // YYYY-MM-DD
   minDuration?: number; // segundos
@@ -164,6 +166,7 @@ export interface DayActivity {
 export interface QuestionSession {
   id?: string;
   userId: string;
+  planId?: string;        // ID do plano/edital (study_plans)
   subject: string;
   totalQuestions: number;
   correctAnswers: number;
@@ -179,6 +182,59 @@ export interface SubjectAccuracy {
   correctAnswers: number;
   accuracy: number;       // percentual 0-100
   sessions: number;       // quantas vezes registrou
+}
+
+// ==========================================================
+// Multi-Edital (Planos de Estudo por Concurso)
+// ==========================================================
+
+/** Plano de estudo associado a um edital/concurso */
+export interface StudyPlanEdital {
+  id?: string;
+  userId: string;
+  name: string;                // "PGE-SP", "Magistratura Federal"
+  subjects: SubjectWeight[];   // Matérias com pesos
+  weeklyGoalHours: number;     // Meta semanal deste plano
+  color: string;               // Hex para badges: "#8b5cf6"
+  isDefault: boolean;          // true para o plano "Geral" auto-criado
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Cores pré-definidas para planos */
+export const PLAN_COLORS = [
+  { hex: '#8b5cf6', name: 'Violeta' },
+  { hex: '#06b6d4', name: 'Ciano' },
+  { hex: '#f59e0b', name: 'Âmbar' },
+  { hex: '#10b981', name: 'Esmeralda' },
+  { hex: '#ef4444', name: 'Vermelho' },
+  { hex: '#ec4899', name: 'Rosa' },
+  { hex: '#3b82f6', name: 'Azul' },
+  { hex: '#f97316', name: 'Laranja' },
+] as const;
+
+// ==========================================================
+// Mentoria Semanal (IA profunda, 1x/semana, salva no Firestore)
+// ==========================================================
+
+/** Resposta da IA para a mentoria semanal */
+export interface WeeklyMentoringContent {
+  weekDiagnosis: string;          // Diagnóstico geral da semana (3-5 frases)
+  strengths: string[];            // Pontos fortes identificados
+  improvements: string[];         // Pontos de melhoria
+  recoveryPlan: string;           // Plano de recuperação para próxima semana
+  suggestedGoals: string[];       // Metas sugeridas para próxima semana
+  motivationalClose: string;      // Fechamento motivacional
+}
+
+/** Documento salvo no Firestore — weekly_mentoring/{id} */
+export interface WeeklyMentoring {
+  id?: string;
+  userId: string;
+  planId?: string;
+  weekStart: string;              // YYYY-MM-DD (segunda-feira)
+  generatedAt: string;            // ISO timestamp
+  content: WeeklyMentoringContent;
 }
 
 /** Insight automático gerado pela análise dos dados */

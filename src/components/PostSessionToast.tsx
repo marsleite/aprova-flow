@@ -1,14 +1,17 @@
 /**
- * Toast de Feedback Pós-Sessão
+ * Toast de Feedback Pós-Sessão — Motor de regras local
  *
  * Aparece após o usuário parar o cronômetro.
- * Mostra feedback curto da IA + dados da sessão.
+ * Feedback 100% local (zero chamadas à IA):
+ * - Classificação da sessão (curta/boa/longa)
+ * - Progresso da meta semanal
+ * - Dica contextual
  * Auto-dismiss após 8 segundos.
  */
 
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, Sparkles, X } from 'lucide-react';
 import { formatDuration } from '@/lib/utils';
@@ -31,12 +34,66 @@ interface PostSessionToastProps {
   onDismiss: () => void;
 }
 
+// ============================================================
+// Motor de feedback local
+// ============================================================
+
+function buildLocalFeedback(
+  session: { subject: string; duration: number },
+  context: {
+    userName: string;
+    weeklyProgressPercent: number;
+    currentStreak: number;
+    weeklyGoalHours: number;
+    weeklyTotalHours: number;
+  }
+): string {
+  const minutes = Math.round(session.duration / 60);
+  const { subject, } = session;
+  const { weeklyProgressPercent, currentStreak, weeklyGoalHours, weeklyTotalHours } = context;
+  const remaining = Math.max(0, weeklyGoalHours - weeklyTotalHours);
+
+  const parts: string[] = [];
+
+  // Classificação da sessão
+  if (minutes >= 60) {
+    parts.push(`Sessão intensa de ${minutes} min em ${subject}!`);
+  } else if (minutes >= 25) {
+    parts.push(`Boa sessão de ${minutes} min em ${subject}.`);
+  } else if (minutes >= 10) {
+    parts.push(`${minutes} min em ${subject} — cada minuto conta.`);
+  } else {
+    parts.push(`${minutes} min rápidos em ${subject}.`);
+  }
+
+  // Progresso da meta
+  if (weeklyProgressPercent >= 100) {
+    parts.push('Meta semanal atingida! Continue para ir além.');
+  } else if (weeklyProgressPercent >= 80) {
+    parts.push(`Quase lá — ${weeklyProgressPercent}% da meta. Faltam ${remaining.toFixed(1)}h.`);
+  } else if (weeklyProgressPercent > 0) {
+    parts.push(`${weeklyProgressPercent}% da meta semanal. Faltam ${remaining.toFixed(1)}h.`);
+  }
+
+  // Streak
+  if (currentStreak >= 7) {
+    parts.push(`🔥 ${currentStreak} dias seguidos!`);
+  } else if (currentStreak >= 3) {
+    parts.push(`Streak de ${currentStreak} dias — não quebre a sequência.`);
+  }
+
+  return parts.join(' ');
+}
+
+// ============================================================
+// Componente
+// ============================================================
+
 export default function PostSessionToast({
   session,
   context,
   onDismiss,
 }: PostSessionToastProps) {
-  const [feedback, setFeedback] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [prevSession, setPrevSession] = useState(session);
 
@@ -44,10 +101,15 @@ export default function PostSessionToast({
   if (session !== prevSession) {
     setPrevSession(session);
     setDismissed(false);
-    setFeedback(null);
   }
 
   const visible = !!session && session.duration >= 10 && !dismissed;
+
+  // Feedback local (sem chamada de API)
+  const feedback = useMemo(() => {
+    if (!session || !context || session.duration < 10) return null;
+    return buildLocalFeedback(session, context);
+  }, [session, context]);
 
   // Ref estável para onDismiss — evita re-trigger do effect quando Dashboard re-renderiza
   const onDismissRef = useRef(onDismiss);
@@ -55,39 +117,17 @@ export default function PostSessionToast({
     onDismissRef.current = onDismiss;
   }, [onDismiss]);
 
+  // Auto-dismiss após 8 segundos
   useEffect(() => {
     if (!session || session.duration < 10) return;
 
-    // Busca feedback da IA em background (não bloqueia a UI)
-    if (context) {
-      fetch('/api/post-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userName: context.userName,
-          subject: session.subject,
-          durationMinutes: Math.round(session.duration / 60),
-          weeklyProgressPercent: context.weeklyProgressPercent,
-          currentStreak: context.currentStreak,
-          weeklyGoalHours: context.weeklyGoalHours,
-          weeklyTotalHours: context.weeklyTotalHours,
-        }),
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.feedback) setFeedback(data.feedback);
-        })
-        .catch(() => {});
-    }
-
-    // Auto-dismiss após 8 segundos
     const timer = setTimeout(() => {
       setDismissed(true);
       setTimeout(() => onDismissRef.current(), 400);
     }, 8000);
 
     return () => clearTimeout(timer);
-  }, [session, context]);
+  }, [session]);
 
   const handleClose = () => {
     setDismissed(true);
@@ -136,7 +176,7 @@ export default function PostSessionToast({
               {formatDuration(session.duration)}
             </p>
 
-            {/* Feedback da IA */}
+            {/* Feedback local */}
             <AnimatePresence>
               {feedback && (
                 <motion.div

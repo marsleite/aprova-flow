@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
@@ -25,10 +25,12 @@ import {
 } from 'lucide-react';
 import { useStudyTimer } from '@/hooks/useStudyTimer';
 import { formatTimerDisplay } from '@/lib/utils';
-import { DEFAULT_SUBJECTS, TimerMode, PomodoroPhase } from '@/types';
+import { DEFAULT_SUBJECTS, TimerMode, PomodoroPhase, StudyPlanEdital } from '@/types';
 
 interface StudyTimerProps {
   userId: string;
+  plans?: StudyPlanEdital[];
+  activePlanId?: string | null;
   onSessionSaved?: (session: { subject: string; duration: number }) => void;
 }
 
@@ -164,8 +166,11 @@ function CycleIndicator({ current, total }: { current: number; total: number }) 
 // ========================================
 // Componente Principal
 // ========================================
-export default function StudyTimer({ userId, onSessionSaved }: StudyTimerProps) {
-  const timer = useStudyTimer({ userId });
+export default function StudyTimer({ userId, plans = [], activePlanId, onSessionSaved }: StudyTimerProps) {
+  // Plano selecionado para esta sessão (herda do header, mas pode ser trocado)
+  const [selectedPlanId, setSelectedPlanId] = useState(activePlanId || '');
+
+  const timer = useStudyTimer({ userId, planId: selectedPlanId || undefined });
   const {
     displaySeconds,
     totalFocusSeconds,
@@ -194,6 +199,19 @@ export default function StudyTimer({ userId, onSessionSaved }: StudyTimerProps) 
   const isIdle = status === 'idle' || status === 'stopped';
   const isPomodoro = mode !== 'freeform';
   const isBreak = pomodoroPhase === 'shortBreak' || pomodoroPhase === 'longBreak';
+
+  // Sincroniza plano quando o header muda (só se idle)
+  useEffect(() => {
+    if (activePlanId && isIdle) {
+      setSelectedPlanId(activePlanId);
+    }
+  }, [activePlanId, isIdle]);
+
+  // Matérias filtradas pelo plano selecionado
+  const activePlan = plans.find((p) => p.id === selectedPlanId);
+  const availableSubjects = activePlan && activePlan.subjects.length > 0
+    ? activePlan.subjects.map((s) => s.subject)
+    : DEFAULT_SUBJECTS as unknown as string[];
 
   // Calcula total de segundos da fase (para o anel de progresso)
   const phaseTotalSeconds = (() => {
@@ -288,6 +306,33 @@ export default function StudyTimer({ userId, onSessionSaved }: StudyTimerProps) 
         </div>
       </div>
 
+      {/* Seletor de Edital (só aparece se houver mais de 1 plano) */}
+      {plans.length > 1 && (
+        <div className="mb-4">
+          <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-300">
+            <BookOpen className="h-4 w-4" />
+            Edital
+          </label>
+          <select
+            value={selectedPlanId}
+            onChange={(e) => {
+              setSelectedPlanId(e.target.value);
+              setSelectedSubject(''); // Reseta matéria ao trocar plano
+            }}
+            disabled={!isIdle}
+            className="w-full rounded-xl border border-white/10 bg-gray-800/50 px-4 py-3 text-white
+                       outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20
+                       disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {plans.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* Seletor de Matéria */}
       <div className="mb-5">
         <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-300">
@@ -303,7 +348,7 @@ export default function StudyTimer({ userId, onSessionSaved }: StudyTimerProps) 
                      disabled:cursor-not-allowed disabled:opacity-50"
         >
           <option value="">Selecione uma matéria...</option>
-          {DEFAULT_SUBJECTS.map((subject) => (
+          {availableSubjects.map((subject) => (
             <option key={subject} value={subject}>
               {subject}
             </option>

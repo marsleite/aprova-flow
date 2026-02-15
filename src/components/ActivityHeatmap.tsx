@@ -17,6 +17,7 @@ import { formatDuration } from '@/lib/utils';
 
 interface ActivityHeatmapProps {
   userId: string;
+  planId?: string;
 }
 
 const MONTH_NAMES = [
@@ -49,7 +50,7 @@ function getLocalDateISO(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export default function ActivityHeatmap({ userId }: ActivityHeatmapProps) {
+export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps) {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
@@ -60,14 +61,14 @@ export default function ActivityHeatmap({ userId }: ActivityHeatmapProps) {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getMonthlyActivity(userId, year, month);
+      const data = await getMonthlyActivity(userId, year, month, planId);
       setDays(data);
     } catch (err) {
       console.error('Erro ao carregar heatmap:', err);
     } finally {
       setLoading(false);
     }
-  }, [userId, year, month]);
+  }, [userId, year, month, planId]);
 
   useEffect(() => {
     fetchData();

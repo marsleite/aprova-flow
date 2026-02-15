@@ -6,55 +6,71 @@ alwaysApply: true
 # AprovaFlow — Memória do Projeto
 
 ## O que é
-Plataforma de estudo para concursos. Rastreia horas líquidas de estudo, visualiza progresso por matéria, define metas e gera insights automáticos com IA.
+Plataforma de estudo para concursos. Rastreia horas líquidas de estudo, visualiza progresso por matéria, define metas e gera insights automáticos com IA. Suporta múltiplos editais (PGE, Magistratura, etc.) com dashboards filtrados por plano.
 
 ## Stack
 - Next.js 16 (App Router) + TypeScript
 - Tailwind CSS + Lucide React + framer-motion
 - Firebase (Auth Google + Firestore)
-- Recharts (Radar + Barras)
-- Google Gemini API (@google/genai) — modelo gemini-2.5-flash
+- Recharts (Radar + Barras + RadialBar)
+- Google Gemini API (@google/genai) — modelo gemini-2.5-flash (uso estratégico)
 
 ## Estrutura de Pastas
 ```
 src/
 ├── app/
-│   ├── api/chat/route.ts         # API Route — chat conversacional (Gemini)
-│   ├── api/gemini/route.ts       # API Route — coach card (Gemini)
-│   ├── api/mentor/route.ts       # API Route — Mentor AprovaFlow (Gemini)
-│   ├── api/post-session/route.ts # API Route — feedback pós-sessão (Gemini)
+│   ├── api/chat/route.ts              # API Route — chat conversacional (Gemini)
+│   ├── api/parse-edital/route.ts      # API Route — importar PDF de edital (Gemini)
+│   ├── api/weekly-mentoring/route.ts  # API Route — mentoria semanal profunda (Gemini, 1x/semana)
 │   ├── globals.css, layout.tsx, page.tsx
 ├── components/       # Todos os componentes de UI
 ├── contexts/         # AuthContext (Provider global)
 ├── hooks/            # useAuth, useStudyTimer (Page Visibility API)
-├── lib/firebase/     # config.ts, sessions.ts, questions.ts (serviços Firestore)
+├── lib/firebase/     # config.ts, sessions.ts, questions.ts, plans.ts
 ├── lib/utils.ts      # formatDuration, exportCSV, formatRelativeDate, etc.
 └── types/index.ts    # Todos os tipos centrais
 ```
 
 ## Firestore Schema
-- **sessions/{id}** — userId, subject, subtopic, startTime, endTime, duration, date, createdAt
-- **user_stats/{userId}** — weeklyGoalHours, planSubjects[], planUpdatedAt, updatedAt
-- **questions_stats/{id}** — userId, subject, totalQuestions, correctAnswers, accuracy, date, createdAt
+- **sessions/{id}** — userId, planId, subject, subtopic, startTime, endTime, duration, date, createdAt
+- **study_plans/{id}** — userId, name, subjects[], weeklyGoalHours, color, isDefault, createdAt, updatedAt
+- **user_stats/{userId}** — weeklyGoalHours, planSubjects[], activePlanId, planUpdatedAt, updatedAt
+- **questions_stats/{id}** — userId, planId, subject, totalQuestions, correctAnswers, accuracy, date, createdAt
+- **weekly_mentoring/{id}** — userId, planId, weekStart (YYYY-MM-DD seg), generatedAt, content (JSON da IA)
+
+## Arquitetura Multi-Edital
+- Cada sessão pertence a um edital (`planId` em sessions e questions_stats)
+- `study_plans` define nome, matérias com pesos, meta semanal e cor por edital
+- PlanSelector no Header permite alternar entre planos ou "Todos os Planos"
+- Dashboard filtra todos os dados por `planId` quando um plano está ativo
+- Migração automática: ao abrir pela 1ª vez, cria plano "Geral" e tagueia sessões existentes
+- PlanManager: modal CRUD para criar/editar/deletar editais
+- Timer: seletor de edital aparece quando há 2+ planos, matérias filtradas pelo plano
+- GoalAndStreakCard: usa meta do plano ativo (não global)
+- StudyPlanCard: usa pesos do plano ativo
 
 ## Componentes Existentes
-- LoginScreen, Header, Dashboard
-- StudyTimer (anel SVG circular + Page Visibility API para horas líquidas)
+- LoginScreen, Header (com PlanSelector), Dashboard
+- PlanSelector (dropdown de editais no Header)
+- PlanManager (modal CRUD de editais: nome, cor, matérias, pesos, meta, importação PDF)
+- StudyTimer (anel SVG circular + Page Visibility API + Pomodoro + seletor de edital)
 - SummaryCards (Hoje/Semana/Mês com animação staggered)
 - SubjectRadarChart (radar 3+ matérias, barras horizontais 1-2 matérias, empty state)
 - WeeklyBarChart (barras Seg-Dom, dia atual destacado)
 - RecentSessions (últimas 5 sessões com badges coloridos)
-- GoalAndStreakCard (meta semanal editável, streak atual/melhor, barra de progresso)
-- StudyPlanCard (pesos por matéria, planejado vs real com barras duplas, status badges)
+- GoalAndStreakCard (meta semanal editável por plano, streak atual/melhor)
+- StudyPlanCard (pesos por matéria do plano ativo, planejado vs real)
 - InsightsPanel (motor de regras local: negligenciada, sugestão, streak, equilíbrio, meta)
 - DailySummaryCard (resumo do dia: total, foco, pendente)
-- SessionHistory (filtros por matéria/período/duração + exportar CSV + paginação)
+- SessionHistory (filtros por matéria/período/duração/edital + exportar CSV + paginação)
 - GeminiCoachCard (mini-card com dica do dia local + botão "Conversar com o Coach")
-- MentorCard (análise estratégica proativa via /api/mentor, cache por sessão, alerta de fadiga, ação imediata)
-- QuestionTrackerCard (registro de questões: matéria, total, acertos, preview de accuracy)
-- AccuracyChart (barras horizontais de taxa de acerto por matéria, cores verde/amarelo/vermelho)
+- MentorCard (motor de regras LOCAL: equilibrio, fadiga, constância × precisão, ação imediata, frases motivacionais)
+- WeeklyMentoringCard (mentoria semanal via IA, 1x/semana, cache no Firestore)
+- QuestionTrackerCard (registro de questões com matérias do plano ativo, validação, toast de acerto)
+- AccuracyChart (RadialBar Recharts + barras horizontais por matéria, cores dinâmicas)
 - ChatPanel (painel slide-in de chat conversacional com Coach IA Gemini)
-- PostSessionToast (feedback pós-sessão via IA, auto-dismiss 8s com ref estável)
+- PostSessionToast (feedback pós-sessão LOCAL, auto-dismiss 8s com ref estável)
+- ActivityHeatmap (grid mensal tipo GitHub, filtrável por planId)
 
 ## O que já foi entregue
 
@@ -72,56 +88,80 @@ src/
 11. Resumo diário automático
 12. UI premium: framer-motion, anel SVG, glow, animações staggered
 
-### Fase 2 (EM ANDAMENTO)
+### Fase 2 (COMPLETA)
 1. ✅ Integração Google Gemini — API Route server-side, prompt grounded, Coach card
-2. ✅ Chat conversacional com Coach IA — painel slide-in, saudação inteligente contextual, sugestões dinâmicas, histórico limitado a 10 msgs na API
-3. ✅ Feedback pós-sessão — toast com IA ao parar cronômetro (bugfix: ref estável para onDismiss)
-4. ✅ Mini-card Coach IA — dica do dia calculada localmente (sem chamar API), botão para abrir chat
-5. ✅ Contexto enriquecido — Coach recebe evolução semanal (Seg-Dom) + últimas 5 sessões individuais
-6. ✅ Heatmap de atividade — grid mensal tipo GitHub (cor = intensidade, detalhe ao clicar)
-7. ✅ Pomodoro avançado — modos 25/5, 50/10, 45/15, fases automáticas, skip, notificação sonora
-8. ✅ Mentor AprovaFlow — API Route /api/mentor + MentorCard proativo no Dashboard (análise, fadiga, ação imediata)
+2. ✅ Chat conversacional com Coach IA — painel slide-in, saudação inteligente contextual
+3. ✅ Feedback pós-sessão — toast LOCAL (substituiu chamada IA)
+4. ✅ Mini-card Coach IA — dica do dia calculada localmente
+5. ✅ Contexto enriquecido — Coach recebe evolução semanal + últimas 5 sessões
+6. ✅ Heatmap de atividade — grid mensal tipo GitHub
+7. ✅ Pomodoro avançado — modos 25/5, 50/10, 45/15, fases automáticas, skip, som
+8. ✅ Mentor AprovaFlow — motor de regras LOCAL (equilibrio, fadiga, constância × precisão, ação imediata)
+9. ✅ Módulo de questões (MVP) — QuestionTrackerCard + AccuracyChart (RadialBar)
+10. ✅ Multi-Edital — study_plans, PlanSelector, PlanManager, filtros por planId, migração
+11. ✅ Importação de Edital PDF — Gemini extrai matérias/pesos/nome/meta de um PDF de edital
+12. ✅ Matérias personalizadas — campo de texto com autocomplete substitui dropdown fixo
+13. ✅ Otimização de IA — Mentor e PostSession convertidos para regras locais, IA reservada para alto valor
+14. ✅ Mentoria Semanal — análise profunda via IA (1x/semana), cache no Firestore, WeeklyMentoringCard
 
-9. ✅ Módulo de questões (MVP) — QuestionTrackerCard + AccuracyChart (RadialBar Recharts) + questions.ts + Mentor recebe accuracy
-   - Toque final: toast com taxa de acerto, RadialBar com cores dinâmicas, Mentor cruza constância × precisão (performanceInsight)
-
-### PRÓXIMA TASK DA FASE 2:
-10. **Notificações inteligentes** — push contextual
+### PRÓXIMA TASK:
+15. **Notificações inteligentes** — push contextual
 
 ## Roadmap — Fase 3 (Escala e Monetização)
 1. Benchmark anônimo — comparar constância com usuários similares
-2. Mentoria IA semanal — relatório + plano de recuperação
-3. Calendário com agenda — planejar estudo futuro por dia, novo schema scheduledSessions
-4. Modo prova — simulado temporizado + análise pós-prova
-5. PWA — instalar como app, funcionar offline
-6. Plano Pro — IA avançada, relatórios, múltiplos planos
+2. Calendário com agenda — planejar estudo futuro por dia
+3. Modo prova — simulado temporizado + análise pós-prova
+4. PWA — instalar como app, funcionar offline
+5. Plano Pro — IA avançada, relatórios
 
 ## Roadmap — Fase Final (Pós-implementação)
-1. Tutorial interativo de onboarding — tour guiado na primeira visita, tooltip/overlay por seção
+1. Tutorial interativo de onboarding — tour guiado na primeira visita
    - Passos: criar conta > configurar plano > definir meta > usar cronômetro > ver progresso
-   - Opção de "pular" e "ver depois", página /tutorial para revisitar
-   - Considerar intro.js, driver.js, ou framer-motion
+   - Opção de "pular" e "ver depois"
 
-## Arquitetura IA (Gemini)
-- 4 API Routes server-side (GEMINI_API_KEY nunca vai ao browser):
-  - /api/gemini — coach card (motivação + sugestão)
-  - /api/chat — chat conversacional com histórico
-  - /api/post-session — feedback curto pós-sessão
-  - /api/mentor — Mentor AprovaFlow (análise estratégica, detecção de fadiga, ação imediata)
-- Prompt grounded: dados reais do usuário injetados no system prompt a cada turno
-- Anti-alucinação: regras absolutas no prompt, temperatura 0.3-0.5, maxOutputTokens 1024-2048
-- Contexto completo enviado: streak, meta, horas/matéria, plano vs real, evolução semanal (Seg-Dom), últimas 5 sessões, taxa de acerto por matéria
-- Mentor cruza constância × precisão: 5 cenários (alta+alta, alta+baixa, baixa+alta, baixa+baixa, sem dados) → campo performanceInsight
-- Histórico de chat limitado a 10 mensagens enviadas à API (economia de tokens)
-- Saudação inteligente ao abrir chat (baseada nos dados do dia)
-- Sugestões rápidas contextuais (variam com matéria negligenciada, progresso da meta)
+## Arquitetura IA (Gemini) — Uso Estratégico
+
+### Filosofia: IA só para alto valor, regras locais para o resto
+- MentorCard e PostSessionToast usam motor de regras LOCAL (zero chamadas à API)
+- IA Gemini reservada para ações do usuário e análises profundas
+
+### API Routes (3 rotas, GEMINI_API_KEY nunca vai ao browser):
+- `/api/chat` — Chat conversacional com Coach IA (sob demanda do usuário)
+- `/api/parse-edital` — Importação de PDF de edital (extrai matérias, pesos, nome, meta via inlineData)
+- `/api/weekly-mentoring` — Mentoria semanal profunda (1x/semana, cache no Firestore)
+
+### Rotas removidas (substituídas por regras locais):
+- ~~/api/gemini~~ — substituído por GeminiCoachCard local
+- ~~/api/mentor~~ — substituído por MentorCard com motor de regras
+- ~~/api/post-session~~ — substituído por PostSessionToast com feedback local
+
+### Motor de regras local (MentorCard):
+- Análise de equilíbrio: planVsActual (negligenciada, sobre-estudada)
+- Detecção de fadiga: queda >30% nas horas dos últimos 3 dias
+- Cruzamento constância × precisão: subjectHours × accuracyData (5 cenários)
+- Ação imediata: matéria + tempo + tipo de atividade
+- Frases motivacionais: 20 frases rotativas por dia/streak
+
+### Motor de feedback local (PostSessionToast):
+- Classificação da sessão por duração (curta/boa/intensa)
+- Progresso da meta semanal
+- Status do streak
+
+### Impacto na quota:
+- Antes: ~10-30 req/dia/usuário (Mentor + PostSession + Chat + ParseEdital)
+- Depois: ~0-5 req/dia/usuário (só Chat + ParseEdital + 0.14 MentoriaSemanal)
+- Plano free (20 req/dia) suporta ~4 usuários ativos
 
 ## Convenções de Código
 - Componentes: PascalCase, 'use client' no topo, framer-motion para animações
 - Hooks: camelCase, prefixo use
-- Serviços Firestore: funções async exportadas em sessions.ts
+- Serviços Firestore: funções async exportadas em sessions.ts, questions.ts, plans.ts
 - Tipos: tudo centralizado em types/index.ts
 - Estilo: dark mode, gradientes violeta/azul neon, Tailwind CSS
-- Resiliência: fetchData separa dados essenciais de opcionais (user_stats pode falhar)
+- Resiliência: fetchData separa dados essenciais de opcionais
 - Idioma: interface em português, código/variáveis em inglês
 - Refs para callbacks instáveis em effects (padrão ref estável)
+- Multi-edital: queries aceitam planId opcional, filtragem client-side
+- Matérias: autocomplete (DEFAULT_SUBJECTS) + texto livre (sem restrição a lista fixa)
+- Importação PDF: base64 inline → Gemini → JSON → auto-preenche PlanManager
+- IA estratégica: regras locais para feedback diário, Gemini só para análise profunda e chat

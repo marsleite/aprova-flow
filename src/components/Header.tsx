@@ -1,7 +1,7 @@
 /**
  * Header da Aplicação
  * 
- * Exibe o logo, nome do usuário e botão de logout.
+ * Exibe o logo, seletor de edital, nome do usuário e botão de logout.
  */
 
 'use client';
@@ -9,12 +9,26 @@
 import { LogOut, Zap, User } from 'lucide-react';
 import { useAuthContext } from '@/contexts/AuthContext';
 import Image from 'next/image';
+import PlanSelector from './PlanSelector';
+import { StudyPlanEdital } from '@/types';
 
-export default function Header() {
+interface HeaderProps {
+  plans?: StudyPlanEdital[];
+  activePlanId?: string | null;
+  onSelectPlan?: (planId: string | null) => void;
+  onCreatePlan?: () => void;
+}
+
+export default function Header({
+  plans = [],
+  activePlanId = null,
+  onSelectPlan,
+  onCreatePlan,
+}: HeaderProps) {
   const { user, logout } = useAuthContext();
 
   return (
-    <header className="border-b border-white/10 bg-gray-950/80 backdrop-blur-xl">
+    <header className="relative z-50 border-b border-white/10 bg-gray-950/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         {/* Logo & Nome */}
         <div className="flex items-center gap-3">
@@ -31,9 +45,33 @@ export default function Header() {
           </div>
         </div>
 
+        {/* Centro: Plan Selector */}
+        {user && plans.length > 0 && onSelectPlan && onCreatePlan && (
+          <div className="hidden sm:block">
+            <PlanSelector
+              plans={plans}
+              activePlanId={activePlanId}
+              onSelect={onSelectPlan}
+              onCreatePlan={onCreatePlan}
+            />
+          </div>
+        )}
+
         {/* Usuário */}
         {user && (
           <div className="flex items-center gap-3">
+            {/* Plan Selector mobile */}
+            {plans.length > 0 && onSelectPlan && onCreatePlan && (
+              <div className="sm:hidden">
+                <PlanSelector
+                  plans={plans}
+                  activePlanId={activePlanId}
+                  onSelect={onSelectPlan}
+                  onCreatePlan={onCreatePlan}
+                />
+              </div>
+            )}
+
             <div className="hidden items-center gap-2 sm:flex">
               {user.photoURL ? (
                 <Image

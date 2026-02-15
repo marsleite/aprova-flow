@@ -25,11 +25,12 @@ import { formatDuration, formatRelativeDate, exportSessionsCSV } from '@/lib/uti
 
 interface SessionHistoryProps {
   userId: string;
+  planId?: string;
 }
 
 const PAGE_SIZE = 8;
 
-export default function SessionHistory({ userId }: SessionHistoryProps) {
+export default function SessionHistory({ userId, planId }: SessionHistoryProps) {
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -45,6 +46,7 @@ export default function SessionHistory({ userId }: SessionHistoryProps) {
     setLoading(true);
     try {
       const filters: SessionFilters = {};
+      if (planId) filters.planId = planId;
       if (subject) filters.subject = subject;
       if (dateFrom) filters.dateFrom = dateFrom;
       if (dateTo) filters.dateTo = dateTo;
@@ -59,7 +61,7 @@ export default function SessionHistory({ userId }: SessionHistoryProps) {
     } finally {
       setLoading(false);
     }
-  }, [userId, subject, dateFrom, dateTo, minMinutes]);
+  }, [userId, planId, subject, dateFrom, dateTo, minMinutes]);
 
   // Busca inicial
   useEffect(() => {

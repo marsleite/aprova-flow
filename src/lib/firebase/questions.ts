@@ -39,11 +39,13 @@ export async function saveQuestionSession(
 }
 
 /**
- * Busca todas as sessões de questões de um usuário a partir de uma data
+ * Busca todas as sessões de questões de um usuário a partir de uma data.
+ * Se planId for fornecido, filtra client-side.
  */
 export async function getQuestionSessionsFromDate(
   userId: string,
-  fromDate: string
+  fromDate: string,
+  planId?: string
 ): Promise<QuestionSession[]> {
   const q = query(
     collection(db, QUESTIONS_COLLECTION),
@@ -53,22 +55,29 @@ export async function getQuestionSessionsFromDate(
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
+  let sessions = snapshot.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
   })) as QuestionSession[];
+
+  if (planId) {
+    sessions = sessions.filter((s) => s.planId === planId);
+  }
+
+  return sessions;
 }
 
 /**
  * Retorna a taxa de acerto agregada por matéria (mês atual)
  */
 export async function getAccuracyBySubject(
-  userId: string
+  userId: string,
+  planId?: string
 ): Promise<SubjectAccuracy[]> {
   const now = new Date();
   const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
 
-  const sessions = await getQuestionSessionsFromDate(userId, monthStart);
+  const sessions = await getQuestionSessionsFromDate(userId, monthStart, planId);
 
   // Agrupa por matéria
   const map = new Map<

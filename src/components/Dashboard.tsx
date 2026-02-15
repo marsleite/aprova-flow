@@ -1,15 +1,14 @@
 /**
- * Dashboard Principal — Layout Upgrade
+ * Dashboard Principal — Multi-Edital
  * 
- * Grid sofisticado com animações staggered:
- * [Cards de Resumo - 3 colunas]
- * [Cronômetro] [Radar por Matéria]
- * [Barras Semanal] [Histórico Sessões]
+ * Suporta múltiplos planos de estudo (editais).
+ * O PlanSelector no Header filtra todo o dashboard por planId.
+ * "Todos os Planos" = visão agregada sem filtro.
  */
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
 import {
@@ -19,13 +18,20 @@ import {
   getRecentSessions,
   getStudyConsistency,
   setWeeklyGoal,
-  getStudyPlan,
   setStudyPlan,
   getPlanVsActual,
   generateInsights,
   getFilteredSessions,
 } from '@/lib/firebase/sessions';
 import { getAccuracyBySubject } from '@/lib/firebase/questions';
+import {
+  getStudyPlans,
+  getActivePlan,
+  setActivePlan,
+  migrateToMultiPlan,
+  updateStudyPlan,
+  deduplicateDefaultPlans,
+} from '@/lib/firebase/plans';
 import { getTodayISO } from '@/lib/utils';
 import {
   StudySummary,
@@ -37,6 +43,7 @@ import {
   PlanVsActual,
   StudyInsight,
   SubjectAccuracy,
+  StudyPlanEdital,
 } from '@/types';
 import Header from './Header';
 import SummaryCards from './SummaryCards';
@@ -52,10 +59,12 @@ import ActivityHeatmap from './ActivityHeatmap';
 import DailySummaryCard from './DailySummaryCard';
 import GeminiCoachCard from './GeminiCoachCard';
 import MentorCard from './MentorCard';
+import WeeklyMentoringCard from './WeeklyMentoringCard';
 import QuestionTrackerCard from './QuestionTrackerCard';
 import AccuracyChart from './AccuracyChart';
 import ChatPanel from './ChatPanel';
 import PostSessionToast from './PostSessionToast';
+import PlanManager from '@/components/PlanManager';
 import { TrendingUp, MessageCircle } from 'lucide-react';
 
 const sectionVariants = {
@@ -69,6 +78,15 @@ const sectionVariants = {
 
 export default function Dashboard() {
   const { user } = useAuthContext();
+
+  // ---- Planos (multi-edital) ----
+  const [plans, setPlans] = useState<StudyPlanEdital[]>([]);
+  const [activePlanId, setActivePlanId] = useState<string | null>(null);
+  const [planManagerOpen, setPlanManagerOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<StudyPlanEdital | null>(null);
+  const migrated = useRef(false);
+
+  // ---- Dados do Dashboard ----
   const [summary, setSummary] = useState<StudySummary>({
     totalToday: 0,
     totalWeek: 0,
@@ -87,55 +105,99 @@ export default function Dashboard() {
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // ---- Plano ativo resolvido (para queries) ----
+  const filterPlanId = activePlanId || undefined;
+  const activePlanObj = plans.find((p) => p.id === activePlanId) || null;
+
+  // ---- Migração + load de planos ----
+  const loadPlans = useCallback(async () => {
+    if (!user) return;
+    try {
+      // Migração idempotente (cria plano "Geral" se necessário)
+      if (!migrated.current) {
+        await migrateToMultiPlan(user.uid);
+        migrated.current = true;
+      }
+
+      // Carrega planos e limpa duplicatas (se houver)
+      let allPlans = await deduplicateDefaultPlans(user.uid);
+      let active = await getActivePlan(user.uid);
+
+      // Se o plano ativo foi removido na dedup, aponta pro default
+      if (active && !allPlans.find((p) => p.id === active)) {
+        const defaultPlan = allPlans.find((p) => p.isDefault);
+        active = defaultPlan?.id || '';
+        await setActivePlan(user.uid, active);
+      }
+
+      setPlans(allPlans);
+      setActivePlanId(active || null);
+    } catch (err) {
+      console.warn('Erro ao carregar planos:', err);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadPlans();
+  }, [loadPlans]);
+
+  // ---- Fetch de dados (com filtro por planId) ----
   const fetchData = useCallback(async () => {
     if (!user) return;
     try {
       // Busca dados essenciais primeiro
       const [summaryRes, subjectsRes, weeklyRes, recentRes] = await Promise.all([
-        getStudySummary(user.uid),
-        getHoursBySubject(user.uid),
-        getWeeklyHours(user.uid),
-        getRecentSessions(user.uid, 5),
+        getStudySummary(user.uid, filterPlanId),
+        getHoursBySubject(user.uid, filterPlanId),
+        getWeeklyHours(user.uid, filterPlanId),
+        getRecentSessions(user.uid, 5, filterPlanId),
       ]);
       setSummary(summaryRes);
       setSubjectData(subjectsRes);
       setWeeklyData(weeklyRes);
       setRecentData(recentRes);
 
-      // Questões — fetch separado e resiliente (coleção pode não ter regras ainda)
+      // Questões — fetch separado e resiliente
       try {
-        const accuracyRes = await getAccuracyBySubject(user.uid);
+        const accuracyRes = await getAccuracyBySubject(user.uid, filterPlanId);
         setAccuracyData(accuracyRes);
       } catch (err) {
-        console.warn('Erro ao carregar dados de questões (atualize as regras do Firestore):', err);
+        console.warn('Erro ao carregar dados de questões:', err);
         setAccuracyData([]);
       }
 
       // Sessões de hoje para o resumo diário
       const today = getTodayISO();
-      const todayRes = await getFilteredSessions(user.uid, { dateFrom: today, dateTo: today });
+      const todayRes = await getFilteredSessions(user.uid, {
+        dateFrom: today,
+        dateTo: today,
+        planId: filterPlanId,
+      });
       setTodaySessions(todayRes);
 
-      // Busca dados que dependem de user_stats (pode falhar se regras não atualizadas)
+      // Busca dados que dependem de user_stats / plano ativo
       try {
-        const [consistencyRes, planRes, pvaRes] = await Promise.all([
-          getStudyConsistency(user.uid),
-          getStudyPlan(user.uid),
-          getPlanVsActual(user.uid),
+        // Se tem plano ativo, usa pesos e goal do plano
+        const planGoalHours = activePlanObj?.weeklyGoalHours;
+        const planSubjects = activePlanObj?.subjects;
+
+        const [consistencyRes, pvaRes] = await Promise.all([
+          getStudyConsistency(user.uid, filterPlanId, planGoalHours),
+          getPlanVsActual(user.uid, filterPlanId, planSubjects),
         ]);
         setConsistency(consistencyRes);
-        setPlanWeights(planRes.subjects);
+        setPlanWeights(planSubjects || []);
         setPlanVsActual(pvaRes);
 
         // Gera insights
         const insightsRes = await generateInsights(user.uid, consistencyRes, pvaRes);
         setInsights(insightsRes);
       } catch (err) {
-        console.warn('Erro ao carregar dados avançados (atualize as regras do Firestore):', err);
+        console.warn('Erro ao carregar dados avançados:', err);
         const weeklyTotalSeconds = weeklyRes.reduce(
           (acc, d) => acc + Math.round(d.hours * 3600), 0
         );
-        const defaultGoalHours = 10;
+        const defaultGoalHours = activePlanObj?.weeklyGoalHours || 10;
         setConsistency({
           currentStreak: 0,
           bestStreak: 0,
@@ -151,11 +213,21 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, filterPlanId, activePlanObj]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (plans.length > 0 || migrated.current) {
+      fetchData();
+    }
+  }, [fetchData, plans.length]);
+
+  // ---- Handlers ----
+  const handleSelectPlan = async (planId: string | null) => {
+    if (!user) return;
+    setActivePlanId(planId);
+    setLoading(true);
+    await setActivePlan(user.uid, planId);
+  };
 
   const handleSessionSaved = (session: { subject: string; duration: number }) => {
     setLastSavedSession(session);
@@ -164,21 +236,47 @@ export default function Dashboard() {
 
   const handleSaveGoal = async (hours: number) => {
     if (!user) return;
-    await setWeeklyGoal(user.uid, hours);
+    // Se tem plano ativo, salva no plano; senão, salva global
+    if (activePlanObj?.id) {
+      await updateStudyPlan(activePlanObj.id, { weeklyGoalHours: hours });
+      await loadPlans();
+    } else {
+      await setWeeklyGoal(user.uid, hours);
+    }
     await fetchData();
   };
 
   const handleSavePlan = async (subjects: SubjectWeight[]) => {
     if (!user) return;
-    await setStudyPlan(user.uid, subjects);
+    // Se tem plano ativo, salva no plano; senão, salva global
+    if (activePlanObj?.id) {
+      await updateStudyPlan(activePlanObj.id, { subjects });
+      await loadPlans();
+    } else {
+      await setStudyPlan(user.uid, subjects);
+    }
     await fetchData();
+  };
+
+  const handlePlanManagerClose = () => {
+    setPlanManagerOpen(false);
+    setEditingPlan(null);
+    loadPlans().then(() => fetchData());
   };
 
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gray-950">
-      <Header />
+      <Header
+        plans={plans}
+        activePlanId={activePlanId}
+        onSelectPlan={handleSelectPlan}
+        onCreatePlan={() => {
+          setEditingPlan(null);
+          setPlanManagerOpen(true);
+        }}
+      />
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         {/* Saudação */}
@@ -193,7 +291,9 @@ export default function Dashboard() {
             Olá, {user.displayName?.split(' ')[0] || 'Estudante'} 👋
           </h2>
           <p className="mt-1 text-gray-400">
-            Acompanhe seu progresso e mantenha a consistência nos estudos.
+            {activePlanObj
+              ? <>Focando em <span className="font-medium text-white" style={{ color: activePlanObj.color }}>{activePlanObj.name}</span></>
+              : 'Acompanhe seu progresso e mantenha a consistência nos estudos.'}
           </p>
         </motion.div>
 
@@ -236,7 +336,12 @@ export default function Dashboard() {
           animate="show"
           className="mb-6 grid gap-6 lg:grid-cols-2"
         >
-          <StudyTimer userId={user.uid} onSessionSaved={handleSessionSaved} />
+          <StudyTimer
+            userId={user.uid}
+            plans={plans}
+            activePlanId={activePlanId}
+            onSessionSaved={handleSessionSaved}
+          />
           <SubjectRadarChart data={subjectData} loading={loading} />
         </motion.div>
 
@@ -250,6 +355,8 @@ export default function Dashboard() {
         >
           <QuestionTrackerCard
             userId={user.uid}
+            planId={activePlanId || undefined}
+            planSubjects={activePlanObj?.subjects}
             lastSessionSubject={lastSavedSession?.subject ?? (recentData[0]?.subject || null)}
             onSaved={fetchData}
           />
@@ -276,7 +383,7 @@ export default function Dashboard() {
           animate="show"
           className="mt-6"
         >
-          <ActivityHeatmap userId={user.uid} />
+          <ActivityHeatmap userId={user.uid} planId={filterPlanId} />
         </motion.div>
 
         {/* Linha 3: Meta + Plano de Estudo */}
@@ -341,11 +448,12 @@ export default function Dashboard() {
             weeklyData={weeklyData}
             recentSessions={recentData}
             accuracyData={accuracyData}
+            activePlanName={activePlanObj?.name || null}
             loading={loading}
           />
         </motion.div>
 
-        {/* Linha 5: Histórico Completo */}
+        {/* Linha 4.6: Mentoria Semanal (IA, 1x/semana com cache) */}
         <motion.div
           custom={10}
           variants={sectionVariants}
@@ -353,7 +461,30 @@ export default function Dashboard() {
           animate="show"
           className="mt-6"
         >
-          <SessionHistory userId={user.uid} />
+          <WeeklyMentoringCard
+            userId={user.uid}
+            planId={filterPlanId}
+            userName={user.displayName?.split(' ')[0] || 'Estudante'}
+            consistency={consistency}
+            subjectHours={subjectData}
+            planVsActual={planVsActual}
+            weeklyData={weeklyData}
+            recentSessions={recentData}
+            accuracyData={accuracyData}
+            activePlanName={activePlanObj?.name || null}
+            loading={loading}
+          />
+        </motion.div>
+
+        {/* Linha 5: Histórico Completo */}
+        <motion.div
+          custom={11}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mt-6"
+        >
+          <SessionHistory userId={user.uid} planId={filterPlanId} />
         </motion.div>
       </main>
 
@@ -394,6 +525,14 @@ export default function Dashboard() {
         totalTodaySeconds={summary.totalToday}
         weeklyData={weeklyData}
         recentSessions={recentData}
+      />
+
+      {/* PlanManager (modal CRUD de editais) */}
+      <PlanManager
+        isOpen={planManagerOpen}
+        userId={user.uid}
+        editPlan={editingPlan}
+        onClose={handlePlanManagerClose}
       />
     </div>
   );

@@ -30,6 +30,7 @@ import { getTodayISO } from '@/lib/utils';
 
 interface UseStudyTimerOptions {
   userId: string;
+  planId?: string;
 }
 
 interface UseStudyTimerReturn {
@@ -78,7 +79,7 @@ interface UseStudyTimerReturn {
 // Alias de compat para código existente
 export type { UseStudyTimerReturn };
 
-export function useStudyTimer({ userId }: UseStudyTimerOptions): UseStudyTimerReturn & {
+export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStudyTimerReturn & {
   /** @deprecated use displaySeconds */
   elapsedSeconds: number;
 } {
@@ -273,6 +274,7 @@ export function useStudyTimer({ userId }: UseStudyTimerOptions): UseStudyTimerRe
       try {
         await saveSession({
           userId,
+          planId: planId || undefined,
           subject: selectedSubject,
           startTime: startTimeRef.current,
           endTime: new Date().toISOString(),
@@ -295,7 +297,7 @@ export function useStudyTimer({ userId }: UseStudyTimerOptions): UseStudyTimerRe
     setPhaseSecondsLeft(0);
     setCurrentCycle(1);
     wasRunningBeforeHide.current = false;
-  }, [status, isPomodoro, totalFocusSeconds, elapsedSeconds, userId, selectedSubject, clearTick]);
+  }, [status, isPomodoro, totalFocusSeconds, elapsedSeconds, userId, planId, selectedSubject, clearTick]);
 
   const skipPhase = useCallback(() => {
     if (!isPomodoro || status !== 'running') return;
