@@ -46,7 +46,7 @@ const item = {
   },
 };
 
-function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor, index }: CardProps) {
+function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: CardProps) {
   return (
     <motion.div
       variants={item}

@@ -25,6 +25,7 @@ import {
   generateInsights,
   getFilteredSessions,
 } from '@/lib/firebase/sessions';
+import { getAccuracyBySubject } from '@/lib/firebase/questions';
 import { getTodayISO } from '@/lib/utils';
 import {
   StudySummary,
@@ -35,6 +36,7 @@ import {
   SubjectWeight,
   PlanVsActual,
   StudyInsight,
+  SubjectAccuracy,
 } from '@/types';
 import Header from './Header';
 import SummaryCards from './SummaryCards';
@@ -46,8 +48,15 @@ import GoalAndStreakCard from './GoalAndStreakCard';
 import StudyPlanCard from './StudyPlanCard';
 import InsightsPanel from './InsightsPanel';
 import SessionHistory from './SessionHistory';
+import ActivityHeatmap from './ActivityHeatmap';
 import DailySummaryCard from './DailySummaryCard';
-import { TrendingUp } from 'lucide-react';
+import GeminiCoachCard from './GeminiCoachCard';
+import MentorCard from './MentorCard';
+import QuestionTrackerCard from './QuestionTrackerCard';
+import AccuracyChart from './AccuracyChart';
+import ChatPanel from './ChatPanel';
+import PostSessionToast from './PostSessionToast';
+import { TrendingUp, MessageCircle } from 'lucide-react';
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -73,6 +82,9 @@ export default function Dashboard() {
   const [planWeights, setPlanWeights] = useState<SubjectWeight[]>([]);
   const [insights, setInsights] = useState<StudyInsight[]>([]);
   const [todaySessions, setTodaySessions] = useState<StudySession[]>([]);
+  const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -89,6 +101,15 @@ export default function Dashboard() {
       setSubjectData(subjectsRes);
       setWeeklyData(weeklyRes);
       setRecentData(recentRes);
+
+      // Questões — fetch separado e resiliente (coleção pode não ter regras ainda)
+      try {
+        const accuracyRes = await getAccuracyBySubject(user.uid);
+        setAccuracyData(accuracyRes);
+      } catch (err) {
+        console.warn('Erro ao carregar dados de questões (atualize as regras do Firestore):', err);
+        setAccuracyData([]);
+      }
 
       // Sessões de hoje para o resumo diário
       const today = getTodayISO();
@@ -136,7 +157,8 @@ export default function Dashboard() {
     fetchData();
   }, [fetchData]);
 
-  const handleSessionSaved = () => {
+  const handleSessionSaved = (session: { subject: string; duration: number }) => {
+    setLastSavedSession(session);
     fetchData();
   };
 
@@ -218,9 +240,25 @@ export default function Dashboard() {
           <SubjectRadarChart data={subjectData} loading={loading} />
         </motion.div>
 
-        {/* Linha 2: Barras Semanal + Histórico */}
+        {/* Linha 1.5: Questões + Taxa de Acerto */}
         <motion.div
           custom={4}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mb-6 grid gap-6 lg:grid-cols-2"
+        >
+          <QuestionTrackerCard
+            userId={user.uid}
+            lastSessionSubject={lastSavedSession?.subject ?? (recentData[0]?.subject || null)}
+            onSaved={fetchData}
+          />
+          <AccuracyChart data={accuracyData} loading={loading} />
+        </motion.div>
+
+        {/* Linha 2: Barras Semanal + Histórico */}
+        <motion.div
+          custom={5}
           variants={sectionVariants}
           initial="hidden"
           animate="show"
@@ -230,9 +268,20 @@ export default function Dashboard() {
           <RecentSessions sessions={recentData} loading={loading} />
         </motion.div>
 
+        {/* Linha 2.5: Heatmap de Atividade */}
+        <motion.div
+          custom={6}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mt-6"
+        >
+          <ActivityHeatmap userId={user.uid} />
+        </motion.div>
+
         {/* Linha 3: Meta + Plano de Estudo */}
         <motion.div
-          custom={5}
+          custom={7}
           variants={sectionVariants}
           initial="hidden"
           animate="show"
@@ -251,20 +300,54 @@ export default function Dashboard() {
           />
         </motion.div>
 
-        {/* Linha 4: Insights */}
+        {/* Linha 4: Insights + Coach IA */}
         <motion.div
-          custom={6}
+          custom={8}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mt-6 grid gap-6 lg:grid-cols-2"
+        >
+          <InsightsPanel insights={insights} loading={loading} />
+          <GeminiCoachCard
+            consistency={consistency}
+            subjectHours={subjectData}
+            planVsActual={planVsActual}
+            totalTodaySeconds={summary.totalToday}
+            onOpenChat={() => setChatOpen(true)}
+            loading={loading}
+          />
+        </motion.div>
+
+        {/* Linha 4.5: Mentor AprovaFlow */}
+        <motion.div
+          custom={9}
           variants={sectionVariants}
           initial="hidden"
           animate="show"
           className="mt-6"
         >
-          <InsightsPanel insights={insights} loading={loading} />
+          <MentorCard
+            userName={user.displayName?.split(' ')[0] || 'Estudante'}
+            consistency={consistency}
+            subjectHours={subjectData}
+            planVsActual={planVsActual}
+            totalTodaySeconds={summary.totalToday}
+            todayDominantSubject={
+              todaySessions.length > 0
+                ? [...todaySessions].sort((a, b) => b.duration - a.duration)[0].subject
+                : null
+            }
+            weeklyData={weeklyData}
+            recentSessions={recentData}
+            accuracyData={accuracyData}
+            loading={loading}
+          />
         </motion.div>
 
         {/* Linha 5: Histórico Completo */}
         <motion.div
-          custom={7}
+          custom={10}
           variants={sectionVariants}
           initial="hidden"
           animate="show"
@@ -273,6 +356,45 @@ export default function Dashboard() {
           <SessionHistory userId={user.uid} />
         </motion.div>
       </main>
+
+      {/* Botão flutuante do Chat */}
+      <motion.button
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 1, type: 'spring', stiffness: 200 }}
+        onClick={() => setChatOpen(true)}
+        className="fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-blue-600 shadow-xl shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
+        title="Conversar com o Coach IA"
+      >
+        <MessageCircle className="h-6 w-6 text-white" />
+      </motion.button>
+
+      {/* Toast pós-sessão */}
+      <PostSessionToast
+        session={lastSavedSession}
+        context={consistency ? {
+          userName: user.displayName?.split(' ')[0] || 'Estudante',
+          weeklyProgressPercent: consistency.weeklyProgressPercent,
+          currentStreak: consistency.currentStreak,
+          weeklyGoalHours: consistency.weeklyGoalHours,
+          weeklyTotalHours: consistency.weeklyTotalSeconds / 3600,
+        } : null}
+        onDismiss={() => setLastSavedSession(null)}
+      />
+
+      {/* Painel de Chat */}
+      <ChatPanel
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+        userName={user.displayName?.split(' ')[0] || 'Estudante'}
+        consistency={consistency}
+        subjectHours={subjectData}
+        planVsActual={planVsActual}
+        todaySessions={todaySessions}
+        totalTodaySeconds={summary.totalToday}
+        weeklyData={weeklyData}
+        recentSessions={recentData}
+      />
     </div>
   );
 }

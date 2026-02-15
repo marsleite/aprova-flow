@@ -12,7 +12,7 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, BookOpen, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { Sun, BookOpen, AlertTriangle, CheckCircle } from 'lucide-react';
 import { StudySession, PlanVsActual } from '@/types';
 import { formatDuration } from '@/lib/utils';
 

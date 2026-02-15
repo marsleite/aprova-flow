@@ -30,12 +30,20 @@ import {
   PlanVsActual,
   StudyInsight,
   SessionFilters,
+  DayActivity,
 } from '@/types';
 import { getDayName, getTodayISO } from '@/lib/utils';
 
 const SESSIONS_COLLECTION = 'sessions';
 const USER_STATS_COLLECTION = 'user_stats';
 const DEFAULT_WEEKLY_GOAL_HOURS = 10;
+
+function formatDateLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 /**
  * Salva uma nova sessão de estudo no Firestore
@@ -521,4 +529,64 @@ export async function getFilteredSessions(
     if (filters.minDuration && s.duration < filters.minDuration) return false;
     return true;
   });
+}
+
+// ==========================================================
+// Heatmap de Atividade
+// ==========================================================
+
+/**
+ * Retorna atividade por dia para um mês inteiro (para o heatmap)
+ */
+export async function getMonthlyActivity(
+  userId: string,
+  year: number,
+  month: number // 0-indexed (0=Jan, 11=Dez)
+): Promise<DayActivity[]> {
+  const monthStart = formatDateLocal(new Date(year, month, 1));
+  const monthEnd = formatDateLocal(new Date(year, month + 1, 0));
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const sessions = await getSessionsFromDate(userId, monthStart);
+  // Filtra apenas sessões do mês pedido
+  const filtered = sessions.filter((s) => s.date <= monthEnd);
+
+  // Agrupa por dia
+  const dayMap = new Map<string, { totalSeconds: number; count: number; subjects: Set<string> }>();
+  for (const s of filtered) {
+    const entry = dayMap.get(s.date) || { totalSeconds: 0, count: 0, subjects: new Set<string>() };
+    entry.totalSeconds += s.duration;
+    entry.count += 1;
+    entry.subjects.add(s.subject);
+    dayMap.set(s.date, entry);
+  }
+
+  // Calcula thresholds para os levels baseado no max do mês
+  const maxSeconds = Math.max(...Array.from(dayMap.values()).map((d) => d.totalSeconds), 1);
+
+  // Gera array com todos os dias do mês
+  const result: DayActivity[] = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const entry = dayMap.get(date);
+
+    let level: DayActivity['level'] = 0;
+    if (entry) {
+      const ratio = entry.totalSeconds / maxSeconds;
+      if (ratio >= 0.75) level = 4;
+      else if (ratio >= 0.5) level = 3;
+      else if (ratio >= 0.25) level = 2;
+      else level = 1;
+    }
+
+    result.push({
+      date,
+      totalSeconds: entry?.totalSeconds ?? 0,
+      sessionCount: entry?.count ?? 0,
+      subjects: entry ? Array.from(entry.subjects) : [],
+      level,
+    });
+  }
+
+  return result;
 }

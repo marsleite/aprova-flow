@@ -8,7 +8,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { History, BookOpen, Clock } from 'lucide-react';
+import { History, Clock } from 'lucide-react';
 import { StudySession } from '@/types';
 import { formatDuration, formatRelativeDate } from '@/lib/utils';
 
