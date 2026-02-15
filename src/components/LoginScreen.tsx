@@ -1,17 +1,41 @@
 /**
  * Tela de Login
  * 
- * Exibe a tela de boas-vindas com login via Google.
+ * Exibe a tela de boas-vindas com login via Google ou Email/Senha.
  * Design dark mode com gradientes roxo/azul neon.
  */
 
 'use client';
 
-import { Zap, BookOpen, Clock, TrendingUp, Brain } from 'lucide-react';
+import { useState } from 'react';
+import { Zap, BookOpen, Clock, TrendingUp, Brain, Mail, Eye, EyeOff } from 'lucide-react';
 import { useAuthContext } from '@/contexts/AuthContext';
 
 export default function LoginScreen() {
-  const { signInWithGoogle, loading, error } = useAuthContext();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail, loading, error } = useAuthContext();
+
+  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      if (mode === 'register') {
+        await signUpWithEmail(email, password, displayName.trim());
+      } else {
+        await signInWithEmail(email, password);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const isDisabled = loading || submitting;
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-950">
@@ -55,19 +79,18 @@ export default function LoginScreen() {
             />
             <Feature
               icon={<Brain className="h-4 w-4 text-pink-400" />}
-              text="IA para sugestões personalizadas (em breve)"
+              text="IA para sugestões personalizadas"
             />
           </div>
 
-          {/* Botão de Login */}
+          {/* Botão Google */}
           <button
             onClick={signInWithGoogle}
-            disabled={loading}
+            disabled={isDisabled}
             className="group flex w-full items-center justify-center gap-3 rounded-xl bg-white px-6 py-3.5 
                        font-medium text-gray-900 shadow-lg transition-all hover:bg-gray-100 hover:shadow-xl
                        disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {/* Ícone Google */}
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
@@ -86,8 +109,98 @@ export default function LoginScreen() {
                 fill="#EA4335"
               />
             </svg>
-            {loading ? 'Entrando...' : 'Entrar com Google'}
+            {isDisabled ? 'Entrando...' : 'Entrar com Google'}
           </button>
+
+          {/* Divisor */}
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-white/10" />
+            <span className="text-xs text-gray-500">ou</span>
+            <div className="h-px flex-1 bg-white/10" />
+          </div>
+
+          {/* Formulário Email/Senha */}
+          <form onSubmit={handleEmailSubmit} className="space-y-3">
+            {mode === 'register' && (
+              <input
+                type="text"
+                placeholder="Seu nome"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white 
+                           placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
+              />
+            )}
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white 
+                         placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
+            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-11 text-sm text-white 
+                           placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isDisabled}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 
+                         px-6 py-3.5 font-medium text-white shadow-lg shadow-violet-500/20 transition-all 
+                         hover:shadow-xl hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Mail className="h-4 w-4" />
+              {submitting
+                ? 'Aguarde...'
+                : mode === 'register'
+                  ? 'Criar conta'
+                  : 'Entrar com email'}
+            </button>
+          </form>
+
+          {/* Toggle Login/Cadastro */}
+          <p className="mt-4 text-center text-sm text-gray-500">
+            {mode === 'login' ? (
+              <>
+                Não tem conta?{' '}
+                <button
+                  onClick={() => setMode('register')}
+                  className="text-violet-400 hover:text-violet-300 transition-colors"
+                >
+                  Criar conta
+                </button>
+              </>
+            ) : (
+              <>
+                Já tem conta?{' '}
+                <button
+                  onClick={() => setMode('login')}
+                  className="text-violet-400 hover:text-violet-300 transition-colors"
+                >
+                  Fazer login
+                </button>
+              </>
+            )}
+          </p>
 
           {/* Erro */}
           {error && (

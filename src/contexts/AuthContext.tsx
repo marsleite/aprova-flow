@@ -16,6 +16,8 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
