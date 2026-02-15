@@ -17,6 +17,20 @@ import {
 import { auth, googleProvider } from '@/lib/firebase/config';
 import { UserProfile } from '@/types';
 
+// ============================================================
+// BETA ALLOWLIST — Remover este bloco ao lançar publicamente
+// ============================================================
+const BETA_ALLOWLIST: string[] = [
+  'marsleite@gmail.com',
+  'grace.andradeleite@gmail.com',
+];
+
+const isBetaAllowed = (email: string | null): boolean => {
+  if (BETA_ALLOWLIST.length === 0) return true; // lista vazia = aberto para todos
+  return !!email && BETA_ALLOWLIST.includes(email.toLowerCase());
+};
+// ============================================================
+
 export function useAuth() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,8 +38,16 @@ export function useAuth() {
 
   // Observa mudanças no estado de autenticação
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: User | null) => {
       if (firebaseUser) {
+        // BETA: verifica se o email está na allowlist
+        if (!isBetaAllowed(firebaseUser.email)) {
+          await signOut(auth);
+          setUser(null);
+          setError('Acesso restrito ao período de beta. Em breve abriremos para todos!');
+          setLoading(false);
+          return;
+        }
         setUser({
           uid: firebaseUser.uid,
           displayName: firebaseUser.displayName,
