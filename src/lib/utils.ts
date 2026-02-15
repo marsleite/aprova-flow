@@ -66,6 +66,31 @@ export function getDayName(date: Date): string {
 }
 
 /**
+ * Exporta um array de sessões como arquivo CSV (dispara download no browser)
+ */
+export function exportSessionsCSV(
+  sessions: { subject: string; date: string; duration: number; startTime: string; endTime: string }[]
+): void {
+  const header = 'Matéria,Data,Duração (min),Início,Fim';
+  const rows = sessions.map((s) => {
+    const mins = Math.round(s.duration / 60);
+    const start = s.startTime ? new Date(s.startTime).toLocaleTimeString('pt-BR') : '';
+    const end = s.endTime ? new Date(s.endTime).toLocaleTimeString('pt-BR') : '';
+    // Escapar aspas duplas e envolver campos com vírgula
+    const subject = `"${s.subject.replace(/"/g, '""')}"`;
+    return `${subject},${s.date},${mins},${start},${end}`;
+  });
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `aprovaflow-sessoes-${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+/**
  * Gera uma cor baseada no índice (para gráficos)
  */
 export function getChartColor(index: number): string {

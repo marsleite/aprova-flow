@@ -48,14 +48,16 @@ function CustomTooltip({ active, payload }: {
   );
 }
 
+const SKELETON_HEIGHTS = [45, 72, 30, 60, 50, 78, 38];
+
 function ChartSkeleton() {
   return (
     <div className="flex h-[250px] items-end justify-around px-6 pt-8">
-      {Array.from({ length: 7 }).map((_, i) => (
+      {SKELETON_HEIGHTS.map((h, i) => (
         <div
           key={i}
           className="w-8 animate-pulse rounded-t bg-gray-800"
-          style={{ height: `${20 + Math.random() * 60}%` }}
+          style={{ height: `${h}%` }}
         />
       ))}
     </div>
