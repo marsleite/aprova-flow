@@ -119,6 +119,20 @@ src/
    - Passos: criar conta > configurar plano > definir meta > usar cronômetro > ver progresso
    - Opção de "pular" e "ver depois"
 
+## Evolução futura — Modo Prova com banco de questões
+- **Visão**: o modo prova atual (cronômetro + registro de blocos) evoluirá para suportar questões dentro do app.
+- **Escopo**:
+  - Catálogo `questions` no Firestore com: enunciado rico (markdown), alternativas (A-E), resposta, explicação, tags (matéria, subtema, dificuldade, banca, ano).
+  - Endpoint/serviço para montar simulados parametrizados (por banca, edital, nível, quantidade).
+  - Interface de resolução com modo concentração, marcação de dúvida, revisão.
+  - Relatórios pós-prova cruzando constância × acertos por matéria/question tag.
+- **Plano para dataset**:
+  1. Começar com importação manual/CSV das listas já usadas pelo usuário (mínimo viável).
+  2. Criar ferramenta de import (CSV/JSON) com validação e deduplicação por `externalId`.
+  3. Adicionar editor interno para cadastrar/editar questões (perfis de confiança).
+  4. Fase final: scraping / integrações oficiais (quando juridicamente possível) + curadoria humana.
+- **Status**: feature planejada para depois das entregas atuais de Fase 3; manter esta evolução como última etapa.
+
 ## Arquitetura IA (Gemini) — Uso Estratégico
 
 ### Filosofia: IA só para alto valor, regras locais para o resto
