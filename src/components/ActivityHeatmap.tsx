@@ -213,7 +213,7 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
 
       {/* Heatmap container */}
       <div className="overflow-x-auto">
-        <div style={{ display: 'inline-block', minWidth: `${numWeeks * 13 + 32}px` }}>
+        <div className="w-full">
           {/* Month labels */}
           <div style={{ position: 'relative', height: '16px', marginLeft: '32px', marginBottom: '4px' }}>
             {monthLabels.map((m, i) => (
@@ -222,7 +222,7 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
                 className="text-[10px] text-gray-500"
                 style={{
                   position: 'absolute',
-                  left: `${m.weekIndex * 13}px`,
+                  left: `${(m.weekIndex / numWeeks) * 100}%`,
                 }}
               >
                 {m.label}
@@ -233,25 +233,25 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
           {/* Grid */}
           <div className="flex">
             {/* Day labels */}
-            <div className="flex flex-col gap-[2px] mr-1">
+            <div className="flex flex-col gap-[2px] mr-1 shrink-0">
               {DAY_LABELS.map((label, i) => (
-                <div key={i} className="h-[11px] flex items-center">
+                <div key={i} style={{ height: `calc((100% - 12px) / 7)`, minHeight: '11px' }} className="flex items-center">
                   <span className="text-[9px] text-gray-500 w-6 text-right pr-1">{label}</span>
                 </div>
               ))}
             </div>
 
-            {/* Weeks columns */}
-            <div className="flex gap-[2px]">
+            {/* Weeks columns - stretch to fill */}
+            <div className="flex gap-[2px] flex-1">
               {Array.from({ length: numWeeks }).map((_, weekIdx) => (
-                <div key={weekIdx} className="flex flex-col gap-[2px]">
+                <div key={weekIdx} className="flex flex-col gap-[2px] flex-1">
                   {Array.from({ length: 7 }).map((_, dayIdx) => {
                     const cell = grid[dayIdx][weekIdx];
                     if (!cell) {
                       return (
                         <div
                           key={dayIdx}
-                          className="h-[11px] w-[11px] rounded-sm bg-transparent"
+                          className="aspect-square rounded-sm bg-transparent"
                         />
                       );
                     }
@@ -263,10 +263,10 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
                       <button
                         key={dayIdx}
                         onClick={() => setSelectedDay(isSelected ? null : cell)}
-                        className={`h-[11px] w-[11px] rounded-sm transition-all
+                        className={`aspect-square rounded-sm transition-all
                           ${LEVEL_COLORS[cell.level]}
                           ${isToday ? 'ring-1 ring-violet-400' : ''}
-                          ${isSelected ? 'ring-1 ring-white scale-125' : ''}
+                          ${isSelected ? 'ring-1 ring-white scale-110' : ''}
                           hover:brightness-125 cursor-pointer
                         `}
                         title={
