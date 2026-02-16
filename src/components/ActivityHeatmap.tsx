@@ -1,16 +1,15 @@
 /**
- * Heatmap de Atividade — Grid mensal tipo GitHub
+ * Heatmap de Atividade — Grid anual estilo GitHub
  *
- * Mostra cada dia do mês com cor proporcional à intensidade de estudo.
+ * Mostra os últimos 12 meses em grid horizontal (semanas como colunas, dias como linhas).
  * Clicar num dia mostra detalhes (matérias, duração, sessões).
- * Navegação entre meses.
  */
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, ChevronLeft, ChevronRight, X, Clock, BookOpen } from 'lucide-react';
+import { X, Clock, BookOpen } from 'lucide-react';
 import { DayActivity } from '@/types';
 import { getMonthlyActivity } from '@/lib/firebase/sessions';
 import { formatDuration } from '@/lib/utils';
@@ -20,12 +19,12 @@ interface ActivityHeatmapProps {
   planId?: string;
 }
 
-const MONTH_NAMES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+const MONTH_NAMES_SHORT = [
+  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
 ];
 
-const DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const DAY_LABELS = ['', 'Seg', '', 'Qua', '', 'Sex', ''];
 
 const LEVEL_COLORS: Record<number, string> = {
   0: 'bg-gray-800/40',
@@ -35,199 +34,272 @@ const LEVEL_COLORS: Record<number, string> = {
   4: 'bg-violet-400',
 };
 
-const LEVEL_BORDERS: Record<number, string> = {
-  0: 'border-gray-800/30',
-  1: 'border-violet-800/40',
-  2: 'border-violet-600/40',
-  3: 'border-violet-400/40',
-  4: 'border-violet-300/50',
-};
-
-function getLocalDateISO(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+interface DayCell {
+  date: string;
+  level: number;
+  totalSeconds: number;
+  sessionCount: number;
+  subjects: string[];
+  dayOfWeek: number; // 0=Dom, 6=Sáb
+  weekIndex: number;
 }
 
 export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps) {
-  const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth());
-  const [days, setDays] = useState<DayActivity[]>([]);
+  const [allDays, setAllDays] = useState<Map<string, DayActivity>>(new Map());
   const [loading, setLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState<DayActivity | null>(null);
+  const [selectedDay, setSelectedDay] = useState<DayCell | null>(null);
 
-  const fetchData = useCallback(async () => {
+  // Busca dados dos últimos 12 meses
+  const fetchYearData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getMonthlyActivity(userId, year, month, planId);
-      setDays(data);
+      const now = new Date();
+      const promises: Promise<DayActivity[]>[] = [];
+
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        promises.push(getMonthlyActivity(userId, d.getFullYear(), d.getMonth(), planId));
+      }
+
+      const results = await Promise.all(promises);
+      const dayMap = new Map<string, DayActivity>();
+
+      for (const monthDays of results) {
+        for (const day of monthDays) {
+          dayMap.set(day.date, day);
+        }
+      }
+
+      setAllDays(dayMap);
     } catch (err) {
       console.error('Erro ao carregar heatmap:', err);
     } finally {
       setLoading(false);
     }
-  }, [userId, year, month, planId]);
+  }, [userId, planId]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchYearData();
+  }, [fetchYearData]);
 
-  const goToPrevMonth = () => {
-    if (month === 0) {
-      setMonth(11);
-      setYear((y) => y - 1);
-    } else {
-      setMonth((m) => m - 1);
+  // Gera grid de ~53 semanas × 7 dias (estilo GitHub)
+  const { grid, monthLabels, totalDays, totalSeconds, numWeeks } = useMemo(() => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // GitHub mostra até o sábado da semana atual
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // avança até sábado
+
+    // Volta ~1 ano: encontra o domingo 52 semanas atrás
+    const startDate = new Date(today);
+    startDate.setFullYear(startDate.getFullYear() - 1);
+    startDate.setDate(startDate.getDate() + 1); // dia seguinte ao mesmo dia do ano passado
+    // Recua até o domingo dessa semana
+    startDate.setDate(startDate.getDate() - startDate.getDay());
+
+    // Total de dias e semanas
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const totalDaysSpan = Math.round((endDate.getTime() - startDate.getTime()) / msPerDay) + 1;
+    const weeks = Math.ceil(totalDaysSpan / 7);
+
+    // Grid: 7 linhas (Dom=0..Sáb=6) × N colunas (semanas)
+    const gridData: (DayCell | null)[][] = Array.from({ length: 7 }, () =>
+      Array.from({ length: weeks }, () => null)
+    );
+
+    const months: { label: string; weekIndex: number }[] = [];
+    let lastMonthTracked = -1;
+    let totalSec = 0;
+    let totalD = 0;
+
+    const cursor = new Date(startDate);
+    let cellIndex = 0;
+
+    while (cursor <= endDate) {
+      const col = Math.floor(cellIndex / 7); // semana (coluna)
+      const row = cursor.getDay();            // dia da semana (linha)
+
+      const y = cursor.getFullYear();
+      const m = cursor.getMonth();
+      const d = cursor.getDate();
+      const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const isFuture = dateStr > todayStr;
+
+      // Track month labels na primeira ocorrência de cada mês (quando é domingo)
+      if (m !== lastMonthTracked) {
+        if (row === 0) {
+          months.push({ label: MONTH_NAMES_SHORT[m], weekIndex: col });
+        } else if (d <= 7) {
+          // Mês começou no meio da semana, mostra na próxima coluna
+          months.push({ label: MONTH_NAMES_SHORT[m], weekIndex: col + 1 });
+        }
+        lastMonthTracked = m;
+      }
+
+      const activity = allDays.get(dateStr);
+
+      if (isFuture) {
+        // Dias futuros: quadrado vazio (nível 0) para preencher o retângulo
+        gridData[row][col] = {
+          date: dateStr,
+          level: 0,
+          totalSeconds: 0,
+          sessionCount: 0,
+          subjects: [],
+          dayOfWeek: row,
+          weekIndex: col,
+        };
+      } else {
+        const cell: DayCell = {
+          date: dateStr,
+          level: activity?.level ?? 0,
+          totalSeconds: activity?.totalSeconds ?? 0,
+          sessionCount: activity?.sessionCount ?? 0,
+          subjects: activity?.subjects ?? [],
+          dayOfWeek: row,
+          weekIndex: col,
+        };
+
+        if (activity && activity.totalSeconds > 0) {
+          totalSec += activity.totalSeconds;
+          totalD++;
+        }
+
+        gridData[row][col] = cell;
+      }
+
+      cursor.setDate(cursor.getDate() + 1);
+      cellIndex++;
     }
-    setSelectedDay(null);
-  };
 
-  const goToNextMonth = () => {
-    const isCurrentMonth = year === now.getFullYear() && month === now.getMonth();
-    if (isCurrentMonth) return; // Não avança além do mês atual
+    return { grid: gridData, monthLabels: months, totalDays: totalD, totalSeconds: totalSec, numWeeks: weeks };
+  }, [allDays]);
 
-    if (month === 11) {
-      setMonth(0);
-      setYear((y) => y + 1);
-    } else {
-      setMonth((m) => m + 1);
-    }
-    setSelectedDay(null);
-  };
+  const todayStr = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }, []);
 
-  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth();
-  const todayStr = getLocalDateISO(now);
-
-  // Calcula offset do primeiro dia do mês (0=Dom, 1=Seg...)
-  const firstDayOfWeek = new Date(year, month, 1).getDay();
-
-  // Total do mês
-  const totalMonthSeconds = days.reduce((acc, d) => acc + d.totalSeconds, 0);
-  const daysStudied = days.filter((d) => d.totalSeconds > 0).length;
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-4 shadow-2xl"
+      >
+        <div className="animate-pulse">
+          <div className="mb-3 h-5 w-64 rounded bg-gray-800"></div>
+          <div className="h-24 w-full rounded bg-gray-800"></div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-6 shadow-2xl"
+      className="rounded-xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-4 shadow-2xl"
     >
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-green-500/20 p-2.5">
-            <Calendar className="h-5 w-5 text-green-400" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-white">Atividade</h3>
-            <p className="text-sm text-gray-400">Consistência de estudos</p>
-          </div>
-        </div>
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-sm font-semibold text-white">
+          {totalDays} {totalDays === 1 ? 'dia' : 'dias'} de estudo no último ano
+        </span>
+      </div>
 
-        {/* Navegação de mês */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={goToPrevMonth}
-            className="rounded-lg p-1.5 text-gray-500 transition hover:bg-gray-800 hover:text-white"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <span className="min-w-[120px] text-center text-sm font-medium text-white">
-            {MONTH_NAMES[month]} {year}
-          </span>
-          <button
-            onClick={goToNextMonth}
-            disabled={isCurrentMonth}
-            className="rounded-lg p-1.5 text-gray-500 transition hover:bg-gray-800 hover:text-white disabled:opacity-30"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+      {/* Heatmap container */}
+      <div className="overflow-x-auto">
+        <div style={{ display: 'inline-block', minWidth: `${numWeeks * 13 + 32}px` }}>
+          {/* Month labels */}
+          <div style={{ position: 'relative', height: '16px', marginLeft: '32px', marginBottom: '4px' }}>
+            {monthLabels.map((m, i) => (
+              <span
+                key={i}
+                className="text-[10px] text-gray-500"
+                style={{
+                  position: 'absolute',
+                  left: `${m.weekIndex * 13}px`,
+                }}
+              >
+                {m.label}
+              </span>
+            ))}
+          </div>
+
+          {/* Grid */}
+          <div className="flex">
+            {/* Day labels */}
+            <div className="flex flex-col gap-[2px] mr-1">
+              {DAY_LABELS.map((label, i) => (
+                <div key={i} className="h-[11px] flex items-center">
+                  <span className="text-[9px] text-gray-500 w-6 text-right pr-1">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Weeks columns */}
+            <div className="flex gap-[2px]">
+              {Array.from({ length: numWeeks }).map((_, weekIdx) => (
+                <div key={weekIdx} className="flex flex-col gap-[2px]">
+                  {Array.from({ length: 7 }).map((_, dayIdx) => {
+                    const cell = grid[dayIdx][weekIdx];
+                    if (!cell) {
+                      return (
+                        <div
+                          key={dayIdx}
+                          className="h-[11px] w-[11px] rounded-sm bg-transparent"
+                        />
+                      );
+                    }
+
+                    const isToday = cell.date === todayStr;
+                    const isSelected = selectedDay?.date === cell.date;
+
+                    return (
+                      <button
+                        key={dayIdx}
+                        onClick={() => setSelectedDay(isSelected ? null : cell)}
+                        className={`h-[11px] w-[11px] rounded-sm transition-all
+                          ${LEVEL_COLORS[cell.level]}
+                          ${isToday ? 'ring-1 ring-violet-400' : ''}
+                          ${isSelected ? 'ring-1 ring-white scale-125' : ''}
+                          hover:brightness-125 cursor-pointer
+                        `}
+                        title={
+                          cell.totalSeconds > 0
+                            ? `${cell.date} — ${formatDuration(cell.totalSeconds)}`
+                            : `${cell.date} — sem estudo`
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Grid do calendário */}
-      {loading ? (
-        <div className="grid grid-cols-7 gap-1.5">
-          {Array.from({ length: 35 }).map((_, i) => (
-            <div key={i} className="aspect-square animate-pulse rounded-md bg-gray-800/40" />
+      {/* Footer */}
+      <div className="mt-3 flex items-center justify-between">
+        <span className="text-xs text-gray-500">
+          {formatDuration(totalSeconds)} no último ano
+        </span>
+        <div className="flex items-center gap-[3px]">
+          <span className="text-[9px] text-gray-600 mr-1">Menos</span>
+          {[0, 1, 2, 3, 4].map((level) => (
+            <div
+              key={level}
+              className={`h-[11px] w-[11px] rounded-sm ${LEVEL_COLORS[level]}`}
+            />
           ))}
+          <span className="text-[9px] text-gray-600 ml-1">Mais</span>
         </div>
-      ) : (
-        <>
-          {/* Labels dos dias da semana */}
-          <div className="mb-1.5 grid grid-cols-7 gap-1.5">
-            {DAY_LABELS.map((d) => (
-              <div key={d} className="text-center text-[10px] font-medium text-gray-600">
-                {d}
-              </div>
-            ))}
-          </div>
-
-          {/* Dias */}
-          <div className="grid grid-cols-7 gap-1.5">
-            {/* Espaços vazios antes do primeiro dia */}
-            {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-              <div key={`empty-${i}`} />
-            ))}
-
-            {/* Dias do mês */}
-            {days.map((day) => {
-              const dayNum = parseInt(day.date.split('-')[2]);
-              const isFuture = day.date > todayStr;
-              const isToday = day.date === todayStr;
-              const isSelected = selectedDay?.date === day.date;
-
-              return (
-                <button
-                  key={day.date}
-                  onClick={() => !isFuture && setSelectedDay(isSelected ? null : day)}
-                  disabled={isFuture}
-                  className={`relative aspect-square rounded-md border text-xs font-medium transition-all
-                    ${isFuture ? 'cursor-default border-transparent bg-gray-900/20 text-gray-800' : ''}
-                    ${!isFuture ? `${LEVEL_COLORS[day.level]} ${LEVEL_BORDERS[day.level]} cursor-pointer hover:brightness-125` : ''}
-                    ${isToday ? 'ring-1 ring-violet-400/50' : ''}
-                    ${isSelected ? 'ring-2 ring-white/50 brightness-125' : ''}
-                  `}
-                  title={
-                    isFuture
-                      ? ''
-                      : day.totalSeconds > 0
-                      ? `${dayNum} — ${formatDuration(day.totalSeconds)}`
-                      : `${dayNum} — sem estudo`
-                  }
-                >
-                  <span
-                    className={`absolute left-1 top-0.5 text-[10px] ${
-                      isToday ? 'font-bold text-violet-300' : isFuture ? 'text-gray-800' : 'text-gray-400'
-                    }`}
-                  >
-                    {dayNum}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Legenda */}
-          <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-3">
-            <span className="text-xs text-gray-500">
-              {daysStudied} {daysStudied === 1 ? 'dia' : 'dias'} · {formatDuration(totalMonthSeconds)}
-            </span>
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] text-gray-600">Menos</span>
-              {[0, 1, 2, 3, 4].map((level) => (
-                <div
-                  key={level}
-                  className={`h-3 w-3 rounded-sm ${LEVEL_COLORS[level]}`}
-                />
-              ))}
-              <span className="text-[10px] text-gray-600">Mais</span>
-            </div>
-          </div>
-        </>
-      )}
+      </div>
 
       {/* Detalhe do dia selecionado */}
       <AnimatePresence>
@@ -236,28 +308,28 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-3 overflow-hidden"
+            className="mt-2 overflow-hidden"
           >
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-medium text-white">
-                  {parseInt(selectedDay.date.split('-')[2])} de {MONTH_NAMES[month]}
+            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-xs font-medium text-white">
+                  {selectedDay.date}
                 </span>
                 <button
                   onClick={() => setSelectedDay(null)}
                   className="text-gray-600 hover:text-gray-400"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-3 w-3" />
                 </button>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <div className="flex items-center gap-1.5 rounded-lg bg-violet-500/10 px-2.5 py-1">
-                  <Clock className="h-3 w-3 text-violet-400" />
+              <div className="flex flex-wrap gap-1">
+                <div className="flex items-center gap-1 rounded-lg bg-violet-500/10 px-2 py-0.5">
+                  <Clock className="h-2.5 w-2.5 text-violet-400" />
                   <span className="text-xs text-violet-300">
                     {formatDuration(selectedDay.totalSeconds)}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 rounded-lg bg-blue-500/10 px-2.5 py-1">
+                <div className="flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-0.5">
                   <span className="text-xs text-blue-300">
                     {selectedDay.sessionCount} {selectedDay.sessionCount === 1 ? 'sessão' : 'sessões'}
                   </span>
@@ -265,9 +337,9 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
                 {selectedDay.subjects.map((s) => (
                   <div
                     key={s}
-                    className="flex items-center gap-1 rounded-lg bg-gray-800/50 px-2.5 py-1"
+                    className="flex items-center gap-1 rounded-lg bg-gray-800/50 px-2 py-0.5"
                   >
-                    <BookOpen className="h-3 w-3 text-gray-400" />
+                    <BookOpen className="h-2.5 w-2.5 text-gray-400" />
                     <span className="text-xs text-gray-300">{s}</span>
                   </div>
                 ))}
@@ -281,9 +353,9 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-3 overflow-hidden"
+            className="mt-2 overflow-hidden"
           >
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-center">
+            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2 text-center">
               <p className="text-xs text-gray-500">Nenhum estudo registrado neste dia</p>
             </div>
           </motion.div>
