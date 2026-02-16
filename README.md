@@ -70,7 +70,12 @@ O app **não ensina matéria** — ele é o **coach de rotina** que garante que 
 - Cards de resumo (Hoje / Semana / Mês)
 - Gráfico de Radar por matéria
 - Barras semanais (Seg-Dom)
-- Heatmap mensal tipo GitHub
+- Heatmap anual tipo GitHub
+- 52/53 semanas visíveis simultaneamente (último ano)
+- Meses alinhados dinamicamente como no GitHub
+- Intensidade baseada em horas líquidas por dia
+- Filtra por plano ativo (ou Todos os planos)
+- Clique abre resumo do dia (sessões, matérias)
 - Planejado vs Real com status por matéria
 - Meta semanal + Streak de dias consecutivos
 
@@ -399,7 +404,7 @@ O usuário pode estudar para **múltiplos concursos** ao mesmo tempo. Cada concu
          planId=null  planId=abc  planId=xyz   Abre PlanManager
               │          │           │
               ▼          ▼           ▼
-  ┌───────────────────────────────────────┐
+  ┌───────────────────────────────┐
   │            DASHBOARD                   │
   │                                        │
   │  planId=null → busca TODAS as sessões  │
@@ -408,7 +413,7 @@ O usuário pode estudar para **múltiplos concursos** ao mesmo tempo. Cada concu
   │                                        │
   │  Componentes recebem dados filtrados:  │
   │  Summary, Radar, Weekly, Goal, Plan    │
-  └───────────────────────────────────────┘
+  └───────────────────────────────┘
 ```
 
 ### Como o filtro funciona
@@ -534,7 +539,7 @@ O Mentor analisa 5 cenários por matéria:
       ├── ┌─ WeeklyBarChart  (Seg-Dom)
       │   └─ RecentSessions  (últimas 5)
       │
-      ├── ActivityHeatmap  (grid mensal)
+      ├── ActivityHeatmap  (grid anual estilo GitHub)
       │
       ├── ┌─ GoalAndStreakCard  (meta + streak)
       │   └─ StudyPlanCard  (planejado vs real)
