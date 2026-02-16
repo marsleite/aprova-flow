@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, CheckCircle, XCircle, Plus } from 'lucide-react';
 import { getMonthEvents, getDayEvents, CalendarEvent } from '@/lib/firebase/calendar';
@@ -88,13 +88,27 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
     return days;
   };
 
-  // Obter eventos de um dia específico
-  const getEventsForDay = (date: Date) => {
-    return events.filter(event => {
-      const eventDate = new Date(event.startTime);
-      return eventDate.toDateString() === date.toDateString();
+  // Agrupar eventos por dia para evitar filtros repetidos
+  const eventsByDay = useMemo(() => {
+    const map = new Map<string, CalendarEvent[]>();
+    events.forEach((event) => {
+      const key = event.startTime.toISOString().split('T')[0];
+      if (!map.has(key)) {
+        map.set(key, [event]);
+      } else {
+        map.get(key)!.push(event);
+      }
     });
-  };
+    return map;
+  }, [events]);
+
+  const getEventsForDay = useCallback(
+    (date: Date) => {
+      const key = date.toISOString().split('T')[0];
+      return eventsByDay.get(key) ?? [];
+    },
+    [eventsByDay]
+  );
 
   // Verificar se é hoje
   const isToday = (date: Date) => {

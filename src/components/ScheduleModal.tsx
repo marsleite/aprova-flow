@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Clock, BookOpen, Target, AlertCircle } from 'lucide-react';
-import { createCalendarEvent, CalendarEvent } from '@/lib/firebase/calendar';
+import { createCalendarEvent, CalendarEvent, checkTimeConflict } from '@/lib/firebase/calendar';
 
 interface ScheduleModalProps {
   isOpen: boolean;
@@ -76,6 +76,14 @@ export default function ScheduleModal({
       // Validar que o fim é depois do início
       if (endDate <= startDate) {
         alert('O horário de término deve ser posterior ao início');
+        return;
+      }
+
+      // Verificar conflito de horário
+      const hasConflict = await checkTimeConflict(userId, startDate, endDate);
+      if (hasConflict) {
+        alert('Já existe um evento agendado neste horário. Ajuste o período antes de salvar.');
+        setLoading(false);
         return;
       }
 
