@@ -40,9 +40,25 @@ export const googleProvider = new GoogleAuthProvider();
  */
 export async function initFirebaseAnalytics() {
   if (typeof window === 'undefined') return null;
+  try {
+    const supported = await isSupported();
+    if (!supported) return null;
+    return getAnalytics(app);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Inicializa o Messaging apenas no browser.
+ * Evita erro em SSR/ambientes sem suporte.
+ */
+export async function initFirebaseMessaging() {
+  if (typeof window === 'undefined') return null;
   const supported = await isSupported();
   if (!supported) return null;
-  return getAnalytics(app);
+  const { getMessaging } = await import('firebase/messaging');
+  return getMessaging(app);
 }
 
 export default app;
