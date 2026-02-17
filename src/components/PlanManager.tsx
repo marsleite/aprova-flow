@@ -78,10 +78,11 @@ function SubjectAutocomplete({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && trimmed) {
       e.preventDefault();
-      // Se há exatamente 1 sugestão, usa ela
-      if (suggestions.length === 1) {
+      // Se há exatamente 1 sugestão E o texto digitado bate exatamente, usa a sugestão
+      if (suggestions.length === 1 && isExactSuggestion) {
         handleAdd(suggestions[0]);
       } else if (canAddCustom) {
+        // Senão, adiciona como matéria personalizada
         handleAdd(trimmed);
       } else if (isExactSuggestion) {
         const match = suggestions.find(

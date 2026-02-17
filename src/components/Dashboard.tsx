@@ -299,7 +299,11 @@ export default function Dashboard() {
           setEditingPlan(null);
           setPlanManagerOpen(true);
         }}
-        onDeletePlan={(planId) => {
+        onEditPlan={(plan) => {
+          setEditingPlan(plan);
+          setPlanManagerOpen(true);
+        }}
+        onDeletePlan={(planId: string) => {
           // Atualiza lista local após exclusão
           setPlans((prev) => prev.filter((p) => p.id !== planId));
           // Se o plano ativo foi deletado, reseta para "Todos"

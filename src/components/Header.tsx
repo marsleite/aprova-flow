@@ -17,6 +17,7 @@ interface HeaderProps {
   activePlanId?: string | null;
   onSelectPlan?: (planId: string | null) => void;
   onCreatePlan?: () => void;
+  onEditPlan?: (plan: StudyPlanEdital) => void;
   onDeletePlan?: (planId: string) => void;
 }
 
@@ -25,6 +26,7 @@ export default function Header({
   activePlanId = null,
   onSelectPlan,
   onCreatePlan,
+  onEditPlan,
   onDeletePlan,
 }: HeaderProps) {
   const { user, logout } = useAuthContext();
@@ -55,6 +57,7 @@ export default function Header({
               activePlanId={activePlanId}
               onSelect={onSelectPlan}
               onCreatePlan={onCreatePlan}
+              onEditPlan={onEditPlan}
               onDeletePlan={onDeletePlan}
             />
           </div>
@@ -71,6 +74,7 @@ export default function Header({
                   activePlanId={activePlanId}
                   onSelect={onSelectPlan}
                   onCreatePlan={onCreatePlan}
+                  onEditPlan={onEditPlan}
                   onDeletePlan={onDeletePlan}
                 />
               </div>

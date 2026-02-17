@@ -10,7 +10,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Plus, Layers, Trash2 } from 'lucide-react';
+import { ChevronDown, Plus, Layers, Trash2, Pencil } from 'lucide-react';
 import { StudyPlanEdital } from '@/types';
 import { deleteStudyPlan } from '@/lib/firebase/plans';
 
@@ -19,6 +19,7 @@ interface PlanSelectorProps {
   activePlanId: string | null;
   onSelect: (planId: string | null) => void;
   onCreatePlan: () => void;
+  onEditPlan?: (plan: StudyPlanEdital) => void;
   onDeletePlan?: (planId: string) => void;
 }
 
@@ -27,6 +28,7 @@ export default function PlanSelector({
   activePlanId,
   onSelect,
   onCreatePlan,
+  onEditPlan,
   onDeletePlan,
 }: PlanSelectorProps) {
   const [open, setOpen] = useState(false);
@@ -136,16 +138,27 @@ export default function PlanSelector({
                   )}
                 </button>
                 {!plan.isDefault && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setConfirmDelete(plan.id!);
-                    }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100"
-                    title="Deletar edital"
-                  >
-                    <Trash2 className="h-3.5 w-3.5 text-red-400 hover:text-red-300" />
-                  </button>
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditPlan?.(plan);
+                        setOpen(false);
+                      }}
+                      title="Editar edital"
+                    >
+                      <Pencil className="h-3.5 w-3.5 text-gray-400 hover:text-violet-400" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDelete(plan.id!);
+                      }}
+                      title="Deletar edital"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-red-400 hover:text-red-300" />
+                    </button>
+                  </div>
                 )}
                 {confirmDelete === plan.id && (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-900/95 backdrop-blur-sm rounded-xl">
