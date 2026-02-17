@@ -299,6 +299,14 @@ export default function Dashboard() {
           setEditingPlan(null);
           setPlanManagerOpen(true);
         }}
+        onDeletePlan={(planId) => {
+          // Atualiza lista local após exclusão
+          setPlans((prev) => prev.filter((p) => p.id !== planId));
+          // Se o plano ativo foi deletado, reseta para "Todos"
+          if (activePlanId === planId) {
+            setActivePlanId(null);
+          }
+        }}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
