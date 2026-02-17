@@ -33,6 +33,7 @@ import {
   deduplicateDefaultPlans,
 } from '@/lib/firebase/plans';
 import { getTodayISO } from '@/lib/utils';
+import { CalendarEvent } from '@/lib/firebase/calendar';
 import {
   StudySummary,
   SubjectHours,
@@ -65,6 +66,9 @@ import AccuracyChart from './AccuracyChart';
 import ChatPanel from './ChatPanel';
 import PostSessionToast from './PostSessionToast';
 import PlanManager from '@/components/PlanManager';
+import BenchmarkCard from './BenchmarkCard';
+import Calendar from './Calendar';
+import ScheduleModal from './ScheduleModal';
 import { TrendingUp, MessageCircle } from 'lucide-react';
 
 const sectionVariants = {
@@ -104,6 +108,11 @@ export default function Dashboard() {
   const [chatOpen, setChatOpen] = useState(false);
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // ---- Estados do Calendário ----
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
   // ---- Plano ativo resolvido (para queries) ----
   const filterPlanId = activePlanId || undefined;
@@ -229,9 +238,23 @@ export default function Dashboard() {
     await setActivePlan(user.uid, planId);
   };
 
-  const handleSessionSaved = (session: { subject: string; duration: number }) => {
+  const handleSessionSaved = async (session: { subject: string; duration: number }) => {
     setLastSavedSession(session);
-    fetchData();
+    await fetchData();
+    
+    // Atualiza benchmark do usuário
+    if (user && consistency?.weeklyGoalHours && consistency.weeklyTotalSeconds) {
+      try {
+        const { saveUserBenchmark } = await import('@/lib/firebase/benchmarks');
+        await saveUserBenchmark(
+          user.uid,
+          consistency.weeklyGoalHours,
+          consistency.weeklyTotalSeconds / 3600
+        );
+      } catch (error) {
+        console.warn('Error updating benchmark:', error);
+      }
+    }
   };
 
   const handleSaveGoal = async (hours: number) => {
@@ -275,6 +298,18 @@ export default function Dashboard() {
         onCreatePlan={() => {
           setEditingPlan(null);
           setPlanManagerOpen(true);
+        }}
+        onEditPlan={(plan) => {
+          setEditingPlan(plan);
+          setPlanManagerOpen(true);
+        }}
+        onDeletePlan={(planId: string) => {
+          // Atualiza lista local após exclusão
+          setPlans((prev) => prev.filter((p) => p.id !== planId));
+          // Se o plano ativo foi deletado, reseta para "Todos"
+          if (activePlanId === planId) {
+            setActivePlanId(null);
+          }
         }}
       />
 
@@ -432,7 +467,7 @@ export default function Dashboard() {
           variants={sectionVariants}
           initial="hidden"
           animate="show"
-          className="mt-6"
+          className="mt-6 grid gap-6 lg:grid-cols-2"
         >
           <MentorCard
             userName={user.displayName?.split(' ')[0] || 'Estudante'}
@@ -449,6 +484,12 @@ export default function Dashboard() {
             recentSessions={recentData}
             accuracyData={accuracyData}
             activePlanName={activePlanObj?.name || null}
+            loading={loading}
+          />
+          <BenchmarkCard
+            weeklyGoalHours={consistency?.weeklyGoalHours || 0}
+            weeklyHours={consistency?.weeklyTotalSeconds ? consistency.weeklyTotalSeconds / 3600 : 0}
+            userId={user.uid}
             loading={loading}
           />
         </motion.div>
@@ -485,6 +526,29 @@ export default function Dashboard() {
           className="mt-6"
         >
           <SessionHistory userId={user.uid} planId={filterPlanId} />
+        </motion.div>
+
+        {/* Linha 6: Calendário */}
+        <motion.div
+          custom={12}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mt-6"
+        >
+          <Calendar
+            userId={user.uid}
+            planId={filterPlanId}
+            onDateClick={(date) => {
+              setSelectedDate(date);
+              setScheduleModalOpen(true);
+            }}
+            onEventClick={(event) => {
+              // TODO: Implementar modal de edição/visualização de evento
+              console.log('Event clicked:', event);
+            }}
+            loading={loading}
+          />
         </motion.div>
       </main>
 
@@ -533,6 +597,22 @@ export default function Dashboard() {
         userId={user.uid}
         editPlan={editingPlan}
         onClose={handlePlanManagerClose}
+      />
+
+      {/* ScheduleModal (agendar sessões) */}
+      <ScheduleModal
+        isOpen={scheduleModalOpen}
+        onClose={() => {
+          setScheduleModalOpen(false);
+          setSelectedDate(null);
+        }}
+        selectedDate={selectedDate || undefined}
+        userId={user.uid}
+        planId={filterPlanId}
+        subjects={activePlanObj?.subjects?.map(s => s.subject) || []}
+        onEventCreated={(event) => {
+          setCalendarEvents(prev => [...prev, event]);
+        }}
       />
     </div>
   );

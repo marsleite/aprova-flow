@@ -70,7 +70,7 @@ src/
 - AccuracyChart (RadialBar Recharts + barras horizontais por matéria, cores dinâmicas)
 - ChatPanel (painel slide-in de chat conversacional com Coach IA Gemini)
 - PostSessionToast (feedback pós-sessão LOCAL, auto-dismiss 8s com ref estável)
-- ActivityHeatmap (grid mensal tipo GitHub, filtrável por planId)
+- ActivityHeatmap (grid anual estilo GitHub, últimos 52/53 weeks, filtrável por planId, escala dinâmica)
 
 ## O que já foi entregue
 
@@ -108,16 +108,30 @@ src/
 15. **Notificações inteligentes** — push contextual
 
 ## Roadmap — Fase 3 (Escala e Monetização)
-1. Benchmark anônimo — comparar constância com usuários similares
-2. Calendário com agenda — planejar estudo futuro por dia
-3. Modo prova — simulado temporizado + análise pós-prova
-4. PWA — instalar como app, funcionar offline
-5. Plano Pro — IA avançada, relatórios
+1. ✅ Benchmark anônimo — comparar constância com usuários similares e mostrar percentil
+2. ✅ Calendário com agenda — eventos no Firestore, modal de agendamento e calendário mensal dark
+3. 🔜 Modo prova — simulado temporizado + análise pós-prova
+4. 🔜 PWA — instalar como app, funcionar offline
+5. 🔜 Plano Pro — IA avançada, relatórios
 
 ## Roadmap — Fase Final (Pós-implementação)
 1. Tutorial interativo de onboarding — tour guiado na primeira visita
    - Passos: criar conta > configurar plano > definir meta > usar cronômetro > ver progresso
    - Opção de "pular" e "ver depois"
+
+## Evolução futura — Modo Prova com banco de questões
+- **Visão**: o modo prova atual (cronômetro + registro de blocos) evoluirá para suportar questões dentro do app.
+- **Escopo**:
+  - Catálogo `questions` no Firestore com: enunciado rico (markdown), alternativas (A-E), resposta, explicação, tags (matéria, subtema, dificuldade, banca, ano).
+  - Endpoint/serviço para montar simulados parametrizados (por banca, edital, nível, quantidade).
+  - Interface de resolução com modo concentração, marcação de dúvida, revisão.
+  - Relatórios pós-prova cruzando constância × acertos por matéria/question tag.
+- **Plano para dataset**:
+  1. Começar com importação manual/CSV das listas já usadas pelo usuário (mínimo viável).
+  2. Criar ferramenta de import (CSV/JSON) com validação e deduplicação por `externalId`.
+  3. Adicionar editor interno para cadastrar/editar questões (perfis de confiança).
+  4. Fase final: scraping / integrações oficiais (quando juridicamente possível) + curadoria humana.
+- **Status**: feature planejada para depois das entregas atuais de Fase 3; manter esta evolução como última etapa.
 
 ## Arquitetura IA (Gemini) — Uso Estratégico
 

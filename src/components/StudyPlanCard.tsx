@@ -7,10 +7,128 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, Settings, Save, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookOpen, Settings, Save, Check, X, ChevronDown, ChevronUp, Search, Plus } from 'lucide-react';
 import { PlanVsActual, SubjectWeight, DEFAULT_SUBJECTS } from '@/types';
+
+// ==========================================================
+// SubjectInput — input com autocomplete + texto livre
+// ==========================================================
+
+function SubjectInput({
+  existingSubjects,
+  onAdd,
+}: {
+  existingSubjects: string[];
+  onAdd: (name: string) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const trimmed = query.trim();
+
+  const suggestions = (DEFAULT_SUBJECTS as readonly string[])
+    .filter((s) => !existingSubjects.includes(s))
+    .filter((s) => trimmed === '' || s.toLowerCase().includes(trimmed.toLowerCase()));
+
+  const isDuplicate = existingSubjects.some(
+    (s) => s.toLowerCase() === trimmed.toLowerCase()
+  );
+  const isExactSuggestion = suggestions.some(
+    (s) => s.toLowerCase() === trimmed.toLowerCase()
+  );
+  const canAddCustom = trimmed.length > 0 && !isDuplicate && !isExactSuggestion;
+
+  const handleAdd = (name: string) => {
+    onAdd(name);
+    setQuery('');
+    inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && trimmed) {
+      e.preventDefault();
+      if (canAddCustom) {
+        handleAdd(trimmed);
+      } else if (isExactSuggestion) {
+        const match = suggestions.find(
+          (s) => s.toLowerCase() === trimmed.toLowerCase()
+        );
+        if (match) handleAdd(match);
+      } else if (suggestions.length === 1) {
+        handleAdd(suggestions[0]);
+      }
+    }
+  };
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setFocused(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const showDropdown = focused && (suggestions.length > 0 || canAddCustom);
+
+  return (
+    <div ref={containerRef} className="relative mb-3">
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
+        <input
+          ref={inputRef}
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onKeyDown={handleKeyDown}
+          placeholder="Buscar ou digitar matéria..."
+          className="w-full rounded-lg border border-white/10 bg-gray-800/60 py-2 pl-9 pr-4 text-sm text-gray-300 outline-none transition-all placeholder:text-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
+        />
+      </div>
+
+      <AnimatePresence>
+        {showDropdown && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.12 }}
+            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[160px] overflow-y-auto rounded-xl border border-white/10 bg-gray-800 shadow-xl"
+          >
+            {canAddCustom && (
+              <button
+                onClick={() => handleAdd(trimmed)}
+                className="flex w-full items-center gap-2 border-b border-white/5 px-3 py-2 text-left text-sm text-violet-400 transition hover:bg-violet-500/10"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Adicionar &quot;{trimmed}&quot;</span>
+              </button>
+            )}
+            {suggestions.map((s) => (
+              <button
+                key={s}
+                onClick={() => handleAdd(s)}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-white/5 hover:text-white"
+              >
+                <span className="flex-1">{s}</span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ==========================================================
+// StudyPlanCard
+// ==========================================================
 
 interface StudyPlanCardProps {
   planVsActual: PlanVsActual[];
@@ -169,23 +287,11 @@ export default function StudyPlanCard({
               ))}
             </div>
 
-            {/* Adicionar matéria */}
-            {weights.length < DEFAULT_SUBJECTS.length && (
-              <select
-                className="mb-3 w-full rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2 text-sm text-gray-400 outline-none focus:border-violet-500"
-                value=""
-                onChange={(e) => handleAddSubject(e.target.value)}
-              >
-                <option value="">+ Adicionar matéria...</option>
-                {DEFAULT_SUBJECTS.filter(
-                  (s) => !weights.find((w) => w.subject === s)
-                ).map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            )}
+            {/* Adicionar matéria (autocomplete + texto livre) */}
+            <SubjectInput
+              existingSubjects={weights.map((w) => w.subject)}
+              onAdd={handleAddSubject}
+            />
 
             {/* Total e ações */}
             <div className="flex items-center justify-between border-t border-white/5 pt-3">
