@@ -20,6 +20,40 @@ service cloud.firestore {
       allow delete: if request.auth != null 
                     && resource.data.userId == request.auth.uid;
     }
+
+    // Banco de questões (somente leitura pelo app; escrita via Admin SDK)
+    match /questions_bank/{questionId} {
+      allow read: if request.auth != null;
+    }
+
+    // Provas oficiais
+    match /exams/{examId} {
+      allow read: if request.auth != null;
+    }
+
+    // Tentativas de questões (histórico do usuário)
+    match /question_attempts/{attemptId} {
+      allow read: if request.auth != null 
+                  && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.questionId is string
+                    && request.resource.data.selectedOption is string
+                    && request.resource.data.correct is bool
+                    && request.resource.data.timeSpentSeconds is number
+                    && request.resource.data.attemptType in ['exam', 'simulado', 'treino'];
+
+      allow delete: if false;
+      allow update: if false;
+    }
+
+    // Configurações salvas de simulados (por usuário)
+    match /simulated_configs/{configId} {
+      allow read, write: if request.auth != null 
+                         && request.auth.uid == resource.data.userId
+                         || (request.auth != null && request.auth.uid == request.resource.data.userId);
+    }
     
     // Configurações do usuário (meta semanal, plano ativo, etc.)
     match /user_stats/{userId} {

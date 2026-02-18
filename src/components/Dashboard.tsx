@@ -69,7 +69,8 @@ import PlanManager from '@/components/PlanManager';
 import BenchmarkCard from './BenchmarkCard';
 import Calendar from './Calendar';
 import ScheduleModal from './ScheduleModal';
-import { TrendingUp, MessageCircle } from 'lucide-react';
+import { TrendingUp, MessageCircle, BookOpen } from 'lucide-react';
+import Link from 'next/link';
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -396,6 +397,45 @@ export default function Dashboard() {
             onSaved={fetchData}
           />
           <AccuracyChart data={accuracyData} loading={loading} />
+        </motion.div>
+
+        {/* Linha 1.6: Card Provas & Simulados */}
+        <motion.div
+          custom={4.5}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mb-6"
+        >
+          <Link href="/provas">
+            <div className="group relative overflow-hidden rounded-2xl border border-gray-700 bg-gradient-to-br from-violet-900/20 to-blue-900/20 p-6 transition-all hover:border-violet-500 hover:shadow-lg hover:shadow-violet-500/20">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="mb-2 flex items-center gap-2">
+                    <BookOpen className="h-6 w-6 text-violet-400" />
+                    <h3 className="text-xl font-semibold text-white">Provas & Simulados</h3>
+                  </div>
+                  <p className="mb-4 text-sm text-gray-400">
+                    Pratique com provas oficiais, crie simulados personalizados e teste seus conhecimentos
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300">
+                      Provas Oficiais
+                    </span>
+                    <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
+                      Simulados
+                    </span>
+                    <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                      Treino Rápido
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-shrink-0 opacity-50 transition-opacity group-hover:opacity-100">
+                  <TrendingUp className="h-8 w-8 text-violet-400" />
+                </div>
+              </div>
+            </div>
+          </Link>
         </motion.div>
 
         {/* Linha 2: Barras Semanal + Histórico */}
