@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { listExamsByPlan, getAvailableSubjects } from '@/lib/firebase/questions';
 import { ExamMetadata } from '@/types';
-import { Clock, BookOpen, Award, Plus } from 'lucide-react';
+import { Clock, BookOpen, Award, Plus, Home } from 'lucide-react';
 import Link from 'next/link';
 
 type TabType = 'oficiais' | 'simulados' | 'treino';
@@ -14,6 +14,11 @@ export default function ProvasPage() {
   const [activeTab, setActiveTab] = useState<TabType>('oficiais');
   const [exams, setExams] = useState<ExamMetadata[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedBanca, setSelectedBanca] = useState('todas');
+  const [selectedYear, setSelectedYear] = useState('todos');
+  const [selectedDuration, setSelectedDuration] = useState('todas');
+  const [selectedQuestionCount, setSelectedQuestionCount] = useState('todas');
 
   useEffect(() => {
     if (!user) return;
@@ -33,6 +38,37 @@ export default function ProvasPage() {
     loadExams();
   }, [user]);
 
+  const bancaOptions = Array.from(
+    new Set(exams.map((exam) => exam.banca).filter((banca): banca is string => !!banca))
+  ).sort();
+
+  const yearOptions = Array.from(
+    new Set(exams.map((exam) => exam.year).filter((year): year is number => typeof year === 'number'))
+  ).sort((a, b) => b - a);
+
+  const filteredExams = exams.filter((exam) => {
+    const nameMatch = exam.name.toLowerCase().includes(searchTerm.trim().toLowerCase());
+    const bancaMatch = selectedBanca === 'todas' || exam.banca === selectedBanca;
+    const yearMatch = selectedYear === 'todos' || String(exam.year) === selectedYear;
+
+    const duration = exam.durationMinutes ?? null;
+    const durationMatch =
+      selectedDuration === 'todas'
+      || (selectedDuration === 'ate120' && duration !== null && duration <= 120)
+      || (selectedDuration === '121a240' && duration !== null && duration > 120 && duration <= 240)
+      || (selectedDuration === 'mais240' && duration !== null && duration > 240)
+      || (selectedDuration === 'semDuracao' && duration === null);
+
+    const count = exam.questions?.length || 0;
+    const questionMatch =
+      selectedQuestionCount === 'todas'
+      || (selectedQuestionCount === 'ate50' && count <= 50)
+      || (selectedQuestionCount === '51a100' && count > 50 && count <= 100)
+      || (selectedQuestionCount === 'mais100' && count > 100);
+
+    return nameMatch && bancaMatch && yearMatch && durationMatch && questionMatch;
+  });
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -45,11 +81,20 @@ export default function ProvasPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Provas & Simulados</h1>
-          <p className="text-gray-400">
-            Pratique com provas oficiais e simulados personalizados
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Provas & Simulados</h1>
+            <p className="text-gray-400">
+              Pratique com provas oficiais e simulados personalizados
+            </p>
+          </div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-600 bg-gray-800/70 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:border-gray-500 hover:bg-gray-700"
+          >
+            <Home className="h-4 w-4" />
+            Principal
+          </Link>
         </div>
 
         {/* Tabs */}
@@ -89,7 +134,91 @@ export default function ProvasPage() {
         {/* Content */}
         {activeTab === 'oficiais' && (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white mb-4">Provas Disponíveis</h2>
+            <div className="mb-4 flex flex-col gap-2">
+              <h2 className="text-xl font-semibold text-white">Provas Disponíveis</h2>
+              {!loading && exams.length > 0 && (
+                <p className="text-sm text-gray-400">
+                  Mostrando {filteredExams.length} de {exams.length} provas
+                </p>
+              )}
+            </div>
+
+            {!loading && exams.length > 0 && (
+              <div className="rounded-lg border border-gray-700 bg-gray-800/50 p-4">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar por nome da prova..."
+                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-violet-500"
+                  />
+
+                  <select
+                    value={selectedBanca}
+                    onChange={(e) => setSelectedBanca(e.target.value)}
+                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-violet-500"
+                  >
+                    <option value="todas">Todas as bancas</option>
+                    {bancaOptions.map((banca) => (
+                      <option key={banca} value={banca}>
+                        {banca}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-violet-500"
+                  >
+                    <option value="todos">Todos os anos</option>
+                    {yearOptions.map((year) => (
+                      <option key={year} value={String(year)}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={selectedDuration}
+                    onChange={(e) => setSelectedDuration(e.target.value)}
+                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-violet-500"
+                  >
+                    <option value="todas">Qualquer duração</option>
+                    <option value="ate120">Até 120 min</option>
+                    <option value="121a240">121 a 240 min</option>
+                    <option value="mais240">Acima de 240 min</option>
+                    <option value="semDuracao">Sem duração definida</option>
+                  </select>
+
+                  <div className="flex gap-2">
+                    <select
+                      value={selectedQuestionCount}
+                      onChange={(e) => setSelectedQuestionCount(e.target.value)}
+                      className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-violet-500"
+                    >
+                      <option value="todas">Qualquer nº questões</option>
+                      <option value="ate50">Até 50</option>
+                      <option value="51a100">51 a 100</option>
+                      <option value="mais100">Mais de 100</option>
+                    </select>
+                    <button
+                      onClick={() => {
+                        setSearchTerm('');
+                        setSelectedBanca('todas');
+                        setSelectedYear('todos');
+                        setSelectedDuration('todas');
+                        setSelectedQuestionCount('todas');
+                      }}
+                      className="shrink-0 rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors hover:bg-gray-600"
+                    >
+                      Limpar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {loading ? (
               <div className="flex items-center justify-center py-12">
@@ -100,9 +229,15 @@ export default function ProvasPage() {
                 <BookOpen className="mx-auto h-12 w-12 text-gray-600 mb-4" />
                 <p className="text-gray-400">Nenhuma prova disponível ainda</p>
               </div>
+            ) : filteredExams.length === 0 ? (
+              <div className="text-center py-12 bg-gray-800/50 rounded-lg border border-gray-700">
+                <BookOpen className="mx-auto h-12 w-12 text-gray-600 mb-4" />
+                <p className="text-gray-300 font-medium">Nenhuma prova encontrada com esses filtros</p>
+                <p className="text-sm text-gray-500 mt-1">Ajuste os filtros para ver mais resultados.</p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {exams.map((exam) => (
+                {filteredExams.map((exam) => (
                   <ExamCard key={exam.id} exam={exam} />
                 ))}
               </div>

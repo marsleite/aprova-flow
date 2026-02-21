@@ -215,20 +215,38 @@ export async function POST(req: NextRequest) {
     }
 
     // Garante que os pesos somam 100
-    const totalWeight = parsed.subjects.reduce((acc, s) => acc + (s.weight || 0), 0);
-    if (totalWeight !== 100 && parsed.subjects.length > 0) {
-      // Ajusta proporcionalmente
-      const factor = 100 / totalWeight;
-      let adjusted = parsed.subjects.map((s) => ({
-        ...s,
-        weight: Math.round(s.weight * factor),
-      }));
-      // Corrige arredondamento
-      const adjustedTotal = adjusted.reduce((acc, s) => acc + s.weight, 0);
-      if (adjustedTotal !== 100 && adjusted.length > 0) {
-        adjusted[0].weight += 100 - adjustedTotal;
+    const sanitizedSubjects = parsed.subjects.map((s) => ({
+      ...s,
+      weight: Number.isFinite(s.weight) ? Math.max(0, s.weight) : 0,
+    }));
+    const totalWeight = sanitizedSubjects.reduce((acc, s) => acc + s.weight, 0);
+
+    if (sanitizedSubjects.length > 0) {
+      if (totalWeight > 0 && totalWeight !== 100) {
+        // Ajusta proporcionalmente
+        const factor = 100 / totalWeight;
+        const adjusted = sanitizedSubjects.map((s) => ({
+          ...s,
+          weight: Math.round(s.weight * factor),
+        }));
+
+        // Corrige arredondamento
+        const adjustedTotal = adjusted.reduce((acc, s) => acc + s.weight, 0);
+        if (adjustedTotal !== 100) {
+          adjusted[0].weight += 100 - adjustedTotal;
+        }
+        parsed.subjects = adjusted;
+      } else if (totalWeight <= 0) {
+        // Fallback: distribuição igualitária quando a IA não retornou pesos válidos
+        const base = Math.floor(100 / sanitizedSubjects.length);
+        const remainder = 100 - base * sanitizedSubjects.length;
+        parsed.subjects = sanitizedSubjects.map((s, index) => ({
+          ...s,
+          weight: base + (index === 0 ? remainder : 0),
+        }));
+      } else {
+        parsed.subjects = sanitizedSubjects;
       }
-      parsed.subjects = adjusted;
     }
 
     // Garante meta dentro de faixa razoável

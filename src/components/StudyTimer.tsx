@@ -32,6 +32,9 @@ interface StudyTimerProps {
   plans?: StudyPlanEdital[];
   activePlanId?: string | null;
   onSessionSaved?: (session: { subject: string; duration: number }) => void;
+  onCreateSession?: () => Promise<void> | void;
+  onCreateEdital?: () => void;
+  creatingSession?: boolean;
 }
 
 // ========================================
@@ -166,10 +169,17 @@ function CycleIndicator({ current, total }: { current: number; total: number }) 
 // ========================================
 // Componente Principal
 // ========================================
-export default function StudyTimer({ userId, plans = [], activePlanId, onSessionSaved }: StudyTimerProps) {
+export default function StudyTimer({
+  userId,
+  plans = [],
+  activePlanId,
+  onSessionSaved,
+  onCreateSession,
+  onCreateEdital,
+  creatingSession = false,
+}: StudyTimerProps) {
   // Plano selecionado para esta sessão (herda do header, mas pode ser trocado)
   const [selectedPlanId, setSelectedPlanId] = useState(activePlanId || '');
-
   const timer = useStudyTimer({ userId, planId: selectedPlanId || undefined });
   const {
     displaySeconds,
@@ -200,15 +210,10 @@ export default function StudyTimer({ userId, plans = [], activePlanId, onSession
   const isPomodoro = mode !== 'freeform';
   const isBreak = pomodoroPhase === 'shortBreak' || pomodoroPhase === 'longBreak';
 
-  // Sincroniza plano quando o header muda (só se idle)
-  useEffect(() => {
-    if (activePlanId && isIdle) {
-      setSelectedPlanId(activePlanId);
-    }
-  }, [activePlanId, isIdle]);
-
   // Matérias filtradas pelo plano selecionado
   const activePlan = plans.find((p) => p.id === selectedPlanId);
+  const isGeneralSelected = !!activePlan?.isDefault;
+  const canStart = !!selectedSubject && !isGeneralSelected;
   const availableSubjects = activePlan && activePlan.subjects.length > 0
     ? activePlan.subjects.map((s) => s.subject)
     : DEFAULT_SUBJECTS as unknown as string[];
@@ -356,6 +361,37 @@ export default function StudyTimer({ userId, plans = [], activePlanId, onSession
         </select>
       </div>
 
+      {/* CTA quando "Geral" está selecionado */}
+      <AnimatePresence>
+        {isIdle && isGeneralSelected && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3"
+          >
+            <p className="text-xs text-amber-200">
+              O plano <strong>Geral</strong> é seu histórico consolidado. Para estudar agora, crie uma sessão ou um edital.
+            </p>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => onCreateSession?.()}
+                disabled={creatingSession}
+                className="rounded-lg bg-amber-500/20 px-3 py-2 text-xs font-medium text-amber-100 transition-colors hover:bg-amber-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {creatingSession ? 'Criando sessão...' : 'Criar Sessão'}
+              </button>
+              <button
+                onClick={onCreateEdital}
+                className="rounded-lg bg-violet-500/20 px-3 py-2 text-xs font-medium text-violet-100 transition-colors hover:bg-violet-500/30"
+              >
+                Criar Edital
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Badge de fase (Pomodoro) */}
       <AnimatePresence mode="wait">
         {isPomodoro && pomodoroPhase && !isIdle && (
@@ -479,11 +515,17 @@ export default function StudyTimer({ userId, plans = [], activePlanId, onSession
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={play}
-              disabled={!selectedSubject}
+              disabled={!canStart}
               className="flex h-14 w-14 items-center justify-center rounded-full bg-violet-600
                          shadow-lg shadow-violet-600/30 transition-colors hover:bg-violet-500
                          disabled:cursor-not-allowed disabled:bg-gray-700 disabled:shadow-none"
-              title={!selectedSubject ? 'Selecione uma matéria primeiro' : 'Iniciar'}
+              title={
+                !selectedSubject
+                  ? 'Selecione uma matéria primeiro'
+                  : isGeneralSelected
+                    ? 'Crie uma sessão ou edital para iniciar'
+                    : 'Iniciar'
+              }
             >
               <Play className="h-6 w-6 text-white" />
             </motion.button>

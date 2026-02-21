@@ -1,5 +1,5 @@
 /**
- * QuestionTrackerCard — Registro de questões
+ * QuestionTrackerCard — Registro manual de questões
  *
  * Inputs para matéria, total de questões e acertos.
  * Salva no Firestore e notifica o Dashboard para refresh.
@@ -140,13 +140,17 @@ export default function QuestionTrackerCard({
           <ClipboardCheck className="h-5 w-5 text-blue-400" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-white">Registro de Questões</h2>
-          <p className="text-sm text-gray-400">Acertos e erros por matéria</p>
+          <h2 className="text-lg font-semibold text-white">Registro Manual de Questões</h2>
+          <p className="text-sm text-gray-400">Para questões feitas fora do AprovaMind</p>
         </div>
       </div>
 
       {/* Formulário */}
       <div className="space-y-4">
+        <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-xs text-blue-300">
+          Provas e simulados do AprovaMind já entram automaticamente na taxa de acerto.
+        </div>
+
         {/* Matéria */}
         <div>
           <label className="mb-1.5 block text-xs font-medium text-gray-400">Matéria</label>

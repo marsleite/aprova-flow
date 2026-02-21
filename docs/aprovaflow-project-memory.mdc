@@ -105,7 +105,10 @@ src/
 14. ✅ Mentoria Semanal — análise profunda via IA (1x/semana), cache no Firestore, WeeklyMentoringCard
 
 ### PRÓXIMA TASK:
-15. **Notificações inteligentes** — push contextual
+15. **Modo prova** — simulado temporizado + análise pós-prova
+
+### PRÓXIMA FASE:
+16. **Notificações inteligentes** — push contextual
 
 ## Roadmap — Fase 3 (Escala e Monetização)
 1. ✅ Benchmark anônimo — comparar constância com usuários similares e mostrar percentil

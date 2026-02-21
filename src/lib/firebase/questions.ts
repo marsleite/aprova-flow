@@ -35,6 +35,61 @@ const ATTEMPTS_COLLECTION = 'question_attempts';
 const SIMULATED_CONFIGS_COLLECTION = 'simulated_configs';
 const QUESTIONS_STATS_COLLECTION = 'questions_stats';
 
+export type AccuracyPeriod = 'month' | 'last3months' | 'all';
+
+export interface AccuracyAnalytics {
+  month: SubjectAccuracy[];
+  previousMonth: SubjectAccuracy[];
+  last3months: SubjectAccuracy[];
+  all: SubjectAccuracy[];
+}
+
+function normalizeSubject(subject: string): string {
+  return subject.trim().replace(/\s+/g, ' ');
+}
+
+function subjectKey(subject: string): string {
+  return normalizeSubject(subject).toLowerCase();
+}
+
+function toISODate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function aggregateAccuracyBySubject(sessions: QuestionSession[]): SubjectAccuracy[] {
+  const map = new Map<string, { label: string; total: number; correct: number; sessions: number }>();
+
+  for (const s of sessions) {
+    const total = Number(s.totalQuestions) || 0;
+    const correct = Number(s.correctAnswers) || 0;
+    if (!s.subject || total <= 0) continue;
+
+    const normalized = normalizeSubject(s.subject);
+    const key = subjectKey(normalized);
+
+    const entry = map.get(key) || {
+      label: normalized,
+      total: 0,
+      correct: 0,
+      sessions: 0,
+    };
+    entry.total += total;
+    entry.correct += Math.min(correct, total);
+    entry.sessions += 1;
+    map.set(key, entry);
+  }
+
+  return Array.from(map.values())
+    .map((data) => ({
+      subject: data.label,
+      totalQuestions: data.total,
+      correctAnswers: data.correct,
+      accuracy: data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0,
+      sessions: data.sessions,
+    }))
+    .sort((a, b) => b.totalQuestions - a.totalQuestions);
+}
+
 export async function getQuestionById(id: string): Promise<QuestionBankItem | null> {
   const ref = doc(db, QUESTIONS_COLLECTION, id);
   const snap = await getDoc(ref);
@@ -48,7 +103,7 @@ export async function listQuestionsByFilter(filters: {
   dificuldades?: QuestionDifficulty[];
   tags?: string[];
 }): Promise<QuestionBankItem[]> {
-  let q = query(collection(db, QUESTIONS_COLLECTION));
+  const q = query(collection(db, QUESTIONS_COLLECTION));
   // Para simplificar, filtros serão aplicados pelo client (futuro: construir queries compostas)
   const snap = await getDocs(q);
   return snap.docs
@@ -130,6 +185,7 @@ export async function getSimulatedConfigs(userId: string): Promise<SimulatedConf
 export async function saveQuestionSession(
   session: Omit<QuestionSession, 'id' | 'createdAt' | 'accuracy'>
 ): Promise<string> {
+  const subject = normalizeSubject(session.subject);
   const accuracy =
     session.totalQuestions > 0
       ? Math.round((session.correctAnswers / session.totalQuestions) * 100)
@@ -137,6 +193,7 @@ export async function saveQuestionSession(
 
   const docRef = await addDoc(collection(db, QUESTIONS_STATS_COLLECTION), {
     ...session,
+    subject,
     accuracy,
     createdAt: new Date().toISOString(),
   });
@@ -150,13 +207,12 @@ export async function saveQuestionSession(
 export async function getQuestionSessionsFromDate(
   userId: string,
   fromDate: string,
-  planId?: string
+  planId?: string,
+  toDate?: string
 ): Promise<QuestionSession[]> {
   const q = query(
-    collection(db, QUESTIONS_COLLECTION),
-    where('userId', '==', userId),
-    where('date', '>=', fromDate),
-    orderBy('date', 'desc')
+    collection(db, QUESTIONS_STATS_COLLECTION),
+    where('userId', '==', userId)
   );
 
   const snapshot = await getDocs(q);
@@ -165,9 +221,16 @@ export async function getQuestionSessionsFromDate(
     ...d.data(),
   })) as QuestionSession[];
 
+  sessions = sessions.filter(
+    (s) => typeof s.date === 'string' && s.date >= fromDate && (!toDate || s.date <= toDate)
+  );
+
   if (planId) {
-    sessions = sessions.filter((s) => s.planId === planId);
+    // Inclui sessões do plano ativo e sessões legadas sem planId (visão compatível).
+    sessions = sessions.filter((s) => s.planId === planId || !s.planId);
   }
+
+  sessions.sort((a, b) => (a.date < b.date ? 1 : -1));
 
   return sessions;
 }
@@ -177,41 +240,62 @@ export async function getQuestionSessionsFromDate(
  */
 export async function getAccuracyBySubject(
   userId: string,
-  planId?: string
+  planId?: string,
+  period: AccuracyPeriod = 'month'
 ): Promise<SubjectAccuracy[]> {
+  const analytics = await getAccuracyAnalytics(userId, planId);
+  if (period === 'all') return analytics.all;
+  if (period === 'last3months') return analytics.last3months;
+  return analytics.month;
+}
+
+export async function getAccuracyAnalytics(
+  userId: string,
+  planId?: string
+): Promise<AccuracyAnalytics> {
   const now = new Date();
-  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+  const last3MonthsStart = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+  const earliestNeeded = toISODate(last3MonthsStart);
 
-  const sessions = await getQuestionSessionsFromDate(userId, monthStart, planId);
+  const recentSessions = await getQuestionSessionsFromDate(userId, earliestNeeded, planId);
 
-  // Agrupa por matéria
-  const map = new Map<
-    string,
-    { total: number; correct: number; sessions: number }
-  >();
+  const monthStartISO = toISODate(monthStart);
+  const previousMonthStartISO = toISODate(previousMonthStart);
+  const previousMonthEndISO = toISODate(previousMonthEnd);
 
-  for (const s of sessions) {
-    const entry = map.get(s.subject) || {
-      total: 0,
-      correct: 0,
-      sessions: 0,
-    };
-    entry.total += s.totalQuestions;
-    entry.correct += s.correctAnswers;
-    entry.sessions += 1;
-    map.set(s.subject, entry);
+  const monthSessions = recentSessions.filter((s) => s.date >= monthStartISO);
+  const previousMonthSessions = recentSessions.filter(
+    (s) => s.date >= previousMonthStartISO && s.date <= previousMonthEndISO
+  );
+
+  const allSessions = await getQuestionSessionsFromDate(userId, '1900-01-01', planId);
+
+  return {
+    month: aggregateAccuracyBySubject(monthSessions),
+    previousMonth: aggregateAccuracyBySubject(previousMonthSessions),
+    last3months: aggregateAccuracyBySubject(recentSessions),
+    all: aggregateAccuracyBySubject(allSessions),
+  };
+}
+
+export function getSubjectDeltaMap(
+  current: SubjectAccuracy[],
+  previous: SubjectAccuracy[]
+): Record<string, number> {
+  const previousMap = new Map(previous.map((item) => [subjectKey(item.subject), item.accuracy]));
+  const delta: Record<string, number> = {};
+
+  for (const item of current) {
+    const key = subjectKey(item.subject);
+    const prev = previousMap.get(key);
+    if (typeof prev === 'number') {
+      delta[item.subject] = item.accuracy - prev;
+    }
   }
-
-  return Array.from(map.entries())
-    .map(([subject, data]) => ({
-      subject,
-      totalQuestions: data.total,
-      correctAnswers: data.correct,
-      accuracy:
-        data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0,
-      sessions: data.sessions,
-    }))
-    .sort((a, b) => b.totalQuestions - a.totalQuestions);
+  return delta;
 }
 
 /**
@@ -257,8 +341,58 @@ export async function getRandomQuestions(
  * Salva múltiplas tentativas de questões em batch
  */
 export async function saveQuestionAttempts(attempts: QuestionAttempt[]): Promise<void> {
+  if (attempts.length === 0) return;
+
   const promises = attempts.map(attempt => saveQuestionAttempt(attempt));
   await Promise.all(promises);
+
+  // Integra automaticamente tentativas de prova/simulado no painel de acurácia por matéria.
+  const questionIds = Array.from(new Set(attempts.map((a) => a.questionId)));
+  const questions = await Promise.all(questionIds.map((id) => getQuestionById(id)));
+  const questionById = new Map<string, QuestionBankItem>();
+  questions.forEach((q) => {
+    if (q?.id) questionById.set(q.id, q);
+  });
+
+  type Aggregate = { subject: string; totalQuestions: number; correctAnswers: number; planId?: string };
+  const grouped = new Map<string, Aggregate>();
+
+  for (const attempt of attempts) {
+    const question = questionById.get(attempt.questionId);
+    if (!question?.materia) continue;
+
+    const subject = normalizeSubject(question.materia);
+    const aggregateKey = `${attempt.planId || ''}::${subjectKey(subject)}`;
+    const current = grouped.get(aggregateKey) || {
+      subject,
+      totalQuestions: 0,
+      correctAnswers: 0,
+      planId: attempt.planId || undefined,
+    };
+
+    current.totalQuestions += 1;
+    if (attempt.correct) current.correctAnswers += 1;
+    grouped.set(aggregateKey, current);
+  }
+
+  if (grouped.size === 0) return;
+
+  const today = new Date();
+  const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const userId = attempts[0].userId;
+
+  await Promise.all(
+    Array.from(grouped.values()).map((item) =>
+      saveQuestionSession({
+        userId,
+        planId: item.planId,
+        subject: item.subject,
+        totalQuestions: item.totalQuestions,
+        correctAnswers: item.correctAnswers,
+        date,
+      })
+    )
+  );
 }
 
 /**

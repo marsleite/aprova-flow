@@ -785,6 +785,12 @@ service cloud.firestore {
 
 ### Próximo
 
+- [ ] **Modo prova** — simulado temporizado + análise (em andamento)
+- [ ] **PWA** — instalar como app, funcionar offline
+- [ ] **Plano Pro** — IA avançada, relatórios, múltiplos planos
+
+### Próxima Fase
+
 - [ ] **Notificações inteligentes** — push contextual baseado em padrões de estudo
 
 ### Fase 3 — Escala e Monetização

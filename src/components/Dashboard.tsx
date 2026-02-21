@@ -23,9 +23,9 @@ import {
   generateInsights,
   getFilteredSessions,
 } from '@/lib/firebase/sessions';
-import { getAccuracyBySubject } from '@/lib/firebase/questions';
+import { getAccuracyAnalytics, getSubjectDeltaMap, AccuracyAnalytics } from '@/lib/firebase/questions';
 import {
-  getStudyPlans,
+  createStudyPlan,
   getActivePlan,
   setActivePlan,
   migrateToMultiPlan,
@@ -106,9 +106,12 @@ export default function Dashboard() {
   const [insights, setInsights] = useState<StudyInsight[]>([]);
   const [todaySessions, setTodaySessions] = useState<StudySession[]>([]);
   const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
+  const [accuracyAnalytics, setAccuracyAnalytics] = useState<AccuracyAnalytics | null>(null);
+  const [accuracyDelta, setAccuracyDelta] = useState<Record<string, number>>({});
   const [chatOpen, setChatOpen] = useState(false);
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [creatingSessionPlan, setCreatingSessionPlan] = useState(false);
   
   // ---- Estados do Calendário ----
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
@@ -130,7 +133,7 @@ export default function Dashboard() {
       }
 
       // Carrega planos e limpa duplicatas (se houver)
-      let allPlans = await deduplicateDefaultPlans(user.uid);
+      const allPlans = await deduplicateDefaultPlans(user.uid);
       let active = await getActivePlan(user.uid);
 
       // Se o plano ativo foi removido na dedup, aponta pro default
@@ -169,11 +172,15 @@ export default function Dashboard() {
 
       // Questões — fetch separado e resiliente
       try {
-        const accuracyRes = await getAccuracyBySubject(user.uid, filterPlanId);
-        setAccuracyData(accuracyRes);
+        const analytics = await getAccuracyAnalytics(user.uid, filterPlanId);
+        setAccuracyAnalytics(analytics);
+        setAccuracyData(analytics.month);
+        setAccuracyDelta(getSubjectDeltaMap(analytics.month, analytics.previousMonth));
       } catch (err) {
         console.warn('Erro ao carregar dados de questões:', err);
+        setAccuracyAnalytics(null);
         setAccuracyData([]);
+        setAccuracyDelta({});
       }
 
       // Sessões de hoje para o resumo diário
@@ -288,6 +295,36 @@ export default function Dashboard() {
     loadPlans().then(() => fetchData());
   };
 
+  const handleCreateSessionPlan = async () => {
+    if (!user || creatingSessionPlan) return;
+    setCreatingSessionPlan(true);
+    try {
+      const baseName = 'Sessão Livre';
+      const existing = plans
+        .map((p) => p.name)
+        .filter((name) => name === baseName || name.startsWith(`${baseName} `));
+      const name = existing.length === 0 ? baseName : `${baseName} ${existing.length + 1}`;
+
+      const planId = await createStudyPlan(user.uid, {
+        name,
+        subjects: [],
+        weeklyGoalHours: 10,
+        color: '#06b6d4',
+        isDefault: false,
+      });
+
+      await setActivePlan(user.uid, planId);
+      await loadPlans();
+      setActivePlanId(planId);
+      setLoading(true);
+      await fetchData();
+    } catch (err) {
+      console.error('Erro ao criar sessão livre:', err);
+    } finally {
+      setCreatingSessionPlan(false);
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -373,10 +410,17 @@ export default function Dashboard() {
           className="mb-6 grid gap-6 lg:grid-cols-2"
         >
           <StudyTimer
+            key={activePlanId || 'all-plans'}
             userId={user.uid}
             plans={plans}
             activePlanId={activePlanId}
             onSessionSaved={handleSessionSaved}
+            onCreateSession={handleCreateSessionPlan}
+            onCreateEdital={() => {
+              setEditingPlan(null);
+              setPlanManagerOpen(true);
+            }}
+            creatingSession={creatingSessionPlan}
           />
           <SubjectRadarChart data={subjectData} loading={loading} />
         </motion.div>
@@ -396,7 +440,12 @@ export default function Dashboard() {
             lastSessionSubject={lastSavedSession?.subject ?? (recentData[0]?.subject || null)}
             onSaved={fetchData}
           />
-          <AccuracyChart data={accuracyData} loading={loading} />
+          <AccuracyChart
+            data={accuracyData}
+            analytics={accuracyAnalytics}
+            deltaBySubject={accuracyDelta}
+            loading={loading}
+          />
         </motion.div>
 
         {/* Linha 1.6: Card Provas & Simulados */}
