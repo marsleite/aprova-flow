@@ -33,9 +33,9 @@ export default function Header({
 
   return (
     <header className="relative z-50 border-b border-white/10 bg-gray-950/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         {/* Logo & Nome */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 self-start sm:self-auto">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-blue-500 shadow-lg shadow-violet-500/25">
             <Zap className="h-5 w-5 text-white" />
           </div>
@@ -49,7 +49,7 @@ export default function Header({
           </div>
         </div>
 
-        {/* Centro: Plan Selector */}
+        {/* Centro: Plan Selector (desktop) */}
         {user && plans.length > 0 && onSelectPlan && onCreatePlan && (
           <div className="hidden sm:block">
             <PlanSelector
@@ -63,12 +63,12 @@ export default function Header({
           </div>
         )}
 
-        {/* Usuário */}
+        {/* Linha mobile: seletor + ações */}
         {user && (
-          <div className="flex items-center gap-3">
+          <div className="flex w-full items-center gap-2 sm:w-auto sm:gap-3">
             {/* Plan Selector mobile */}
             {plans.length > 0 && onSelectPlan && onCreatePlan && (
-              <div className="sm:hidden">
+              <div className="min-w-0 flex-1 sm:hidden">
                 <PlanSelector
                   plans={plans}
                   activePlanId={activePlanId}
@@ -101,7 +101,7 @@ export default function Header({
 
             <button
               onClick={logout}
-              className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm 
+              className="flex shrink-0 items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm 
                          text-gray-400 transition-colors hover:border-red-500/30 hover:text-red-400"
               title="Sair"
             >

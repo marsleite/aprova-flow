@@ -103,9 +103,9 @@ export default function DailySummaryCard({
         </div>
 
         {/* Total */}
-        <p className="mb-4 text-3xl font-bold text-white">
+        <p className="mb-4 text-2xl font-bold text-white sm:text-3xl">
           {formatDuration(totalTodaySeconds)}
-          <span className="ml-2 text-sm font-normal text-gray-400">
+          <span className="mt-1 block text-sm font-normal text-gray-400 sm:ml-2 sm:mt-0 sm:inline">
             em {analysis.sessionCount} {analysis.sessionCount === 1 ? 'sessão' : 'sessões'}
           </span>
         </p>

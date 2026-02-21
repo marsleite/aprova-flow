@@ -33,7 +33,6 @@ import {
   deduplicateDefaultPlans,
 } from '@/lib/firebase/plans';
 import { getTodayISO } from '@/lib/utils';
-import { CalendarEvent } from '@/lib/firebase/calendar';
 import {
   StudySummary,
   SubjectHours,
@@ -116,7 +115,6 @@ export default function Dashboard() {
   // ---- Estados do Calendário ----
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
   // ---- Plano ativo resolvido (para queries) ----
   const filterPlanId = activePlanId || undefined;
@@ -647,7 +645,7 @@ export default function Dashboard() {
         animate={{ scale: 1 }}
         transition={{ delay: 1, type: 'spring', stiffness: 200 }}
         onClick={() => setChatOpen(true)}
-        className="fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-blue-600 shadow-xl shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-blue-600 shadow-xl shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 sm:bottom-6 sm:right-6"
         title="Conversar com o Coach IA"
       >
         <MessageCircle className="h-6 w-6 text-white" />
@@ -699,9 +697,6 @@ export default function Dashboard() {
         userId={user.uid}
         planId={filterPlanId}
         subjects={activePlanObj?.subjects?.map(s => s.subject) || []}
-        onEventCreated={(event) => {
-          setCalendarEvents(prev => [...prev, event]);
-        }}
       />
     </div>
   );

@@ -160,8 +160,8 @@ export default function ExecutarProvaPage() {
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-4 sm:px-6">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold text-white">{exam.name}</h1>
             <p className="text-sm text-gray-400">
@@ -169,11 +169,11 @@ export default function ExecutarProvaPage() {
             </p>
           </div>
           
-          <div className="flex items-center gap-6">
+          <div className="flex items-center justify-between gap-3 sm:justify-end sm:gap-6">
             {exam.durationMinutes && (
               <div className="flex items-center gap-2 text-white">
-                <Clock className="h-5 w-5" />
-                <span className="text-xl font-mono">{formatTime(timeRemaining)}</span>
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="text-lg font-mono sm:text-xl">{formatTime(timeRemaining)}</span>
               </div>
             )}
             
@@ -187,7 +187,7 @@ export default function ExecutarProvaPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 p-4 sm:gap-6 sm:p-6 lg:grid-cols-4">
         {/* Área Principal - Questão */}
         <div className="lg:col-span-3 space-y-6">
           {/* Enunciado */}
@@ -224,7 +224,7 @@ export default function ExecutarProvaPage() {
           </div>
 
           {/* Ações */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               onClick={handleToggleReview}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
@@ -237,11 +237,11 @@ export default function ExecutarProvaPage() {
               {currentQuestion.markedForReview ? 'Desmarca Revisão' : 'Marcar para Revisar'}
             </button>
 
-            <div className="flex gap-2">
+            <div className="flex w-full gap-2 sm:w-auto">
               <button
                 onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
                 disabled={currentIndex === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-700 px-4 py-2 text-white transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Anterior
@@ -250,7 +250,7 @@ export default function ExecutarProvaPage() {
               <button
                 onClick={() => setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1))}
                 disabled={currentIndex === questions.length - 1}
-                className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-white transition-colors hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
               >
                 Próxima
                 <ChevronRight className="h-4 w-4" />
@@ -279,7 +279,7 @@ export default function ExecutarProvaPage() {
           {/* Grid de questões */}
           <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
             <h3 className="font-semibold text-white mb-3">Questões</h3>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
               {questions.map((q, idx) => (
                 <button
                   key={idx}
@@ -311,16 +311,16 @@ export default function ExecutarProvaPage() {
               Você respondeu {answeredCount} de {questions.length} questões.
               {reviewCount > 0 && ` Há ${reviewCount} questão(ões) marcadas para revisão.`}
             </p>
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={() => setShowFinishConfirm(false)}
-                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                className="flex-1 rounded-lg bg-gray-700 px-4 py-2 text-white transition-colors hover:bg-gray-600"
               >
                 Continuar
               </button>
               <button
                 onClick={handleFinish}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
               >
                 Finalizar
               </button>

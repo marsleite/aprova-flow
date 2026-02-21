@@ -98,8 +98,8 @@ export default function CriarSimuladoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Link
@@ -109,7 +109,7 @@ export default function CriarSimuladoPage() {
             <ArrowLeft className="h-5 w-5 text-gray-400" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-white">Criar Simulado</h1>
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">Criar Simulado</h1>
             <p className="text-gray-400">Configure seu simulado personalizado</p>
           </div>
         </div>
@@ -156,7 +156,7 @@ export default function CriarSimuladoPage() {
             Deixe vazio para incluir todas as matérias
           </p>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
             {DEFAULT_SUBJECTS.map((materia) => (
               <button
                 key={materia}
