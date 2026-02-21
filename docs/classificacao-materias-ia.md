@@ -3,6 +3,8 @@
 **Data:** 17 de fevereiro de 2026  
 **Contexto:** Importação e classificação das provas TRF1 Juiz Federal 2024
 
+> Status atual do repositório: este documento é histórico. Os scripts operacionais citados aqui não fazem mais parte deste projeto Next.js e devem ser tratados como fluxo externo/server-side.
+
 ---
 
 ## Problema Identificado

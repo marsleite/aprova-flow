@@ -91,7 +91,7 @@ export async function getCalendarEvents(
   planId?: string
 ): Promise<CalendarEvent[]> {
   try {
-    let q = query(
+    const q = query(
       collection(db, CALENDAR_EVENTS_COLLECTION),
       where('userId', '==', userId),
       where('startTime', '>=', startDate),

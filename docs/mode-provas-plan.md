@@ -11,7 +11,7 @@
   - Cronômetro modo prova com contagem regressiva, bloqueio de pausa e resumo final.
   - Correção instantânea + feedback por matéria e recomendações automáticas.
 - **Backoffice**
-  - Scripts (ou interface interna) para importar provas oficiais (PDF/CSV) com gabarito.
+  - Interface interna (ou job server-side) para importar provas oficiais (PDF/CSV) com gabarito.
   - Ferramentas de revisão e tagging (matéria, subtema, banca, dificuldade).
 - **IA / LangChain** (futuro)
   - Geração de explicação detalhada por questão.
@@ -76,7 +76,7 @@ simulated_configs/ (opcional)
 - Usuários podem **ler** `questions_bank`, `exams`.
 - Apenas admins (role) podem criar/editar questões oficiais.
 - Usuários podem criar `question_attempts` somente com `userId` próprio.
-- Scripts de import rodarão via Firebase Admin (server-side) para garantir consistência.
+- Importação deve rodar em ambiente server-side com credenciais administrativas (fora do app web) para garantir consistência.
 
 ---
 
@@ -84,7 +84,7 @@ simulated_configs/ (opcional)
 
 1. **Fonte**: PDFs de provas oficiais + gabaritos, ou CSV fornecido pela banca.
 2. **Formato intermediário**: JSON/CSV com campos padronizados (`statement`, `alternatives`, `answer`, `materia`, ...).
-3. **Script de importação** (Node ou Python):
+3. **Serviço de importação** (job/API interna):
    - Valida duplicidade (hash do enunciado + ano).
    - Normaliza texto (acentos, maiúsculas/minúsculas, espaçamento).
    - Envia para `questions_bank` em lotes (Batch Write).
@@ -213,7 +213,7 @@ graph TD;
 ## 7. Roadmap de Implementação
 
 1. **Modelagem & Regras** (documento + atualizações em `firestore.rules`).
-2. **Scripts de ingestão** (CSV → Firestore) e import inicial de algumas provas.
+2. **Fluxo de ingestão server-side** (CSV/JSON → Firestore) e import inicial de algumas provas.
 3. **Endpoints/helpers** no `lib/firebase/questions.ts` (CRUD, filtros, sorteio).
 4. **UI Provas & Simulados** (listagem + execução + resultado).
 5. **Métricas e notificações** integradas.
@@ -225,7 +225,7 @@ graph TD;
 
 - [ ] Implementar `questions.ts` (tipos + funções Firestore).
 - [ ] Atualizar `firestore.rules` com coleções de provas/questões/tentativas.
-- [ ] Criar script de import inicial (ex.: TJBA Juiz 2026).
+- [ ] Criar fluxo de import inicial server-side (ex.: TJBA Juiz 2026).
 - [ ] Desenhar layout da tela "Provas & Simulados" e coletar feedback.
 
 > Este plano será nosso blueprint para o modo Provas — podemos ir refinando conforme surgirem novas necessidades.

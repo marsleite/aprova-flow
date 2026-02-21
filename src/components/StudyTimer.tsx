@@ -169,7 +169,6 @@ function CycleIndicator({ current, total }: { current: number; total: number }) 
 export default function StudyTimer({ userId, plans = [], activePlanId, onSessionSaved }: StudyTimerProps) {
   // Plano selecionado para esta sessão (herda do header, mas pode ser trocado)
   const [selectedPlanId, setSelectedPlanId] = useState(activePlanId || '');
-
   const timer = useStudyTimer({ userId, planId: selectedPlanId || undefined });
   const {
     displaySeconds,
@@ -199,13 +198,6 @@ export default function StudyTimer({ userId, plans = [], activePlanId, onSession
   const isIdle = status === 'idle' || status === 'stopped';
   const isPomodoro = mode !== 'freeform';
   const isBreak = pomodoroPhase === 'shortBreak' || pomodoroPhase === 'longBreak';
-
-  // Sincroniza plano quando o header muda (só se idle)
-  useEffect(() => {
-    if (activePlanId && isIdle) {
-      setSelectedPlanId(activePlanId);
-    }
-  }, [activePlanId, isIdle]);
 
   // Matérias filtradas pelo plano selecionado
   const activePlan = plans.find((p) => p.id === selectedPlanId);

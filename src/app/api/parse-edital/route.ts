@@ -219,7 +219,7 @@ export async function POST(req: NextRequest) {
     if (totalWeight !== 100 && parsed.subjects.length > 0) {
       // Ajusta proporcionalmente
       const factor = 100 / totalWeight;
-      let adjusted = parsed.subjects.map((s) => ({
+      const adjusted = parsed.subjects.map((s) => ({
         ...s,
         weight: Math.round(s.weight * factor),
       }));

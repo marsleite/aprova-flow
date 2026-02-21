@@ -130,7 +130,7 @@ export default function Dashboard() {
       }
 
       // Carrega planos e limpa duplicatas (se houver)
-      let allPlans = await deduplicateDefaultPlans(user.uid);
+      const allPlans = await deduplicateDefaultPlans(user.uid);
       let active = await getActivePlan(user.uid);
 
       // Se o plano ativo foi removido na dedup, aponta pro default

@@ -48,7 +48,7 @@ export async function listQuestionsByFilter(filters: {
   dificuldades?: QuestionDifficulty[];
   tags?: string[];
 }): Promise<QuestionBankItem[]> {
-  let q = query(collection(db, QUESTIONS_COLLECTION));
+  const q = query(collection(db, QUESTIONS_COLLECTION));
   // Para simplificar, filtros serão aplicados pelo client (futuro: construir queries compostas)
   const snap = await getDocs(q);
   return snap.docs
