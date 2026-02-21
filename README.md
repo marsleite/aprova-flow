@@ -202,9 +202,14 @@ src/
 ├── app/
 │   ├── api/
 │   │   ├── chat/route.ts            # Chat conversacional (Gemini)
-│   │   ├── gemini/route.ts          # Coach card — dica do dia (Gemini)
-│   │   ├── mentor/route.ts          # Mentor estratégico (Gemini)
-│   │   └── post-session/route.ts    # Feedback pós-sessão (Gemini)
+│   │   ├── parse-edital/route.ts    # Extrai edital PDF (Gemini)
+│   │   └── weekly-mentoring/route.ts # Mentoria semanal (Gemini)
+│   ├── provas/
+│   │   ├── page.tsx                 # Hub Provas & Simulados
+│   │   ├── criar-simulado/page.tsx
+│   │   └── [id]/
+│   │       ├── executar/page.tsx
+│   │       └── resultado/page.tsx
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── page.tsx                     # Entry point (Login ou Dashboard)
@@ -220,7 +225,7 @@ src/
 │   ├── Header.tsx                   # Logo + PlanSelector + user
 │   ├── InsightsPanel.tsx            # Insights automáticos (regras locais)
 │   ├── LoginScreen.tsx              # Tela de login
-│   ├── MentorCard.tsx               # Card do Mentor AprovaMind (IA)
+│   ├── MentorCard.tsx               # Mentor local (regras, sem chamada IA)
 │   ├── PlanManager.tsx              # Modal CRUD de editais
 │   ├── PlanSelector.tsx             # Dropdown de editais no Header
 │   ├── PostSessionToast.tsx         # Toast de feedback pós-sessão
@@ -231,7 +236,10 @@ src/
 │   ├── StudyTimer.tsx               # Cronômetro com anel SVG + Pomodoro
 │   ├── SubjectRadarChart.tsx        # Gráfico de Radar
 │   ├── SummaryCards.tsx             # Cards Hoje/Semana/Mês
-│   └── WeeklyBarChart.tsx           # Barras Seg-Dom
+│   ├── WeeklyBarChart.tsx           # Barras Seg-Dom
+│   ├── WeeklyMentoringCard.tsx      # Mentoria semanal com cache
+│   ├── Calendar.tsx                 # Calendário mensal
+│   └── BenchmarkCard.tsx            # Benchmark anônimo
 │
 ├── contexts/
 │   └── AuthContext.tsx               # Provider global de autenticação
@@ -243,9 +251,14 @@ src/
 ├── lib/
 │   ├── firebase/
 │   │   ├── config.ts                 # Inicialização Firebase
+│   │   ├── benchmarks.ts             # Benchmark anônimo
+│   │   ├── calendar.ts               # Eventos de agenda
 │   │   ├── plans.ts                  # CRUD de planos (editais) + migração
 │   │   ├── questions.ts              # CRUD de questões + accuracy
 │   │   └── sessions.ts              # CRUD de sessões + analytics
+│   ├── server/
+│   │   ├── apiGuard.ts               # Auth + rate-limit das APIs
+│   │   └── firebaseAdmin.ts          # Inicialização Firebase Admin
 │   └── utils.ts                     # formatDuration, exportCSV, etc.
 │
 └── types/
@@ -299,8 +312,8 @@ src/
 ### Cronômetro → Firestore → Dashboard
 
 ```
-  Usuário         StudyTimer       useStudyTimer       Firestore        Dashboard       /api/post-session
-    │                │                  │                  │                │                  │
+  Usuário         StudyTimer       useStudyTimer       Firestore        Dashboard
+    │                │                  │                  │                │
     │ Seleciona      │                  │                  │                │                  │
     │ edital+matéria │                  │                  │                │                  │
     │───────────────▶│                  │                  │                │                  │
@@ -328,11 +341,9 @@ src/
     │                │─────────────────────────────────────────────────────▶│                  │
     │                │                  │                  │  fetchData()   │                  │
     │                │                  │                  │◀───────────────│                  │
-    │                │                  │                  │                │   POST contexto  │
-    │                │                  │                  │                │─────────────────▶│
-    │                │                  │                  │                │   feedback IA    │
-    │ Toast feedback │                  │                  │                │◀─────────────────│
-    │◀───────────────────────────────────────────────────────────────────────                  │
+    │                │                  │                  │                │ Gera feedback local
+    │ Toast feedback │                  │                  │                │ (PostSessionToast)
+    │◀───────────────────────────────────────────────────────────────────────│
 ```
 
 ### Dashboard — Ciclo de Fetch
@@ -473,33 +484,35 @@ Na primeira vez que o usuário abre o app após o update:
 - **Server-side only**: `GEMINI_API_KEY` nunca vai ao browser
 - **Temperatura baixa**: 0.3-0.5 para respostas consistentes
 
-### 4 Endpoints IA
+### 3 Endpoints IA (server-side)
 
 ```
   ┌──────────────────────────────┐        ┌─────────────────────┐        ┌──────────────────┐
   │     BROWSER (Componentes)    │        │  API ROUTES (Server) │        │   GEMINI CLOUD   │
   │                              │        │                      │        │                  │
-  │  ┌────────────────────────┐  │  POST  │  ┌────────────────┐  │  req   │ ┌──────────────┐ │
-  │  │ GeminiCoachCard        │──┼───────▶│  │ /api/gemini    │──┼──────▶│ │              │ │
-  │  └────────────────────────┘  │        │  └────────────────┘  │       │ │              │ │
   │  ┌────────────────────────┐  │  POST  │  ┌────────────────┐  │  req   │ │   Gemini     │ │
   │  │ ChatPanel              │──┼───────▶│  │ /api/chat      │──┼──────▶│ │   2.5 Flash  │ │
   │  └────────────────────────┘  │        │  └────────────────┘  │       │ │              │ │
   │  ┌────────────────────────┐  │  POST  │  ┌────────────────┐  │  req   │ │              │ │
-  │  │ MentorCard             │──┼───────▶│  │ /api/mentor    │──┼──────▶│ │              │ │
+  │  │ PlanManager (Import)   │──┼───────▶││/api/parse-edital │──┼──────▶│ │              │ │
   │  └────────────────────────┘  │        │  └────────────────┘  │       │ │              │ │
   │  ┌────────────────────────┐  │  POST  │  ┌────────────────┐  │  req   │ │              │ │
-  │  │ PostSessionToast       │──┼───────▶│  │/api/post-session│──┼──────▶│ │              │ │
+  │  │ WeeklyMentoringCard    │──┼───────▶││/api/weekly-mentoring│──┼────▶│ │              │ │
   │  └────────────────────────┘  │        │  └────────────────┘  │       │ └──────────────┘ │
   └──────────────────────────────┘        └──────────────────────┘       └──────────────────┘
 ```
 
 | Endpoint | Uso | Contexto enviado | Resposta |
 |----------|-----|-----------------|---------|
-| `/api/gemini` | Dica do dia no Coach card | Streak, meta, horas/matéria | Texto motivacional + sugestão |
 | `/api/chat` | Chat conversacional | Tudo + histórico (últimas 10 msgs) | Resposta de coach |
-| `/api/mentor` | Análise estratégica proativa | Tudo + accuracy + edital ativo | JSON: analysis, performanceInsight, fatigueAlert, immediateAction, motivationalQuote |
-| `/api/post-session` | Feedback após parar timer | Sessão recém-salva + contexto | Texto curto de feedback |
+| `/api/parse-edital` | Importação de edital PDF | Base64 do PDF + instruções | JSON com matérias, pesos, meta e nome do plano |
+| `/api/weekly-mentoring` | Mentoria semanal profunda | Contexto semanal completo | JSON com diagnóstico, pontos fortes/melhorias e metas |
+
+### IA local vs IA remota
+
+- `MentorCard` e `PostSessionToast` usam regras locais (sem chamadas de IA remota).
+- Gemini fica reservado para chat, parse de edital e mentoria semanal.
+- As rotas de IA exigem token Firebase (`Authorization: Bearer`) e possuem rate limiting.
 
 ### Cruzamento Constância × Precisão (Mentor)
 
@@ -547,7 +560,7 @@ O Mentor analisa 5 cenários por matéria:
       ├── ┌─ InsightsPanel  (regras locais)
       │   └─ GeminiCoachCard  (dica + botão chat)
       │
-      ├── MentorCard  ◀── análise IA proativa
+      ├── MentorCard  ◀── análise local (sem IA remota)
       ├── SessionHistory  (filtros + CSV)
       │
       ├── ChatPanel  ◀── slide-in chat (oculto por padrão)
@@ -564,44 +577,85 @@ O Mentor analisa 5 cenários por matéria:
 | StudyTimer | useStudyTimer hook | Firestore (saveSession) |
 | GoalAndStreakCard | Dashboard (consistency) | Firestore (weeklyGoal ou plan goal) |
 | StudyPlanCard | Dashboard (planVsActual, planWeights) | Firestore (plan subjects) |
-| MentorCard | Dashboard (todos os dados) | /api/mentor (fetch) |
-| PlanManager | Dashboard (editPlan) | Firestore (study_plans CRUD) |
+| MentorCard | Dashboard (todos os dados) | Regras locais (sem API) |
+| WeeklyMentoringCard | Dashboard (dados semanais) | `/api/weekly-mentoring` + cache Firestore |
+| PlanManager | Dashboard (editPlan) | Firestore (study_plans CRUD) + `/api/parse-edital` |
 
 ---
 
 ## API Routes
 
-### POST /api/mentor
+### Autenticação
 
-**Request:**
+As rotas de IA exigem:
+
+```http
+Authorization: Bearer <firebase-id-token>
+Content-Type: application/json
+```
+
+### POST /api/chat
+
+**Request (resumo):**
 ```json
 {
-  "userName": "Marcelo",
-  "currentStreak": 5,
-  "bestStreak": 12,
-  "weeklyGoalHours": 15,
-  "weeklyTotalHours": 8.5,
-  "weeklyProgressPercent": 57,
-  "daysStudiedThisWeek": 4,
-  "todayTotalMinutes": 90,
-  "todayDominantSubject": "Direito Civil",
-  "subjectHours": [{"subject": "Direito Civil", "hours": 12}],
-  "planVsActual": [{"subject": "Direito Civil", "plannedPercent": 25, "actualPercent": 40, "status": "over"}],
-  "weeklyBreakdown": [{"day": "Seg", "hours": 2.5, "isToday": false}],
-  "recentSessions": [{"subject": "Direito Civil", "duration": 3600, "date": "2026-02-14"}],
-  "accuracyBySubject": [{"subject": "Direito Civil", "accuracy": 72, "totalQuestions": 50}],
-  "activePlanName": "PGE-SP"
+  "messages": [{ "role": "user", "content": "..." }],
+  "context": {
+    "userName": "Marcelo",
+    "weeklyGoalHours": 15,
+    "weeklyProgressPercent": 57
+  }
 }
 ```
 
 **Response:**
 ```json
 {
-  "analysis": "Seu foco em Civil está acima do planejado...",
-  "performanceInsight": "Constância alta em Civil, mas precisão de 72% sugere...",
-  "fatigueAlert": null,
-  "immediateAction": "Abra Tributário e faça 30 min de questões comentadas.",
-  "motivationalQuote": "Constância bate talento. Sua vaga está sendo construída."
+  "reply": "Resposta do coach..."
+}
+```
+
+### POST /api/parse-edital
+
+**Request (resumo):**
+```json
+{
+  "pdfBase64": "<base64>",
+  "fileName": "edital.pdf"
+}
+```
+
+**Response (resumo):**
+```json
+{
+  "planName": "TRF1 Juiz Federal 2024",
+  "subjects": [{ "subject": "Direito Constitucional", "weight": 20 }],
+  "suggestedWeeklyGoalHours": 15,
+  "totalSubjectsFound": 8
+}
+```
+
+### POST /api/weekly-mentoring
+
+**Request (resumo):**
+```json
+{
+  "userName": "Marcelo",
+  "weeklyGoalHours": 15,
+  "weeklyTotalHours": 8.5,
+  "subjectHours": [{ "subject": "Direito Civil", "hours": 12 }]
+}
+```
+
+**Response (resumo):**
+```json
+{
+  "weekDiagnosis": "...",
+  "strengths": ["..."],
+  "improvements": ["..."],
+  "recoveryPlan": "...",
+  "suggestedGoals": ["..."],
+  "motivationalClose": "..."
 }
 ```
 
@@ -637,7 +691,12 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
 NEXT_PUBLIC_FIREBASE_APP_ID=...
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=...
 GEMINI_API_KEY=...
+FIREBASE_ADMIN_PROJECT_ID=...
+FIREBASE_ADMIN_CLIENT_EMAIL=...
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
+
+> As rotas de IA validam Firebase ID token no servidor via Firebase Admin.
 
 ### 3. Configurar Firebase
 
@@ -721,7 +780,8 @@ service cloud.firestore {
 ### Concluído
 
 - [x] **Fase 1** — MVP: Login, Cronômetro, Dashboard, Radar, Barras, Meta, Plano, Insights, CSV
-- [x] **Fase 2** — IA + Features: Gemini (Coach, Chat, Mentor, Post-session), Pomodoro, Heatmap, Questões, Multi-Edital
+- [x] **Fase 2** — IA + Features: Chat, Parse de edital, Pomodoro, Heatmap, Questões, Multi-Edital
+- [x] **Fase 3 (parcial)** — Benchmark anônimo, Mentoria IA semanal e Calendário com agenda
 
 ### Próximo
 
@@ -729,10 +789,10 @@ service cloud.firestore {
 
 ### Fase 3 — Escala e Monetização
 
-- [ ] Benchmark anônimo — comparar com usuários similares
-- [ ] Mentoria IA semanal — relatório + plano de recuperação
-- [ ] Calendário com agenda — planejar estudo futuro
-- [ ] Modo prova — simulado temporizado + análise
+- [x] Benchmark anônimo — comparar com usuários similares
+- [x] Mentoria IA semanal — relatório + plano de recuperação
+- [x] Calendário com agenda — planejar estudo futuro
+- [ ] Modo prova — simulado temporizado + análise (em andamento)
 - [ ] PWA — instalar como app, funcionar offline
 - [ ] Plano Pro — IA avançada, relatórios, múltiplos planos
 

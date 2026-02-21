@@ -135,7 +135,7 @@ export async function saveQuestionSession(
       ? Math.round((session.correctAnswers / session.totalQuestions) * 100)
       : 0;
 
-  const docRef = await addDoc(collection(db, QUESTIONS_COLLECTION), {
+  const docRef = await addDoc(collection(db, QUESTIONS_STATS_COLLECTION), {
     ...session,
     accuracy,
     createdAt: new Date().toISOString(),

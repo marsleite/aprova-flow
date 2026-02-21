@@ -25,7 +25,7 @@ import { UserProfile } from '@/types';
 // ============================================================
 const BETA_ALLOWLIST: string[] = [
   'marsleite@gmail.com',
-  'grace.andradeleite@gmail.com',
+  'graceandradeleite@gmail.com',
 ];
 
 const isBetaAllowed = (email: string | null): boolean => {

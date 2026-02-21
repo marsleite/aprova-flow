@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { enforceRateLimit, requireAuthenticatedUser } from '@/lib/server/apiGuard';
 
 // ============================================================
 // Tipos
@@ -114,6 +115,17 @@ CAPACIDADES:
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuthenticatedUser(request);
+    if ('response' in auth) return auth.response;
+
+    const limited = enforceRateLimit({
+      key: auth.key,
+      bucket: 'api-chat',
+      max: 30,
+      windowMs: 60_000,
+    });
+    if (limited) return limited;
+
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -130,6 +142,22 @@ export async function POST(request: NextRequest) {
         { error: 'Dados inválidos' },
         { status: 400 }
       );
+    }
+
+    if (messages.length > 20) {
+      return NextResponse.json({ error: 'Histórico excede o limite permitido.' }, { status: 400 });
+    }
+
+    const hasInvalidMessage = messages.some(
+      (msg) =>
+        !msg ||
+        (msg.role !== 'user' && msg.role !== 'assistant') ||
+        typeof msg.content !== 'string' ||
+        msg.content.trim().length === 0 ||
+        msg.content.length > 2000
+    );
+    if (hasInvalidMessage) {
+      return NextResponse.json({ error: 'Mensagens inválidas.' }, { status: 400 });
     }
 
     const ai = new GoogleGenAI({ apiKey });

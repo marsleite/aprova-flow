@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { StudyConsistency, SubjectHours, PlanVsActual, StudySession, DailyHours } from '@/types';
 import { formatDuration } from '@/lib/utils';
+import { auth } from '@/lib/firebase/config';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -203,10 +204,17 @@ export default function ChatPanel({
     try {
       // Envia apenas as últimas MAX_HISTORY mensagens à API
       const trimmed = newMessages.slice(-MAX_HISTORY);
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        throw new Error('Sessão expirada');
+      }
 
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           messages: trimmed,
           context: buildContext(),

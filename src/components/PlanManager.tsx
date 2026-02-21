@@ -36,6 +36,7 @@ import {
   updateStudyPlan,
   deleteStudyPlan,
 } from '@/lib/firebase/plans';
+import { auth } from '@/lib/firebase/config';
 
 // ==========================================================
 // SubjectAutocomplete — input de texto com sugestões
@@ -244,10 +245,18 @@ export default function PlanManager({
         reader.readAsDataURL(file);
       });
 
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
       // Chama a API
       const res = await fetch('/api/parse-edital', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ pdfBase64: base64, fileName: file.name }),
       });
 

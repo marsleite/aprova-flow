@@ -38,6 +38,7 @@ import {
   saveWeeklyMentoring,
   getCurrentWeekStart,
 } from '@/lib/firebase/sessions';
+import { auth } from '@/lib/firebase/config';
 
 // ============================================================
 // Tipos
@@ -118,9 +119,18 @@ export default function WeeklyMentoringCard({
     setError(null);
 
     try {
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        setError('Sessão expirada. Faça login novamente.');
+        return;
+      }
+
       const res = await fetch('/api/weekly-mentoring', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           userName,
           activePlanName: activePlanName || null,

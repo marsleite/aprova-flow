@@ -35,7 +35,17 @@ export function formatTimerDisplay(totalSeconds: number): string {
  * Retorna a data atual no formato YYYY-MM-DD
  */
 export function getTodayISO(): string {
-  return new Date().toISOString().split('T')[0];
+  return formatDateLocalISO(new Date());
+}
+
+/**
+ * Formata uma data para YYYY-MM-DD usando timezone local do usuário.
+ */
+export function formatDateLocalISO(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -47,7 +57,7 @@ export function formatRelativeDate(dateISO: string): string {
   
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayISO = yesterday.toISOString().split('T')[0];
+  const yesterdayISO = formatDateLocalISO(yesterday);
 
   if (dateISO === today) return 'Hoje';
   if (dateISO === yesterdayISO) return 'Ontem';
