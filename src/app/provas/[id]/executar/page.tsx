@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { loadExamQuestions, getExamById, saveQuestionAttempts } from '@/lib/firebase/questions';
 import { ExamMetadata, QuestionBankItem, QuestionAttempt } from '@/types';
-import { Clock, ChevronLeft, ChevronRight, Flag, Check, X } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Flag } from 'lucide-react';
 
 interface QuestionState {
   question: QuestionBankItem;
@@ -64,23 +64,6 @@ export default function ExecutarProvaPage() {
     loadData();
   }, [user, examId, router]);
 
-  // Timer countdown
-  useEffect(() => {
-    if (timeRemaining <= 0 || loading) return;
-
-    const interval = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 1) {
-          handleFinish();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [timeRemaining, loading]);
-
   const handleSelectAnswer = (key: string) => {
     setQuestions(prev => {
       const updated = [...prev];
@@ -105,6 +88,7 @@ export default function ExecutarProvaPage() {
       .filter(q => q.selectedAnswer !== null)
       .map(q => ({
         userId: user.uid,
+        planId: exam.planId || undefined,
         questionId: q.question.id!,
         examId: exam.id!,
         attemptType: 'exam' as const,
@@ -120,6 +104,23 @@ export default function ExecutarProvaPage() {
       console.error('Erro ao salvar resultado:', error);
     }
   }, [user, exam, questions, timeRemaining, examId, router]);
+
+  // Timer countdown
+  useEffect(() => {
+    if (timeRemaining <= 0 || loading) return;
+
+    const interval = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) {
+          handleFinish();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timeRemaining, loading, handleFinish]);
 
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);

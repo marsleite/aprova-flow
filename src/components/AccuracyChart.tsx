@@ -1,68 +1,42 @@
 /**
  * AccuracyChart — Taxa de Acerto por Matéria
  *
- * RadialBar central (taxa geral) + barras horizontais por matéria.
- * Cores dinâmicas: verde (>=80%), amarelo (>=60%), vermelho (<60%).
+ * Visão rápida (Top 3) + modal completo com ordenação.
+ * Suporta períodos: mês, últimos 3 meses e acumulado.
  */
 
 'use client';
 
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Target, ClipboardCheck } from 'lucide-react';
-import {
-  RadialBarChart,
-  RadialBar,
-  PolarAngleAxis,
-} from 'recharts';
+import { Target, ClipboardCheck, X } from 'lucide-react';
+import { RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts';
 import { SubjectAccuracy } from '@/types';
+import { AccuracyAnalytics, AccuracyPeriod } from '@/lib/firebase/questions';
 
 interface AccuracyChartProps {
   data: SubjectAccuracy[];
+  analytics?: AccuracyAnalytics | null;
+  deltaBySubject?: Record<string, number>;
   loading?: boolean;
 }
 
-/* ---------- helpers ---------- */
+type SortMode = 'volume' | 'accuracy' | 'delta';
 
 function getAccuracyColor(accuracy: number) {
-  if (accuracy >= 80)
-    return { bar: 'bg-emerald-500', text: 'text-emerald-400', bg: 'bg-emerald-500/20', hex: '#10b981' };
-  if (accuracy >= 60)
-    return { bar: 'bg-amber-500', text: 'text-amber-400', bg: 'bg-amber-500/20', hex: '#f59e0b' };
-  return { bar: 'bg-red-500', text: 'text-red-400', bg: 'bg-red-500/20', hex: '#ef4444' };
+  if (accuracy >= 80) {
+    return { bar: 'bg-emerald-500', text: 'text-emerald-400', hex: '#10b981' };
+  }
+  if (accuracy >= 60) {
+    return { bar: 'bg-amber-500', text: 'text-amber-400', hex: '#f59e0b' };
+  }
+  return { bar: 'bg-red-500', text: 'text-red-400', hex: '#ef4444' };
 }
 
-/* ---------- animation variants ---------- */
-
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
-};
-
-const item = {
-  hidden: { opacity: 0, x: -15 },
-  show: { opacity: 1, x: 0, transition: { duration: 0.35, ease: 'easeOut' as const } },
-};
-
-/* ---------- skeletons & empty ---------- */
-
-function ChartSkeleton() {
-  return (
-    <div className="space-y-4 py-2">
-      {/* Fake radial */}
-      <div className="flex justify-center">
-        <div className="h-[120px] w-[120px] animate-pulse rounded-full bg-gray-800/60" />
-      </div>
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="animate-pulse">
-          <div className="mb-1.5 flex justify-between">
-            <div className="h-4 w-28 rounded bg-gray-800" />
-            <div className="h-4 w-10 rounded bg-gray-800" />
-          </div>
-          <div className="h-3 w-full rounded-full bg-gray-800" />
-        </div>
-      ))}
-    </div>
-  );
+function getSampleBadge(totalQuestions: number) {
+  if (totalQuestions >= 40) return 'Amostra alta';
+  if (totalQuestions >= 15) return 'Amostra média';
+  return 'Amostra baixa';
 }
 
 function EmptyState() {
@@ -71,17 +45,13 @@ function EmptyState() {
       <div className="mb-3 rounded-xl bg-gray-800/50 p-3">
         <ClipboardCheck className="h-8 w-8 text-gray-600" />
       </div>
-      <p className="text-center text-sm text-gray-500">
-        Nenhuma questão registrada
-      </p>
+      <p className="text-center text-sm text-gray-500">Nenhuma questão registrada</p>
       <p className="mt-1 text-center text-xs text-gray-600">
-        Use o card de questões para começar
+        Use o registro manual para questões feitas fora do app
       </p>
     </div>
   );
 }
-
-/* ---------- RadialGauge ---------- */
 
 function OverallGauge({ accuracy }: { accuracy: number }) {
   const color = getAccuracyColor(accuracy);
@@ -101,12 +71,7 @@ function OverallGauge({ accuracy }: { accuracy: number }) {
         barSize={12}
         data={chartData}
       >
-        <PolarAngleAxis
-          type="number"
-          domain={[0, 100]}
-          angleAxisId={0}
-          tick={false}
-        />
+        <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
         <RadialBar
           dataKey="value"
           cornerRadius={6}
@@ -115,7 +80,6 @@ function OverallGauge({ accuracy }: { accuracy: number }) {
           animationDuration={1200}
         />
       </RadialBarChart>
-      {/* Label central */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className={`text-2xl font-bold ${color.text}`}>{accuracy}%</span>
         <span className="text-[10px] text-gray-500">geral</span>
@@ -124,113 +88,273 @@ function OverallGauge({ accuracy }: { accuracy: number }) {
   );
 }
 
-/* ---------- main ---------- */
+export default function AccuracyChart({
+  data,
+  analytics,
+  deltaBySubject = {},
+  loading,
+}: AccuracyChartProps) {
+  const [period, setPeriod] = useState<AccuracyPeriod>('month');
+  const [showAll, setShowAll] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>('volume');
 
-export default function AccuracyChart({ data, loading }: AccuracyChartProps) {
-  const totalQuestions = data.reduce((acc, d) => acc + d.totalQuestions, 0);
-  const totalCorrect = data.reduce((acc, d) => acc + d.correctAnswers, 0);
-  const overallAccuracy =
-    totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+  const periodData = useMemo(() => {
+    if (analytics) {
+      if (period === 'all') return analytics.all;
+      if (period === 'last3months') return analytics.last3months;
+      return analytics.month;
+    }
+    return data;
+  }, [analytics, data, period]);
+
+  const previousMonthOverall = useMemo(() => {
+    if (!analytics || analytics.previousMonth.length === 0) return null;
+    const totalQ = analytics.previousMonth.reduce((acc, item) => acc + item.totalQuestions, 0);
+    const totalC = analytics.previousMonth.reduce((acc, item) => acc + item.correctAnswers, 0);
+    if (totalQ === 0) return null;
+    return Math.round((totalC / totalQ) * 100);
+  }, [analytics]);
+
+  const totalQuestions = periodData.reduce((acc, d) => acc + d.totalQuestions, 0);
+  const totalCorrect = periodData.reduce((acc, d) => acc + d.correctAnswers, 0);
+  const overallAccuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+  const overallDelta = period === 'month' && previousMonthOverall !== null
+    ? overallAccuracy - previousMonthOverall
+    : null;
+
+  const topSubjects = useMemo(
+    () => [...periodData].sort((a, b) => b.totalQuestions - a.totalQuestions).slice(0, 3),
+    [periodData]
+  );
+
+  const sortedAll = useMemo(() => {
+    const arr = [...periodData];
+    if (sortMode === 'accuracy') return arr.sort((a, b) => b.accuracy - a.accuracy);
+    if (sortMode === 'delta') {
+      return arr.sort(
+        (a, b) => (deltaBySubject[b.subject] ?? Number.NEGATIVE_INFINITY) - (deltaBySubject[a.subject] ?? Number.NEGATIVE_INFINITY)
+      );
+    }
+    return arr.sort((a, b) => b.totalQuestions - a.totalQuestions);
+  }, [periodData, sortMode, deltaBySubject]);
+
+  const insights = useMemo(() => {
+    if (periodData.length === 0) return [];
+
+    const cards: string[] = [];
+    if (period === 'month') {
+      const bestGrowth = periodData
+        .map((s) => ({ subject: s.subject, delta: deltaBySubject[s.subject] }))
+        .filter((s): s is { subject: string; delta: number } => typeof s.delta === 'number')
+        .sort((a, b) => b.delta - a.delta)[0];
+
+      if (bestGrowth && bestGrowth.delta > 0) {
+        cards.push(`Maior evolução: ${bestGrowth.subject} (+${bestGrowth.delta} p.p.)`);
+      }
+    }
+
+    const risk = [...periodData]
+      .filter((s) => s.totalQuestions >= 10 && s.accuracy < 70)
+      .sort((a, b) => a.accuracy - b.accuracy)[0];
+
+    if (risk) {
+      cards.push(`Ponto de atenção: ${risk.subject} (${risk.accuracy}% em ${risk.totalQuestions}Q)`);
+      cards.push(`Próxima ação: fazer 20 questões de revisão focada em ${risk.subject}.`);
+    } else {
+      cards.push('Sem matéria crítica no momento. Mantenha o ritmo de revisão.');
+    }
+
+    return cards.slice(0, 3);
+  }, [periodData, period, deltaBySubject]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-6 shadow-2xl"
-    >
-      {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-cyan-500/20 p-2.5">
-            <Target className="h-5 w-5 text-cyan-400" />
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-6 shadow-2xl"
+      >
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-cyan-500/20 p-2.5">
+              <Target className="h-5 w-5 text-cyan-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white">Taxa de Acerto</h2>
+              <p className="text-sm text-gray-400">Desempenho por matéria no período</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-white">Taxa de Acerto</h2>
-            <p className="text-sm text-gray-400">Desempenho por matéria no mês</p>
-          </div>
+          {!loading && periodData.length > 0 && (
+            <div className="rounded-xl bg-gray-800/50 px-3 py-1.5 text-xs text-gray-400">
+              {totalQuestions} Q
+            </div>
+          )}
         </div>
 
-        {/* Badge com total de questões */}
-        {!loading && data.length > 0 && (
-          <div className="rounded-xl bg-gray-800/50 px-3 py-1.5">
-            <span className="text-xs text-gray-400">{totalQuestions} Q</span>
+        {!loading && periodData.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {[
+              { key: 'month', label: 'Mês atual' },
+              { key: 'last3months', label: 'Últimos 3 meses' },
+              { key: 'all', label: 'Todos os meses' },
+            ].map((option) => (
+              <button
+                key={option.key}
+                onClick={() => setPeriod(option.key as AccuracyPeriod)}
+                className={`rounded-lg px-3 py-1.5 text-xs transition-colors ${
+                  period === option.key
+                    ? 'bg-cyan-500/20 text-cyan-300'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-300'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         )}
-      </div>
 
-      {/* Conteúdo */}
-      {loading ? (
-        <ChartSkeleton />
-      ) : data.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <>
-          {/* Gauge radial geral */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-          >
+        {loading ? (
+          <div className="py-8 text-center text-sm text-gray-500">Carregando desempenho...</div>
+        ) : periodData.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <>
             <OverallGauge accuracy={overallAccuracy} />
-          </motion.div>
 
-          {/* Barras por matéria */}
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="mt-4 space-y-3"
-          >
-            {data.map((entry) => {
-              const color = getAccuracyColor(entry.accuracy);
-              return (
-                <motion.div key={entry.subject} variants={item}>
-                  <div className="mb-1 flex items-center justify-between">
-                    <span className="truncate text-sm font-medium text-white">
-                      {entry.subject}
-                    </span>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <span className="text-[11px] text-gray-500">
-                        {entry.correctAnswers}/{entry.totalQuestions}
-                      </span>
-                      <span className={`text-sm font-bold ${color.text}`}>
-                        {entry.accuracy}%
-                      </span>
+            {period === 'month' && overallDelta !== null && (
+              <div className="mt-2 text-center text-xs">
+                <span className={overallDelta >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                  {overallDelta >= 0 ? '+' : ''}{overallDelta} p.p.
+                </span>
+                <span className="text-gray-500"> vs mês anterior</span>
+              </div>
+            )}
+
+            <div className="mt-4 space-y-3">
+              {topSubjects.map((entry) => {
+                const color = getAccuracyColor(entry.accuracy);
+                const delta = period === 'month' ? deltaBySubject[entry.subject] : undefined;
+                return (
+                  <div key={entry.subject}>
+                    <div className="mb-1 flex items-center justify-between">
+                      <span className="truncate text-sm font-medium text-white">{entry.subject}</span>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span className="text-[11px] text-gray-500">
+                          {entry.correctAnswers}/{entry.totalQuestions}
+                        </span>
+                        {typeof delta === 'number' && (
+                          <span className={`text-[11px] ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {delta >= 0 ? '+' : ''}{delta}
+                          </span>
+                        )}
+                        <span className={`text-sm font-bold ${color.text}`}>{entry.accuracy}%</span>
+                      </div>
+                    </div>
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-800/60">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${entry.accuracy}%` }}
+                        transition={{ duration: 0.8, ease: 'easeOut' }}
+                        className={`h-full rounded-full ${color.bar}`}
+                      />
+                    </div>
+                    <div className="mt-1 text-right text-[10px] text-gray-500">
+                      {getSampleBadge(entry.totalQuestions)}
                     </div>
                   </div>
-                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-800/60">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${entry.accuracy}%` }}
-                      transition={{ duration: 0.8, ease: 'easeOut' }}
-                      className={`h-full rounded-full ${color.bar}`}
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </>
-      )}
+                );
+              })}
+            </div>
 
-      {/* Legenda */}
-      {!loading && data.length > 0 && (
-        <div className="mt-4 flex items-center justify-center gap-4 border-t border-white/5 pt-3">
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-[10px] text-gray-500">≥80%</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-amber-500" />
-            <span className="text-[10px] text-gray-500">60-79%</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-red-500" />
-            <span className="text-[10px] text-gray-500">&lt;60%</span>
+            <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
+              <span className="text-xs text-gray-500">Top {topSubjects.length} de {periodData.length} matérias</span>
+              {periodData.length > topSubjects.length && (
+                <button
+                  onClick={() => setShowAll(true)}
+                  className="text-xs font-medium text-cyan-300 hover:text-cyan-200"
+                >
+                  Ver todas ({periodData.length})
+                </button>
+              )}
+            </div>
+
+            <div className="mt-3 space-y-1.5 border-t border-white/5 pt-3">
+              {insights.map((insight) => (
+                <p key={insight} className="text-xs text-gray-400">{insight}</p>
+              ))}
+            </div>
+          </>
+        )}
+      </motion.div>
+
+      {showAll && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-gray-950 p-5 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">Todas as matérias</h3>
+              <button
+                onClick={() => setShowAll(false)}
+                className="rounded-lg bg-gray-800 p-2 text-gray-300 hover:bg-gray-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mb-3 flex flex-wrap gap-2">
+              <button
+                onClick={() => setSortMode('volume')}
+                className={`rounded-lg px-3 py-1.5 text-xs ${sortMode === 'volume' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-gray-800 text-gray-400'}`}
+              >
+                Ordenar por questões
+              </button>
+              <button
+                onClick={() => setSortMode('accuracy')}
+                className={`rounded-lg px-3 py-1.5 text-xs ${sortMode === 'accuracy' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-gray-800 text-gray-400'}`}
+              >
+                Ordenar por %
+              </button>
+              <button
+                onClick={() => setSortMode('delta')}
+                disabled={period !== 'month'}
+                className={`rounded-lg px-3 py-1.5 text-xs ${
+                  sortMode === 'delta' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-gray-800 text-gray-400'
+                } disabled:cursor-not-allowed disabled:opacity-40`}
+              >
+                Ganho no mês
+              </button>
+            </div>
+
+            <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
+              {sortedAll.map((entry) => {
+                const color = getAccuracyColor(entry.accuracy);
+                const delta = deltaBySubject[entry.subject];
+                return (
+                  <div key={`all-${entry.subject}`}>
+                    <div className="mb-1 flex items-center justify-between">
+                      <span className="truncate text-sm font-medium text-white">{entry.subject}</span>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span className="text-[11px] text-gray-500">
+                          {entry.correctAnswers}/{entry.totalQuestions}
+                        </span>
+                        {typeof delta === 'number' && period === 'month' && (
+                          <span className={`text-[11px] ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {delta >= 0 ? '+' : ''}{delta}
+                          </span>
+                        )}
+                        <span className={`text-sm font-bold ${color.text}`}>{entry.accuracy}%</span>
+                      </div>
+                    </div>
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-800/60">
+                      <div className={`h-full rounded-full ${color.bar}`} style={{ width: `${entry.accuracy}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
-    </motion.div>
+    </>
   );
 }

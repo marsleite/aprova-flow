@@ -23,7 +23,7 @@ import {
   generateInsights,
   getFilteredSessions,
 } from '@/lib/firebase/sessions';
-import { getAccuracyBySubject } from '@/lib/firebase/questions';
+import { getAccuracyAnalytics, getSubjectDeltaMap, AccuracyAnalytics } from '@/lib/firebase/questions';
 import {
   getStudyPlans,
   getActivePlan,
@@ -106,6 +106,8 @@ export default function Dashboard() {
   const [insights, setInsights] = useState<StudyInsight[]>([]);
   const [todaySessions, setTodaySessions] = useState<StudySession[]>([]);
   const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
+  const [accuracyAnalytics, setAccuracyAnalytics] = useState<AccuracyAnalytics | null>(null);
+  const [accuracyDelta, setAccuracyDelta] = useState<Record<string, number>>({});
   const [chatOpen, setChatOpen] = useState(false);
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -169,11 +171,15 @@ export default function Dashboard() {
 
       // Questões — fetch separado e resiliente
       try {
-        const accuracyRes = await getAccuracyBySubject(user.uid, filterPlanId);
-        setAccuracyData(accuracyRes);
+        const analytics = await getAccuracyAnalytics(user.uid, filterPlanId);
+        setAccuracyAnalytics(analytics);
+        setAccuracyData(analytics.month);
+        setAccuracyDelta(getSubjectDeltaMap(analytics.month, analytics.previousMonth));
       } catch (err) {
         console.warn('Erro ao carregar dados de questões:', err);
+        setAccuracyAnalytics(null);
         setAccuracyData([]);
+        setAccuracyDelta({});
       }
 
       // Sessões de hoje para o resumo diário
@@ -396,7 +402,12 @@ export default function Dashboard() {
             lastSessionSubject={lastSavedSession?.subject ?? (recentData[0]?.subject || null)}
             onSaved={fetchData}
           />
-          <AccuracyChart data={accuracyData} loading={loading} />
+          <AccuracyChart
+            data={accuracyData}
+            analytics={accuracyAnalytics}
+            deltaBySubject={accuracyDelta}
+            loading={loading}
+          />
         </motion.div>
 
         {/* Linha 1.6: Card Provas & Simulados */}

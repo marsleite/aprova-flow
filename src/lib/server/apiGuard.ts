@@ -7,10 +7,41 @@ type LimiterState = {
 
 const inMemoryLimiter = new Map<string, LimiterState>();
 
+type IdentityToolkitLookupResponse = {
+  users?: Array<{
+    localId?: string;
+  }>;
+};
+
 function getClientIp(req: NextRequest): string {
   const xff = req.headers.get('x-forwarded-for');
   if (xff) return xff.split(',')[0].trim();
   return req.headers.get('x-real-ip') || 'unknown';
+}
+
+async function verifyFirebaseIdToken(idToken: string): Promise<string | null> {
+  const apiKey =
+    process.env.FIREBASE_WEB_API_KEY ||
+    process.env.FIREBASE_API_KEY ||
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+
+  if (!apiKey) return null;
+
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ idToken }),
+      cache: 'no-store',
+    }
+  );
+
+  if (!response.ok) return null;
+
+  const data = (await response.json()) as IdentityToolkitLookupResponse;
+  const uid = data.users?.[0]?.localId;
+  return uid || null;
 }
 
 export async function requireAuthenticatedUser(req: NextRequest): Promise<
@@ -27,22 +58,15 @@ export async function requireAuthenticatedUser(req: NextRequest): Promise<
     return { response: NextResponse.json({ error: 'Token inválido.' }, { status: 401 }) };
   }
 
-  const parts = idToken.split('.');
-  if (parts.length !== 3) {
-    return { response: NextResponse.json({ error: 'Token inválido.' }, { status: 401 }) };
-  }
-
   try {
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')) as {
-      sub?: string;
-      user_id?: string;
-      exp?: number;
-    };
-
-    const uid = payload.user_id || payload.sub;
-    const now = Math.floor(Date.now() / 1000);
-    if (!uid || (typeof payload.exp === 'number' && payload.exp < now)) {
-      return { response: NextResponse.json({ error: 'Sessão expirada. Faça login novamente.' }, { status: 401 }) };
+    const uid = await verifyFirebaseIdToken(idToken);
+    if (!uid) {
+      return {
+        response: NextResponse.json(
+          { error: 'Sessão inválida ou expirada. Faça login novamente.' },
+          { status: 401 }
+        ),
+      };
     }
 
     return { uid, key: uid };
