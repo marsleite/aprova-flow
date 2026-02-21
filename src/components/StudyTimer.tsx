@@ -288,7 +288,7 @@ export default function StudyTimer({
       {/* Seletor de Modo */}
       <div className="mb-5">
         <label className="mb-2 block text-xs font-medium text-gray-400">Modo</label>
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
           {MODE_OPTIONS.map((opt) => (
             <button
               key={opt.value}
@@ -414,7 +414,7 @@ export default function StudyTimer({
 
       {/* Display do Timer com Anel Circular */}
       <div className="mb-5 flex flex-col items-center">
-        <div className="relative flex h-[220px] w-[220px] items-center justify-center">
+        <div className="relative flex h-[190px] w-[190px] items-center justify-center sm:h-[220px] sm:w-[220px]">
           <ProgressRing
             seconds={displaySeconds}
             totalSeconds={phaseTotalSeconds}
@@ -437,7 +437,7 @@ export default function StudyTimer({
             className="relative z-10 flex flex-col items-center"
           >
             <span
-              className={`font-mono text-5xl font-bold tracking-wider transition-colors duration-300
+              className={`font-mono text-4xl font-bold tracking-wider transition-colors duration-300 sm:text-5xl
                 ${isRunning && !isAutoPaused && !isBreak ? 'text-violet-400' : ''}
                 ${isRunning && !isAutoPaused && isBreak ? 'text-emerald-400' : ''}
                 ${isPaused ? 'text-amber-400' : ''}
@@ -503,7 +503,7 @@ export default function StudyTimer({
       </div>
 
       {/* Botões de Controle */}
-      <div className="flex items-center justify-center gap-4">
+      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
         <AnimatePresence mode="wait">
           {/* Play */}
           {(isIdle || isPaused) && (

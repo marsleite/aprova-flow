@@ -62,7 +62,7 @@ export default function GoalAndStreakCard({
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-3">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
           <div className="mb-1 flex items-center gap-1 text-xs text-gray-400">
             <Flame className="h-3.5 w-3.5 text-orange-400" />
@@ -104,7 +104,7 @@ export default function GoalAndStreakCard({
         </p>
       </div>
 
-      <div className="flex items-end gap-2">
+      <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-end">
         <div className="flex-1">
           <label className="mb-1 block text-xs text-gray-400">Meta semanal (horas)</label>
           <input
@@ -119,7 +119,7 @@ export default function GoalAndStreakCard({
         <button
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-violet-500 disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-violet-500 disabled:opacity-60"
         >
           <Save className={`h-4 w-4 ${saving ? 'animate-spin' : ''}`} />
           Salvar
@@ -128,4 +128,3 @@ export default function GoalAndStreakCard({
     </motion.div>
   );
 }
-

@@ -67,11 +67,11 @@ export default function PlanSelector({
   };
 
   return (
-    <div ref={dropdownRef} className="relative">
+    <div ref={dropdownRef} className="relative w-full sm:w-auto">
       {/* Botão principal */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-lg border border-white/10 bg-gray-800/50 px-3 py-1.5 text-sm text-gray-300 transition-all hover:border-white/20 hover:bg-gray-800"
+        className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-gray-800/50 px-3 py-2 text-sm text-gray-300 transition-all hover:border-white/20 hover:bg-gray-800 sm:w-auto sm:py-1.5"
       >
         {activePlan ? (
           <span
@@ -81,7 +81,7 @@ export default function PlanSelector({
         ) : (
           <Layers className="h-3.5 w-3.5 text-gray-500" />
         )}
-        <span className="max-w-[120px] truncate">{label}</span>
+        <span className="min-w-0 flex-1 truncate text-left sm:max-w-[160px] sm:flex-none">{label}</span>
         <ChevronDown
           className={`h-3.5 w-3.5 text-gray-500 transition-transform ${
             open ? 'rotate-180' : ''
@@ -97,7 +97,7 @@ export default function PlanSelector({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -5, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full z-50 mt-1.5 min-w-[200px] overflow-hidden rounded-xl border border-white/10 bg-gray-900 shadow-xl shadow-black/40"
+            className="absolute left-0 right-0 top-full z-50 mt-1.5 min-w-[200px] overflow-hidden rounded-xl border border-white/10 bg-gray-900 shadow-xl shadow-black/40 sm:left-auto sm:right-0 sm:w-[320px]"
           >
             {/* Opção "Todos" */}
             <button

@@ -68,7 +68,7 @@ function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: Car
           </div>
           <TrendingUp className="h-4 w-4 text-gray-600" />
         </div>
-        <p className="text-4xl font-bold tracking-tight text-white">{value}</p>
+        <p className="text-3xl font-bold tracking-tight text-white sm:text-4xl">{value}</p>
         <p className="mt-1 text-xs text-gray-400">{subtitle}</p>
       </div>
     </motion.div>

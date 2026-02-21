@@ -78,12 +78,12 @@ export default function ProvasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between gap-4">
+        <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Provas & Simulados</h1>
+            <h1 className="mb-2 text-2xl font-bold text-white sm:text-3xl">Provas & Simulados</h1>
             <p className="text-gray-400">
               Pratique com provas oficiais e simulados personalizados
             </p>
@@ -98,10 +98,10 @@ export default function ProvasPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 border-b border-gray-700">
+        <div className="mb-6 flex gap-2 overflow-x-auto border-b border-gray-700 sm:mb-8">
           <button
             onClick={() => setActiveTab('oficiais')}
-            className={`px-6 py-3 font-medium transition-colors ${
+            className={`whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors sm:px-6 sm:text-base ${
               activeTab === 'oficiais'
                 ? 'text-violet-400 border-b-2 border-violet-400'
                 : 'text-gray-400 hover:text-gray-300'
@@ -109,9 +109,9 @@ export default function ProvasPage() {
           >
             Provas Oficiais
           </button>
-          <button
-            onClick={() => setActiveTab('simulados')}
-            className={`px-6 py-3 font-medium transition-colors ${
+            <button
+              onClick={() => setActiveTab('simulados')}
+            className={`whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors sm:px-6 sm:text-base ${
               activeTab === 'simulados'
                 ? 'text-violet-400 border-b-2 border-violet-400'
                 : 'text-gray-400 hover:text-gray-300'
@@ -119,9 +119,9 @@ export default function ProvasPage() {
           >
             Simulados
           </button>
-          <button
-            onClick={() => setActiveTab('treino')}
-            className={`px-6 py-3 font-medium transition-colors ${
+            <button
+              onClick={() => setActiveTab('treino')}
+            className={`whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors sm:px-6 sm:text-base ${
               activeTab === 'treino'
                 ? 'text-violet-400 border-b-2 border-violet-400'
                 : 'text-gray-400 hover:text-gray-300'

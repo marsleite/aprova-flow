@@ -144,7 +144,7 @@ export default function PostSessionToast({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-          className="fixed bottom-24 right-6 z-50 w-80 overflow-hidden rounded-2xl border border-violet-500/20 bg-gray-900/95 shadow-2xl backdrop-blur-xl"
+          className="fixed bottom-4 left-4 right-4 z-50 overflow-hidden rounded-2xl border border-violet-500/20 bg-gray-900/95 shadow-2xl backdrop-blur-xl sm:bottom-24 sm:left-auto sm:right-6 sm:w-80"
         >
           {/* Barra de progresso auto-dismiss */}
           <motion.div

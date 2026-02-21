@@ -146,12 +146,12 @@ export default function ResultadoProvaPage() {
   const incorrectCount = results.length - correctCount;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
+      <div className="mx-auto max-w-6xl space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Resultado da Prova</h1>
+            <h1 className="mb-2 text-2xl font-bold text-white sm:text-3xl">Resultado da Prova</h1>
             <p className="text-gray-400">{exam.name}</p>
           </div>
           <Link
@@ -164,7 +164,7 @@ export default function ResultadoProvaPage() {
         </div>
 
         {/* Resumo Geral */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="bg-gradient-to-br from-violet-600 to-violet-700 rounded-lg p-6 text-white">
             <div className="flex items-center gap-2 mb-2">
               <Award className="h-5 w-5" />

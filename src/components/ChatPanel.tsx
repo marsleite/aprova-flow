@@ -332,7 +332,7 @@ export default function ChatPanel({
 
                     {/* Balão */}
                     <div
-                      className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                      className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed sm:max-w-[80%] ${
                         msg.role === 'user'
                           ? 'rounded-tr-sm bg-violet-600 text-white'
                           : 'rounded-tl-sm border border-white/5 bg-gray-900 text-gray-300'
@@ -386,7 +386,7 @@ export default function ChatPanel({
             </div>
 
             {/* Input */}
-            <div className="border-t border-white/10 px-4 py-3">
+            <div className="border-t border-white/10 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3">
               <div className="flex items-center gap-2">
                 <input
                   ref={inputRef}

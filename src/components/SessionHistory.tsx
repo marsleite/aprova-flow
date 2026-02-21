@@ -235,12 +235,12 @@ export default function SessionHistory({ userId, planId }: SessionHistoryProps) 
             {paginatedSessions.map((s, idx) => (
               <div
                 key={s.id || idx}
-                className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 transition-colors hover:bg-white/[0.04]"
+                className="flex flex-col gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 transition-colors hover:bg-white/[0.04] sm:flex-row sm:items-center sm:gap-3"
               >
                 <div className="h-2 w-2 shrink-0 rounded-full bg-violet-400" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-white">{s.subject}</p>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                     <Clock className="h-3 w-3" />
                     {formatDuration(s.duration)}
                     <span className="text-gray-700">·</span>
@@ -248,7 +248,7 @@ export default function SessionHistory({ userId, planId }: SessionHistoryProps) 
                     {s.endTime && ` – ${new Date(s.endTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
                   </div>
                 </div>
-                <span className="shrink-0 rounded-lg bg-violet-500/10 px-2.5 py-1 text-xs font-medium text-violet-300">
+                <span className="self-start rounded-lg bg-violet-500/10 px-2.5 py-1 text-xs font-medium text-violet-300 sm:self-auto">
                   {formatRelativeDate(s.date)}
                 </span>
               </div>
@@ -261,7 +261,7 @@ export default function SessionHistory({ userId, planId }: SessionHistoryProps) 
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-400 hover:text-white disabled:opacity-30"
+                className="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-gray-400 hover:text-white disabled:opacity-30 sm:px-3"
               >
                 Anterior
               </button>
@@ -271,7 +271,7 @@ export default function SessionHistory({ userId, planId }: SessionHistoryProps) 
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-400 hover:text-white disabled:opacity-30"
+                className="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-gray-400 hover:text-white disabled:opacity-30 sm:px-3"
               >
                 Próxima
               </button>
