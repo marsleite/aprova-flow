@@ -257,23 +257,23 @@ python reclassify_final.py 1  # Reclassifica todas as genéricas do tipo 1
 ```
 
 ### 3. `delete_all_trf1.ts`
-**Localização:** `/Users/marleite/workspace/aprova-flow/scripts/delete_all_trf1.ts`
+**Localização:** fluxo externo/server-side (não versionado neste repositório)
 
 **Propósito:** Remove todos os exames TRF1 do Firestore (limpeza antes de reimportação)
 
 **Uso:**
 ```bash
-npx ts-node scripts/delete_all_trf1.ts
+# Executar no ambiente externo de ingestão/admin
 ```
 
 ### 4. `clean_duplicates.ts`
-**Localização:** `/Users/marleite/workspace/aprova-flow/scripts/clean_duplicates.ts`
+**Localização:** fluxo externo/server-side (não versionado neste repositório)
 
 **Propósito:** Remove exames duplicados mantendo apenas primeira ocorrência
 
 **Uso:**
 ```bash
-npx ts-node scripts/clean_duplicates.ts
+# Executar no ambiente externo de ingestão/admin
 ```
 
 ---
@@ -323,32 +323,10 @@ done
 ```
 
 ### Passo 4: Limpar Firestore
-```bash
-cd /Users/marleite/workspace/aprova-flow
-
-# Com credenciais Firebase configuradas
-npx ts-node scripts/delete_all_trf1.ts
-```
+Executar no pipeline/admin externo com credenciais de serviço (fora deste app Next.js).
 
 ### Passo 5: Importar JSONs Corrigidos
-```bash
-# Script Python que chama import_exam.ts para cada tipo
-python - <<'PY'
-import subprocess, json, os
-
-creds = json.load(open('/Users/marleite/Downloads/track-84c17-firebase-adminsdk-fbsvc-3f98c614a0.json'))
-env = os.environ.copy()
-env['FIREBASE_ADMIN_PROJECT_ID'] = creds['project_id']
-env['FIREBASE_ADMIN_CLIENT_EMAIL'] = creds['client_email']
-env['FIREBASE_ADMIN_PRIVATE_KEY'] = creds['private_key']
-
-for tipo in [1, 2, 3, 4]:
-    subprocess.run([
-        'npx', 'ts-node', 'scripts/import_exam.ts',
-        f'../aprova-script/data/output/trf1-t{tipo}.json'
-    ], env=env, cwd='/Users/marleite/workspace/aprova-flow')
-PY
-```
+Executar no pipeline/admin externo que publica em `exams` e `questions_bank`.
 
 ---
 
@@ -425,10 +403,10 @@ FIREBASE_ADMIN_PRIVATE_KEY=<da-service-account>
 ## Contato e Manutenção
 
 **Responsável:** Processo documentado em 17/02/2026  
-**Repositório:** `/Users/marleite/workspace/aprova-flow`  
-**Scripts:** `/Users/marleite/workspace/aprova-script`
+**Repositório web:** `/Users/marleite/workspace/aprova-flow`  
+**Pipeline de ingestão:** mantido externamente ao app web
 
 Para dúvidas ou problemas, consultar:
 - Este documento
-- Scripts comentados em `aprova-script/`
-- Código de classificação em `aprova-script/classification.py`
+- Repositório/pipeline externo de ingestão
+- Código de classificação IA do pipeline externo

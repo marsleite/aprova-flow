@@ -65,6 +65,8 @@ O app **não ensina matéria** — ele é o **coach de rotina** que garante que 
 - Cada plano tem matérias, pesos e meta semanal próprios
 - Dashboard filtra tudo pelo edital selecionado
 - Visão "Todos os Planos" agrega tudo
+- Plano "Geral" funciona como histórico consolidado (não inicia cronômetro diretamente)
+- CTA no cronômetro para criar sessão livre ou novo edital quando "Geral" está ativo
 
 ### Dashboard Inteligente
 - Cards de resumo (Hoje / Semana / Mês)
@@ -80,16 +82,28 @@ O app **não ensina matéria** — ele é o **coach de rotina** que garante que 
 - Meta semanal + Streak de dias consecutivos
 
 ### Módulo de Questões
-- Registro de acertos/erros por matéria
-- Gráfico RadialBar com taxa de acerto geral
+- Registro manual de acertos/erros por matéria (para questões feitas fora do app)
+- Taxa de acerto com períodos: mês atual, últimos 3 meses e todos os meses
+- Visão resumida Top 3 + modal com todas as matérias e ordenação
 - Barras por matéria com cores dinâmicas (verde/amarelo/vermelho)
 - Validação inteligente (acertos <= total)
 
 ### IA Integrada (Google Gemini)
 - **Coach IA**: Chat conversacional para dúvidas de rotina
-- **Mentor AprovaMind**: Análise estratégica proativa com cruzamento constância × precisão
-- **Feedback pós-sessão**: Toast automático ao parar o cronômetro
+- **Mentoria Semanal IA**: análise estratégica aprofundada com cache semanal
+- **Mentor AprovaMind**: análise local (sem chamada remota)
+- **Feedback pós-sessão**: toast local ao parar o cronômetro
 - Todos os prompts são "grounded" nos dados reais do Firestore
+
+---
+
+## Atualizações Recentes (Fev/2026)
+
+- Responsividade mobile-first aplicada no dashboard e fluxo de Provas & Simulados, preservando desktop.
+- Heatmap anual com comportamento híbrido: scroll horizontal no mobile e preenchimento completo no desktop.
+- Plano **Geral** tratado como histórico consolidado (somente leitura para iniciar estudo), com CTA para criar sessão livre ou edital.
+- Sessão livre disponível para estudo sem vincular a um edital formal.
+- Taxa de acerto evoluída com filtros por período e visualização completa de matérias.
 
 ---
 
@@ -216,7 +230,7 @@ src/
 │
 ├── components/
 │   ├── AccuracyChart.tsx            # RadialBar + barras de acerto por matéria
-│   ├── ActivityHeatmap.tsx          # Grid mensal tipo GitHub
+│   ├── ActivityHeatmap.tsx          # Grid anual tipo GitHub (últimos 12 meses)
 │   ├── ChatPanel.tsx                # Painel slide-in do Coach IA
 │   ├── DailySummaryCard.tsx         # Resumo do dia
 │   ├── Dashboard.tsx                # Orquestrador principal — fetch + layout
@@ -304,6 +318,15 @@ src/
 | `study_plans` | auto | userId, name, subjects[], weeklyGoalHours, color, isDefault | Um plano = um edital |
 | `user_stats` | userId | weeklyGoalHours, planSubjects[], activePlanId | Singleton por usuário |
 | `questions_stats` | auto | userId, planId, subject, totalQuestions, correctAnswers, accuracy | Um registro = um lote de questões |
+| `questions_bank` | auto | statement, alternatives, answer, materia, banca, difficulty | Banco base de questões para prova/simulado/treino |
+| `exams` | auto | name, year, banca, durationMinutes, questionIds[] | Provas oficiais |
+| `question_attempts` | auto | userId, planId, questionId, selectedOption, correct, attemptType | Tentativas por questão |
+| `simulated_configs` | auto | userId, planId, filters, questionCount, durationMinutes | Configurações salvas de simulado |
+| `calendar_events` | auto | userId, planId, title, subject, startTime, endTime, status | Agenda de estudos |
+| `benchmarks` | auto | cohort, metrics agregadas | Benchmark anônimo (somente leitura no app) |
+| `user_benchmarks` | userId | weeklyGoalHours, weeklyHours, percentile | Snapshot individual de benchmark |
+
+> Campos exatos e validações de acesso: consulte `firestore.rules`.
 
 ---
 
@@ -716,62 +739,22 @@ Acesse [http://localhost:3000](http://localhost:3000)
 
 ## Regras Firestore
 
-```
-rules_version = '2';
+Fonte de verdade: `/firestore.rules`.
 
-service cloud.firestore {
-  match /databases/{database}/documents {
+Coleções cobertas atualmente:
+- `sessions`
+- `study_plans`
+- `user_stats`
+- `questions_stats`
+- `questions_bank`
+- `exams`
+- `question_attempts`
+- `simulated_configs`
+- `benchmarks`
+- `user_benchmarks`
+- `calendar_events`
 
-    match /sessions/{sessionId} {
-      allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
-      allow create: if request.auth != null
-                    && request.resource.data.userId == request.auth.uid
-                    && request.resource.data.subject is string
-                    && request.resource.data.duration is number
-                    && request.resource.data.date is string;
-      allow update: if request.auth != null
-                    && resource.data.userId == request.auth.uid;
-      allow delete: if request.auth != null
-                    && resource.data.userId == request.auth.uid;
-    }
-
-    match /user_stats/{userId} {
-      allow read, write: if request.auth != null
-                         && request.auth.uid == userId;
-    }
-
-    match /study_plans/{planId} {
-      allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
-      allow create: if request.auth != null
-                    && request.resource.data.userId == request.auth.uid
-                    && request.resource.data.name is string;
-      allow update: if request.auth != null
-                    && resource.data.userId == request.auth.uid;
-      allow delete: if request.auth != null
-                    && resource.data.userId == request.auth.uid;
-    }
-
-    match /questions_stats/{docId} {
-      allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
-      allow create: if request.auth != null
-                    && request.resource.data.userId == request.auth.uid
-                    && request.resource.data.subject is string
-                    && request.resource.data.totalQuestions is number;
-      allow update: if request.auth != null
-                    && resource.data.userId == request.auth.uid;
-      allow delete: if request.auth != null
-                    && resource.data.userId == request.auth.uid;
-    }
-
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-}
-```
+> Recomenda-se sempre publicar as regras diretamente a partir do arquivo `firestore.rules` para evitar divergência com trechos de documentação.
 
 ---
 

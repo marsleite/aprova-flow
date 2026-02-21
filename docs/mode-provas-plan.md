@@ -1,6 +1,8 @@
 # Plano do Modo Provas & Banco de Questões
 
 > Objetivo: criar o modo mais completo de simulados para concurseiros, conectando banco de questões, provas oficiais e inteligência com IA.
+>
+> Status (Fev/2026): este plano já teve execução parcial no app. O hub de Provas & Simulados, execução de prova, resultado, treino rápido e filtros principais já estão em produção. Os itens abaixo seguem como referência arquitetural + backlog incremental.
 
 ---
 
@@ -212,20 +214,22 @@ graph TD;
 
 ## 7. Roadmap de Implementação
 
-1. **Modelagem & Regras** (documento + atualizações em `firestore.rules`).
-2. **Fluxo de ingestão server-side** (CSV/JSON → Firestore) e import inicial de algumas provas.
-3. **Endpoints/helpers** no `lib/firebase/questions.ts` (CRUD, filtros, sorteio).
-4. **UI Provas & Simulados** (listagem + execução + resultado).
-5. **Métricas e notificações** integradas.
-6. **Fase IA**: parser de provas, explicações automáticas, chat com a questão.
+1. ✅ **Modelagem & Regras** (documento + atualizações em `firestore.rules`).
+2. ✅ **Fluxo de ingestão server-side** (fora deste repositório Next.js).
+3. ✅ **Endpoints/helpers** no `lib/firebase/questions.ts` (CRUD, filtros e treino).
+4. ✅ **UI Provas & Simulados** (listagem + execução + resultado).
+5. 🟡 **Métricas e notificações** integradas (parcial, em evolução).
+6. 🔜 **Fase IA**: explicações automáticas e chat com a questão.
 
 ---
 
 ## 8. Próximas Ações Imediatas
 
-- [ ] Implementar `questions.ts` (tipos + funções Firestore).
-- [ ] Atualizar `firestore.rules` com coleções de provas/questões/tentativas.
-- [ ] Criar fluxo de import inicial server-side (ex.: TJBA Juiz 2026).
-- [ ] Desenhar layout da tela "Provas & Simulados" e coletar feedback.
+- [x] Implementar `questions.ts` (tipos + funções Firestore).
+- [x] Atualizar `firestore.rules` com coleções de provas/questões/tentativas.
+- [x] Criar fluxo de import inicial server-side (executado fora deste repo web).
+- [x] Desenhar e implementar layout da tela "Provas & Simulados".
+- [ ] Evoluir UX mobile-first e acessibilidade no fluxo completo de prova.
+- [ ] Adicionar explicações de questões e revisão guiada pós-prova.
 
 > Este plano será nosso blueprint para o modo Provas — podemos ir refinando conforme surgirem novas necessidades.

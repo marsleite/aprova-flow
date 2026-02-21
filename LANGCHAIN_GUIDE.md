@@ -2,6 +2,8 @@
 
 Este documento descreve como construir um microserviço baseado em LangChain para analisar editais/PDFs e extrair dados estruturados (matérias, pesos, metas). Também inclui um prompt completo para futuros agentes IA gerarem o repositório automaticamente.
 
+> Status (Fev/2026): guia de referência para serviço externo opcional. O app Next.js atual não depende deste pipeline para rodar em produção.
+
 ---
 
 ## 1. Visão Geral

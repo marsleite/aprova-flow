@@ -67,10 +67,10 @@ src/
 - MentorCard (motor de regras LOCAL: equilibrio, fadiga, constância × precisão, ação imediata, frases motivacionais)
 - WeeklyMentoringCard (mentoria semanal via IA, 1x/semana, cache no Firestore)
 - QuestionTrackerCard (registro de questões com matérias do plano ativo, validação, toast de acerto)
-- AccuracyChart (RadialBar Recharts + barras horizontais por matéria, cores dinâmicas)
+- AccuracyChart (taxa de acerto por período: mês, 3 meses e acumulado + Top 3 e modal completo)
 - ChatPanel (painel slide-in de chat conversacional com Coach IA Gemini)
 - PostSessionToast (feedback pós-sessão LOCAL, auto-dismiss 8s com ref estável)
-- ActivityHeatmap (grid anual estilo GitHub, últimos 52/53 weeks, filtrável por planId, escala dinâmica)
+- ActivityHeatmap (grid anual estilo GitHub, últimos 52/53 weeks, filtrável por planId, escala dinâmica e responsividade híbrida mobile/desktop)
 
 ## O que já foi entregue
 
@@ -94,7 +94,7 @@ src/
 3. ✅ Feedback pós-sessão — toast LOCAL (substituiu chamada IA)
 4. ✅ Mini-card Coach IA — dica do dia calculada localmente
 5. ✅ Contexto enriquecido — Coach recebe evolução semanal + últimas 5 sessões
-6. ✅ Heatmap de atividade — grid mensal tipo GitHub
+6. ✅ Heatmap de atividade — grid anual tipo GitHub
 7. ✅ Pomodoro avançado — modos 25/5, 50/10, 45/15, fases automáticas, skip, som
 8. ✅ Mentor AprovaMind — motor de regras LOCAL (equilibrio, fadiga, constância × precisão, ação imediata)
 9. ✅ Módulo de questões (MVP) — QuestionTrackerCard + AccuracyChart (RadialBar)
@@ -103,12 +103,14 @@ src/
 12. ✅ Matérias personalizadas — campo de texto com autocomplete substitui dropdown fixo
 13. ✅ Otimização de IA — Mentor e PostSession convertidos para regras locais, IA reservada para alto valor
 14. ✅ Mentoria Semanal — análise profunda via IA (1x/semana), cache no Firestore, WeeklyMentoringCard
+15. ✅ Plano Geral como histórico consolidado + CTA no cronômetro para criar sessão/edital
+16. ✅ Responsividade mobile-first no dashboard e módulo de provas sem regressão desktop
 
 ### PRÓXIMA TASK:
-15. **Modo prova** — simulado temporizado + análise pós-prova
+17. **Modo prova** — simulado temporizado + análise pós-prova
 
 ### PRÓXIMA FASE:
-16. **Notificações inteligentes** — push contextual
+18. **Notificações inteligentes** — push contextual
 
 ## Roadmap — Fase 3 (Escala e Monetização)
 1. ✅ Benchmark anônimo — comparar constância com usuários similares e mostrar percentil
@@ -123,7 +125,7 @@ src/
    - Opção de "pular" e "ver depois"
 
 ## Evolução futura — Modo Prova com banco de questões
-- **Visão**: o modo prova atual (cronômetro + registro de blocos) evoluirá para suportar questões dentro do app.
+- **Visão**: o modo prova atual (hub, execução, resultado e treino rápido) evoluirá para suportar explicações avançadas e trilhas inteligentes por questão.
 - **Escopo**:
   - Catálogo `questions` no Firestore com: enunciado rico (markdown), alternativas (A-E), resposta, explicação, tags (matéria, subtema, dificuldade, banca, ano).
   - Endpoint/serviço para montar simulados parametrizados (por banca, edital, nível, quantidade).
