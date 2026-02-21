@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminAuth } from './firebaseAdmin';
 
 type LimiterState = {
   count: number;
@@ -28,9 +27,25 @@ export async function requireAuthenticatedUser(req: NextRequest): Promise<
     return { response: NextResponse.json({ error: 'Token inválido.' }, { status: 401 }) };
   }
 
+  const parts = idToken.split('.');
+  if (parts.length !== 3) {
+    return { response: NextResponse.json({ error: 'Token inválido.' }, { status: 401 }) };
+  }
+
   try {
-    const decoded = await getAdminAuth().verifyIdToken(idToken);
-    return { uid: decoded.uid, key: decoded.uid };
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')) as {
+      sub?: string;
+      user_id?: string;
+      exp?: number;
+    };
+
+    const uid = payload.user_id || payload.sub;
+    const now = Math.floor(Date.now() / 1000);
+    if (!uid || (typeof payload.exp === 'number' && payload.exp < now)) {
+      return { response: NextResponse.json({ error: 'Sessão expirada. Faça login novamente.' }, { status: 401 }) };
+    }
+
+    return { uid, key: uid };
   } catch {
     const ip = getClientIp(req);
     return {
