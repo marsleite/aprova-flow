@@ -25,7 +25,7 @@ import {
 } from '@/lib/firebase/sessions';
 import { getAccuracyAnalytics, getSubjectDeltaMap, AccuracyAnalytics } from '@/lib/firebase/questions';
 import {
-  getStudyPlans,
+  createStudyPlan,
   getActivePlan,
   setActivePlan,
   migrateToMultiPlan,
@@ -111,6 +111,7 @@ export default function Dashboard() {
   const [chatOpen, setChatOpen] = useState(false);
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [creatingSessionPlan, setCreatingSessionPlan] = useState(false);
   
   // ---- Estados do Calendário ----
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
@@ -294,6 +295,36 @@ export default function Dashboard() {
     loadPlans().then(() => fetchData());
   };
 
+  const handleCreateSessionPlan = async () => {
+    if (!user || creatingSessionPlan) return;
+    setCreatingSessionPlan(true);
+    try {
+      const baseName = 'Sessão Livre';
+      const existing = plans
+        .map((p) => p.name)
+        .filter((name) => name === baseName || name.startsWith(`${baseName} `));
+      const name = existing.length === 0 ? baseName : `${baseName} ${existing.length + 1}`;
+
+      const planId = await createStudyPlan(user.uid, {
+        name,
+        subjects: [],
+        weeklyGoalHours: 10,
+        color: '#06b6d4',
+        isDefault: false,
+      });
+
+      await setActivePlan(user.uid, planId);
+      await loadPlans();
+      setActivePlanId(planId);
+      setLoading(true);
+      await fetchData();
+    } catch (err) {
+      console.error('Erro ao criar sessão livre:', err);
+    } finally {
+      setCreatingSessionPlan(false);
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -379,10 +410,17 @@ export default function Dashboard() {
           className="mb-6 grid gap-6 lg:grid-cols-2"
         >
           <StudyTimer
+            key={activePlanId || 'all-plans'}
             userId={user.uid}
             plans={plans}
             activePlanId={activePlanId}
             onSessionSaved={handleSessionSaved}
+            onCreateSession={handleCreateSessionPlan}
+            onCreateEdital={() => {
+              setEditingPlan(null);
+              setPlanManagerOpen(true);
+            }}
+            creatingSession={creatingSessionPlan}
           />
           <SubjectRadarChart data={subjectData} loading={loading} />
         </motion.div>
