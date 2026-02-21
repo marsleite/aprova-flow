@@ -96,21 +96,19 @@ export async function getStudySummary(userId: string, planId?: string): Promise<
   const now = new Date();
   
   // Data de início do mês atual (YYYY-MM-01)
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    .toISOString()
-    .split('T')[0];
+  const monthStart = formatDateLocal(new Date(now.getFullYear(), now.getMonth(), 1));
 
   // Busca todas as sessões do mês
   const sessions = await getSessionsFromDate(userId, monthStart, planId);
 
-  const today = now.toISOString().split('T')[0];
+  const today = formatDateLocal(now);
   
   // Calcula início da semana (segunda-feira)
   const dayOfWeek = now.getDay();
   const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
   const weekStart = new Date(now);
   weekStart.setDate(now.getDate() - mondayOffset);
-  const weekStartStr = weekStart.toISOString().split('T')[0];
+  const weekStartStr = formatDateLocal(weekStart);
 
   let totalToday = 0;
   let totalWeek = 0;
@@ -136,9 +134,7 @@ export async function getStudySummary(userId: string, planId?: string): Promise<
  */
 export async function getHoursBySubject(userId: string, planId?: string): Promise<SubjectHours[]> {
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    .toISOString()
-    .split('T')[0];
+  const monthStart = formatDateLocal(new Date(now.getFullYear(), now.getMonth(), 1));
 
   const sessions = await getSessionsFromDate(userId, monthStart, planId);
 
@@ -170,7 +166,7 @@ export async function getWeeklyHours(userId: string, planId?: string): Promise<D
   const monday = new Date(now);
   monday.setDate(now.getDate() - mondayOffset);
 
-  const weekStartStr = monday.toISOString().split('T')[0];
+  const weekStartStr = formatDateLocal(monday);
   const sessions = await getSessionsFromDate(userId, weekStartStr, planId);
 
   // Mapa de data → duração total
@@ -185,7 +181,7 @@ export async function getWeeklyHours(userId: string, planId?: string): Promise<D
   for (let i = 0; i < 7; i++) {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = formatDateLocal(d);
     const seconds = dayMap.get(dateStr) || 0;
 
     result.push({
@@ -291,7 +287,7 @@ export async function getStudyConsistency(userId: string, planId?: string, planG
   // Busca sessões do último ano para cálculo de streak
   const from = new Date();
   from.setFullYear(from.getFullYear() - 1);
-  const fromDate = from.toISOString().split('T')[0];
+  const fromDate = formatDateLocal(from);
   const sessions = await getSessionsFromDate(userId, fromDate, planId);
 
   const dateSet = new Set(sessions.map((s) => s.date));
@@ -317,10 +313,10 @@ export async function getStudyConsistency(userId: string, planId?: string, planG
 
   // Streak atual: conta de hoje; se não houver hoje, começa de ontem
   const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
+  const todayStr = formatDateLocal(today);
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  const yesterdayStr = formatDateLocal(yesterday);
 
   let cursor: Date | null = null;
   if (dateSet.has(todayStr)) {
@@ -331,7 +327,7 @@ export async function getStudyConsistency(userId: string, planId?: string, planG
 
   let currentStreak = 0;
   while (cursor) {
-    const key = cursor.toISOString().split('T')[0];
+    const key = formatDateLocal(cursor);
     if (!dateSet.has(key)) break;
     currentStreak += 1;
     cursor.setDate(cursor.getDate() - 1);

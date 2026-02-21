@@ -12,6 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { enforceRateLimit, requireAuthenticatedUser } from '@/lib/server/apiGuard';
 
 // ============================================================
 // Tipos
@@ -81,6 +82,17 @@ REGRAS DE NOMEAÇÃO:
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuthenticatedUser(req);
+    if ('response' in auth) return auth.response;
+
+    const limited = enforceRateLimit({
+      key: auth.key,
+      bucket: 'api-parse-edital',
+      max: 5,
+      windowMs: 10 * 60_000,
+    });
+    if (limited) return limited;
+
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(

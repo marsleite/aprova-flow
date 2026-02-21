@@ -13,6 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { enforceRateLimit, requireAuthenticatedUser } from '@/lib/server/apiGuard';
 
 // ============================================================
 // Tipos
@@ -138,6 +139,17 @@ Responda EXATAMENTE neste formato JSON (sem markdown, sem \`\`\`):
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuthenticatedUser(request);
+    if ('response' in auth) return auth.response;
+
+    const limited = enforceRateLimit({
+      key: auth.key,
+      bucket: 'api-weekly-mentoring',
+      max: 3,
+      windowMs: 60 * 60_000,
+    });
+    if (limited) return limited;
+
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(

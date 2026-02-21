@@ -245,3 +245,74 @@ export interface StudyInsight {
   icon: string; // nome do ícone lucide
   color: string; // tailwind color class
 }
+
+// ==========================================================
+// Provas & Banco de Questões
+// ==========================================================
+
+export type QuestionDifficulty = 'fácil' | 'médio' | 'difícil' | 'extremo';
+
+export interface QuestionAlternative {
+  key: string;      // "A", "B", ...
+  text: string;
+}
+
+export interface QuestionBankItem {
+  id?: string;
+  statement: string;
+  alternatives: QuestionAlternative[];
+  answer: string;              // key da alternativa correta
+  explanation?: string;
+  materia: string;
+  subtema?: string;
+  banca?: string;
+  year?: number;
+  difficulty?: QuestionDifficulty;
+  tags?: string[];
+  sourceExamId?: string | null;
+  metadata?: Record<string, unknown>;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ExamMetadata {
+  id?: string;
+  name: string;
+  planId?: string | null;
+  banca?: string;
+  year?: number;
+  durationMinutes?: number;
+  questions: string[]; // questionIds em ordem
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface QuestionAttempt {
+  id?: string;
+  userId: string;
+  planId?: string | null;
+  questionId: string;
+  examId?: string | null;
+  attemptType: 'exam' | 'simulado' | 'treino';
+  selectedOption: string;
+  correct: boolean;
+  timeSpentSeconds: number;
+  createdAt?: string;
+}
+
+export interface SimulatedConfig {
+  id?: string;
+  userId: string;
+  planId?: string | null;
+  questionCount: number;
+  durationMinutes?: number;
+  filters: {
+    materias?: string[];
+    dificuldades?: QuestionDifficulty[];
+    bancas?: string[];
+    anos?: number[];
+    tags?: string[];
+  };
+  createdAt?: string;
+}

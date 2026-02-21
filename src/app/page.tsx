@@ -6,12 +6,12 @@
 
 'use client';
 
-import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
+import { useAuthContext } from '@/contexts/AuthContext';
 import LoginScreen from '@/components/LoginScreen';
 import Dashboard from '@/components/Dashboard';
 import { Zap } from 'lucide-react';
 
-function AppContent() {
+export default function Home() {
   const { user, loading } = useAuthContext();
 
   // Loading state
@@ -33,12 +33,4 @@ function AppContent() {
 
   // Autenticado → Dashboard
   return <Dashboard />;
-}
-
-export default function Home() {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  );
 }
