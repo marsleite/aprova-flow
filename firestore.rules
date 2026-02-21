@@ -157,6 +157,31 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Progresso de execução do plano diário (concluir/adiar blocos)
+    match /daily_ai_plan_progress/{progressId} {
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.dateISO is string
+                    && request.resource.data.planSignature is string
+                    && request.resource.data.completedBlocks is list
+                    && request.resource.data.deferredBlocks is list
+                    && request.resource.data.updatedAt is string;
+
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.dateISO == resource.data.dateISO
+                    && request.resource.data.planSignature is string
+                    && request.resource.data.completedBlocks is list
+                    && request.resource.data.deferredBlocks is list
+                    && request.resource.data.updatedAt is string;
+
+      allow delete: if false;
+    }
+
     // Eventos do calendário
     // Apenas o proprietário pode gerenciar seus eventos
     match /calendar_events/{eventId} {

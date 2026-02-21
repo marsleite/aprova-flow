@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { db } from './config';
 
 export interface DailyPlanBlock {
@@ -30,6 +30,23 @@ interface DailyAiPlanDoc {
 }
 
 const DAILY_AI_PLANS_COLLECTION = 'daily_ai_plans';
+const DAILY_AI_PLAN_PROGRESS_COLLECTION = 'daily_ai_plan_progress';
+
+export interface DailyAiPlanProgress {
+  userId: string;
+  dateISO: string;
+  planSignature: string;
+  completedBlocks: number[];
+  deferredBlocks: number[];
+  updatedAt: string;
+}
+
+export function buildDailyPlanSignature(plan: DailyPlanResponse): string {
+  return [
+    plan.dateISO,
+    ...plan.blocks.map((b) => `${b.subject}|${b.durationMinutes}|${b.taskType}|${b.priority}|${b.objective}`),
+  ].join('||');
+}
 
 function parsePlan(planJson: string): DailyPlanResponse | null {
   try {
@@ -60,4 +77,54 @@ export async function getDailyAiPlanForDate(userId: string, dateISO: string): Pr
   docs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return parsePlan(docs[0].planJson);
+}
+
+function progressDocId(userId: string, dateISO: string): string {
+  return `${userId}_${dateISO}`;
+}
+
+export async function getDailyAiPlanProgress(userId: string, dateISO: string): Promise<DailyAiPlanProgress | null> {
+  const ref = doc(db, DAILY_AI_PLAN_PROGRESS_COLLECTION, progressDocId(userId, dateISO));
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+
+  const data = snap.data() as Partial<DailyAiPlanProgress>;
+  if (!data || data.userId !== userId || data.dateISO !== dateISO) return null;
+
+  return {
+    userId: data.userId,
+    dateISO: data.dateISO,
+    planSignature: typeof data.planSignature === 'string' ? data.planSignature : '',
+    completedBlocks: Array.isArray(data.completedBlocks)
+      ? data.completedBlocks.filter((v): v is number => typeof v === 'number')
+      : [],
+    deferredBlocks: Array.isArray(data.deferredBlocks)
+      ? data.deferredBlocks.filter((v): v is number => typeof v === 'number')
+      : [],
+    updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : new Date().toISOString(),
+  };
+}
+
+export async function saveDailyAiPlanProgress(
+  userId: string,
+  dateISO: string,
+  progress: {
+    planSignature: string;
+    completedBlocks: number[];
+    deferredBlocks: number[];
+  }
+): Promise<void> {
+  const ref = doc(db, DAILY_AI_PLAN_PROGRESS_COLLECTION, progressDocId(userId, dateISO));
+  await setDoc(
+    ref,
+    {
+      userId,
+      dateISO,
+      planSignature: progress.planSignature,
+      completedBlocks: [...new Set(progress.completedBlocks)].sort((a, b) => a - b),
+      deferredBlocks: [...new Set(progress.deferredBlocks)].sort((a, b) => a - b),
+      updatedAt: new Date().toISOString(),
+    },
+    { merge: true }
+  );
 }

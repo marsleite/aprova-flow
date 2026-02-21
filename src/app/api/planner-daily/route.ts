@@ -8,6 +8,7 @@ interface PlannerDailyRequest {
   userName: string;
   activePlanName?: string | null;
   dateISO?: string;
+  replanMode?: 'manual' | 'session_saved';
   weeklyGoalHours: number;
   weeklyTotalHours: number;
   weeklyProgressPercent: number;
@@ -18,6 +19,17 @@ interface PlannerDailyRequest {
   subjectHours: { subject: string; hours: number }[];
   planVsActual: { subject: string; plannedPercent: number; actualPercent: number; status: string }[];
   accuracyBySubject?: { subject: string; accuracy: number; totalQuestions: number }[];
+  executionContext?: {
+    completedBlockIndexes?: number[];
+    deferredBlockIndexes?: number[];
+    currentBlocks?: {
+      subject: string;
+      durationMinutes: number;
+      objective: string;
+      taskType: 'teoria' | 'questoes' | 'revisao' | 'simulado';
+      priority: 'alta' | 'media' | 'baixa';
+    }[];
+  };
 }
 
 interface DailyPlanBlock {
@@ -38,6 +50,12 @@ interface PlannerDailyResponse {
 
 function buildFallbackPlan(ctx: PlannerDailyRequest, dateISO: string): PlannerDailyResponse {
   const available = Math.max(60, Math.min(360, ctx.availableMinutesToday ?? 180));
+  const completedIndexes = new Set(ctx.executionContext?.completedBlockIndexes || []);
+  const deferredIndexes = new Set(ctx.executionContext?.deferredBlockIndexes || []);
+  const deferredSubjects = (ctx.executionContext?.currentBlocks || [])
+    .map((block, idx) => ({ block, idx }))
+    .filter(({ idx }) => deferredIndexes.has(idx) && !completedIndexes.has(idx))
+    .map(({ block }) => block.subject);
 
   const neglectedSubjects = [...ctx.planVsActual]
     .filter((p) => p.status === 'neglected')
@@ -53,7 +71,7 @@ function buildFallbackPlan(ctx: PlannerDailyRequest, dateISO: string): PlannerDa
     .sort((a, b) => b.hours - a.hours)
     .map((s) => s.subject);
 
-  const candidates = [...new Set([...neglectedSubjects, ...lowAccuracySubjects, ...topHoursSubjects])];
+  const candidates = [...new Set([...deferredSubjects, ...neglectedSubjects, ...lowAccuracySubjects, ...topHoursSubjects])];
   const selected = (candidates.length > 0 ? candidates : ['Matéria prioritária']).slice(0, 3);
 
   const base = Math.floor(available / selected.length);
@@ -105,6 +123,23 @@ function buildPlannerPrompt(ctx: PlannerDailyRequest): string {
 
   const dateISO = ctx.dateISO || new Date().toISOString().slice(0, 10);
   const available = Math.max(30, Math.min(720, ctx.availableMinutesToday ?? 180));
+  const hasExecutionContext =
+    Array.isArray(ctx.executionContext?.currentBlocks) && ctx.executionContext.currentBlocks.length > 0;
+  const completedIndexes = new Set(ctx.executionContext?.completedBlockIndexes || []);
+  const deferredIndexes = new Set(ctx.executionContext?.deferredBlockIndexes || []);
+  const executionSummary = hasExecutionContext
+    ? ctx.executionContext!.currentBlocks!
+        .map((block, idx) => {
+          const status = completedIndexes.has(idx)
+            ? 'concluído'
+            : deferredIndexes.has(idx)
+              ? 'adiado'
+              : 'pendente';
+          return `  - [${idx + 1}] ${block.subject} (${block.durationMinutes} min, ${block.taskType}, prioridade ${block.priority}) -> ${status}`;
+        })
+        .join('\n')
+    : '  Sem execução anterior para hoje.';
+  const replanMode = ctx.replanMode || 'manual';
 
   return `Você é o planejador estratégico do AprovaMind.
 
@@ -118,6 +153,7 @@ REGRAS:
 - Entregue entre 3 e 6 blocos.
 - Cada bloco deve ter duração entre 20 e 120 minutos.
 - Soma dos blocos deve ficar próxima de ${available} minutos (variação máxima de 20%).
+- Se houver contexto de execução prévia, replaneje os blocos restantes com base no que já foi concluído.
 - Se não houver dados suficientes, ainda assim gere plano simples e prático.
 - Idioma: português brasileiro.
 
@@ -131,6 +167,7 @@ DADOS DO ALUNO:
 - Dias estudados na semana: ${ctx.daysStudiedThisWeek}/7
 - Minutos já estudados hoje: ${ctx.todayTotalMinutes}
 - Janela disponível hoje (alvo): ${available} minutos
+- Tipo de solicitação: ${replanMode}
 
 HORAS POR MATÉRIA:
 ${subjectSummary}
@@ -140,6 +177,15 @@ ${planSummary}
 
 ACERTO POR MATÉRIA:
 ${accuracySummary}
+
+EXECUÇÃO DO PLANO DE HOJE:
+${executionSummary}
+
+ORIENTAÇÃO ESPECÍFICA DE REPLANEJAMENTO:
+- Se tipo de solicitação for "session_saved", assuma que o aluno acabou de terminar uma sessão agora.
+- Evite repetir blocos marcados como concluídos.
+- Se houver blocos adiados, tente recolocá-los de forma realista.
+- Preserve foco nas matérias negligenciadas e de menor acurácia.
 
 Schema de saída (JSON exato):
 {
