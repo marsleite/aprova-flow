@@ -115,6 +115,48 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Telemetria de uso da IA
+    // Cada usuário escreve apenas seus próprios eventos.
+    match /ai_usage_events/{eventId} {
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.route is string
+                    && request.resource.data.task is string
+                    && request.resource.data.provider is string
+                    && request.resource.data.model is string
+                    && request.resource.data.latencyMs is number
+                    && request.resource.data.inputTokens is number
+                    && request.resource.data.outputTokens is number
+                    && request.resource.data.totalTokens is number
+                    && request.resource.data.estimatedCostUsd is number
+                    && request.resource.data.success is bool
+                    && request.resource.data.statusCode is number;
+
+      allow update, delete: if false;
+    }
+
+    // Snapshots do plano diário gerado por IA
+    match /daily_ai_plans/{planId} {
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.dateISO is string
+                    && request.resource.data.estimatedTotalMinutes is number
+                    && request.resource.data.blocksCount is number
+                    && request.resource.data.rationale is string
+                    && request.resource.data.planJson is string
+                    && request.resource.data.provider is string
+                    && request.resource.data.model is string
+                    && request.resource.data.createdAt is string;
+
+      allow update, delete: if false;
+    }
+
     // Eventos do calendário
     // Apenas o proprietário pode gerenciar seus eventos
     match /calendar_events/{eventId} {

@@ -62,6 +62,8 @@ import MentorCard from './MentorCard';
 import WeeklyMentoringCard from './WeeklyMentoringCard';
 import QuestionTrackerCard from './QuestionTrackerCard';
 import AccuracyChart from './AccuracyChart';
+import DailyAiPlannerCard from './DailyAiPlannerCard';
+import AiUsageSummaryCard from './AiUsageSummaryCard';
 import ChatPanel from './ChatPanel';
 import PostSessionToast from './PostSessionToast';
 import PlanManager from '@/components/PlanManager';
@@ -70,6 +72,7 @@ import Calendar from './Calendar';
 import ScheduleModal from './ScheduleModal';
 import { TrendingUp, MessageCircle, BookOpen } from 'lucide-react';
 import Link from 'next/link';
+import { isAdminIdentity } from '@/lib/admin';
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -119,6 +122,10 @@ export default function Dashboard() {
   // ---- Plano ativo resolvido (para queries) ----
   const filterPlanId = activePlanId || undefined;
   const activePlanObj = plans.find((p) => p.id === activePlanId) || null;
+  const canViewAiTelemetry = isAdminIdentity({
+    uid: user?.uid,
+    email: user?.email,
+  });
 
   // ---- Migração + load de planos ----
   const loadPlans = useCallback(async () => {
@@ -484,6 +491,39 @@ export default function Dashboard() {
             </div>
           </Link>
         </motion.div>
+
+        {/* Linha 1.7: Plano Diário IA */}
+        <motion.div
+          custom={4.7}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mb-6"
+        >
+          <DailyAiPlannerCard
+            userId={user.uid}
+            userName={user.displayName?.split(' ')[0] || 'Estudante'}
+            activePlanName={activePlanObj?.name || null}
+            consistency={consistency}
+            subjectHours={subjectData}
+            planVsActual={planVsActual}
+            accuracyData={accuracyData}
+            totalTodaySeconds={summary.totalToday}
+          />
+        </motion.div>
+
+        {/* Linha 1.8: Telemetria de IA */}
+        {canViewAiTelemetry && (
+          <motion.div
+            custom={4.8}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            className="mb-6"
+          >
+            <AiUsageSummaryCard userId={user.uid} />
+          </motion.div>
+        )}
 
         {/* Linha 2: Barras Semanal + Histórico */}
         <motion.div

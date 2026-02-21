@@ -45,7 +45,7 @@ async function verifyFirebaseIdToken(idToken: string): Promise<string | null> {
 }
 
 export async function requireAuthenticatedUser(req: NextRequest): Promise<
-  | { uid: string; key: string }
+  | { uid: string; key: string; idToken: string }
   | { response: NextResponse }
 > {
   const authHeader = req.headers.get('authorization');
@@ -69,7 +69,7 @@ export async function requireAuthenticatedUser(req: NextRequest): Promise<
       };
     }
 
-    return { uid, key: uid };
+    return { uid, key: uid, idToken };
   } catch {
     const ip = getClientIp(req);
     return {
