@@ -12,7 +12,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { enforceRateLimit, requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, parseJsonFromModelText, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 
@@ -143,13 +144,13 @@ export async function POST(request: NextRequest) {
     const auth = await requireAuthenticatedUser(request);
     if ('response' in auth) return auth.response;
 
-    const limited = enforceRateLimit({
-      key: auth.key,
-      bucket: 'api-weekly-mentoring',
-      max: 3,
-      windowMs: 60 * 60_000,
+    const quota = await enforceAiTaskQuota({
+      uid: auth.uid,
+      email: auth.email,
+      idToken: auth.idToken,
+      task: 'weekly-mentoring',
     });
-    if (limited) return limited;
+    if (!quota.allowed) return quota.response;
 
     const body = (await request.json()) as WeeklyMentoringRequest;
 
@@ -223,6 +224,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result, {
       headers: {
+        ...quota.headers,
         'x-ai-provider': aiResponse.provider,
         'x-ai-model': aiResponse.model,
         'x-ai-latency-ms': String(aiResponse.latencyMs),

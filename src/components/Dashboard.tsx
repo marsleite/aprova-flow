@@ -73,6 +73,8 @@ import ScheduleModal from './ScheduleModal';
 import { TrendingUp, MessageCircle, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { isAdminIdentity } from '@/lib/admin';
+import { useEntitlements } from '@/hooks/useEntitlements';
+import { canCreateMorePlans, isUnlimited } from '@/lib/entitlements';
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -114,6 +116,7 @@ export default function Dashboard() {
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [creatingSessionPlan, setCreatingSessionPlan] = useState(false);
+  const [planLimitNotice, setPlanLimitNotice] = useState<string | null>(null);
   
   // ---- Estados do Calendário ----
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
@@ -122,6 +125,8 @@ export default function Dashboard() {
   // ---- Plano ativo resolvido (para queries) ----
   const filterPlanId = activePlanId || undefined;
   const activePlanObj = plans.find((p) => p.id === activePlanId) || null;
+  const { planTier, capabilities } = useEntitlements(user?.uid, user?.email);
+  const canCreatePlan = canCreateMorePlans(planTier, plans.length);
   const canViewAiTelemetry = isAdminIdentity({
     uid: user?.uid,
     email: user?.email,
@@ -302,6 +307,10 @@ export default function Dashboard() {
 
   const handleCreateSessionPlan = async () => {
     if (!user || creatingSessionPlan) return;
+    if (!canCreatePlan) {
+      setPlanLimitNotice('Seu plano atual atingiu o limite de sessões/editais. Faça upgrade para criar mais.');
+      return;
+    }
     setCreatingSessionPlan(true);
     try {
       const baseName = 'Sessão Livre';
@@ -339,6 +348,10 @@ export default function Dashboard() {
         activePlanId={activePlanId}
         onSelectPlan={handleSelectPlan}
         onCreatePlan={() => {
+          if (!canCreatePlan) {
+            setPlanLimitNotice('Seu plano atual atingiu o limite de sessões/editais. Faça upgrade para continuar.');
+            return;
+          }
           setEditingPlan(null);
           setPlanManagerOpen(true);
         }}
@@ -373,6 +386,19 @@ export default function Dashboard() {
               ? <>Focando em <span className="font-medium text-white" style={{ color: activePlanObj.color }}>{activePlanObj.name}</span></>
               : 'Acompanhe seu progresso e mantenha a consistência nos estudos.'}
           </p>
+          <p className="mt-2 text-xs text-gray-500">
+            Plano atual: <span className="uppercase text-gray-300">{planTier}</span>
+            {!isUnlimited(capabilities.maxStudyPlans) && (
+              <>
+                {' '}· Editais: <span className="text-gray-300">{plans.length}/{capabilities.maxStudyPlans}</span>
+              </>
+            )}
+          </p>
+          {planLimitNotice && (
+            <div className="mt-3 inline-flex items-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-200">
+              {planLimitNotice}
+            </div>
+          )}
         </motion.div>
 
         {/* Resumo Diário */}
@@ -422,6 +448,10 @@ export default function Dashboard() {
             onSessionSaved={handleSessionSaved}
             onCreateSession={handleCreateSessionPlan}
             onCreateEdital={() => {
+              if (!canCreatePlan) {
+                setPlanLimitNotice('Seu plano atual atingiu o limite de sessões/editais. Faça upgrade para continuar.');
+                return;
+              }
               setEditingPlan(null);
               setPlanManagerOpen(true);
             }}
@@ -663,19 +693,28 @@ export default function Dashboard() {
           animate="show"
           className="mt-6"
         >
-          <Calendar
-            userId={user.uid}
-            planId={filterPlanId}
-            onDateClick={(date) => {
-              setSelectedDate(date);
-              setScheduleModalOpen(true);
-            }}
-            onEventClick={(event) => {
-              // TODO: Implementar modal de edição/visualização de evento
-              console.log('Event clicked:', event);
-            }}
-            loading={loading}
-          />
+          {capabilities.canUseCalendar ? (
+            <Calendar
+              userId={user.uid}
+              planId={filterPlanId}
+              onDateClick={(date) => {
+                setSelectedDate(date);
+                setScheduleModalOpen(true);
+              }}
+              onEventClick={(event) => {
+                // TODO: Implementar modal de edição/visualização de evento
+                console.log('Event clicked:', event);
+              }}
+              loading={loading}
+            />
+          ) : (
+            <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-6">
+              <h3 className="text-lg font-semibold text-white">Calendário avançado</h3>
+              <p className="mt-2 text-sm text-blue-100/90">
+                Disponível nos planos Pro e Premium para organizar sessões com agenda mensal.
+              </p>
+            </div>
+          )}
         </motion.div>
       </main>
 
@@ -728,7 +767,7 @@ export default function Dashboard() {
 
       {/* ScheduleModal (agendar sessões) */}
       <ScheduleModal
-        isOpen={scheduleModalOpen}
+        isOpen={scheduleModalOpen && capabilities.canUseCalendar}
         onClose={() => {
           setScheduleModalOpen(false);
           setSelectedDate(null);

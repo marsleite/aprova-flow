@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { enforceRateLimit, requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, parseJsonFromModelText, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 import { saveDailyAiPlanSnapshot } from '@/lib/server/dailyAiPlanStore';
@@ -272,13 +273,13 @@ export async function POST(request: NextRequest) {
     const auth = await requireAuthenticatedUser(request);
     if ('response' in auth) return auth.response;
 
-    const limited = enforceRateLimit({
-      key: auth.key,
-      bucket: 'api-planner-daily',
-      max: 8,
-      windowMs: 60_000,
+    const quota = await enforceAiTaskQuota({
+      uid: auth.uid,
+      email: auth.email,
+      idToken: auth.idToken,
+      task: 'planner-daily',
     });
-    if (limited) return limited;
+    if (!quota.allowed) return quota.response;
 
     const body = (await request.json()) as PlannerDailyRequest;
     if (!body?.userName || !Number.isFinite(body.weeklyGoalHours)) {
@@ -336,6 +337,7 @@ export async function POST(request: NextRequest) {
         { ...fallbackPlan, fallbackUsed: true },
         {
           headers: {
+            ...quota.headers,
             'x-ai-provider': aiResponse.provider,
             'x-ai-model': aiResponse.model,
             'x-ai-latency-ms': String(aiResponse.latencyMs),
@@ -381,6 +383,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(plan, {
       headers: {
+        ...quota.headers,
         'x-ai-provider': aiResponse.provider,
         'x-ai-model': aiResponse.model,
         'x-ai-latency-ms': String(aiResponse.latencyMs),

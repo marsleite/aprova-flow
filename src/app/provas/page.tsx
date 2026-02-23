@@ -3,14 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { listExamsByPlan, getAvailableSubjects } from '@/lib/firebase/questions';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import { ExamMetadata } from '@/types';
-import { Clock, BookOpen, Award, Plus, Home } from 'lucide-react';
+import { Clock, BookOpen, Award, Plus, Home, Lock } from 'lucide-react';
 import Link from 'next/link';
 
 type TabType = 'oficiais' | 'simulados' | 'treino';
 
 export default function ProvasPage() {
   const { user } = useAuthContext();
+  const { capabilities } = useEntitlements(user?.uid, user?.email);
   const [activeTab, setActiveTab] = useState<TabType>('oficiais');
   const [exams, setExams] = useState<ExamMetadata[]>([]);
   const [loading, setLoading] = useState(true);
@@ -249,32 +251,56 @@ export default function ProvasPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-white">Meus Simulados</h2>
-              <Link
-                href="/provas/criar-simulado"
-                className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
-              >
-                <Plus className="h-4 w-4" />
-                Criar Simulado
-              </Link>
+              {capabilities.canCreateSimulados ? (
+                <Link
+                  href="/provas/criar-simulado"
+                  className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  Criar Simulado
+                </Link>
+              ) : (
+                <span className="inline-flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+                  <Lock className="h-3.5 w-3.5" />
+                  Simulados no Pro/Premium
+                </span>
+              )}
             </div>
             
-            <div className="text-center py-12 bg-gray-800/50 rounded-lg border border-gray-700">
-              <Award className="mx-auto h-12 w-12 text-gray-600 mb-4" />
-              <p className="text-gray-400 mb-4">
-                Crie simulados personalizados com filtros de matéria, banca e dificuldade
-              </p>
-              <Link
-                href="/provas/criar-simulado"
-                className="inline-block px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
-              >
-                Criar Primeiro Simulado
-              </Link>
-            </div>
+            {capabilities.canCreateSimulados ? (
+              <div className="text-center py-12 bg-gray-800/50 rounded-lg border border-gray-700">
+                <Award className="mx-auto h-12 w-12 text-gray-600 mb-4" />
+                <p className="text-gray-400 mb-4">
+                  Crie simulados personalizados com filtros de matéria, banca e dificuldade
+                </p>
+                <Link
+                  href="/provas/criar-simulado"
+                  className="inline-block px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
+                >
+                  Criar Primeiro Simulado
+                </Link>
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-amber-500/10 rounded-lg border border-amber-500/30">
+                <Lock className="mx-auto h-12 w-12 text-amber-300 mb-4" />
+                <p className="text-amber-100 font-medium mb-2">Simulados personalizados fazem parte do plano Pro/Premium</p>
+                <p className="text-sm text-amber-200/80">
+                  Continue praticando nas provas oficiais e desbloqueie simulados para treinos direcionados.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === 'treino' && (
-          <TreinoRapidoTab />
+          capabilities.canUseTreinoRapido ? (
+            <TreinoRapidoTab />
+          ) : (
+            <div className="text-center py-12 bg-amber-500/10 rounded-lg border border-amber-500/30">
+              <Lock className="mx-auto h-12 w-12 text-amber-300 mb-4" />
+              <p className="text-amber-100 font-medium">Treino rápido disponível no plano Pro/Premium</p>
+            </div>
+          )
         )}
       </div>
     </div>

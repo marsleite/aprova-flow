@@ -157,6 +157,36 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Contadores de quota/rate limit de IA (janela distribuída)
+    match /ai_rate_limits/{docId} {
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.task is string
+                    && request.resource.data.planTier is string
+                    && request.resource.data.window is string
+                    && request.resource.data.windowKey is string
+                    && request.resource.data.windowStartMs is number
+                    && request.resource.data.windowEndMs is number
+                    && request.resource.data.count is number
+                    && request.resource.data.updatedAt is string;
+
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.task == resource.data.task
+                    && request.resource.data.window == resource.data.window
+                    && request.resource.data.windowKey == resource.data.windowKey
+                    && request.resource.data.windowStartMs is number
+                    && request.resource.data.windowEndMs is number
+                    && request.resource.data.count is number
+                    && request.resource.data.updatedAt is string;
+
+      allow delete: if false;
+    }
+
     // Progresso de execução do plano diário (concluir/adiar blocos)
     match /daily_ai_plan_progress/{progressId} {
       allow read: if request.auth != null

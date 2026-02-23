@@ -177,7 +177,7 @@ Checklist:
 - [x] Implementar `src/lib/ai/*`.
 - [x] Migrar rotas para gateway.
 - [x] Substituir parse manual de JSON por schema/parse estruturado resiliente.
-- [ ] Migrar rate limit para armazenamento compartilhado.
+- [x] Migrar rate limit para armazenamento compartilhado.
 
 ### Fase 2 — Produto premium diário (3 semanas)
 
@@ -221,7 +221,7 @@ Entregáveis:
 - Trial de 7 dias para recursos premium de IA.
 
 Checklist:
-- [ ] Definir quotas por recurso (não só por mensagens de chat).
+- [x] Definir quotas por recurso (não só por mensagens de chat).
 - [ ] Exibir ganho de resultado no paywall.
 - [ ] Instrumentar conversão por feature premium.
 
@@ -262,10 +262,10 @@ Aprendizado:
 ## 9) Backlog Técnico Objetivo
 
 Prioridade alta:
-- [ ] AI Gateway unificado com suporte OpenAI + Gemini.
-- [ ] Structured outputs para saídas críticas.
-- [ ] Observabilidade de custo e tokens por chamada.
-- [ ] Rate limit distribuído.
+- [x] AI Gateway unificado com suporte OpenAI + Gemini.
+- [x] Structured outputs para saídas críticas.
+- [x] Observabilidade de custo e tokens por chamada.
+- [x] Rate limit distribuído.
 
 Prioridade média:
 - [ ] Persistir memória curta do chat por usuário/plano.

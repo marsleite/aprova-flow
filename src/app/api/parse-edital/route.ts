@@ -11,7 +11,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { enforceRateLimit, requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, parseJsonFromModelText, runAiPdf } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 
@@ -86,13 +87,13 @@ export async function POST(req: NextRequest) {
     const auth = await requireAuthenticatedUser(req);
     if ('response' in auth) return auth.response;
 
-    const limited = enforceRateLimit({
-      key: auth.key,
-      bucket: 'api-parse-edital',
-      max: 5,
-      windowMs: 10 * 60_000,
+    const quota = await enforceAiTaskQuota({
+      uid: auth.uid,
+      email: auth.email,
+      idToken: auth.idToken,
+      task: 'parse-edital',
     });
-    if (limited) return limited;
+    if (!quota.allowed) return quota.response;
 
     const body: ParseEditalRequest = await req.json();
     const { pdfBase64 } = body;
@@ -238,6 +239,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(parsed, {
       headers: {
+        ...quota.headers,
         'x-ai-provider': aiResponse.provider,
         'x-ai-model': aiResponse.model,
         'x-ai-latency-ms': String(aiResponse.latencyMs),

@@ -7,7 +7,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { enforceRateLimit, requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 
@@ -119,13 +120,13 @@ export async function POST(request: NextRequest) {
     const auth = await requireAuthenticatedUser(request);
     if ('response' in auth) return auth.response;
 
-    const limited = enforceRateLimit({
-      key: auth.key,
-      bucket: 'api-chat',
-      max: 30,
-      windowMs: 60_000,
+    const quota = await enforceAiTaskQuota({
+      uid: auth.uid,
+      email: auth.email,
+      idToken: auth.idToken,
+      task: 'chat',
     });
-    if (limited) return limited;
+    if (!quota.allowed) return quota.response;
 
     const { messages, context } = (await request.json()) as ChatRequest;
 
@@ -205,6 +206,7 @@ export async function POST(request: NextRequest) {
       { reply: cleaned },
       {
         headers: {
+          ...quota.headers,
           'x-ai-provider': aiResponse.provider,
           'x-ai-model': aiResponse.model,
           'x-ai-latency-ms': String(aiResponse.latencyMs),
