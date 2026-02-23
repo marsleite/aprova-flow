@@ -15,7 +15,6 @@ import {
   Pause,
   Square,
   Clock,
-  AlertTriangle,
   Save,
   BookOpen,
   SkipForward,
@@ -188,7 +187,6 @@ export default function StudyTimer({
     mode,
     selectedSubject,
     isTabVisible,
-    isAutoPaused,
     pomodoroPhase,
     currentCycle,
     totalCycles,
@@ -205,7 +203,7 @@ export default function StudyTimer({
   } = timer;
 
   const isRunning = status === 'running';
-  const isPaused = status === 'paused' || isAutoPaused;
+  const isPaused = status === 'paused';
   const isIdle = status === 'idle' || status === 'stopped';
   const isPomodoro = mode !== 'freeform';
   const isBreak = pomodoroPhase === 'shortBreak' || pomodoroPhase === 'longBreak';
@@ -291,14 +289,14 @@ export default function StudyTimer({
           <Clock className="h-5 w-5 text-violet-400" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-white">Cronômetro de Estudo</h2>
-          <p className="text-sm text-gray-400">
-            {isPomodoro
-              ? `Pomodoro ${pomodoroConfig?.label}`
-              : 'Tempo líquido · Pausa automática ao trocar aba'}
-          </p>
+            <h2 className="text-lg font-semibold text-white">Cronômetro de Estudo</h2>
+            <p className="text-sm text-gray-400">
+              {isPomodoro
+                ? `Pomodoro ${pomodoroConfig?.label}`
+                : 'Tempo corrido · Pausa manual'}
+            </p>
+          </div>
         </div>
-      </div>
 
       {/* Seletor de Modo */}
       <div className="mb-5">
@@ -439,7 +437,7 @@ export default function StudyTimer({
           />
 
           {/* Glow quando rodando em foco */}
-          {isRunning && !isAutoPaused && !isBreak && (
+          {isRunning && !isBreak && (
             <div className="absolute inset-0 animate-timer-glow rounded-full" />
           )}
 
@@ -452,9 +450,9 @@ export default function StudyTimer({
             className="relative z-10 flex flex-col items-center"
           >
             <span
-              className={`font-mono text-4xl font-bold tracking-wider transition-colors duration-300 sm:text-5xl
-                ${isRunning && !isAutoPaused && !isBreak ? 'text-violet-400' : ''}
-                ${isRunning && !isAutoPaused && isBreak ? 'text-emerald-400' : ''}
+                className={`font-mono text-4xl font-bold tracking-wider transition-colors duration-300 sm:text-5xl
+                ${isRunning && !isBreak ? 'text-violet-400' : ''}
+                ${isRunning && isBreak ? 'text-emerald-400' : ''}
                 ${isPaused ? 'text-amber-400' : ''}
                 ${isIdle ? 'text-gray-500' : ''}
               `}
@@ -473,32 +471,26 @@ export default function StudyTimer({
         {/* Indicador de status */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={`${status}-${isAutoPaused}-${pomodoroPhase}`}
+            key={`${status}-${pomodoroPhase}`}
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.2 }}
             className="mt-2 flex items-center gap-2"
           >
-            {isRunning && !isAutoPaused && !isBreak && (
+            {isRunning && !isBreak && (
               <>
                 <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
                 <span className="text-sm text-green-400">Estudando...</span>
               </>
             )}
-            {isRunning && !isAutoPaused && isBreak && (
+            {isRunning && isBreak && (
               <>
                 <Coffee className="h-4 w-4 text-emerald-400" />
                 <span className="text-sm text-emerald-400">Descansando...</span>
               </>
             )}
-            {isAutoPaused && (
-              <>
-                <AlertTriangle className="h-4 w-4 text-amber-400" />
-                <span className="text-sm text-amber-400">Auto-pausado (aba inativa)</span>
-              </>
-            )}
-            {isPaused && !isAutoPaused && (
+            {isPaused && (
               <>
                 <span className="h-2 w-2 rounded-full bg-amber-400" />
                 <span className="text-sm text-amber-400">Pausado</span>
@@ -547,7 +539,7 @@ export default function StudyTimer({
           )}
 
           {/* Pause */}
-          {isRunning && !isAutoPaused && (
+          {isRunning && (
             <motion.button
               key="pause"
               initial={{ scale: 0 }}
@@ -628,11 +620,11 @@ export default function StudyTimer({
             exit={{ opacity: 0, height: 0 }}
             className="mt-4 overflow-hidden rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-2"
           >
-            <p className="text-center text-xs text-amber-300">
-              O cronômetro está pausado enquanto esta aba estiver em segundo plano
-            </p>
-          </motion.div>
-        )}
+              <p className="text-center text-xs text-amber-300">
+              O cronômetro continua rodando mesmo com esta aba em segundo plano
+              </p>
+            </motion.div>
+          )}
       </AnimatePresence>
     </motion.div>
   );
