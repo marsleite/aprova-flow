@@ -3,7 +3,10 @@ interface AdminIdentity {
   email?: string | null;
 }
 
-const BOOTSTRAP_ADMIN_EMAILS = ['marsleite@gmail.com'];
+const BOOTSTRAP_ADMIN_EMAILS = [
+  'marsleite@gmail.com',
+  'graceandradeleite@gmail.com',
+];
 
 function parseCsv(value: string | undefined): string[] {
   if (!value) return [];
