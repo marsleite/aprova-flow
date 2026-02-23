@@ -5,6 +5,8 @@ alwaysApply: true
 
 # AprovaMind — Memória do Projeto
 
+Última atualização: 23/02/2026
+
 ## O que é
 Plataforma de estudo para concursos. Rastreia horas líquidas de estudo, visualiza progresso por matéria, define metas e gera insights automáticos com IA. Suporta múltiplos editais (PGE, Magistratura, etc.) com dashboards filtrados por plano.
 
@@ -13,7 +15,7 @@ Plataforma de estudo para concursos. Rastreia horas líquidas de estudo, visuali
 - Tailwind CSS + Lucide React + framer-motion
 - Firebase (Auth Google + Firestore)
 - Recharts (Radar + Barras + RadialBar)
-- Google Gemini API (@google/genai) — modelo gemini-2.5-flash (uso estratégico)
+- AI Gateway (Gemini + OpenAI) com roteamento por tarefa
 
 ## Estrutura de Pastas
 ```
@@ -22,11 +24,14 @@ src/
 │   ├── api/chat/route.ts              # API Route — chat conversacional (Gemini)
 │   ├── api/parse-edital/route.ts      # API Route — importar PDF de edital (Gemini)
 │   ├── api/weekly-mentoring/route.ts  # API Route — mentoria semanal profunda (Gemini, 1x/semana)
+│   ├── api/planner-daily/route.ts     # API Route — plano diário IA com fallback resiliente
 │   ├── globals.css, layout.tsx, page.tsx
 ├── components/       # Todos os componentes de UI
 ├── contexts/         # AuthContext (Provider global)
 ├── hooks/            # useAuth, useStudyTimer (Page Visibility API)
 ├── lib/firebase/     # config.ts, sessions.ts, questions.ts, plans.ts
+├── lib/ai/           # gateway, métricas e providers (Gemini/OpenAI)
+├── lib/server/       # guard, persistência REST Firestore (telemetria/plans IA)
 ├── lib/utils.ts      # formatDuration, exportCSV, formatRelativeDate, etc.
 └── types/index.ts    # Todos os tipos centrais
 ```
@@ -37,6 +42,10 @@ src/
 - **user_stats/{userId}** — weeklyGoalHours, planSubjects[], activePlanId, planUpdatedAt, updatedAt
 - **questions_stats/{id}** — userId, planId, subject, totalQuestions, correctAnswers, accuracy, date, createdAt
 - **weekly_mentoring/{id}** — userId, planId, weekStart (YYYY-MM-DD seg), generatedAt, content (JSON da IA)
+- **ai_usage_events/{id}** — telemetria por chamada IA (tokens, custo, latência, status)
+- **daily_ai_plans/{id}** — snapshot do plano diário gerado por IA
+- **daily_ai_plan_progress/{id}** — execução do plano diário (blocos concluídos/adiados)
+- **calendar_events/{id}** — agenda de estudo
 
 ## Arquitetura Multi-Edital
 - Cada sessão pertence a um edital (`planId` em sessions e questions_stats)
@@ -66,6 +75,8 @@ src/
 - GeminiCoachCard (mini-card com dica do dia local + botão "Conversar com o Coach")
 - MentorCard (motor de regras LOCAL: equilibrio, fadiga, constância × precisão, ação imediata, frases motivacionais)
 - WeeklyMentoringCard (mentoria semanal via IA, 1x/semana, cache no Firestore)
+- DailyAiPlannerCard (plano diário executável, persistência e replanejamento)
+- AiUsageSummaryCard (telemetria de IA, visível apenas para admin)
 - QuestionTrackerCard (registro de questões com matérias do plano ativo, validação, toast de acerto)
 - AccuracyChart (RadialBar Recharts + barras horizontais por matéria, cores dinâmicas)
 - ChatPanel (painel slide-in de chat conversacional com Coach IA Gemini)
@@ -104,11 +115,25 @@ src/
 13. ✅ Otimização de IA — Mentor e PostSession convertidos para regras locais, IA reservada para alto valor
 14. ✅ Mentoria Semanal — análise profunda via IA (1x/semana), cache no Firestore, WeeklyMentoringCard
 
+### Fase IA — Fundação + Produto Diário (EM PRODUÇÃO)
+1. ✅ AI Gateway unificado para Gemini/OpenAI (roteamento por tarefa e env por rota)
+2. ✅ Observabilidade por chamada IA (tokens, custo, latência, status, provider/model)
+3. ✅ Persistência server-side de telemetria em `ai_usage_events`
+4. ✅ Painel de telemetria no dashboard (restrito a admin por email/uid)
+5. ✅ `/api/planner-daily` com JSON estruturado e fallback resiliente
+6. ✅ Persistência de snapshot em `daily_ai_plans`
+7. ✅ Execução do plano diário (iniciar no cronômetro, concluir, adiar)
+8. ✅ Persistência de progresso em `daily_ai_plan_progress`
+9. ✅ Replanejamento automático após sessão salva, com contexto de execução
+10. ✅ Rate limit distribuído + quotas por recurso/plano (Firestore, por task/tier)
+11. ✅ Base de entitlements transversal (`planTier`) aplicada em planos, simulados e calendário
+12. ✅ Menu de conta com modal "Conta e Plano" para visualizar benefícios e trocar tier
+
 ### PRÓXIMA TASK:
-15. **Modo prova** — simulado temporizado + análise pós-prova
+12. **Paywall contextual de produto + IA** (mensagem de upgrade + valor claro ao atingir limite)
 
 ### PRÓXIMA FASE:
-16. **Notificações inteligentes** — push contextual
+11. **Pós-simulado premium** — diagnóstico + trilha 24h/72h/7d
 
 ## Roadmap — Fase 3 (Escala e Monetização)
 1. ✅ Benchmark anônimo — comparar constância com usuários similares e mostrar percentil
@@ -136,16 +161,23 @@ src/
   4. Fase final: scraping / integrações oficiais (quando juridicamente possível) + curadoria humana.
 - **Status**: feature planejada para depois das entregas atuais de Fase 3; manter esta evolução como última etapa.
 
-## Arquitetura IA (Gemini) — Uso Estratégico
+## Arquitetura IA (Gateway Multi-Provider) — Uso Estratégico
 
 ### Filosofia: IA só para alto valor, regras locais para o resto
 - MentorCard e PostSessionToast usam motor de regras LOCAL (zero chamadas à API)
-- IA Gemini reservada para ações do usuário e análises profundas
+- IA reservada para ações do usuário e análises profundas
 
-### API Routes (3 rotas, GEMINI_API_KEY nunca vai ao browser):
-- `/api/chat` — Chat conversacional com Coach IA (sob demanda do usuário)
-- `/api/parse-edital` — Importação de PDF de edital (extrai matérias, pesos, nome, meta via inlineData)
+### Camada central
+- `src/lib/ai/gateway.ts`: decide provider/model por tarefa
+- Providers: `src/lib/ai/providers/gemini.ts` e `src/lib/ai/providers/openai.ts`
+- Métricas/custo: `src/lib/ai/metrics.ts`
+- Telemetria persistida: `src/lib/server/aiUsageStore.ts`
+
+### API Routes IA (4 rotas):
+- `/api/chat` — Chat conversacional com Coach IA
+- `/api/parse-edital` — Importação de PDF de edital
 - `/api/weekly-mentoring` — Mentoria semanal profunda (1x/semana, cache no Firestore)
+- `/api/planner-daily` — Plano diário adaptativo + fallback robusto
 
 ### Rotas removidas (substituídas por regras locais):
 - ~~/api/gemini~~ — substituído por GeminiCoachCard local
@@ -166,7 +198,7 @@ src/
 
 ### Impacto na quota:
 - Antes: ~10-30 req/dia/usuário (Mentor + PostSession + Chat + ParseEdital)
-- Depois: ~0-5 req/dia/usuário (só Chat + ParseEdital + 0.14 MentoriaSemanal)
+- Depois: ~1-8 req/dia/usuário (Chat + ParseEdital + Planner + 0.14 MentoriaSemanal)
 - Plano free (20 req/dia) suporta ~4 usuários ativos
 
 ## Convenções de Código

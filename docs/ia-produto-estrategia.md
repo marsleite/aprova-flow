@@ -158,9 +158,9 @@ Entregáveis:
 - Definição de KPIs de produto e IA.
 
 Checklist:
-- [ ] Criar `ai_usage_events`.
-- [ ] Logar métricas em `/api/chat`, `/api/weekly-mentoring`, `/api/parse-edital`.
-- [ ] Painel simples (console/admin) com custo diário e taxa de erro.
+- [x] Criar `ai_usage_events`.
+- [x] Logar métricas em `/api/chat`, `/api/weekly-mentoring`, `/api/parse-edital`.
+- [x] Painel simples (console/admin) com custo diário e taxa de erro.
 
 ### Fase 1 — Fundação técnica de IA (2 semanas)
 
@@ -174,10 +174,10 @@ Entregáveis:
 - Rate limit persistente (não in-memory).
 
 Checklist:
-- [ ] Implementar `src/lib/ai/*`.
-- [ ] Migrar rotas para gateway.
-- [ ] Substituir parse manual de JSON por schema.
-- [ ] Migrar rate limit para armazenamento compartilhado.
+- [x] Implementar `src/lib/ai/*`.
+- [x] Migrar rotas para gateway.
+- [x] Substituir parse manual de JSON por schema/parse estruturado resiliente.
+- [x] Migrar rate limit para armazenamento compartilhado.
 
 ### Fase 2 — Produto premium diário (3 semanas)
 
@@ -190,9 +190,10 @@ Entregáveis:
 - Replanejamento automático após sessão salva.
 
 Checklist:
-- [ ] Definir schema do plano diário (3 a 6 blocos).
-- [ ] Criar UI com ações de execução (iniciar agora, adiar, concluído).
-- [ ] Salvar histórico de planos executados.
+- [x] Definir schema do plano diário (3 a 6 blocos).
+- [x] Criar UI com ações de execução (iniciar agora, adiar, concluído).
+- [x] Salvar histórico de planos executados.
+- [x] Replanejamento automático após sessão salva (com contexto de execução).
 
 ### Fase 3 — Pós-simulado premium (3 semanas)
 
@@ -220,7 +221,7 @@ Entregáveis:
 - Trial de 7 dias para recursos premium de IA.
 
 Checklist:
-- [ ] Definir quotas por recurso (não só por mensagens de chat).
+- [x] Definir quotas por recurso (não só por mensagens de chat).
 - [ ] Exibir ganho de resultado no paywall.
 - [ ] Instrumentar conversão por feature premium.
 
@@ -261,10 +262,10 @@ Aprendizado:
 ## 9) Backlog Técnico Objetivo
 
 Prioridade alta:
-- [ ] AI Gateway unificado com suporte OpenAI + Gemini.
-- [ ] Structured outputs para saídas críticas.
-- [ ] Observabilidade de custo e tokens por chamada.
-- [ ] Rate limit distribuído.
+- [x] AI Gateway unificado com suporte OpenAI + Gemini.
+- [x] Structured outputs para saídas críticas.
+- [x] Observabilidade de custo e tokens por chamada.
+- [x] Rate limit distribuído.
 
 Prioridade média:
 - [ ] Persistir memória curta do chat por usuário/plano.

@@ -12,8 +12,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
-import { enforceRateLimit, requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
+import { logAiUsageEvent, parseJsonFromModelText, runAiText } from '@/lib/ai';
+import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 
 // ============================================================
 // Tipos
@@ -142,21 +144,13 @@ export async function POST(request: NextRequest) {
     const auth = await requireAuthenticatedUser(request);
     if ('response' in auth) return auth.response;
 
-    const limited = enforceRateLimit({
-      key: auth.key,
-      bucket: 'api-weekly-mentoring',
-      max: 3,
-      windowMs: 60 * 60_000,
+    const quota = await enforceAiTaskQuota({
+      uid: auth.uid,
+      email: auth.email,
+      idToken: auth.idToken,
+      task: 'weekly-mentoring',
     });
-    if (limited) return limited;
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'GEMINI_API_KEY não configurada.' },
-        { status: 500 }
-      );
-    }
+    if (!quota.allowed) return quota.response;
 
     const body = (await request.json()) as WeeklyMentoringRequest;
 
@@ -167,36 +161,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const ai = new GoogleGenAI({ apiKey });
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: buildPrompt(body),
-      config: {
-        temperature: 0.4,
-        maxOutputTokens: 4096,
-      },
+    const aiResponse = await runAiText({
+      task: 'weekly-mentoring',
+      prompt: buildPrompt(body),
+      temperature: 0.4,
+      maxOutputTokens: 4096,
+      preferJson: true,
     });
 
-    const text = response.text?.trim() || '';
-
-    // Parse JSON com múltiplas estratégias
-    let parsed;
-    try {
-      let cleaned = text
-        .replace(/```json\s*/gi, '')
-        .replace(/```\s*/g, '')
-        .trim();
-
-      const firstBrace = cleaned.indexOf('{');
-      const lastBrace = cleaned.lastIndexOf('}');
-      if (firstBrace !== -1 && lastBrace > firstBrace) {
-        cleaned = cleaned.slice(firstBrace, lastBrace + 1);
-      }
-
-      parsed = JSON.parse(cleaned);
-    } catch {
-      console.error('[weekly-mentoring] JSON inválido:', text.slice(0, 500));
+    const parsed = parseJsonFromModelText<Record<string, unknown>>(aiResponse.text || '');
+    if (!parsed) {
+      console.error('[weekly-mentoring] JSON inválido:', (aiResponse.text || '').slice(0, 500));
+      const usageEvent = {
+        route: '/api/weekly-mentoring',
+        task: 'weekly-mentoring',
+        provider: aiResponse.provider,
+        model: aiResponse.model,
+        latencyMs: aiResponse.latencyMs,
+        inputTokens: aiResponse.usage.inputTokens,
+        outputTokens: aiResponse.usage.outputTokens,
+        totalTokens: aiResponse.usage.totalTokens,
+        estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
+        success: false,
+        statusCode: 422,
+        userId: auth.uid,
+        errorCode: 'JSON_PARSE_FAILED',
+      } as const;
+      logAiUsageEvent(usageEvent);
+      void saveAiUsageEvent(usageEvent, auth.idToken);
       return NextResponse.json(
         { error: 'Não foi possível gerar a mentoria. Tente novamente.' },
         { status: 422 }
@@ -213,7 +205,32 @@ export async function POST(request: NextRequest) {
       motivationalClose: typeof parsed.motivationalClose === 'string' ? parsed.motivationalClose : 'Continue firme. A vaga é sua.',
     };
 
-    return NextResponse.json(result);
+    const usageEvent = {
+      route: '/api/weekly-mentoring',
+      task: 'weekly-mentoring',
+      provider: aiResponse.provider,
+      model: aiResponse.model,
+      latencyMs: aiResponse.latencyMs,
+      inputTokens: aiResponse.usage.inputTokens,
+      outputTokens: aiResponse.usage.outputTokens,
+      totalTokens: aiResponse.usage.totalTokens,
+      estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
+      success: true,
+      statusCode: 200,
+      userId: auth.uid,
+    } as const;
+    logAiUsageEvent(usageEvent);
+    void saveAiUsageEvent(usageEvent, auth.idToken);
+
+    return NextResponse.json(result, {
+      headers: {
+        ...quota.headers,
+        'x-ai-provider': aiResponse.provider,
+        'x-ai-model': aiResponse.model,
+        'x-ai-latency-ms': String(aiResponse.latencyMs),
+        'x-ai-cost-usd': aiResponse.usage.estimatedCostUsd.toString(),
+      },
+    });
   } catch (error) {
     console.error('[weekly-mentoring] Erro:', error);
 

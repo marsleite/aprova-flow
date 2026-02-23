@@ -694,9 +694,14 @@ GEMINI_API_KEY=...
 FIREBASE_ADMIN_PROJECT_ID=...
 FIREBASE_ADMIN_CLIENT_EMAIL=...
 FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+NEXT_PUBLIC_ADMIN_EMAILS=admin1@email.com,admin2@email.com
+# opcional
+NEXT_PUBLIC_ADMIN_UIDS=uid1,uid2
 ```
 
 > As rotas de IA validam Firebase ID token no servidor via Firebase Admin.
+> `NEXT_PUBLIC_ADMIN_EMAILS` e `NEXT_PUBLIC_ADMIN_UIDS` liberam acesso total (tier `admin`).
+> Também existe uma lista bootstrap fixa em `/Users/marleite/workspace/aprova-flow/src/lib/admin.ts`.
 
 ### 3. Configurar Firebase
 

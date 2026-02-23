@@ -252,6 +252,21 @@ export default function StudyTimer({
   }, [phaseJustChanged, playNotificationSound, clearPhaseChanged]);
 
   // ========================================
+  // Integração com Plano Diário IA
+  // ========================================
+  useEffect(() => {
+    function handleStartSubject(event: Event) {
+      const custom = event as CustomEvent<{ subject?: string }>;
+      const subject = custom.detail?.subject;
+      if (!subject || typeof subject !== 'string') return;
+      setSelectedSubject(subject);
+    }
+
+    window.addEventListener('aprova:start-subject', handleStartSubject as EventListener);
+    return () => window.removeEventListener('aprova:start-subject', handleStartSubject as EventListener);
+  }, [setSelectedSubject]);
+
+  // ========================================
   // Handlers
   // ========================================
   const handleStop = async () => {

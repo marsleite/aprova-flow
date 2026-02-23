@@ -11,8 +11,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
-import { enforceRateLimit, requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
+import { logAiUsageEvent, parseJsonFromModelText, runAiPdf } from '@/lib/ai';
+import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 
 // ============================================================
 // Tipos
@@ -85,21 +87,13 @@ export async function POST(req: NextRequest) {
     const auth = await requireAuthenticatedUser(req);
     if ('response' in auth) return auth.response;
 
-    const limited = enforceRateLimit({
-      key: auth.key,
-      bucket: 'api-parse-edital',
-      max: 5,
-      windowMs: 10 * 60_000,
+    const quota = await enforceAiTaskQuota({
+      uid: auth.uid,
+      email: auth.email,
+      idToken: auth.idToken,
+      task: 'parse-edital',
     });
-    if (limited) return limited;
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'GEMINI_API_KEY não configurada no servidor.' },
-        { status: 500 }
-      );
-    }
+    if (!quota.allowed) return quota.response;
 
     const body: ParseEditalRequest = await req.json();
     const { pdfBase64 } = body;
@@ -121,35 +115,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Chama Gemini com o PDF inline
-    const ai = new GoogleGenAI({ apiKey });
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            {
-              inlineData: {
-                mimeType: 'application/pdf',
-                data: pdfBase64,
-              },
-            },
-            {
-              text: 'Analise este edital de concurso público e extraia as matérias cobradas conforme as instruções.',
-            },
-          ],
-        },
-      ],
-      config: {
-        temperature: 0.2,
-        maxOutputTokens: 8192,
-        systemInstruction: SYSTEM_PROMPT,
-      },
+    const aiResponse = await runAiPdf({
+      task: 'parse-edital',
+      pdfBase64,
+      prompt: 'Analise este edital de concurso público e extraia as matérias cobradas conforme as instruções.',
+      temperature: 0.2,
+      maxOutputTokens: 8192,
+      systemInstruction: SYSTEM_PROMPT,
     });
 
-    const raw = response.text?.trim() || '';
+    const raw = aiResponse.text?.trim() || '';
 
     console.log(
       `[parse-edital] Gemini retornou ${raw.length} caracteres para PDF "${pdfBase64.length > 100 ? '...' : ''}"`
@@ -163,47 +138,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Tenta parsear JSON da resposta com múltiplas estratégias
-    let parsed: ParseEditalResponse;
-    try {
-      // Estratégia 1: Remove backticks markdown e whitespace
-      let cleaned = raw
-        .replace(/```json\s*/gi, '')
-        .replace(/```\s*/g, '')
-        .trim();
-
-      // Estratégia 2: Encontra o primeiro '{' e o último '}' para extrair o JSON
-      const firstBrace = cleaned.indexOf('{');
-      const lastBrace = cleaned.lastIndexOf('}');
-      if (firstBrace !== -1 && lastBrace > firstBrace) {
-        cleaned = cleaned.slice(firstBrace, lastBrace + 1);
-      }
-
-      parsed = JSON.parse(cleaned);
-    } catch {
-      // Estratégia 3: Regex mais específica como fallback
-      try {
-        const jsonMatch = raw.match(
-          /\{\s*"planName"[\s\S]*?"subjects"\s*:\s*\[[\s\S]*?\]\s*[,}][\s\S]*?\}/
-        );
-        if (jsonMatch) {
-          parsed = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error('Nenhum JSON encontrado');
-        }
-      } catch {
-        console.error(
-          'Resposta do Gemini não é JSON válido:',
-          raw.slice(0, 1000)
-        );
-        return NextResponse.json(
-          {
-            error:
-              'Não foi possível interpretar o edital. Tente novamente.',
-          },
-          { status: 422 }
-        );
-      }
+    const parsed = parseJsonFromModelText<ParseEditalResponse>(raw);
+    if (!parsed) {
+      console.error(
+        'Resposta do modelo não é JSON válido:',
+        raw.slice(0, 1000)
+      );
+      const usageEvent = {
+        route: '/api/parse-edital',
+        task: 'parse-edital',
+        provider: aiResponse.provider,
+        model: aiResponse.model,
+        latencyMs: aiResponse.latencyMs,
+        inputTokens: aiResponse.usage.inputTokens,
+        outputTokens: aiResponse.usage.outputTokens,
+        totalTokens: aiResponse.usage.totalTokens,
+        estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
+        success: false,
+        statusCode: 422,
+        userId: auth.uid,
+        errorCode: 'JSON_PARSE_FAILED',
+      } as const;
+      logAiUsageEvent(usageEvent);
+      void saveAiUsageEvent(usageEvent, auth.idToken);
+      return NextResponse.json(
+        {
+          error:
+            'Não foi possível interpretar o edital. Tente novamente.',
+        },
+        { status: 422 }
+      );
     }
 
     // Valida a resposta
@@ -256,7 +220,32 @@ export async function POST(req: NextRequest) {
     );
     parsed.totalSubjectsFound = parsed.subjects.length;
 
-    return NextResponse.json(parsed);
+    const usageEvent = {
+      route: '/api/parse-edital',
+      task: 'parse-edital',
+      provider: aiResponse.provider,
+      model: aiResponse.model,
+      latencyMs: aiResponse.latencyMs,
+      inputTokens: aiResponse.usage.inputTokens,
+      outputTokens: aiResponse.usage.outputTokens,
+      totalTokens: aiResponse.usage.totalTokens,
+      estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
+      success: true,
+      statusCode: 200,
+      userId: auth.uid,
+    } as const;
+    logAiUsageEvent(usageEvent);
+    void saveAiUsageEvent(usageEvent, auth.idToken);
+
+    return NextResponse.json(parsed, {
+      headers: {
+        ...quota.headers,
+        'x-ai-provider': aiResponse.provider,
+        'x-ai-model': aiResponse.model,
+        'x-ai-latency-ms': String(aiResponse.latencyMs),
+        'x-ai-cost-usd': aiResponse.usage.estimatedCostUsd.toString(),
+      },
+    });
   } catch (err) {
     console.error('Erro ao processar edital:', err);
 

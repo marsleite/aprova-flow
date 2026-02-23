@@ -115,6 +115,103 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Telemetria de uso da IA
+    // Cada usuário escreve apenas seus próprios eventos.
+    match /ai_usage_events/{eventId} {
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.route is string
+                    && request.resource.data.task is string
+                    && request.resource.data.provider is string
+                    && request.resource.data.model is string
+                    && request.resource.data.latencyMs is number
+                    && request.resource.data.inputTokens is number
+                    && request.resource.data.outputTokens is number
+                    && request.resource.data.totalTokens is number
+                    && request.resource.data.estimatedCostUsd is number
+                    && request.resource.data.success is bool
+                    && request.resource.data.statusCode is number;
+
+      allow update, delete: if false;
+    }
+
+    // Snapshots do plano diário gerado por IA
+    match /daily_ai_plans/{planId} {
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.dateISO is string
+                    && request.resource.data.estimatedTotalMinutes is number
+                    && request.resource.data.blocksCount is number
+                    && request.resource.data.rationale is string
+                    && request.resource.data.planJson is string
+                    && request.resource.data.provider is string
+                    && request.resource.data.model is string
+                    && request.resource.data.createdAt is string;
+
+      allow update, delete: if false;
+    }
+
+    // Contadores de quota/rate limit de IA (janela distribuída)
+    match /ai_rate_limits/{docId} {
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.task is string
+                    && request.resource.data.planTier is string
+                    && request.resource.data.window is string
+                    && request.resource.data.windowKey is string
+                    && request.resource.data.windowStartMs is number
+                    && request.resource.data.windowEndMs is number
+                    && request.resource.data.count is number
+                    && request.resource.data.updatedAt is string;
+
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.task == resource.data.task
+                    && request.resource.data.window == resource.data.window
+                    && request.resource.data.windowKey == resource.data.windowKey
+                    && request.resource.data.windowStartMs is number
+                    && request.resource.data.windowEndMs is number
+                    && request.resource.data.count is number
+                    && request.resource.data.updatedAt is string;
+
+      allow delete: if false;
+    }
+
+    // Progresso de execução do plano diário (concluir/adiar blocos)
+    match /daily_ai_plan_progress/{progressId} {
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.dateISO is string
+                    && request.resource.data.planSignature is string
+                    && request.resource.data.completedBlocks is list
+                    && request.resource.data.deferredBlocks is list
+                    && request.resource.data.updatedAt is string;
+
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.dateISO == resource.data.dateISO
+                    && request.resource.data.planSignature is string
+                    && request.resource.data.completedBlocks is list
+                    && request.resource.data.deferredBlocks is list
+                    && request.resource.data.updatedAt is string;
+
+      allow delete: if false;
+    }
+
     // Eventos do calendário
     // Apenas o proprietário pode gerenciar seus eventos
     match /calendar_events/{eventId} {

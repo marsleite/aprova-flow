@@ -10,6 +10,7 @@ const inMemoryLimiter = new Map<string, LimiterState>();
 type IdentityToolkitLookupResponse = {
   users?: Array<{
     localId?: string;
+    email?: string;
   }>;
 };
 
@@ -19,7 +20,7 @@ function getClientIp(req: NextRequest): string {
   return req.headers.get('x-real-ip') || 'unknown';
 }
 
-async function verifyFirebaseIdToken(idToken: string): Promise<string | null> {
+async function verifyFirebaseIdToken(idToken: string): Promise<{ uid: string; email?: string | null } | null> {
   const apiKey =
     process.env.FIREBASE_WEB_API_KEY ||
     process.env.FIREBASE_API_KEY ||
@@ -41,11 +42,12 @@ async function verifyFirebaseIdToken(idToken: string): Promise<string | null> {
 
   const data = (await response.json()) as IdentityToolkitLookupResponse;
   const uid = data.users?.[0]?.localId;
-  return uid || null;
+  if (!uid) return null;
+  return { uid, email: data.users?.[0]?.email || null };
 }
 
 export async function requireAuthenticatedUser(req: NextRequest): Promise<
-  | { uid: string; key: string }
+  | { uid: string; email?: string | null; key: string; idToken: string }
   | { response: NextResponse }
 > {
   const authHeader = req.headers.get('authorization');
@@ -59,8 +61,8 @@ export async function requireAuthenticatedUser(req: NextRequest): Promise<
   }
 
   try {
-    const uid = await verifyFirebaseIdToken(idToken);
-    if (!uid) {
+    const identity = await verifyFirebaseIdToken(idToken);
+    if (!identity) {
       return {
         response: NextResponse.json(
           { error: 'Sessão inválida ou expirada. Faça login novamente.' },
@@ -69,7 +71,7 @@ export async function requireAuthenticatedUser(req: NextRequest): Promise<
       };
     }
 
-    return { uid, key: uid };
+    return { uid: identity.uid, email: identity.email, key: identity.uid, idToken };
   } catch {
     const ip = getClientIp(req);
     return {

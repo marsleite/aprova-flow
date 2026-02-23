@@ -7,8 +7,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
-import { enforceRateLimit, requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
+import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
+import { logAiUsageEvent, runAiText } from '@/lib/ai';
+import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 
 // ============================================================
 // Tipos
@@ -118,22 +120,13 @@ export async function POST(request: NextRequest) {
     const auth = await requireAuthenticatedUser(request);
     if ('response' in auth) return auth.response;
 
-    const limited = enforceRateLimit({
-      key: auth.key,
-      bucket: 'api-chat',
-      max: 30,
-      windowMs: 60_000,
+    const quota = await enforceAiTaskQuota({
+      uid: auth.uid,
+      email: auth.email,
+      idToken: auth.idToken,
+      task: 'chat',
     });
-    if (limited) return limited;
-
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'GEMINI_API_KEY não configurada' },
-        { status: 500 }
-      );
-    }
+    if (!quota.allowed) return quota.response;
 
     const { messages, context } = (await request.json()) as ChatRequest;
 
@@ -160,8 +153,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Mensagens inválidas.' }, { status: 400 });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
-
     // Monta o histórico de conversa com system prompt embutido
     const systemPrompt = buildSystemPrompt(context);
 
@@ -182,21 +173,47 @@ export async function POST(request: NextRequest) {
 
     const fullPrompt = contents.join('\n\n') + '\n\nCoach:';
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: fullPrompt,
-      config: {
-        temperature: 0.5,       // Um pouco mais criativo para conversa natural
-        maxOutputTokens: 2048,  // Evita respostas truncadas em conversas longas
-      },
+    const aiResponse = await runAiText({
+      task: 'chat',
+      prompt: fullPrompt,
+      temperature: 0.5,
+      maxOutputTokens: 2048,
     });
 
-    const text = response.text?.trim() || 'Desculpe, não consegui gerar uma resposta. Tente novamente.';
+    const text = aiResponse.text?.trim() || 'Desculpe, não consegui gerar uma resposta. Tente novamente.';
 
     // Limpa prefixo "Coach:" se o modelo repetir
     const cleaned = text.replace(/^Coach:\s*/i, '').trim();
 
-    return NextResponse.json({ reply: cleaned });
+    const usageEvent = {
+      route: '/api/chat',
+      task: 'chat',
+      provider: aiResponse.provider,
+      model: aiResponse.model,
+      latencyMs: aiResponse.latencyMs,
+      inputTokens: aiResponse.usage.inputTokens,
+      outputTokens: aiResponse.usage.outputTokens,
+      totalTokens: aiResponse.usage.totalTokens,
+      estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
+      success: true,
+      statusCode: 200,
+      userId: auth.uid,
+    } as const;
+    logAiUsageEvent(usageEvent);
+    void saveAiUsageEvent(usageEvent, auth.idToken);
+
+    return NextResponse.json(
+      { reply: cleaned },
+      {
+        headers: {
+          ...quota.headers,
+          'x-ai-provider': aiResponse.provider,
+          'x-ai-model': aiResponse.model,
+          'x-ai-latency-ms': String(aiResponse.latencyMs),
+          'x-ai-cost-usd': aiResponse.usage.estimatedCostUsd.toString(),
+        },
+      }
+    );
   } catch (error) {
     console.error('Erro no chat:', error);
     return NextResponse.json(

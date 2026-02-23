@@ -4,13 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { saveSimulatedConfig, getRandomQuestions } from '@/lib/firebase/questions';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import { QuestionDifficulty, DEFAULT_SUBJECTS } from '@/types';
-import { ArrowLeft, Play } from 'lucide-react';
+import { ArrowLeft, Play, Lock } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CriarSimuladoPage() {
   const router = useRouter();
   const { user } = useAuthContext();
+  const { capabilities } = useEntitlements(user?.uid, user?.email);
 
   const [questionCount, setQuestionCount] = useState(20);
   const [durationMinutes, setDurationMinutes] = useState(60);
@@ -93,6 +95,42 @@ export default function CriarSimuladoPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
         <p className="text-gray-400">Faça login para criar simulados</p>
+      </div>
+    );
+  }
+
+  if (!capabilities.canCreateSimulados) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
+        <div className="mx-auto max-w-3xl space-y-6">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/provas"
+              className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-400" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-white sm:text-3xl">Criar Simulado</h1>
+              <p className="text-gray-400">Recurso de plano Pro/Premium</p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-8 text-center">
+            <Lock className="mx-auto mb-4 h-12 w-12 text-amber-300" />
+            <p className="text-lg font-semibold text-amber-100">Simulados personalizados estão no plano Pro/Premium</p>
+            <p className="mt-2 text-sm text-amber-200/80">
+              Você pode continuar usando provas oficiais na seção Provas &amp; Simulados.
+            </p>
+            <Link
+              href="/provas"
+              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-amber-500/20 px-4 py-2 text-sm text-amber-100 hover:bg-amber-500/30"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar para Provas
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
