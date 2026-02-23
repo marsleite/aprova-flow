@@ -112,6 +112,7 @@ export default function Dashboard() {
   const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
   const [accuracyAnalytics, setAccuracyAnalytics] = useState<AccuracyAnalytics | null>(null);
   const [accuracyDelta, setAccuracyDelta] = useState<Record<string, number>>({});
+  const [sessionsRefreshKey, setSessionsRefreshKey] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -259,6 +260,7 @@ export default function Dashboard() {
   const handleSessionSaved = async (session: { subject: string; duration: number }) => {
     setLastSavedSession(session);
     await fetchData();
+    setSessionsRefreshKey((prev) => prev + 1);
     
     // Atualiza benchmark do usuário
     if (user && consistency?.weeklyGoalHours && consistency.weeklyTotalSeconds) {
@@ -340,6 +342,11 @@ export default function Dashboard() {
   };
 
   if (!user) return null;
+
+  const handleSessionsChanged = async () => {
+    await fetchData();
+    setSessionsRefreshKey((prev) => prev + 1);
+  };
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -575,7 +582,11 @@ export default function Dashboard() {
           animate="show"
           className="mt-6"
         >
-          <ActivityHeatmap userId={user.uid} planId={filterPlanId} />
+          <ActivityHeatmap
+            userId={user.uid}
+            planId={filterPlanId}
+            refreshKey={sessionsRefreshKey}
+          />
         </motion.div>
 
         {/* Linha 3: Meta + Plano de Estudo */}
@@ -682,7 +693,11 @@ export default function Dashboard() {
           animate="show"
           className="mt-6"
         >
-          <SessionHistory userId={user.uid} planId={filterPlanId} />
+          <SessionHistory
+            userId={user.uid}
+            planId={filterPlanId}
+            onSessionsChanged={handleSessionsChanged}
+          />
         </motion.div>
 
         {/* Linha 6: Calendário */}

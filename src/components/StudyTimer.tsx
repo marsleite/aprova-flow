@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
@@ -21,6 +21,9 @@ import {
   Timer,
   Coffee,
   Zap,
+  Search,
+  Plus,
+  ChevronDown,
 } from 'lucide-react';
 import { useStudyTimer } from '@/hooks/useStudyTimer';
 import { formatTimerDisplay } from '@/lib/utils';
@@ -165,6 +168,173 @@ function CycleIndicator({ current, total }: { current: number; total: number }) 
   );
 }
 
+function SubjectDropdown({
+  value,
+  options,
+  disabled,
+  onSelect,
+  onAdd,
+}: {
+  value: string;
+  options: string[];
+  disabled: boolean;
+  onSelect: (subject: string) => void;
+  onAdd: (subject: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const trimmed = query.trim();
+
+  const filteredOptions = options
+    .filter((item) => trimmed === '' || item.toLowerCase().includes(trimmed.toLowerCase()));
+
+  const isExactOption = options.some((item) => item.toLowerCase() === trimmed.toLowerCase());
+  const canAddCustom = trimmed.length > 0 && !isExactOption;
+  const showDropdown = !disabled && open;
+
+  const handleSelect = (subject: string) => {
+    onSelect(subject);
+    setOpen(false);
+    setQuery('');
+  };
+
+  const handleAdd = (subject: string) => {
+    const normalized = subject.trim();
+    if (!normalized) return;
+    onAdd(normalized);
+    setOpen(false);
+    setQuery('');
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setOpen(false);
+      setQuery('');
+      return;
+    }
+
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+
+    if (canAddCustom) {
+      handleAdd(trimmed);
+      return;
+    }
+
+    const match =
+      filteredOptions.find((item) => item.toLowerCase() === trimmed.toLowerCase()) ||
+      filteredOptions[0];
+
+    if (match) {
+      handleSelect(match);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const id = window.setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        onClick={() => {
+          if (disabled) return;
+          setOpen((prev) => {
+            const next = !prev;
+            if (!next) setQuery('');
+            return next;
+          });
+        }}
+        disabled={disabled}
+        className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-gray-800/50 px-4 py-3 text-left text-white outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span className={value ? 'text-white' : 'text-gray-400'}>
+          {value || 'Selecione uma matéria...'}
+        </span>
+        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {showDropdown && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.12 }}
+            className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border border-white/10 bg-gray-800 shadow-xl"
+          >
+            <div className="border-b border-white/5 p-2">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Buscar ou digitar matéria..."
+                  className="w-full rounded-lg border border-white/10 bg-gray-900/70 py-2 pl-9 pr-3 text-sm text-gray-200 outline-none transition-all placeholder:text-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
+                />
+              </div>
+            </div>
+
+            <div className="max-h-[220px] overflow-y-auto">
+              {canAddCustom && (
+                <button
+                  type="button"
+                  onClick={() => handleAdd(trimmed)}
+                  className="flex w-full items-center gap-2 border-b border-white/5 px-3 py-2 text-left text-sm text-violet-400 transition hover:bg-violet-500/10"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Adicionar &quot;{trimmed}&quot;</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => handleSelect('')}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-white/5 hover:text-white"
+              >
+                <span className="flex-1">Selecione uma matéria...</span>
+              </button>
+
+              {filteredOptions.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => handleSelect(item)}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-white/5 hover:text-white"
+                >
+                  <span className="flex-1">{item}</span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ========================================
 // Componente Principal
 // ========================================
@@ -179,6 +349,7 @@ export default function StudyTimer({
 }: StudyTimerProps) {
   // Plano selecionado para esta sessão (herda do header, mas pode ser trocado)
   const [selectedPlanId, setSelectedPlanId] = useState(activePlanId || '');
+  const [customSubjectsByPlan, setCustomSubjectsByPlan] = useState<Record<string, string[]>>({});
   const timer = useStudyTimer({ userId, planId: selectedPlanId || undefined });
   const {
     displaySeconds,
@@ -212,9 +383,26 @@ export default function StudyTimer({
   const activePlan = plans.find((p) => p.id === selectedPlanId);
   const isGeneralSelected = !!activePlan?.isDefault;
   const canStart = !!selectedSubject && !isGeneralSelected;
-  const availableSubjects = activePlan && activePlan.subjects.length > 0
-    ? activePlan.subjects.map((s) => s.subject)
-    : DEFAULT_SUBJECTS as unknown as string[];
+  const currentPlanKey = selectedPlanId || '__global__';
+  const availableSubjects = useMemo(() => {
+    const baseSubjects = activePlan && activePlan.subjects.length > 0
+      ? activePlan.subjects.map((s) => s.subject)
+      : [...DEFAULT_SUBJECTS] as unknown as string[];
+    const customSubjects = customSubjectsByPlan[currentPlanKey] || [];
+    const merged = [...baseSubjects, ...customSubjects];
+
+    if (selectedSubject && !merged.some((item) => item.toLowerCase() === selectedSubject.toLowerCase())) {
+      merged.push(selectedSubject);
+    }
+
+    const seen = new Set<string>();
+    return merged.filter((item) => {
+      const key = item.trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [activePlan, customSubjectsByPlan, currentPlanKey, selectedSubject]);
 
   // Calcula total de segundos da fase (para o anel de progresso)
   const phaseTotalSeconds = (() => {
@@ -274,6 +462,29 @@ export default function StudyTimer({
     const savedDuration = isPomodoro ? totalFocusSeconds : displaySeconds;
     await stop();
     onSessionSaved?.({ subject: savedSubject, duration: savedDuration });
+  };
+
+  const handleAddSubject = (subjectName: string) => {
+    const trimmed = subjectName.trim();
+    if (!trimmed) return;
+
+    const existing = availableSubjects.find((item) => item.toLowerCase() === trimmed.toLowerCase());
+    const finalSubject = existing || trimmed;
+
+    if (!existing) {
+      setCustomSubjectsByPlan((prev) => {
+        const current = prev[currentPlanKey] || [];
+        if (current.some((item) => item.toLowerCase() === finalSubject.toLowerCase())) {
+          return prev;
+        }
+        return {
+          ...prev,
+          [currentPlanKey]: [...current, finalSubject],
+        };
+      });
+    }
+
+    setSelectedSubject(finalSubject);
   };
 
   return (
@@ -357,21 +568,13 @@ export default function StudyTimer({
           <BookOpen className="h-4 w-4" />
           Matéria
         </label>
-        <select
+        <SubjectDropdown
           value={selectedSubject}
-          onChange={(e) => setSelectedSubject(e.target.value)}
+          options={availableSubjects}
           disabled={!isIdle}
-          className="w-full rounded-xl border border-white/10 bg-gray-800/50 px-4 py-3 text-white
-                     outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20
-                     disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <option value="">Selecione uma matéria...</option>
-          {availableSubjects.map((subject) => (
-            <option key={subject} value={subject}>
-              {subject}
-            </option>
-          ))}
-        </select>
+          onSelect={setSelectedSubject}
+          onAdd={handleAddSubject}
+        />
       </div>
 
       {/* CTA quando "Geral" está selecionado */}
