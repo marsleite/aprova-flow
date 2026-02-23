@@ -1,9 +1,9 @@
 /**
  * Hook do Cronômetro de Estudo com Horas Líquidas + Pomodoro
  *
- * ===== REGRA DAS HORAS LÍQUIDAS =====
- * Utiliza a Page Visibility API para pausar automaticamente o cronômetro
- * quando o usuário muda de aba ou minimiza o navegador.
+ * ===== REGRA DE EXECUÇÃO =====
+ * O cronômetro continua contando em background (troca de aba/tela bloqueada).
+ * A pausa acontece apenas por ação explícita do usuário.
  *
  * ===== MODOS =====
  * - freeform: cronômetro livre (comportamento original)
@@ -46,8 +46,6 @@ interface UseStudyTimerReturn {
   selectedSubject: string;
   /** Se a aba está visível ou não */
   isTabVisible: boolean;
-  /** Se o cronômetro foi auto-pausado por troca de aba */
-  isAutoPaused: boolean;
   /** Fase atual do Pomodoro (null em freeform) */
   pomodoroPhase: PomodoroPhase | null;
   /** Ciclo atual (1-indexed) */
@@ -90,7 +88,6 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
   const [status, setStatus] = useState<TimerStatus>('idle');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [isTabVisible, setIsTabVisible] = useState(true);
-  const [isAutoPaused, setIsAutoPaused] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   // Freeform: contagem progressiva
@@ -106,7 +103,10 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
   // Refs
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<string>('');
-  const wasRunningBeforeHide = useRef(false);
+  const lastTickAtRef = useRef<number | null>(null);
+  const pomodoroPhaseRef = useRef<PomodoroPhase | null>(null);
+  const phaseSecondsLeftRef = useRef(0);
+  const currentCycleRef = useRef(1);
 
   const isPomodoro = mode !== 'freeform';
   const pomodoroConfig = isPomodoro ? POMODORO_PRESETS[mode] : null;
@@ -120,100 +120,127 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    lastTickAtRef.current = null;
   }, []);
+
+  const getNextPomodoroState = useCallback(
+    (phase: PomodoroPhase, cycle: number, config: PomodoroConfig) => {
+      if (phase === 'focus') {
+        const isLongBreak = cycle >= config.cyclesBeforeLongBreak;
+        return {
+          phase: isLongBreak ? ('longBreak' as const) : ('shortBreak' as const),
+          cycle,
+          secondsLeft: (isLongBreak ? config.longBreakMinutes : config.shortBreakMinutes) * 60,
+        };
+      }
+
+      const wasLongBreak = phase === 'longBreak';
+      const nextCycle = wasLongBreak ? 1 : cycle + 1;
+      return {
+        phase: 'focus' as const,
+        cycle: nextCycle,
+        secondsLeft: config.focusMinutes * 60,
+      };
+    },
+    []
+  );
 
   const startTicking = useCallback(() => {
     clearTick();
+    lastTickAtRef.current = Date.now();
+
     intervalRef.current = setInterval(() => {
+      const now = Date.now();
+      const lastTickAt = lastTickAtRef.current ?? now;
+      const deltaSeconds = Math.floor((now - lastTickAt) / 1000);
+      if (deltaSeconds <= 0) return;
+      lastTickAtRef.current = lastTickAt + deltaSeconds * 1000;
+
       if (!isPomodoro) {
-        // Freeform: conta pra cima
-        setElapsedSeconds((prev) => prev + 1);
+        // Freeform: conta com base no tempo real decorrido
+        setElapsedSeconds((prev) => prev + deltaSeconds);
       } else {
-        // Pomodoro: conta pra baixo
-        setPhaseSecondsLeft((prev) => {
-          if (prev <= 1) return 0; // será tratado pelo effect
-          return prev - 1;
-        });
-        // Acumula foco
-        setPomodoroPhase((phase) => {
-          if (phase === 'focus') {
-            setTotalFocusSeconds((t) => t + 1);
-            setElapsedSeconds((e) => e + 1);
+        if (!pomodoroConfig || !pomodoroPhaseRef.current) return;
+
+        let remaining = deltaSeconds;
+        let phase = pomodoroPhaseRef.current;
+        let secondsLeft = phaseSecondsLeftRef.current;
+        let cycle = currentCycleRef.current;
+        let focusSecondsToAdd = 0;
+        let changedPhase: PomodoroPhase | null = null;
+
+        while (remaining > 0 && phase) {
+          if (secondsLeft <= 0) {
+            const next = getNextPomodoroState(phase, cycle, pomodoroConfig);
+            phase = next.phase;
+            cycle = next.cycle;
+            secondsLeft = next.secondsLeft;
+            changedPhase = phase;
+            continue;
           }
-          return phase;
-        });
+
+          const secondsToConsume = Math.min(secondsLeft, remaining);
+          if (phase === 'focus') {
+            focusSecondsToAdd += secondsToConsume;
+          }
+
+          secondsLeft -= secondsToConsume;
+          remaining -= secondsToConsume;
+
+          if (secondsLeft === 0) {
+            const next = getNextPomodoroState(phase, cycle, pomodoroConfig);
+            phase = next.phase;
+            cycle = next.cycle;
+            secondsLeft = next.secondsLeft;
+            changedPhase = phase;
+          }
+        }
+
+        if (focusSecondsToAdd > 0) {
+          setTotalFocusSeconds((total) => total + focusSecondsToAdd);
+          setElapsedSeconds((elapsed) => elapsed + focusSecondsToAdd);
+        }
+
+        pomodoroPhaseRef.current = phase;
+        phaseSecondsLeftRef.current = secondsLeft;
+        currentCycleRef.current = cycle;
+        setPomodoroPhase(phase);
+        setPhaseSecondsLeft(secondsLeft);
+        setCurrentCycle(cycle);
+
+        if (changedPhase) {
+          setPhaseJustChanged(changedPhase);
+        }
       }
     }, 1000);
-  }, [isPomodoro, clearTick]);
+  }, [clearTick, getNextPomodoroState, isPomodoro, pomodoroConfig]);
 
   // ========================================
-  // Pomodoro — transição automática de fase
-  // ========================================
-  useEffect(() => {
-    if (!isPomodoro || status !== 'running' || phaseSecondsLeft > 0) return;
-    if (!pomodoroConfig || !pomodoroPhase) return;
-
-    // Fase acabou
-    clearTick();
-
-    if (pomodoroPhase === 'focus') {
-      // Foco acabou → vai pra pausa
-      const isLongBreak = currentCycle >= pomodoroConfig.cyclesBeforeLongBreak;
-      const nextPhase: PomodoroPhase = isLongBreak ? 'longBreak' : 'shortBreak';
-      const breakMinutes = isLongBreak
-        ? pomodoroConfig.longBreakMinutes
-        : pomodoroConfig.shortBreakMinutes;
-
-      setPomodoroPhase(nextPhase);
-      setPhaseSecondsLeft(breakMinutes * 60);
-      setPhaseJustChanged(nextPhase);
-      startTicking();
-    } else {
-      // Pausa acabou → próximo ciclo de foco
-      const wasLongBreak = pomodoroPhase === 'longBreak';
-      const nextCycle = wasLongBreak ? 1 : currentCycle + 1;
-
-      setCurrentCycle(nextCycle);
-      setPomodoroPhase('focus');
-      setPhaseSecondsLeft(pomodoroConfig.focusMinutes * 60);
-      setPhaseJustChanged('focus');
-      startTicking();
-    }
-  }, [
-    phaseSecondsLeft,
-    isPomodoro,
-    status,
-    pomodoroPhase,
-    pomodoroConfig,
-    currentCycle,
-    clearTick,
-    startTicking,
-  ]);
-
-  // ========================================
-  // Page Visibility API — Horas Líquidas
+  // Page Visibility API — apenas status visual da aba
   // ========================================
   useEffect(() => {
     const handleVisibilityChange = () => {
-      const visible = !document.hidden;
-      setIsTabVisible(visible);
-
-      if (!visible && status === 'running') {
-        wasRunningBeforeHide.current = true;
-        setIsAutoPaused(true);
-        clearTick();
-      } else if (visible && wasRunningBeforeHide.current) {
-        wasRunningBeforeHide.current = false;
-        setIsAutoPaused(false);
-        startTicking();
-      }
+      setIsTabVisible(!document.hidden);
     };
 
+    handleVisibilityChange();
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [status, clearTick, startTicking]);
+  }, []);
+
+  useEffect(() => {
+    pomodoroPhaseRef.current = pomodoroPhase;
+  }, [pomodoroPhase]);
+
+  useEffect(() => {
+    phaseSecondsLeftRef.current = phaseSecondsLeft;
+  }, [phaseSecondsLeft]);
+
+  useEffect(() => {
+    currentCycleRef.current = currentCycle;
+  }, [currentCycle]);
 
   // Limpa ao desmontar
   useEffect(() => {
@@ -242,18 +269,23 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
       startTimeRef.current = new Date().toISOString();
 
       if (isPomodoro && pomodoroConfig) {
+        const initialFocusSeconds = pomodoroConfig.focusMinutes * 60;
         setPomodoroPhase('focus');
-        setPhaseSecondsLeft(pomodoroConfig.focusMinutes * 60);
+        setPhaseSecondsLeft(initialFocusSeconds);
         setCurrentCycle(1);
+        pomodoroPhaseRef.current = 'focus';
+        phaseSecondsLeftRef.current = initialFocusSeconds;
+        currentCycleRef.current = 1;
       } else {
         setPomodoroPhase(null);
         setPhaseSecondsLeft(0);
+        pomodoroPhaseRef.current = null;
+        phaseSecondsLeftRef.current = 0;
+        currentCycleRef.current = 1;
       }
     }
 
     setStatus('running');
-    setIsAutoPaused(false);
-    wasRunningBeforeHide.current = false;
     startTicking();
   }, [selectedSubject, status, isPomodoro, pomodoroConfig, startTicking]);
 
@@ -292,18 +324,25 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
     setStatus('stopped');
     setElapsedSeconds(0);
     setTotalFocusSeconds(0);
-    setIsAutoPaused(false);
     setPomodoroPhase(null);
     setPhaseSecondsLeft(0);
     setCurrentCycle(1);
-    wasRunningBeforeHide.current = false;
+    pomodoroPhaseRef.current = null;
+    phaseSecondsLeftRef.current = 0;
+    currentCycleRef.current = 1;
   }, [status, isPomodoro, totalFocusSeconds, elapsedSeconds, userId, planId, selectedSubject, clearTick]);
 
   const skipPhase = useCallback(() => {
-    if (!isPomodoro || status !== 'running') return;
-    // Força transição zerando o timer da fase
-    setPhaseSecondsLeft(0);
-  }, [isPomodoro, status]);
+    if (!isPomodoro || status !== 'running' || !pomodoroConfig || !pomodoroPhaseRef.current) return;
+    const next = getNextPomodoroState(pomodoroPhaseRef.current, currentCycleRef.current, pomodoroConfig);
+    pomodoroPhaseRef.current = next.phase;
+    phaseSecondsLeftRef.current = next.secondsLeft;
+    currentCycleRef.current = next.cycle;
+    setPomodoroPhase(next.phase);
+    setPhaseSecondsLeft(next.secondsLeft);
+    setCurrentCycle(next.cycle);
+    setPhaseJustChanged(next.phase);
+  }, [getNextPomodoroState, isPomodoro, pomodoroConfig, status]);
 
   const clearPhaseChanged = useCallback(() => {
     setPhaseJustChanged(null);
@@ -322,7 +361,6 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
     mode,
     selectedSubject,
     isTabVisible,
-    isAutoPaused,
     pomodoroPhase,
     currentCycle,
     totalCycles: pomodoroConfig?.cyclesBeforeLongBreak ?? 4,
