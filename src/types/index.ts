@@ -4,8 +4,6 @@
  */
 
 /** Representa uma sessão de estudo salva no Firestore */
-export type StudySessionSource = 'timer' | 'manual';
-
 export interface StudySession {
   id?: string;
   userId: string;
@@ -16,10 +14,7 @@ export interface StudySession {
   endTime: string;        // ISO String do fim
   duration: number;       // Duração líquida em segundos
   date: string;           // ISO String da data (YYYY-MM-DD)
-  source?: StudySessionSource; // Origem da sessão (timer/app ou lançamento manual)
-  wasEdited?: boolean;    // Indica se a sessão foi ajustada manualmente após criada
   createdAt?: string;     // Timestamp de criação
-  updatedAt?: string;     // Timestamp da última atualização manual
 }
 
 /** Dados do usuário autenticado */

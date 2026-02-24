@@ -16,7 +16,6 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
 } from 'firebase/firestore';
 import { db } from './config';
 import {
@@ -55,30 +54,9 @@ function formatDateLocal(date: Date): string {
 export async function saveSession(session: Omit<StudySession, 'id' | 'createdAt'>): Promise<string> {
   const docRef = await addDoc(collection(db, SESSIONS_COLLECTION), {
     ...session,
-    source: session.source || 'timer',
-    wasEdited: session.wasEdited || false,
     createdAt: new Date().toISOString(),
   });
   return docRef.id;
-}
-
-type UpdatableSessionFields = Partial<
-  Pick<StudySession, 'subject' | 'subtopic' | 'startTime' | 'endTime' | 'duration' | 'date' | 'planId'>
->;
-
-/**
- * Atualiza uma sessão existente (ajuste manual).
- */
-export async function updateSession(
-  sessionId: string,
-  updates: UpdatableSessionFields
-): Promise<void> {
-  const ref = doc(db, SESSIONS_COLLECTION, sessionId);
-  await updateDoc(ref, {
-    ...updates,
-    wasEdited: true,
-    updatedAt: new Date().toISOString(),
-  });
 }
 
 /**
