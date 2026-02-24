@@ -6,6 +6,7 @@ const DASHBOARD_LAYOUT_COLLECTION = 'dashboard_layouts';
 export interface DashboardLayoutPrefs {
   order: string[];
   hidden: string[];
+  sizes: Record<string, string>;
 }
 
 interface DashboardLayoutDoc extends DashboardLayoutPrefs {
@@ -28,6 +29,23 @@ function sanitizeStringList(value: unknown): string[] {
   return unique;
 }
 
+function sanitizeSizesMap(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object') return {};
+
+  const entries = Object.entries(value as Record<string, unknown>);
+  const normalized: Record<string, string> = {};
+
+  for (const [key, raw] of entries) {
+    const normalizedKey = key.trim();
+    if (!normalizedKey || typeof raw !== 'string') continue;
+    const normalizedValue = raw.trim();
+    if (!normalizedValue) continue;
+    normalized[normalizedKey] = normalizedValue;
+  }
+
+  return normalized;
+}
+
 export async function getDashboardLayoutPrefs(userId: string): Promise<DashboardLayoutPrefs | null> {
   const ref = doc(db, DASHBOARD_LAYOUT_COLLECTION, userId);
   const snap = await getDoc(ref);
@@ -40,6 +58,7 @@ export async function getDashboardLayoutPrefs(userId: string): Promise<Dashboard
   return {
     order: sanitizeStringList(data.order),
     hidden: sanitizeStringList(data.hidden),
+    sizes: sanitizeSizesMap(data.sizes),
   };
 }
 
@@ -49,6 +68,7 @@ export async function saveDashboardLayoutPrefs(userId: string, prefs: DashboardL
     userId,
     order: sanitizeStringList(prefs.order),
     hidden: sanitizeStringList(prefs.hidden),
+    sizes: sanitizeSizesMap(prefs.sizes),
     version: 1,
     updatedAt: new Date().toISOString(),
   };
