@@ -222,11 +222,15 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
     setFormOpen(true);
   };
 
-  const closeForm = (force = false) => {
-    if (saving && !force) return;
+  const forceCloseForm = () => {
     setFormOpen(false);
     setEditingSession(null);
     setSaveError('');
+  };
+
+  const closeForm = () => {
+    if (saving) return;
+    forceCloseForm();
   };
 
   const handleSubmitSession = async (event: FormEvent<HTMLFormElement>) => {
@@ -254,7 +258,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
         });
       }
 
-      closeForm(true);
+      forceCloseForm();
       await fetchSessions();
       if (onSessionsChanged) {
         try {
