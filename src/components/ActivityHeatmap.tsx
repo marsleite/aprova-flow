@@ -17,6 +17,7 @@ import { formatDuration } from '@/lib/utils';
 interface ActivityHeatmapProps {
   userId: string;
   planId?: string;
+  refreshKey?: number;
 }
 
 const MONTH_NAMES_SHORT = [
@@ -44,7 +45,20 @@ interface DayCell {
   weekIndex: number;
 }
 
-export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps) {
+function getLevelFromSeconds(totalSeconds: number): DayActivity['level'] {
+  if (totalSeconds <= 0) return 0;
+
+  const minutes = totalSeconds / 60;
+
+  // Escala fixa para manter a leitura consistente em todo o período:
+  // 1-29 min -> nível 1, 30-59 -> nível 2, 60-119 -> nível 3, 120+ -> nível 4.
+  if (minutes >= 120) return 4;
+  if (minutes >= 60) return 3;
+  if (minutes >= 30) return 2;
+  return 1;
+}
+
+export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: ActivityHeatmapProps) {
   const [allDays, setAllDays] = useState<Map<string, DayActivity>>(new Map());
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<DayCell | null>(null);
@@ -80,7 +94,7 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
 
   useEffect(() => {
     fetchYearData();
-  }, [fetchYearData]);
+  }, [fetchYearData, refreshKey]);
 
   // Gera grid de ~53 semanas × 7 dias (estilo GitHub)
   const { grid, monthLabels, totalDays, totalSeconds, numWeeks } = useMemo(() => {
@@ -113,7 +127,6 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
     let lastMonthTracked = -1;
     let totalSec = 0;
     let totalD = 0;
-
     const cursor = new Date(startDate);
     let cellIndex = 0;
 
@@ -139,6 +152,7 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
       }
 
       const activity = allDays.get(dateStr);
+      const totalSecondsForCell = activity?.totalSeconds ?? 0;
 
       if (isFuture) {
         // Dias futuros: quadrado vazio (nível 0) para preencher o retângulo
@@ -154,8 +168,8 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
       } else {
         const cell: DayCell = {
           date: dateStr,
-          level: activity?.level ?? 0,
-          totalSeconds: activity?.totalSeconds ?? 0,
+          level: getLevelFromSeconds(totalSecondsForCell),
+          totalSeconds: totalSecondsForCell,
           sessionCount: activity?.sessionCount ?? 0,
           subjects: activity?.subjects ?? [],
           dayOfWeek: row,
@@ -219,10 +233,10 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
 
       {/* Heatmap container */}
       <div className="overflow-x-auto pb-1">
-        <div style={{ width: `max(100%, ${heatmapWidth}px)` }}>
-          {/* Month labels - mobile (fixo) */}
+        {/* Mobile: tamanho fixo com scroll horizontal */}
+        <div className="sm:hidden" style={{ width: `max(100%, ${heatmapWidth}px)` }}>
           <div
-            className="relative mb-1 h-4 sm:hidden"
+            className="relative mb-1 h-4"
             style={{ marginLeft: `${dayLabelWidth + 4}px`, width: `${gridWidth}px` }}
           >
             {monthLabels.map((m, i) => (
@@ -236,40 +250,20 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
             ))}
           </div>
 
-          {/* Month labels - desktop (elástico) */}
-          <div className="relative mb-1 ml-8 hidden h-4 sm:block">
-            {monthLabels.map((m, i) => (
-              <span
-                key={i}
-                className="absolute text-[10px] text-gray-500"
-                style={{ left: `${(m.weekIndex / numWeeks) * 100}%` }}
-              >
-                {m.label}
-              </span>
-            ))}
-          </div>
-
-          {/* Grid */}
           <div className="flex">
-            {/* Day labels */}
             <div className="mr-1 flex shrink-0 flex-col gap-[2px]">
               {DAY_LABELS.map((label, i) => (
-                <div
-                  key={i}
-                  style={{ height: `${cellSize}px` }}
-                  className="flex items-center sm:h-auto"
-                >
+                <div key={i} style={{ height: `${cellSize}px` }} className="flex items-center">
                   <span className="w-6 pr-1 text-right text-[9px] text-gray-500">{label}</span>
                 </div>
               ))}
             </div>
 
-            {/* Weeks columns */}
-            <div className="flex gap-[2px] sm:flex-1">
+            <div className="flex gap-[2px]">
               {Array.from({ length: numWeeks }).map((_, weekIdx) => (
                 <div
                   key={weekIdx}
-                  className="flex shrink-0 flex-col gap-[2px] sm:flex-1"
+                  className="flex shrink-0 flex-col gap-[2px]"
                   style={{ width: `${cellSize}px` }}
                 >
                   {Array.from({ length: 7 }).map((_, dayIdx) => {
@@ -278,7 +272,7 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
                       return (
                         <div
                           key={dayIdx}
-                          className="h-[11px] w-[11px] rounded-sm bg-transparent sm:h-auto sm:w-auto sm:aspect-square"
+                          className="h-[11px] w-[11px] rounded-sm bg-transparent"
                         />
                       );
                     }
@@ -290,7 +284,74 @@ export default function ActivityHeatmap({ userId, planId }: ActivityHeatmapProps
                       <button
                         key={dayIdx}
                         onClick={() => setSelectedDay(isSelected ? null : cell)}
-                        className={`h-[11px] w-[11px] rounded-sm transition-all sm:h-auto sm:w-auto sm:aspect-square
+                        className={`h-[11px] w-[11px] rounded-sm transition-all
+                          ${LEVEL_COLORS[cell.level]}
+                          ${isToday ? 'ring-1 ring-violet-400' : ''}
+                          ${isSelected ? 'ring-1 ring-white scale-110' : ''}
+                          hover:brightness-125 cursor-pointer
+                        `}
+                        title={
+                          cell.totalSeconds > 0
+                            ? `${cell.date} — ${formatDuration(cell.totalSeconds)}`
+                            : `${cell.date} — sem estudo`
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: preenche largura do card mantendo alinhamento dos dias */}
+        <div className="hidden sm:block">
+          <div className="relative mb-1 ml-8 h-4">
+            {monthLabels.map((m, i) => (
+              <span
+                key={i}
+                className="absolute text-[10px] text-gray-500"
+                style={{ left: `${(m.weekIndex / numWeeks) * 100}%` }}
+              >
+                {m.label}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex items-stretch">
+            <div className="mr-1 grid w-7 shrink-0 grid-rows-7 gap-[2px]">
+              {DAY_LABELS.map((label, i) => (
+                <div key={i} className="flex items-center">
+                  <span className="w-6 pr-1 text-right text-[9px] text-gray-500">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex min-w-0 flex-1 gap-[2px]">
+              {Array.from({ length: numWeeks }).map((_, weekIdx) => (
+                <div
+                  key={weekIdx}
+                  className="flex min-w-0 flex-1 flex-col gap-[2px]"
+                >
+                  {Array.from({ length: 7 }).map((_, dayIdx) => {
+                    const cell = grid[dayIdx][weekIdx];
+                    if (!cell) {
+                      return (
+                        <div
+                          key={dayIdx}
+                          className="aspect-square w-full rounded-sm bg-transparent"
+                        />
+                      );
+                    }
+
+                    const isToday = cell.date === todayStr;
+                    const isSelected = selectedDay?.date === cell.date;
+
+                    return (
+                      <button
+                        key={dayIdx}
+                        onClick={() => setSelectedDay(isSelected ? null : cell)}
+                        className={`aspect-square w-full rounded-sm transition-all
                           ${LEVEL_COLORS[cell.level]}
                           ${isToday ? 'ring-1 ring-violet-400' : ''}
                           ${isSelected ? 'ring-1 ring-white scale-110' : ''}

@@ -69,6 +69,12 @@ service cloud.firestore {
       allow read, write: if request.auth != null 
                          && request.auth.uid == userId;
     }
+
+    // Preferências de layout da dashboard (ordem/visibilidade dos blocos)
+    match /dashboard_layouts/{userId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+    }
     
     // Planos de estudo (editais)
     match /study_plans/{planId} {

@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
 import {
@@ -70,11 +70,12 @@ import PlanManager from '@/components/PlanManager';
 import BenchmarkCard from './BenchmarkCard';
 import Calendar from './Calendar';
 import ScheduleModal from './ScheduleModal';
-import { TrendingUp, MessageCircle, BookOpen } from 'lucide-react';
+import { TrendingUp, MessageCircle, BookOpen, LayoutGrid, ArrowUp, ArrowDown, Eye, EyeOff, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import { isAdminIdentity } from '@/lib/admin';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { canCreateMorePlans, isUnlimited } from '@/lib/entitlements';
+import { getDashboardLayoutPrefs, saveDashboardLayoutPrefs } from '@/lib/firebase/dashboard';
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -84,6 +85,248 @@ const sectionVariants = {
     transition: { duration: 0.4, delay: i * 0.08, ease: 'easeOut' as const },
   }),
 };
+
+type DashboardSectionId =
+  | 'daily-summary'
+  | 'summary-cards'
+  | 'study-timer'
+  | 'subject-radar'
+  | 'question-tracker'
+  | 'accuracy-chart'
+  | 'provas-simulados'
+  | 'ai-daily-planner'
+  | 'ai-telemetry'
+  | 'weekly-bar'
+  | 'recent-sessions'
+  | 'activity-heatmap'
+  | 'goal-streak'
+  | 'study-plan'
+  | 'insights'
+  | 'gemini-coach'
+  | 'mentor'
+  | 'benchmark'
+  | 'weekly-mentoring'
+  | 'session-history'
+  | 'calendar';
+
+type DashboardSectionSize = 'full' | 'half';
+
+const DASHBOARD_DEFAULT_ORDER: DashboardSectionId[] = [
+  'daily-summary',
+  'summary-cards',
+  'study-timer',
+  'subject-radar',
+  'question-tracker',
+  'accuracy-chart',
+  'provas-simulados',
+  'weekly-bar',
+  'recent-sessions',
+  'activity-heatmap',
+  'goal-streak',
+  'study-plan',
+  'session-history',
+  'calendar',
+  'ai-daily-planner',
+  'insights',
+  'gemini-coach',
+  'mentor',
+  'benchmark',
+  'weekly-mentoring',
+  'ai-telemetry',
+];
+
+const DASHBOARD_SECTION_META: Record<
+  DashboardSectionId,
+  {
+    label: string;
+    description: string;
+    defaultSize: DashboardSectionSize;
+    allowedSizes: DashboardSectionSize[];
+  }
+> = {
+  'daily-summary': {
+    label: 'Resumo de Hoje',
+    description: 'Síntese do dia com foco principal e pendências.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'summary-cards': {
+    label: 'Visão Geral',
+    description: 'Totais de hoje, semana e mês.',
+    defaultSize: 'full',
+    allowedSizes: ['half', 'full'],
+  },
+  'study-timer': {
+    label: 'Cronômetro',
+    description: 'Controle principal de sessão de estudo.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'subject-radar': {
+    label: 'Radar de Matérias',
+    description: 'Distribuição mensal por matéria.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'question-tracker': {
+    label: 'Registro de Questões',
+    description: 'Registro manual de questões resolvidas.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'accuracy-chart': {
+    label: 'Taxa de Acerto',
+    description: 'Evolução de desempenho por matéria.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'provas-simulados': {
+    label: 'Provas & Simulados',
+    description: 'Atalho para prática e simulados.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'ai-daily-planner': {
+    label: 'Plano Diário IA',
+    description: 'Plano sugerido para o dia.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'ai-telemetry': {
+    label: 'Telemetria IA',
+    description: 'Painel técnico de consumo (admin).',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'weekly-bar': {
+    label: 'Evolução Semanal',
+    description: 'Horas estudadas por dia na semana.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'recent-sessions': {
+    label: 'Sessões Recentes',
+    description: 'Últimas sessões registradas.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'activity-heatmap': {
+    label: 'Heatmap',
+    description: 'Mapa anual de consistência e intensidade de estudo.',
+    defaultSize: 'full',
+    allowedSizes: ['half', 'full'],
+  },
+  'goal-streak': {
+    label: 'Meta & Consistência',
+    description: 'Meta semanal, progresso e streak.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'study-plan': {
+    label: 'Plano de Estudo',
+    description: 'Planejado vs real por matéria.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  insights: {
+    label: 'Insights',
+    description: 'Alertas e pontos de atenção automáticos.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'gemini-coach': {
+    label: 'Coach IA',
+    description: 'Resumo e ação sugerida para o momento.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  mentor: {
+    label: 'Mentor AprovaMind',
+    description: 'Mentoria contextual personalizada.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  benchmark: {
+    label: 'Benchmark',
+    description: 'Comparação de ritmo com base anônima.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'weekly-mentoring': {
+    label: 'Mentoria Semanal IA',
+    description: 'Análise semanal consolidada com plano de melhoria.',
+    defaultSize: 'half',
+    allowedSizes: ['half', 'full'],
+  },
+  'session-history': {
+    label: 'Histórico Completo',
+    description: 'Filtro, edição e inclusão manual de sessões.',
+    defaultSize: 'full',
+    allowedSizes: ['half', 'full'],
+  },
+  calendar: {
+    label: 'Calendário',
+    description: 'Agenda de estudos e eventos.',
+    defaultSize: 'full',
+    allowedSizes: ['half', 'full'],
+  },
+};
+
+interface DashboardLayoutState {
+  order: DashboardSectionId[];
+  hidden: DashboardSectionId[];
+  sizes: Partial<Record<DashboardSectionId, DashboardSectionSize>>;
+}
+
+function sanitizeDashboardLayout(
+  order: string[] | DashboardSectionId[] | undefined,
+  hidden: string[] | DashboardSectionId[] | undefined,
+  sizes: Record<string, string> | Record<DashboardSectionId, DashboardSectionSize> | undefined,
+  availableSections: DashboardSectionId[]
+): DashboardLayoutState {
+  const availableSet = new Set(availableSections);
+
+  const dedupedOrder: DashboardSectionId[] = [];
+  for (const item of order || []) {
+    const id = item as DashboardSectionId;
+    if (!availableSet.has(id) || dedupedOrder.includes(id)) continue;
+    dedupedOrder.push(id);
+  }
+
+  for (const id of availableSections) {
+    if (!dedupedOrder.includes(id)) {
+      dedupedOrder.push(id);
+    }
+  }
+
+  const dedupedHidden: DashboardSectionId[] = [];
+  for (const item of hidden || []) {
+    const id = item as DashboardSectionId;
+    if (!availableSet.has(id) || dedupedHidden.includes(id)) continue;
+    dedupedHidden.push(id);
+  }
+
+  if (dedupedHidden.length >= dedupedOrder.length && dedupedOrder.length > 0) {
+    dedupedHidden.pop();
+  }
+
+  const normalizedSizes: Partial<Record<DashboardSectionId, DashboardSectionSize>> = {};
+  for (const id of dedupedOrder) {
+    const allowedSizes = DASHBOARD_SECTION_META[id].allowedSizes;
+    const defaultSize = DASHBOARD_SECTION_META[id].defaultSize;
+    const raw = sizes?.[id];
+    const normalized: DashboardSectionSize =
+      raw === 'half' || raw === 'full' ? raw : defaultSize;
+
+    normalizedSizes[id] = allowedSizes.includes(normalized) ? normalized : defaultSize;
+  }
+
+  return {
+    order: dedupedOrder,
+    hidden: dedupedHidden,
+    sizes: normalizedSizes,
+  };
+}
 
 export default function Dashboard() {
   const { user } = useAuthContext();
@@ -112,11 +355,22 @@ export default function Dashboard() {
   const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
   const [accuracyAnalytics, setAccuracyAnalytics] = useState<AccuracyAnalytics | null>(null);
   const [accuracyDelta, setAccuracyDelta] = useState<Record<string, number>>({});
+  const [sessionsRefreshKey, setSessionsRefreshKey] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [creatingSessionPlan, setCreatingSessionPlan] = useState(false);
   const [planLimitNotice, setPlanLimitNotice] = useState<string | null>(null);
+  const [sectionOrder, setSectionOrder] = useState<DashboardSectionId[]>(DASHBOARD_DEFAULT_ORDER);
+  const [hiddenSections, setHiddenSections] = useState<DashboardSectionId[]>([]);
+  const [sectionSizes, setSectionSizes] = useState<Partial<Record<DashboardSectionId, DashboardSectionSize>>>({});
+  const [layoutEditorOpen, setLayoutEditorOpen] = useState(false);
+  const [layoutDraft, setLayoutDraft] = useState<DashboardLayoutState | null>(null);
+  const [layoutSaving, setLayoutSaving] = useState(false);
+  const [layoutError, setLayoutError] = useState<string | null>(null);
+  const [layoutLoaded, setLayoutLoaded] = useState(false);
+  const [draggingSectionId, setDraggingSectionId] = useState<DashboardSectionId | null>(null);
+  const [dragOverSectionId, setDragOverSectionId] = useState<DashboardSectionId | null>(null);
   
   // ---- Estados do Calendário ----
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
@@ -131,6 +385,13 @@ export default function Dashboard() {
     uid: user?.uid,
     email: user?.email,
   });
+  const availableSections = useMemo(
+    () =>
+      DASHBOARD_DEFAULT_ORDER.filter(
+        (sectionId) => canViewAiTelemetry || sectionId !== 'ai-telemetry'
+      ),
+    [canViewAiTelemetry]
+  );
 
   // ---- Migração + load de planos ----
   const loadPlans = useCallback(async () => {
@@ -248,6 +509,275 @@ export default function Dashboard() {
     }
   }, [fetchData, plans.length]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+
+    const loadLayout = async () => {
+      try {
+        const saved = await getDashboardLayoutPrefs(user.uid);
+        if (cancelled) return;
+
+        const sanitized = sanitizeDashboardLayout(
+          saved?.order || availableSections,
+          saved?.hidden || [],
+          saved?.sizes || {},
+          availableSections
+        );
+
+        setSectionOrder(sanitized.order);
+        setHiddenSections(sanitized.hidden);
+        setSectionSizes(sanitized.sizes);
+      } catch (error) {
+        console.warn('Erro ao carregar layout da dashboard:', error);
+        const fallback = sanitizeDashboardLayout(DASHBOARD_DEFAULT_ORDER, [], {}, availableSections);
+        setSectionOrder(fallback.order);
+        setHiddenSections(fallback.hidden);
+        setSectionSizes(fallback.sizes);
+      } finally {
+        if (!cancelled) {
+          setLayoutLoaded(true);
+        }
+      }
+    };
+
+    void loadLayout();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, availableSections]);
+
+  const currentLayout = useMemo(
+    () => sanitizeDashboardLayout(sectionOrder, hiddenSections, sectionSizes, availableSections),
+    [sectionOrder, hiddenSections, sectionSizes, availableSections]
+  );
+
+  const editingLayout = useMemo(() => {
+    if (!layoutEditorOpen || !layoutDraft) return currentLayout;
+    return sanitizeDashboardLayout(
+      layoutDraft.order,
+      layoutDraft.hidden,
+      layoutDraft.sizes,
+      availableSections
+    );
+  }, [layoutEditorOpen, layoutDraft, currentLayout, availableSections]);
+
+  const getSectionOrderStyle = useCallback(
+    (sectionId: DashboardSectionId) => {
+      const index = editingLayout.order.indexOf(sectionId);
+      return {
+        order: index >= 0 ? index : editingLayout.order.length,
+      };
+    },
+    [editingLayout.order]
+  );
+
+  const isSectionHidden = useCallback(
+    (sectionId: DashboardSectionId) => editingLayout.hidden.includes(sectionId),
+    [editingLayout.hidden]
+  );
+
+  const getSectionSize = useCallback(
+    (sectionId: DashboardSectionId): DashboardSectionSize => {
+      return editingLayout.sizes[sectionId] || DASHBOARD_SECTION_META[sectionId].defaultSize;
+    },
+    [editingLayout.sizes]
+  );
+
+  const reorderDraftSections = useCallback((sourceId: DashboardSectionId, targetId: DashboardSectionId) => {
+    setLayoutDraft((prev) => {
+      if (!prev || sourceId === targetId) return prev;
+      const nextOrder = [...prev.order];
+      const sourceIndex = nextOrder.indexOf(sourceId);
+      const targetIndex = nextOrder.indexOf(targetId);
+
+      if (sourceIndex < 0 || targetIndex < 0) {
+        return prev;
+      }
+
+      nextOrder.splice(sourceIndex, 1);
+      const adjustedTarget = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+      nextOrder.splice(adjustedTarget, 0, sourceId);
+      return { ...prev, order: nextOrder };
+    });
+  }, []);
+
+  const getSectionClassName = useCallback(
+    (sectionId: DashboardSectionId, baseClassName: string) => {
+      const hidden = isSectionHidden(sectionId);
+      const sectionSize = getSectionSize(sectionId);
+      const isDragging = draggingSectionId === sectionId;
+      const isDropTarget = dragOverSectionId === sectionId;
+      const isEditableVisible = layoutEditorOpen && !hidden;
+      const spanClass = sectionSize === 'half' ? ' lg:col-span-1' : ' lg:col-span-2';
+
+      return `${hidden ? 'hidden ' : ''}${baseClassName}${spanClass}${
+        isEditableVisible ? ' cursor-move' : ''
+      }${isDragging ? ' opacity-70' : ''}${
+        isDropTarget ? ' ring-2 ring-violet-500/60 ring-offset-2 ring-offset-gray-950 rounded-2xl' : ''
+      }`;
+    },
+    [isSectionHidden, getSectionSize, draggingSectionId, dragOverSectionId, layoutEditorOpen]
+  );
+
+  const getSectionDragProps = useCallback(
+    (sectionId: DashboardSectionId) => {
+      const hidden = isSectionHidden(sectionId);
+      if (!layoutEditorOpen || hidden) {
+        return {};
+      }
+
+      return {
+        draggable: true,
+        onDragStartCapture: (event: React.DragEvent<HTMLDivElement>) => {
+          setDraggingSectionId(sectionId);
+          setDragOverSectionId(null);
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', sectionId);
+        },
+        onDragOverCapture: (event: React.DragEvent<HTMLDivElement>) => {
+          if (!draggingSectionId || draggingSectionId === sectionId) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'move';
+          setDragOverSectionId(sectionId);
+        },
+        onDropCapture: (event: React.DragEvent<HTMLDivElement>) => {
+          event.preventDefault();
+          const sourceFromTransfer = event.dataTransfer.getData('text/plain') as DashboardSectionId;
+          const sourceId = sourceFromTransfer || draggingSectionId;
+          if (!sourceId || sourceId === sectionId) {
+            setDragOverSectionId(null);
+            return;
+          }
+          reorderDraftSections(sourceId, sectionId);
+          setDragOverSectionId(null);
+        },
+        onDragEndCapture: () => {
+          setDraggingSectionId(null);
+          setDragOverSectionId(null);
+        },
+      };
+    },
+    [isSectionHidden, layoutEditorOpen, draggingSectionId, reorderDraftSections]
+  );
+
+  const openLayoutEditor = () => {
+    setLayoutError(null);
+    setDraggingSectionId(null);
+    setDragOverSectionId(null);
+    setLayoutDraft({
+      order: [...currentLayout.order],
+      hidden: [...currentLayout.hidden],
+      sizes: { ...currentLayout.sizes },
+    });
+    setLayoutEditorOpen(true);
+  };
+
+  const closeLayoutEditor = () => {
+    setLayoutError(null);
+    setLayoutEditorOpen(false);
+    setLayoutDraft(null);
+    setDraggingSectionId(null);
+    setDragOverSectionId(null);
+  };
+
+  const moveDraftSection = (sectionId: DashboardSectionId, direction: 'up' | 'down') => {
+    setLayoutDraft((prev) => {
+      if (!prev) return prev;
+      const nextOrder = [...prev.order];
+      const index = nextOrder.indexOf(sectionId);
+      if (index < 0) return prev;
+
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= nextOrder.length) return prev;
+
+      [nextOrder[index], nextOrder[targetIndex]] = [nextOrder[targetIndex], nextOrder[index]];
+      return { ...prev, order: nextOrder };
+    });
+  };
+
+  const toggleDraftSectionVisibility = (sectionId: DashboardSectionId) => {
+    setLayoutDraft((prev) => {
+      if (!prev) return prev;
+      const isHidden = prev.hidden.includes(sectionId);
+
+      if (!isHidden) {
+        const visibleCount = prev.order.length - prev.hidden.length;
+        if (visibleCount <= 1) {
+          return prev;
+        }
+        return { ...prev, hidden: [...prev.hidden, sectionId] };
+      }
+
+      return {
+        ...prev,
+        hidden: prev.hidden.filter((id) => id !== sectionId),
+      };
+    });
+  };
+
+  const toggleDraftSectionSize = (sectionId: DashboardSectionId) => {
+    setLayoutDraft((prev) => {
+      if (!prev) return prev;
+      const allowed = DASHBOARD_SECTION_META[sectionId].allowedSizes;
+      if (allowed.length <= 1) return prev;
+
+      const currentSize = prev.sizes[sectionId] || DASHBOARD_SECTION_META[sectionId].defaultSize;
+      const currentIndex = allowed.indexOf(currentSize);
+      const nextSize = allowed[(currentIndex + 1) % allowed.length];
+
+      return {
+        ...prev,
+        sizes: {
+          ...prev.sizes,
+          [sectionId]: nextSize,
+        },
+      };
+    });
+  };
+
+  const resetDraftLayout = () => {
+    setLayoutDraft({
+      order: [...availableSections],
+      hidden: [],
+      sizes: sanitizeDashboardLayout(availableSections, [], {}, availableSections).sizes,
+    });
+    setLayoutError(null);
+  };
+
+  const saveLayout = async () => {
+    if (!user || !layoutDraft) return;
+
+    const nextLayout = sanitizeDashboardLayout(
+      layoutDraft.order,
+      layoutDraft.hidden,
+      layoutDraft.sizes,
+      availableSections
+    );
+
+    setLayoutSaving(true);
+    setLayoutError(null);
+
+    try {
+      await saveDashboardLayoutPrefs(user.uid, {
+        order: nextLayout.order,
+        hidden: nextLayout.hidden,
+        sizes: nextLayout.sizes,
+      });
+      setSectionOrder(nextLayout.order);
+      setHiddenSections(nextLayout.hidden);
+      setSectionSizes(nextLayout.sizes);
+      closeLayoutEditor();
+    } catch (error) {
+      console.error('Erro ao salvar layout da dashboard:', error);
+      setLayoutError('Não foi possível salvar agora. Tente novamente.');
+    } finally {
+      setLayoutSaving(false);
+    }
+  };
+
   // ---- Handlers ----
   const handleSelectPlan = async (planId: string | null) => {
     if (!user) return;
@@ -259,6 +789,7 @@ export default function Dashboard() {
   const handleSessionSaved = async (session: { subject: string; duration: number }) => {
     setLastSavedSession(session);
     await fetchData();
+    setSessionsRefreshKey((prev) => prev + 1);
     
     // Atualiza benchmark do usuário
     if (user && consistency?.weeklyGoalHours && consistency.weeklyTotalSeconds) {
@@ -341,6 +872,11 @@ export default function Dashboard() {
 
   if (!user) return null;
 
+  const handleSessionsChanged = async () => {
+    await fetchData();
+    setSessionsRefreshKey((prev) => prev + 1);
+  };
+
   return (
     <div className="min-h-screen bg-gray-950">
       <Header
@@ -401,321 +937,543 @@ export default function Dashboard() {
           )}
         </motion.div>
 
-        {/* Resumo Diário */}
         <motion.div
-          custom={1}
+          custom={0.5}
           variants={sectionVariants}
           initial="hidden"
           animate="show"
-          className="mb-6"
+          className="mb-6 flex items-center justify-between gap-3"
         >
-          <DailySummaryCard
-            todaySessions={todaySessions}
-            totalTodaySeconds={summary.totalToday}
-            planVsActual={planVsActual}
-            loading={loading}
-          />
+          <p className="text-xs text-gray-500">
+            {layoutLoaded
+              ? 'Ajuste os blocos conforme seu fluxo de estudo.'
+              : 'Carregando preferências de layout...'}
+          </p>
+          <button
+            onClick={openLayoutEditor}
+            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-xs text-gray-300 transition hover:border-violet-500/40 hover:text-violet-200"
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            Personalizar painel
+          </button>
         </motion.div>
 
-        {/* Cards de Resumo */}
-        <motion.div
-          custom={2}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mb-8"
-        >
-          <div className="mb-4 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-violet-400" />
-            <h3 className="text-lg font-semibold text-white">Visão Geral</h3>
-          </div>
-          <SummaryCards summary={summary} loading={loading} />
-        </motion.div>
-
-        {/* Linha 1: Cronômetro + Radar */}
-        <motion.div
-          custom={3}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mb-6 grid gap-6 lg:grid-cols-2"
-        >
-          <StudyTimer
-            key={activePlanId || 'all-plans'}
-            userId={user.uid}
-            plans={plans}
-            activePlanId={activePlanId}
-            onSessionSaved={handleSessionSaved}
-            onCreateSession={handleCreateSessionPlan}
-            onCreateEdital={() => {
-              if (!canCreatePlan) {
-                setPlanLimitNotice('Seu plano atual atingiu o limite de sessões/editais. Faça upgrade para continuar.');
-                return;
-              }
-              setEditingPlan(null);
-              setPlanManagerOpen(true);
-            }}
-            creatingSession={creatingSessionPlan}
-          />
-          <SubjectRadarChart data={subjectData} loading={loading} />
-        </motion.div>
-
-        {/* Linha 1.5: Questões + Taxa de Acerto */}
-        <motion.div
-          custom={4}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mb-6 grid gap-6 lg:grid-cols-2"
-        >
-          <QuestionTrackerCard
-            userId={user.uid}
-            planId={activePlanId || undefined}
-            planSubjects={activePlanObj?.subjects}
-            lastSessionSubject={lastSavedSession?.subject ?? (recentData[0]?.subject || null)}
-            onSaved={fetchData}
-          />
-          <AccuracyChart
-            data={accuracyData}
-            analytics={accuracyAnalytics}
-            deltaBySubject={accuracyDelta}
-            loading={loading}
-          />
-        </motion.div>
-
-        {/* Linha 1.6: Card Provas & Simulados */}
-        <motion.div
-          custom={4.5}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mb-6"
-        >
-          <Link href="/provas">
-            <div className="group relative overflow-hidden rounded-2xl border border-gray-700 bg-gradient-to-br from-violet-900/20 to-blue-900/20 p-6 transition-all hover:border-violet-500 hover:shadow-lg hover:shadow-violet-500/20">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="mb-2 flex items-center gap-2">
-                    <BookOpen className="h-6 w-6 text-violet-400" />
-                    <h3 className="text-xl font-semibold text-white">Provas & Simulados</h3>
-                  </div>
-                  <p className="mb-4 text-sm text-gray-400">
-                    Pratique com provas oficiais, crie simulados personalizados e teste seus conhecimentos
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300">
-                      Provas Oficiais
-                    </span>
-                    <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
-                      Simulados
-                    </span>
-                    <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
-                      Treino Rápido
-                    </span>
-                  </div>
-                </div>
-                <div className="flex-shrink-0 opacity-50 transition-opacity group-hover:opacity-100">
-                  <TrendingUp className="h-8 w-8 text-violet-400" />
-                </div>
-              </div>
-            </div>
-          </Link>
-        </motion.div>
-
-        {/* Linha 1.7: Plano Diário IA */}
-        <motion.div
-          custom={4.7}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mb-6"
-        >
-          <DailyAiPlannerCard
-            userId={user.uid}
-            userName={user.displayName?.split(' ')[0] || 'Estudante'}
-            activePlanName={activePlanObj?.name || null}
-            consistency={consistency}
-            subjectHours={subjectData}
-            planVsActual={planVsActual}
-            accuracyData={accuracyData}
-            totalTodaySeconds={summary.totalToday}
-          />
-        </motion.div>
-
-        {/* Linha 1.8: Telemetria de IA */}
-        {canViewAiTelemetry && (
+        {layoutEditorOpen && layoutDraft && (
           <motion.div
-            custom={4.8}
+            custom={0.6}
             variants={sectionVariants}
             initial="hidden"
             animate="show"
-            className="mb-6"
+            className="mb-6 rounded-2xl border border-white/10 bg-gray-900/70 p-4 shadow-xl"
           >
-            <AiUsageSummaryCard userId={user.uid} />
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-semibold text-white">Editar Dashboard</h3>
+                <p className="text-xs text-gray-500">Mostre/oculte e reorganize os blocos.</p>
+                <p className="text-xs text-violet-300/90">Dica: arraste os blocos na área principal enquanto este modo estiver aberto.</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={resetDraftLayout}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-gray-300 transition hover:border-white/20 hover:text-white"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Padrão
+                </button>
+                <button
+                  onClick={closeLayoutEditor}
+                  disabled={layoutSaving}
+                  className="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-gray-300 transition hover:border-white/20 hover:text-white disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={saveLayout}
+                  disabled={layoutSaving}
+                  className="rounded-lg bg-violet-600 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-violet-500 disabled:opacity-60"
+                >
+                  {layoutSaving ? 'Salvando...' : 'Salvar layout'}
+                </button>
+              </div>
+            </div>
+
+            {layoutError && (
+              <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+                {layoutError}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {editingLayout.order.map((sectionId, index) => {
+                const hidden = editingLayout.hidden.includes(sectionId);
+                const sectionSize = editingLayout.sizes[sectionId] || DASHBOARD_SECTION_META[sectionId].defaultSize;
+                const canResize = DASHBOARD_SECTION_META[sectionId].allowedSizes.length > 1;
+                const canMoveUp = index > 0;
+                const canMoveDown = index < editingLayout.order.length - 1;
+
+                return (
+                  <div
+                    key={sectionId}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm text-white">{DASHBOARD_SECTION_META[sectionId].label}</p>
+                      <p className="truncate text-xs text-gray-500">{DASHBOARD_SECTION_META[sectionId].description}</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => moveDraftSection(sectionId, 'up')}
+                        disabled={!canMoveUp || layoutSaving}
+                        className="rounded-md border border-white/10 p-1 text-gray-300 transition hover:border-white/20 hover:text-white disabled:opacity-40"
+                        title="Mover para cima"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => moveDraftSection(sectionId, 'down')}
+                        disabled={!canMoveDown || layoutSaving}
+                        className="rounded-md border border-white/10 p-1 text-gray-300 transition hover:border-white/20 hover:text-white disabled:opacity-40"
+                        title="Mover para baixo"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => toggleDraftSectionVisibility(sectionId)}
+                        disabled={layoutSaving}
+                        className={`rounded-md border p-1 transition ${
+                          hidden
+                            ? 'border-white/10 text-gray-400 hover:border-white/20 hover:text-white'
+                            : 'border-violet-500/50 text-violet-200 hover:bg-violet-500/10'
+                        }`}
+                        title={hidden ? 'Mostrar bloco' : 'Ocultar bloco'}
+                      >
+                        {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => toggleDraftSectionSize(sectionId)}
+                        disabled={!canResize || layoutSaving}
+                        className={`min-w-[40px] rounded-md border px-1.5 py-1 text-[10px] transition ${
+                          canResize
+                            ? 'border-white/10 text-gray-200 hover:border-white/20 hover:text-white'
+                            : 'border-white/5 text-gray-500 opacity-60'
+                        }`}
+                        title={canResize ? 'Alternar tamanho do bloco' : 'Tamanho fixo para este bloco'}
+                      >
+                        {sectionSize === 'half' ? '1/2' : '1/1'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </motion.div>
         )}
 
-        {/* Linha 2: Barras Semanal + Histórico */}
-        <motion.div
-          custom={5}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="grid gap-6 lg:grid-cols-2"
-        >
-          <WeeklyBarChart data={weeklyData} loading={loading} />
-          <RecentSessions sessions={recentData} loading={loading} />
-        </motion.div>
-
-        {/* Linha 2.5: Heatmap de Atividade */}
-        <motion.div
-          custom={6}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mt-6"
-        >
-          <ActivityHeatmap userId={user.uid} planId={filterPlanId} />
-        </motion.div>
-
-        {/* Linha 3: Meta + Plano de Estudo */}
-        <motion.div
-          custom={7}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mt-6 grid gap-6 lg:grid-cols-2"
-        >
-          <GoalAndStreakCard
-            data={consistency}
-            loading={loading}
-            onSaveGoal={handleSaveGoal}
-          />
-          <StudyPlanCard
-            planVsActual={planVsActual}
-            currentWeights={planWeights}
-            loading={loading}
-            onSavePlan={handleSavePlan}
-          />
-        </motion.div>
-
-        {/* Linha 4: Insights + Coach IA */}
-        <motion.div
-          custom={8}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mt-6 grid gap-6 lg:grid-cols-2"
-        >
-          <InsightsPanel insights={insights} loading={loading} />
-          <GeminiCoachCard
-            consistency={consistency}
-            subjectHours={subjectData}
-            planVsActual={planVsActual}
-            totalTodaySeconds={summary.totalToday}
-            onOpenChat={() => setChatOpen(true)}
-            loading={loading}
-          />
-        </motion.div>
-
-        {/* Linha 4.5: Mentor AprovaMind */}
-        <motion.div
-          custom={9}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mt-6 grid gap-6 lg:grid-cols-2"
-        >
-          <MentorCard
-            userName={user.displayName?.split(' ')[0] || 'Estudante'}
-            consistency={consistency}
-            subjectHours={subjectData}
-            planVsActual={planVsActual}
-            totalTodaySeconds={summary.totalToday}
-            todayDominantSubject={
-              todaySessions.length > 0
-                ? [...todaySessions].sort((a, b) => b.duration - a.duration)[0].subject
-                : null
-            }
-            weeklyData={weeklyData}
-            recentSessions={recentData}
-            accuracyData={accuracyData}
-            activePlanName={activePlanObj?.name || null}
-            loading={loading}
-          />
-          <BenchmarkCard
-            weeklyGoalHours={consistency?.weeklyGoalHours || 0}
-            weeklyHours={consistency?.weeklyTotalSeconds ? consistency.weeklyTotalSeconds / 3600 : 0}
-            userId={user.uid}
-            loading={loading}
-          />
-        </motion.div>
-
-        {/* Linha 4.6: Mentoria Semanal (IA, 1x/semana com cache) */}
-        <motion.div
-          custom={10}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mt-6"
-        >
-          <WeeklyMentoringCard
-            userId={user.uid}
-            planId={filterPlanId}
-            userName={user.displayName?.split(' ')[0] || 'Estudante'}
-            consistency={consistency}
-            subjectHours={subjectData}
-            planVsActual={planVsActual}
-            weeklyData={weeklyData}
-            recentSessions={recentData}
-            accuracyData={accuracyData}
-            activePlanName={activePlanObj?.name || null}
-            loading={loading}
-          />
-        </motion.div>
-
-        {/* Linha 5: Histórico Completo */}
-        <motion.div
-          custom={11}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mt-6"
-        >
-          <SessionHistory userId={user.uid} planId={filterPlanId} />
-        </motion.div>
-
-        {/* Linha 6: Calendário */}
-        <motion.div
-          custom={12}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          className="mt-6"
-        >
-          {capabilities.canUseCalendar ? (
-            <Calendar
-              userId={user.uid}
-              planId={filterPlanId}
-              onDateClick={(date) => {
-                setSelectedDate(date);
-                setScheduleModalOpen(true);
-              }}
-              onEventClick={(event) => {
-                // TODO: Implementar modal de edição/visualização de evento
-                console.log('Event clicked:', event);
-              }}
+        <div className={`grid items-start gap-6 lg:grid-cols-2 ${layoutEditorOpen ? 'rounded-2xl border border-dashed border-violet-500/30 p-2 sm:p-3' : ''}`}>
+          <motion.div
+            custom={1}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('daily-summary')}
+            style={getSectionOrderStyle('daily-summary')}
+            className={getSectionClassName('daily-summary', '')}
+          >
+            <DailySummaryCard
+              todaySessions={todaySessions}
+              totalTodaySeconds={summary.totalToday}
+              planVsActual={planVsActual}
               loading={loading}
             />
-          ) : (
-            <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-6">
-              <h3 className="text-lg font-semibold text-white">Calendário avançado</h3>
-              <p className="mt-2 text-sm text-blue-100/90">
-                Disponível nos planos Pro e Premium para organizar sessões com agenda mensal.
-              </p>
+          </motion.div>
+
+          <motion.div
+            custom={2}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('summary-cards')}
+            style={getSectionOrderStyle('summary-cards')}
+            className={getSectionClassName('summary-cards', '')}
+          >
+            <div className="mb-4 flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-violet-400" />
+              <h3 className="text-lg font-semibold text-white">Visão Geral</h3>
             </div>
+            <SummaryCards summary={summary} loading={loading} />
+          </motion.div>
+
+          <motion.div
+            custom={3}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('study-timer')}
+            style={getSectionOrderStyle('study-timer')}
+            className={getSectionClassName('study-timer', '')}
+          >
+            <StudyTimer
+              key={activePlanId || 'all-plans'}
+              userId={user.uid}
+              plans={plans}
+              activePlanId={activePlanId}
+              onSessionSaved={handleSessionSaved}
+              onCreateSession={handleCreateSessionPlan}
+              onCreateEdital={() => {
+                if (!canCreatePlan) {
+                  setPlanLimitNotice('Seu plano atual atingiu o limite de sessões/editais. Faça upgrade para continuar.');
+                  return;
+                }
+                setEditingPlan(null);
+                setPlanManagerOpen(true);
+              }}
+              creatingSession={creatingSessionPlan}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={4}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('subject-radar')}
+            style={getSectionOrderStyle('subject-radar')}
+            className={getSectionClassName('subject-radar', '')}
+          >
+            <SubjectRadarChart data={subjectData} loading={loading} />
+          </motion.div>
+
+          <motion.div
+            custom={5}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('question-tracker')}
+            style={getSectionOrderStyle('question-tracker')}
+            className={getSectionClassName('question-tracker', '')}
+          >
+            <QuestionTrackerCard
+              userId={user.uid}
+              planId={activePlanId || undefined}
+              planSubjects={activePlanObj?.subjects}
+              lastSessionSubject={lastSavedSession?.subject ?? (recentData[0]?.subject || null)}
+              onSaved={fetchData}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={6}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('accuracy-chart')}
+            style={getSectionOrderStyle('accuracy-chart')}
+            className={getSectionClassName('accuracy-chart', '')}
+          >
+            <AccuracyChart
+              data={accuracyData}
+              analytics={accuracyAnalytics}
+              deltaBySubject={accuracyDelta}
+              loading={loading}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={7}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('provas-simulados')}
+            style={getSectionOrderStyle('provas-simulados')}
+            className={getSectionClassName('provas-simulados', '')}
+          >
+            <Link href="/provas">
+              <div className="group relative overflow-hidden rounded-2xl border border-gray-700 bg-gradient-to-br from-violet-900/20 to-blue-900/20 p-6 transition-all hover:border-violet-500 hover:shadow-lg hover:shadow-violet-500/20">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="mb-2 flex items-center gap-2">
+                      <BookOpen className="h-6 w-6 text-violet-400" />
+                      <h3 className="text-xl font-semibold text-white">Provas & Simulados</h3>
+                    </div>
+                    <p className="mb-4 text-sm text-gray-400">
+                      Pratique com provas oficiais, crie simulados personalizados e teste seus conhecimentos
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300">
+                        Provas Oficiais
+                      </span>
+                      <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
+                        Simulados
+                      </span>
+                      <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                        Treino Rápido
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 opacity-50 transition-opacity group-hover:opacity-100">
+                    <TrendingUp className="h-8 w-8 text-violet-400" />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+
+          <motion.div
+            custom={8}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('weekly-bar')}
+            style={getSectionOrderStyle('weekly-bar')}
+            className={getSectionClassName('weekly-bar', '')}
+          >
+            <WeeklyBarChart data={weeklyData} loading={loading} />
+          </motion.div>
+
+          <motion.div
+            custom={9}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('recent-sessions')}
+            style={getSectionOrderStyle('recent-sessions')}
+            className={getSectionClassName('recent-sessions', '')}
+          >
+            <RecentSessions sessions={recentData} loading={loading} />
+          </motion.div>
+
+          <motion.div
+            custom={10}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('activity-heatmap')}
+            style={getSectionOrderStyle('activity-heatmap')}
+            className={getSectionClassName('activity-heatmap', '')}
+          >
+            <ActivityHeatmap
+              userId={user.uid}
+              planId={filterPlanId}
+              refreshKey={sessionsRefreshKey}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={11}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('goal-streak')}
+            style={getSectionOrderStyle('goal-streak')}
+            className={getSectionClassName('goal-streak', '')}
+          >
+            <GoalAndStreakCard
+              data={consistency}
+              loading={loading}
+              onSaveGoal={handleSaveGoal}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={12}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('study-plan')}
+            style={getSectionOrderStyle('study-plan')}
+            className={getSectionClassName('study-plan', '')}
+          >
+            <StudyPlanCard
+              planVsActual={planVsActual}
+              currentWeights={planWeights}
+              loading={loading}
+              onSavePlan={handleSavePlan}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={13}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('session-history')}
+            style={getSectionOrderStyle('session-history')}
+            className={getSectionClassName('session-history', '')}
+          >
+            <SessionHistory
+              userId={user.uid}
+              planId={filterPlanId}
+              onSessionsChanged={handleSessionsChanged}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={14}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('calendar')}
+            style={getSectionOrderStyle('calendar')}
+            className={getSectionClassName('calendar', '')}
+          >
+            {capabilities.canUseCalendar ? (
+              <Calendar
+                userId={user.uid}
+                planId={filterPlanId}
+                onDateClick={(date) => {
+                  setSelectedDate(date);
+                  setScheduleModalOpen(true);
+                }}
+                onEventClick={(event) => {
+                  console.log('Event clicked:', event);
+                }}
+                loading={loading}
+              />
+            ) : (
+              <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-6">
+                <h3 className="text-lg font-semibold text-white">Calendário avançado</h3>
+                <p className="mt-2 text-sm text-blue-100/90">
+                  Disponível nos planos Pro e Premium para organizar sessões com agenda mensal.
+                </p>
+              </div>
+            )}
+          </motion.div>
+
+          <motion.div
+            custom={15}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('ai-daily-planner')}
+            style={getSectionOrderStyle('ai-daily-planner')}
+            className={getSectionClassName('ai-daily-planner', '')}
+          >
+            <DailyAiPlannerCard
+              userId={user.uid}
+              userName={user.displayName?.split(' ')[0] || 'Estudante'}
+              activePlanName={activePlanObj?.name || null}
+              consistency={consistency}
+              subjectHours={subjectData}
+              planVsActual={planVsActual}
+              accuracyData={accuracyData}
+              totalTodaySeconds={summary.totalToday}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={16}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('insights')}
+            style={getSectionOrderStyle('insights')}
+            className={getSectionClassName('insights', '')}
+          >
+            <InsightsPanel insights={insights} loading={loading} />
+          </motion.div>
+
+          <motion.div
+            custom={17}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('gemini-coach')}
+            style={getSectionOrderStyle('gemini-coach')}
+            className={getSectionClassName('gemini-coach', '')}
+          >
+            <GeminiCoachCard
+              consistency={consistency}
+              subjectHours={subjectData}
+              planVsActual={planVsActual}
+              totalTodaySeconds={summary.totalToday}
+              onOpenChat={() => setChatOpen(true)}
+              loading={loading}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={18}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('mentor')}
+            style={getSectionOrderStyle('mentor')}
+            className={getSectionClassName('mentor', '')}
+          >
+            <MentorCard
+              userName={user.displayName?.split(' ')[0] || 'Estudante'}
+              consistency={consistency}
+              subjectHours={subjectData}
+              planVsActual={planVsActual}
+              totalTodaySeconds={summary.totalToday}
+              todayDominantSubject={
+                todaySessions.length > 0
+                  ? [...todaySessions].sort((a, b) => b.duration - a.duration)[0].subject
+                  : null
+              }
+              weeklyData={weeklyData}
+              recentSessions={recentData}
+              accuracyData={accuracyData}
+              activePlanName={activePlanObj?.name || null}
+              loading={loading}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={19}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('benchmark')}
+            style={getSectionOrderStyle('benchmark')}
+            className={getSectionClassName('benchmark', '')}
+          >
+            <BenchmarkCard
+              weeklyGoalHours={consistency?.weeklyGoalHours || 0}
+              weeklyHours={consistency?.weeklyTotalSeconds ? consistency.weeklyTotalSeconds / 3600 : 0}
+              userId={user.uid}
+              loading={loading}
+            />
+          </motion.div>
+
+          <motion.div
+            custom={20}
+            variants={sectionVariants}
+            initial="hidden"
+            animate="show"
+            {...getSectionDragProps('weekly-mentoring')}
+            style={getSectionOrderStyle('weekly-mentoring')}
+            className={getSectionClassName('weekly-mentoring', '')}
+          >
+            <WeeklyMentoringCard
+              userId={user.uid}
+              planId={filterPlanId}
+              userName={user.displayName?.split(' ')[0] || 'Estudante'}
+              consistency={consistency}
+              subjectHours={subjectData}
+              planVsActual={planVsActual}
+              weeklyData={weeklyData}
+              recentSessions={recentData}
+              accuracyData={accuracyData}
+              activePlanName={activePlanObj?.name || null}
+              loading={loading}
+            />
+          </motion.div>
+
+          {canViewAiTelemetry && (
+            <motion.div
+              custom={21}
+              variants={sectionVariants}
+              initial="hidden"
+              animate="show"
+              {...getSectionDragProps('ai-telemetry')}
+              style={getSectionOrderStyle('ai-telemetry')}
+              className={getSectionClassName('ai-telemetry', '')}
+            >
+              <AiUsageSummaryCard userId={user.uid} />
+            </motion.div>
           )}
-        </motion.div>
+        </div>
       </main>
 
       {/* Botão flutuante do Chat */}
