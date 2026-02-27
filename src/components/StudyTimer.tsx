@@ -363,6 +363,9 @@ export default function StudyTimer({
     totalCycles,
     pomodoroConfig,
     phaseJustChanged,
+    hasControl,
+    activeScreens,
+    maxActiveScreens,
     setSelectedSubject,
     setMode,
     play,
@@ -382,7 +385,7 @@ export default function StudyTimer({
   // Matérias filtradas pelo plano selecionado
   const activePlan = plans.find((p) => p.id === selectedPlanId);
   const isGeneralSelected = !!activePlan?.isDefault;
-  const canStart = !!selectedSubject && !isGeneralSelected;
+  const canStart = !!selectedSubject && !isGeneralSelected && hasControl;
   const currentPlanKey = selectedPlanId || '__global__';
   const availableSubjects = useMemo(() => {
     const baseSubjects = activePlan && activePlan.subjects.length > 0
@@ -509,6 +512,15 @@ export default function StudyTimer({
           </div>
         </div>
 
+      {!hasControl && (
+        <div className="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+          <p className="text-xs text-amber-200">
+            Só é possível usar o cronômetro em {maxActiveScreens} telas/2 navegadores ao mesmo
+            tempo. Esta tela ficou em modo visualização.
+          </p>
+        </div>
+      )}
+
       {/* Seletor de Modo */}
       <div className="mb-5">
         <label className="mb-2 block text-xs font-medium text-gray-400">Modo</label>
@@ -517,7 +529,7 @@ export default function StudyTimer({
             <button
               key={opt.value}
               onClick={() => setMode(opt.value)}
-              disabled={!isIdle}
+              disabled={!isIdle || !hasControl}
               className={`flex flex-col items-center gap-0.5 rounded-xl border px-2 py-2 text-center transition-all
                 ${
                   mode === opt.value
@@ -548,7 +560,7 @@ export default function StudyTimer({
               setSelectedPlanId(e.target.value);
               setSelectedSubject(''); // Reseta matéria ao trocar plano
             }}
-            disabled={!isIdle}
+            disabled={!isIdle || !hasControl}
             className="w-full rounded-xl border border-white/10 bg-gray-800/50 px-4 py-3 text-white
                        outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20
                        disabled:cursor-not-allowed disabled:opacity-50"
@@ -571,7 +583,7 @@ export default function StudyTimer({
         <SubjectDropdown
           value={selectedSubject}
           options={availableSubjects}
-          disabled={!isIdle}
+          disabled={!isIdle || !hasControl}
           onSelect={setSelectedSubject}
           onAdd={handleAddSubject}
         />
@@ -751,8 +763,10 @@ export default function StudyTimer({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={pause}
+              disabled={!hasControl}
               className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-600
-                         shadow-lg shadow-amber-600/30 transition-colors hover:bg-amber-500"
+                         shadow-lg shadow-amber-600/30 transition-colors hover:bg-amber-500
+                         disabled:cursor-not-allowed disabled:opacity-40"
               title="Pausar"
             >
               <Pause className="h-6 w-6 text-white" />
@@ -771,8 +785,9 @@ export default function StudyTimer({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={skipPhase}
+              disabled={!hasControl}
               className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-700
-                         shadow-lg transition-colors hover:bg-gray-600"
+                         shadow-lg transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
               title="Pular pausa"
             >
               <SkipForward className="h-5 w-5 text-white" />
@@ -791,7 +806,7 @@ export default function StudyTimer({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleStop}
-              disabled={isSaving}
+              disabled={isSaving || !hasControl}
               className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600
                          shadow-lg shadow-red-600/30 transition-colors hover:bg-red-500
                          disabled:cursor-not-allowed disabled:opacity-50"
@@ -813,6 +828,15 @@ export default function StudyTimer({
           Selecione uma matéria para começar a estudar
         </motion.p>
       )}
+
+      <p
+        className={`mt-3 text-center text-[11px] ${
+          activeScreens > maxActiveScreens ? 'text-amber-300' : 'text-gray-500'
+        }`}
+      >
+        Sincronizado em {activeScreens} tela{activeScreens === 1 ? '' : 's'}
+        {activeScreens > maxActiveScreens ? ` · limite de ${maxActiveScreens}` : ''}
+      </p>
 
       {/* Info de Visibilidade */}
       <AnimatePresence>

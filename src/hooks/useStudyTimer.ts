@@ -1,30 +1,31 @@
 /**
- * Hook do Cronômetro de Estudo com Horas Líquidas + Pomodoro
+ * Hook do cronômetro com estado autoritativo no Firestore.
  *
- * ===== REGRA DE EXECUÇÃO =====
- * O cronômetro continua contando em background (troca de aba/tela bloqueada).
- * A pausa acontece apenas por ação explícita do usuário.
- *
- * ===== MODOS =====
- * - freeform: cronômetro livre (comportamento original)
- * - pomodoro-25/5: 25min foco + 5min pausa (clássico)
- * - pomodoro-50/10: 50min foco + 10min pausa (intenso)
- * - pomodoro-45/15: 45min foco + 15min pausa (equilibrado)
- *
- * No modo Pomodoro o timer faz contagem regressiva durante cada fase.
- * Apenas fases de foco são salvas como sessão de estudo.
+ * Regras:
+ * - Pausa apenas manual.
+ * - Sincroniza entre telas/dispositivos em tempo real.
+ * - Limita controle ativo a 2 telas por usuário.
  */
 
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  TimerStatus,
-  TimerMode,
-  PomodoroPhase,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  runTransaction,
+  setDoc,
+} from 'firebase/firestore';
+import {
   PomodoroConfig,
+  PomodoroPhase,
   POMODORO_PRESETS,
+  TimerMode,
+  TimerStatus,
 } from '@/types';
+import { db } from '@/lib/firebase/config';
 import { saveSession } from '@/lib/firebase/sessions';
 import { getTodayISO } from '@/lib/utils';
 
@@ -56,6 +57,12 @@ interface UseStudyTimerReturn {
   pomodoroConfig: PomodoroConfig | null;
   /** Se acabou de transicionar de fase (para notificação) */
   phaseJustChanged: PomodoroPhase | null;
+  /** Esta tela pode controlar o cronômetro */
+  hasControl: boolean;
+  /** Quantidade de telas ativas conectadas no cronômetro */
+  activeScreens: number;
+  /** Limite máximo de telas com controle ativo */
+  maxActiveScreens: number;
   /** Define a matéria */
   setSelectedSubject: (subject: string) => void;
   /** Define o modo */
@@ -74,6 +81,302 @@ interface UseStudyTimerReturn {
   isSaving: boolean;
 }
 
+type PomodoroMode = Exclude<TimerMode, 'freeform'>;
+
+interface RemoteTimerState {
+  userId: string;
+  mode: TimerMode;
+  status: TimerStatus;
+  selectedSubject: string;
+  planId: string | null;
+  startTime: string;
+  runningAnchorAt: string | null;
+  accumulatedSeconds: number;
+  totalFocusSeconds: number;
+  pomodoroPhase: PomodoroPhase | null;
+  phaseSecondsLeft: number;
+  currentCycle: number;
+  updatedAt: string;
+  updatedByClientId: string;
+}
+
+interface RuntimeSnapshot {
+  displaySeconds: number;
+  elapsedSeconds: number;
+  totalFocusSeconds: number;
+  pomodoroPhase: PomodoroPhase | null;
+  phaseSecondsLeft: number;
+  currentCycle: number;
+}
+
+const ACTIVE_TIMERS_COLLECTION = 'active_timers';
+const TIMER_PRESENCE_COLLECTION = 'timer_presence';
+const MAX_ACTIVE_SCREENS = 2;
+const PRESENCE_HEARTBEAT_MS = 15000;
+const PRESENCE_TTL_MS = 45000;
+const CLIENT_ID_STORAGE_KEY = 'aprova-flow:timer-client-id';
+
+const TIMER_STATUSES: TimerStatus[] = ['idle', 'running', 'paused', 'stopped'];
+const TIMER_MODES: TimerMode[] = ['freeform', 'pomodoro-25/5', 'pomodoro-50/10', 'pomodoro-45/15'];
+const POMODORO_PHASES: PomodoroPhase[] = ['focus', 'shortBreak', 'longBreak'];
+
+function isTimerStatus(value: unknown): value is TimerStatus {
+  return typeof value === 'string' && TIMER_STATUSES.includes(value as TimerStatus);
+}
+
+function isTimerMode(value: unknown): value is TimerMode {
+  return typeof value === 'string' && TIMER_MODES.includes(value as TimerMode);
+}
+
+function isPomodoroPhase(value: unknown): value is PomodoroPhase {
+  return typeof value === 'string' && POMODORO_PHASES.includes(value as PomodoroPhase);
+}
+
+function toNonNegativeInt(value: unknown, fallback: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
+  return Math.max(0, Math.floor(value));
+}
+
+function parseIsoMs(value: unknown): number | null {
+  if (typeof value !== 'string' || value.length === 0) return null;
+  const ms = Date.parse(value);
+  return Number.isNaN(ms) ? null : ms;
+}
+
+function getOrCreateClientId(): string {
+  if (typeof window === 'undefined') {
+    return `ssr-${Date.now()}`;
+  }
+
+  const existing = window.sessionStorage.getItem(CLIENT_ID_STORAGE_KEY);
+  if (existing) return existing;
+
+  const generated =
+    typeof window.crypto !== 'undefined' && typeof window.crypto.randomUUID === 'function'
+      ? window.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  window.sessionStorage.setItem(CLIENT_ID_STORAGE_KEY, generated);
+  return generated;
+}
+
+function createDefaultTimerState(userId: string): RemoteTimerState {
+  const now = new Date().toISOString();
+  return {
+    userId,
+    mode: 'freeform',
+    status: 'idle',
+    selectedSubject: '',
+    planId: null,
+    startTime: '',
+    runningAnchorAt: null,
+    accumulatedSeconds: 0,
+    totalFocusSeconds: 0,
+    pomodoroPhase: null,
+    phaseSecondsLeft: 0,
+    currentCycle: 1,
+    updatedAt: now,
+    updatedByClientId: '',
+  };
+}
+
+function normalizeTimerState(raw: Record<string, unknown> | undefined, userId: string): RemoteTimerState {
+  const fallback = createDefaultTimerState(userId);
+  if (!raw) return fallback;
+
+  return {
+    userId,
+    mode: isTimerMode(raw.mode) ? raw.mode : fallback.mode,
+    status: isTimerStatus(raw.status) ? raw.status : fallback.status,
+    selectedSubject: typeof raw.selectedSubject === 'string' ? raw.selectedSubject : fallback.selectedSubject,
+    planId: typeof raw.planId === 'string' && raw.planId.length > 0 ? raw.planId : null,
+    startTime: typeof raw.startTime === 'string' ? raw.startTime : fallback.startTime,
+    runningAnchorAt:
+      typeof raw.runningAnchorAt === 'string' && raw.runningAnchorAt.length > 0
+        ? raw.runningAnchorAt
+        : null,
+    accumulatedSeconds: toNonNegativeInt(raw.accumulatedSeconds, 0),
+    totalFocusSeconds: toNonNegativeInt(raw.totalFocusSeconds, 0),
+    pomodoroPhase: isPomodoroPhase(raw.pomodoroPhase) ? raw.pomodoroPhase : null,
+    phaseSecondsLeft: toNonNegativeInt(raw.phaseSecondsLeft, 0),
+    currentCycle: Math.max(1, toNonNegativeInt(raw.currentCycle, 1)),
+    updatedAt: typeof raw.updatedAt === 'string' ? raw.updatedAt : fallback.updatedAt,
+    updatedByClientId:
+      typeof raw.updatedByClientId === 'string' ? raw.updatedByClientId : fallback.updatedByClientId,
+  };
+}
+
+function getNextPomodoroState(phase: PomodoroPhase, cycle: number, config: PomodoroConfig) {
+  if (phase === 'focus') {
+    const isLongBreak = cycle >= config.cyclesBeforeLongBreak;
+    return {
+      phase: isLongBreak ? ('longBreak' as const) : ('shortBreak' as const),
+      cycle,
+      secondsLeft: (isLongBreak ? config.longBreakMinutes : config.shortBreakMinutes) * 60,
+    };
+  }
+
+  const wasLongBreak = phase === 'longBreak';
+  const nextCycle = wasLongBreak ? 1 : cycle + 1;
+  return {
+    phase: 'focus' as const,
+    cycle: nextCycle,
+    secondsLeft: config.focusMinutes * 60,
+  };
+}
+
+function ensurePomodoroSeedState(
+  phase: PomodoroPhase | null,
+  phaseSecondsLeft: number,
+  cycle: number,
+  config: PomodoroConfig
+) {
+  if (!phase) {
+    return {
+      phase: 'focus' as const,
+      phaseSecondsLeft: config.focusMinutes * 60,
+      cycle: 1,
+    };
+  }
+  const seconds = Math.max(0, Math.floor(phaseSecondsLeft));
+  return {
+    phase,
+    phaseSecondsLeft: seconds,
+    cycle: Math.max(1, cycle),
+  };
+}
+
+function simulatePomodoroState({
+  phase,
+  phaseSecondsLeft,
+  cycle,
+  totalFocusSeconds,
+  elapsedSeconds,
+  config,
+}: {
+  phase: PomodoroPhase | null;
+  phaseSecondsLeft: number;
+  cycle: number;
+  totalFocusSeconds: number;
+  elapsedSeconds: number;
+  config: PomodoroConfig;
+}) {
+  const seeded = ensurePomodoroSeedState(phase, phaseSecondsLeft, cycle, config);
+  let currentPhase = seeded.phase;
+  let secondsLeft = seeded.phaseSecondsLeft;
+  let currentCycle = seeded.cycle;
+  let focusAccumulated = Math.max(0, Math.floor(totalFocusSeconds));
+  let remaining = Math.max(0, Math.floor(elapsedSeconds));
+
+  while (remaining > 0) {
+    if (secondsLeft <= 0) {
+      const next = getNextPomodoroState(currentPhase, currentCycle, config);
+      currentPhase = next.phase;
+      currentCycle = next.cycle;
+      secondsLeft = next.secondsLeft;
+      continue;
+    }
+
+    const consumed = Math.min(secondsLeft, remaining);
+    if (currentPhase === 'focus') {
+      focusAccumulated += consumed;
+    }
+
+    secondsLeft -= consumed;
+    remaining -= consumed;
+
+    if (secondsLeft === 0) {
+      const next = getNextPomodoroState(currentPhase, currentCycle, config);
+      currentPhase = next.phase;
+      currentCycle = next.cycle;
+      secondsLeft = next.secondsLeft;
+    }
+  }
+
+  return {
+    phase: currentPhase,
+    phaseSecondsLeft: secondsLeft,
+    currentCycle,
+    totalFocusSeconds: focusAccumulated,
+  };
+}
+
+function deriveFreeformElapsedSeconds(state: RemoteTimerState, nowMs: number): number {
+  const base = Math.max(0, Math.floor(state.accumulatedSeconds));
+  if (state.status !== 'running' || !state.runningAnchorAt) {
+    return base;
+  }
+
+  const anchorMs = parseIsoMs(state.runningAnchorAt);
+  if (anchorMs === null) return base;
+  const runningDelta = Math.max(0, Math.floor((nowMs - anchorMs) / 1000));
+  return base + runningDelta;
+}
+
+function derivePomodoroState(state: RemoteTimerState, nowMs: number) {
+  if (state.mode === 'freeform') {
+    return {
+      phase: null,
+      phaseSecondsLeft: 0,
+      currentCycle: 1,
+      totalFocusSeconds: 0,
+    };
+  }
+
+  const config = POMODORO_PRESETS[state.mode];
+  if (state.status !== 'running' || !state.runningAnchorAt) {
+    const seeded = ensurePomodoroSeedState(
+      state.pomodoroPhase,
+      state.phaseSecondsLeft,
+      state.currentCycle,
+      config
+    );
+    return {
+      phase: state.pomodoroPhase ? seeded.phase : null,
+      phaseSecondsLeft: state.pomodoroPhase ? seeded.phaseSecondsLeft : 0,
+      currentCycle: state.pomodoroPhase ? seeded.cycle : 1,
+      totalFocusSeconds: Math.max(0, Math.floor(state.totalFocusSeconds)),
+    };
+  }
+
+  const anchorMs = parseIsoMs(state.runningAnchorAt);
+  const elapsedSeconds =
+    anchorMs === null ? 0 : Math.max(0, Math.floor((nowMs - anchorMs) / 1000));
+
+  return simulatePomodoroState({
+    phase: state.pomodoroPhase,
+    phaseSecondsLeft: state.phaseSecondsLeft,
+    cycle: state.currentCycle,
+    totalFocusSeconds: state.totalFocusSeconds,
+    elapsedSeconds,
+    config,
+  });
+}
+
+function deriveRuntimeSnapshot(state: RemoteTimerState, nowMs: number): RuntimeSnapshot {
+  if (state.mode === 'freeform') {
+    const elapsed = deriveFreeformElapsedSeconds(state, nowMs);
+    return {
+      displaySeconds: elapsed,
+      elapsedSeconds: elapsed,
+      totalFocusSeconds: elapsed,
+      pomodoroPhase: null,
+      phaseSecondsLeft: 0,
+      currentCycle: 1,
+    };
+  }
+
+  const pomodoro = derivePomodoroState(state, nowMs);
+  return {
+    displaySeconds: pomodoro.phaseSecondsLeft,
+    elapsedSeconds: pomodoro.totalFocusSeconds,
+    totalFocusSeconds: pomodoro.totalFocusSeconds,
+    pomodoroPhase: pomodoro.phase,
+    phaseSecondsLeft: pomodoro.phaseSecondsLeft,
+    currentCycle: pomodoro.currentCycle,
+  };
+}
+
 // Alias de compat para código existente
 export type { UseStudyTimerReturn };
 
@@ -81,143 +384,24 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
   /** @deprecated use displaySeconds */
   elapsedSeconds: number;
 } {
-  // ========================================
-  // Estado
-  // ========================================
-  const [mode, setModeState] = useState<TimerMode>('freeform');
-  const [status, setStatus] = useState<TimerStatus>('idle');
-  const [selectedSubject, setSelectedSubject] = useState('');
+  const clientIdRef = useRef(getOrCreateClientId());
+  const presenceCreatedAtRef = useRef(new Date().toISOString());
+  const previousPhaseRef = useRef<PomodoroPhase | null>(null);
+
+  const [remoteState, setRemoteState] = useState<RemoteTimerState>(() => createDefaultTimerState(userId));
+  const [tickNowMs, setTickNowMs] = useState(Date.now());
   const [isTabVisible, setIsTabVisible] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Freeform: contagem progressiva
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-
-  // Pomodoro
-  const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase | null>(null);
-  const [phaseSecondsLeft, setPhaseSecondsLeft] = useState(0);
-  const [currentCycle, setCurrentCycle] = useState(1);
-  const [totalFocusSeconds, setTotalFocusSeconds] = useState(0);
   const [phaseJustChanged, setPhaseJustChanged] = useState<PomodoroPhase | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasControl, setHasControl] = useState(true);
+  const [activeScreens, setActiveScreens] = useState(1);
 
-  // Refs
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<string>('');
-  const lastTickAtRef = useRef<number | null>(null);
-  const pomodoroPhaseRef = useRef<PomodoroPhase | null>(null);
-  const phaseSecondsLeftRef = useRef(0);
-  const currentCycleRef = useRef(1);
+  useEffect(() => {
+    setRemoteState(createDefaultTimerState(userId));
+    setTickNowMs(Date.now());
+    previousPhaseRef.current = null;
+  }, [userId]);
 
-  const isPomodoro = mode !== 'freeform';
-  const pomodoroConfig = isPomodoro ? POMODORO_PRESETS[mode] : null;
-
-  // ========================================
-  // Helpers
-  // ========================================
-
-  const clearTick = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    lastTickAtRef.current = null;
-  }, []);
-
-  const getNextPomodoroState = useCallback(
-    (phase: PomodoroPhase, cycle: number, config: PomodoroConfig) => {
-      if (phase === 'focus') {
-        const isLongBreak = cycle >= config.cyclesBeforeLongBreak;
-        return {
-          phase: isLongBreak ? ('longBreak' as const) : ('shortBreak' as const),
-          cycle,
-          secondsLeft: (isLongBreak ? config.longBreakMinutes : config.shortBreakMinutes) * 60,
-        };
-      }
-
-      const wasLongBreak = phase === 'longBreak';
-      const nextCycle = wasLongBreak ? 1 : cycle + 1;
-      return {
-        phase: 'focus' as const,
-        cycle: nextCycle,
-        secondsLeft: config.focusMinutes * 60,
-      };
-    },
-    []
-  );
-
-  const startTicking = useCallback(() => {
-    clearTick();
-    lastTickAtRef.current = Date.now();
-
-    intervalRef.current = setInterval(() => {
-      const now = Date.now();
-      const lastTickAt = lastTickAtRef.current ?? now;
-      const deltaSeconds = Math.floor((now - lastTickAt) / 1000);
-      if (deltaSeconds <= 0) return;
-      lastTickAtRef.current = lastTickAt + deltaSeconds * 1000;
-
-      if (!isPomodoro) {
-        // Freeform: conta com base no tempo real decorrido
-        setElapsedSeconds((prev) => prev + deltaSeconds);
-      } else {
-        if (!pomodoroConfig || !pomodoroPhaseRef.current) return;
-
-        let remaining = deltaSeconds;
-        let phase = pomodoroPhaseRef.current;
-        let secondsLeft = phaseSecondsLeftRef.current;
-        let cycle = currentCycleRef.current;
-        let focusSecondsToAdd = 0;
-        let changedPhase: PomodoroPhase | null = null;
-
-        while (remaining > 0 && phase) {
-          if (secondsLeft <= 0) {
-            const next = getNextPomodoroState(phase, cycle, pomodoroConfig);
-            phase = next.phase;
-            cycle = next.cycle;
-            secondsLeft = next.secondsLeft;
-            changedPhase = phase;
-            continue;
-          }
-
-          const secondsToConsume = Math.min(secondsLeft, remaining);
-          if (phase === 'focus') {
-            focusSecondsToAdd += secondsToConsume;
-          }
-
-          secondsLeft -= secondsToConsume;
-          remaining -= secondsToConsume;
-
-          if (secondsLeft === 0) {
-            const next = getNextPomodoroState(phase, cycle, pomodoroConfig);
-            phase = next.phase;
-            cycle = next.cycle;
-            secondsLeft = next.secondsLeft;
-            changedPhase = phase;
-          }
-        }
-
-        if (focusSecondsToAdd > 0) {
-          setTotalFocusSeconds((total) => total + focusSecondsToAdd);
-          setElapsedSeconds((elapsed) => elapsed + focusSecondsToAdd);
-        }
-
-        pomodoroPhaseRef.current = phase;
-        phaseSecondsLeftRef.current = secondsLeft;
-        currentCycleRef.current = cycle;
-        setPomodoroPhase(phase);
-        setPhaseSecondsLeft(secondsLeft);
-        setCurrentCycle(cycle);
-
-        if (changedPhase) {
-          setPhaseJustChanged(changedPhase);
-        }
-      }
-    }, 1000);
-  }, [clearTick, getNextPomodoroState, isPomodoro, pomodoroConfig]);
-
-  // ========================================
-  // Page Visibility API — apenas status visual da aba
-  // ========================================
   useEffect(() => {
     const handleVisibilityChange = () => {
       setIsTabVisible(!document.hidden);
@@ -225,138 +409,439 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
 
     handleVisibilityChange();
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   useEffect(() => {
-    pomodoroPhaseRef.current = pomodoroPhase;
-  }, [pomodoroPhase]);
+    if (!userId) return;
+    const timerRef = doc(db, ACTIVE_TIMERS_COLLECTION, userId);
+
+    const unsubscribe = onSnapshot(
+      timerRef,
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          const defaults = createDefaultTimerState(userId);
+          setRemoteState(defaults);
+          void setDoc(timerRef, defaults, { merge: true });
+          return;
+        }
+
+        const next = normalizeTimerState(snapshot.data() as Record<string, unknown>, userId);
+        setRemoteState(next);
+      },
+      (error) => {
+        console.warn('Erro ao sincronizar timer ativo:', error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [userId]);
 
   useEffect(() => {
-    phaseSecondsLeftRef.current = phaseSecondsLeft;
-  }, [phaseSecondsLeft]);
+    if (remoteState.status !== 'running') {
+      setTickNowMs(Date.now());
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setTickNowMs(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [remoteState.status, remoteState.runningAnchorAt, remoteState.mode]);
 
   useEffect(() => {
-    currentCycleRef.current = currentCycle;
-  }, [currentCycle]);
+    if (!userId) return;
 
-  // Limpa ao desmontar
+    const clientId = clientIdRef.current;
+    const myPresenceRef = doc(db, TIMER_PRESENCE_COLLECTION, userId, 'clients', clientId);
+    const clientsRef = collection(db, TIMER_PRESENCE_COLLECTION, userId, 'clients');
+
+    const heartbeat = async () => {
+      try {
+        await setDoc(
+          myPresenceRef,
+          {
+            userId,
+            clientId,
+            createdAt: presenceCreatedAtRef.current,
+            lastSeenAt: new Date().toISOString(),
+            userAgent: typeof navigator === 'undefined' ? 'unknown' : navigator.userAgent.slice(0, 200),
+          },
+          { merge: true }
+        );
+      } catch (error) {
+        console.warn('Erro no heartbeat do timer:', error);
+      }
+    };
+
+    void heartbeat();
+    const heartbeatId = window.setInterval(() => {
+      void heartbeat();
+    }, PRESENCE_HEARTBEAT_MS);
+
+    const unsubscribe = onSnapshot(
+      clientsRef,
+      (snapshot) => {
+        const nowMs = Date.now();
+        const staleThresholdMs = PRESENCE_TTL_MS * 3;
+
+        const activeClients = snapshot.docs
+          .map((clientDoc) => {
+            const data = clientDoc.data() as Record<string, unknown>;
+            const createdAtMs = parseIsoMs(data.createdAt) ?? parseIsoMs(data.lastSeenAt) ?? 0;
+            const lastSeenAtMs = parseIsoMs(data.lastSeenAt) ?? 0;
+            return {
+              ref: clientDoc.ref,
+              clientId:
+                typeof data.clientId === 'string' && data.clientId.length > 0
+                  ? data.clientId
+                  : clientDoc.id,
+              createdAtMs,
+              lastSeenAtMs,
+            };
+          })
+          .filter((client) => {
+            const isFresh = nowMs - client.lastSeenAtMs <= PRESENCE_TTL_MS;
+            const isVeryStale = nowMs - client.lastSeenAtMs > staleThresholdMs;
+            if (isVeryStale) {
+              void deleteDoc(client.ref).catch(() => {
+                // cleanup best effort
+              });
+            }
+            return isFresh;
+          })
+          .sort((a, b) => {
+            if (a.createdAtMs !== b.createdAtMs) return a.createdAtMs - b.createdAtMs;
+            return a.clientId.localeCompare(b.clientId);
+          });
+
+        setActiveScreens(activeClients.length);
+        const allowedClients = new Set(
+          activeClients.slice(0, MAX_ACTIVE_SCREENS).map((client) => client.clientId)
+        );
+        setHasControl(allowedClients.has(clientId));
+      },
+      (error) => {
+        console.warn('Erro ao observar presença do timer:', error);
+      }
+    );
+
+    const handleBeforeUnload = () => {
+      void deleteDoc(myPresenceRef).catch(() => {
+        // cleanup best effort
+      });
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.clearInterval(heartbeatId);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      unsubscribe();
+      void deleteDoc(myPresenceRef).catch(() => {
+        // cleanup best effort
+      });
+    };
+  }, [userId]);
+
+  const mutateTimerState = useCallback(
+    async (
+      mutator: (current: RemoteTimerState, nowIso: string, nowMs: number) => RemoteTimerState | null
+    ) => {
+      if (!userId || !hasControl) return;
+
+      const timerRef = doc(db, ACTIVE_TIMERS_COLLECTION, userId);
+      const clientId = clientIdRef.current;
+
+      await runTransaction(db, async (transaction) => {
+        const currentSnap = await transaction.get(timerRef);
+        const current = currentSnap.exists()
+          ? normalizeTimerState(currentSnap.data() as Record<string, unknown>, userId)
+          : createDefaultTimerState(userId);
+
+        const now = new Date();
+        const nowIso = now.toISOString();
+        const next = mutator(current, nowIso, now.getTime());
+        if (!next) return;
+
+        transaction.set(
+          timerRef,
+          {
+            ...next,
+            userId,
+            updatedAt: nowIso,
+            updatedByClientId: clientId,
+          },
+          { merge: true }
+        );
+      });
+    },
+    [hasControl, userId]
+  );
+
+  const runtime = useMemo(() => deriveRuntimeSnapshot(remoteState, tickNowMs), [remoteState, tickNowMs]);
+
   useEffect(() => {
-    return () => clearTick();
-  }, [clearTick]);
+    const isRunningPomodoro = remoteState.mode !== 'freeform' && remoteState.status === 'running';
+    const currentPhase = runtime.pomodoroPhase;
 
-  // ========================================
-  // Controles
-  // ========================================
+    if (isRunningPomodoro && previousPhaseRef.current && currentPhase && previousPhaseRef.current !== currentPhase) {
+      setPhaseJustChanged(currentPhase);
+    }
+
+    previousPhaseRef.current = currentPhase;
+  }, [remoteState.mode, remoteState.status, runtime.pomodoroPhase]);
+
+  const mode = remoteState.mode;
+  const status = remoteState.status;
+  const selectedSubject = remoteState.selectedSubject;
+  const pomodoroConfig = mode === 'freeform' ? null : POMODORO_PRESETS[mode];
+  const pomodoroPhase = mode === 'freeform' ? null : runtime.pomodoroPhase;
+  const currentCycle = mode === 'freeform' ? 1 : runtime.currentCycle;
+
+  const setSelectedSubject = useCallback(
+    (subject: string) => {
+      if (!hasControl) return;
+      const normalized = subject.trim();
+      setRemoteState((prev) => ({ ...prev, selectedSubject: normalized }));
+      void mutateTimerState((current) => ({ ...current, selectedSubject: normalized })).catch((error) => {
+        console.error('Erro ao definir matéria do timer:', error);
+      });
+    },
+    [hasControl, mutateTimerState]
+  );
 
   const setMode = useCallback(
     (newMode: TimerMode) => {
-      if (status !== 'idle' && status !== 'stopped') return; // só muda se parado
-      setModeState(newMode);
+      if (!hasControl) return;
+
+      setRemoteState((prev) => {
+        if (prev.status !== 'idle' && prev.status !== 'stopped') return prev;
+        return {
+          ...prev,
+          mode: newMode,
+          accumulatedSeconds: 0,
+          totalFocusSeconds: 0,
+          pomodoroPhase: null,
+          phaseSecondsLeft: 0,
+          currentCycle: 1,
+          runningAnchorAt: null,
+          startTime: '',
+        };
+      });
+
+      void mutateTimerState((current) => {
+        if (current.status !== 'idle' && current.status !== 'stopped') return null;
+        return {
+          ...current,
+          mode: newMode,
+          accumulatedSeconds: 0,
+          totalFocusSeconds: 0,
+          pomodoroPhase: null,
+          phaseSecondsLeft: 0,
+          currentCycle: 1,
+          runningAnchorAt: null,
+          startTime: '',
+        };
+      }).catch((error) => {
+        console.error('Erro ao alterar modo do timer:', error);
+      });
     },
-    [status]
+    [hasControl, mutateTimerState]
   );
 
   const play = useCallback(() => {
-    if (!selectedSubject) return;
+    if (!hasControl) return;
+    void mutateTimerState((current, nowIso) => {
+      const subject = current.selectedSubject.trim();
+      if (!subject) return null;
+      if (current.status === 'running') return null;
 
-    if (status === 'idle' || status === 'stopped') {
-      // Novo estudo: reseta tudo
-      setElapsedSeconds(0);
-      setTotalFocusSeconds(0);
-      startTimeRef.current = new Date().toISOString();
-
-      if (isPomodoro && pomodoroConfig) {
-        const initialFocusSeconds = pomodoroConfig.focusMinutes * 60;
-        setPomodoroPhase('focus');
-        setPhaseSecondsLeft(initialFocusSeconds);
-        setCurrentCycle(1);
-        pomodoroPhaseRef.current = 'focus';
-        phaseSecondsLeftRef.current = initialFocusSeconds;
-        currentCycleRef.current = 1;
-      } else {
-        setPomodoroPhase(null);
-        setPhaseSecondsLeft(0);
-        pomodoroPhaseRef.current = null;
-        phaseSecondsLeftRef.current = 0;
-        currentCycleRef.current = 1;
+      if (current.status === 'paused') {
+        return {
+          ...current,
+          status: 'running',
+          selectedSubject: subject,
+          runningAnchorAt: nowIso,
+        };
       }
-    }
 
-    setStatus('running');
-    startTicking();
-  }, [selectedSubject, status, isPomodoro, pomodoroConfig, startTicking]);
+      if (current.status !== 'idle' && current.status !== 'stopped') return null;
+
+      if (current.mode === 'freeform') {
+        return {
+          ...current,
+          status: 'running',
+          selectedSubject: subject,
+          planId: planId || null,
+          startTime: nowIso,
+          runningAnchorAt: nowIso,
+          accumulatedSeconds: 0,
+          totalFocusSeconds: 0,
+          pomodoroPhase: null,
+          phaseSecondsLeft: 0,
+          currentCycle: 1,
+        };
+      }
+
+      const config = POMODORO_PRESETS[current.mode as PomodoroMode];
+      return {
+        ...current,
+        status: 'running',
+        selectedSubject: subject,
+        planId: planId || null,
+        startTime: nowIso,
+        runningAnchorAt: nowIso,
+        accumulatedSeconds: 0,
+        totalFocusSeconds: 0,
+        pomodoroPhase: 'focus',
+        phaseSecondsLeft: config.focusMinutes * 60,
+        currentCycle: 1,
+      };
+    }).catch((error) => {
+      console.error('Erro ao iniciar/retomar timer:', error);
+    });
+  }, [hasControl, mutateTimerState, planId]);
 
   const pause = useCallback(() => {
-    if (status !== 'running') return;
-    setStatus('paused');
-    clearTick();
-  }, [status, clearTick]);
+    if (!hasControl) return;
+    void mutateTimerState((current, _nowIso, nowMs) => {
+      if (current.status !== 'running') return null;
+
+      if (current.mode === 'freeform') {
+        const elapsed = deriveFreeformElapsedSeconds(current, nowMs);
+        return {
+          ...current,
+          status: 'paused',
+          runningAnchorAt: null,
+          accumulatedSeconds: elapsed,
+        };
+      }
+
+      const pomodoro = derivePomodoroState(current, nowMs);
+      return {
+        ...current,
+        status: 'paused',
+        runningAnchorAt: null,
+        totalFocusSeconds: pomodoro.totalFocusSeconds,
+        pomodoroPhase: pomodoro.phase,
+        phaseSecondsLeft: pomodoro.phaseSecondsLeft,
+        currentCycle: pomodoro.currentCycle,
+      };
+    }).catch((error) => {
+      console.error('Erro ao pausar timer:', error);
+    });
+  }, [hasControl, mutateTimerState]);
 
   const stop = useCallback(async () => {
-    if (status === 'idle') return;
-    clearTick();
+    if (!hasControl) return;
 
-    const finalDuration = isPomodoro ? totalFocusSeconds : elapsedSeconds;
+    const finalSessionRef: {
+      current:
+        | {
+            subject: string;
+            startTime: string;
+            endTime: string;
+            duration: number;
+            planId?: string;
+          }
+        | null;
+    } = { current: null };
 
-    if (finalDuration >= 10) {
-      setIsSaving(true);
-      try {
-        await saveSession({
-          userId,
-          planId: planId || undefined,
-          subject: selectedSubject,
-          startTime: startTimeRef.current,
-          endTime: new Date().toISOString(),
-          duration: finalDuration,
-          date: getTodayISO(),
-        });
-      } catch (error) {
-        console.error('Erro ao salvar sessão:', error);
-      } finally {
-        setIsSaving(false);
+    await mutateTimerState((current, nowIso, nowMs) => {
+      if (current.status === 'idle' || current.status === 'stopped') return null;
+
+      if (current.mode === 'freeform') {
+        const elapsed = deriveFreeformElapsedSeconds(current, nowMs);
+        finalSessionRef.current = {
+          subject: current.selectedSubject,
+          startTime: current.startTime || nowIso,
+          endTime: nowIso,
+          duration: elapsed,
+          planId: current.planId || planId || undefined,
+        };
+      } else {
+        const pomodoro = derivePomodoroState(current, nowMs);
+        finalSessionRef.current = {
+          subject: current.selectedSubject,
+          startTime: current.startTime || nowIso,
+          endTime: nowIso,
+          duration: pomodoro.totalFocusSeconds,
+          planId: current.planId || planId || undefined,
+        };
       }
-    }
 
-    // Reseta
-    setStatus('stopped');
-    setElapsedSeconds(0);
-    setTotalFocusSeconds(0);
-    setPomodoroPhase(null);
-    setPhaseSecondsLeft(0);
-    setCurrentCycle(1);
-    pomodoroPhaseRef.current = null;
-    phaseSecondsLeftRef.current = 0;
-    currentCycleRef.current = 1;
-  }, [status, isPomodoro, totalFocusSeconds, elapsedSeconds, userId, planId, selectedSubject, clearTick]);
+      return {
+        ...current,
+        status: 'stopped',
+        runningAnchorAt: null,
+        accumulatedSeconds: 0,
+        totalFocusSeconds: 0,
+        pomodoroPhase: null,
+        phaseSecondsLeft: 0,
+        currentCycle: 1,
+        startTime: '',
+        planId: null,
+      };
+    }).catch((error) => {
+      console.error('Erro ao parar timer:', error);
+    });
+
+    const finalSession = finalSessionRef.current;
+    if (!finalSession || finalSession.duration < 10) return;
+
+    setIsSaving(true);
+    try {
+      await saveSession({
+        userId,
+        planId: finalSession.planId,
+        subject: finalSession.subject,
+        startTime: finalSession.startTime,
+        endTime: finalSession.endTime,
+        duration: finalSession.duration,
+        date: getTodayISO(),
+        source: 'timer',
+      });
+    } catch (error) {
+      console.error('Erro ao salvar sessão do timer:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [hasControl, mutateTimerState, planId, userId]);
 
   const skipPhase = useCallback(() => {
-    if (!isPomodoro || status !== 'running' || !pomodoroConfig || !pomodoroPhaseRef.current) return;
-    const next = getNextPomodoroState(pomodoroPhaseRef.current, currentCycleRef.current, pomodoroConfig);
-    pomodoroPhaseRef.current = next.phase;
-    phaseSecondsLeftRef.current = next.secondsLeft;
-    currentCycleRef.current = next.cycle;
-    setPomodoroPhase(next.phase);
-    setPhaseSecondsLeft(next.secondsLeft);
-    setCurrentCycle(next.cycle);
-    setPhaseJustChanged(next.phase);
-  }, [getNextPomodoroState, isPomodoro, pomodoroConfig, status]);
+    if (!hasControl) return;
+    void mutateTimerState((current, nowIso, nowMs) => {
+      if (current.mode === 'freeform' || current.status !== 'running') return null;
+
+      const pomodoro = derivePomodoroState(current, nowMs);
+      if (pomodoro.phase !== 'shortBreak' && pomodoro.phase !== 'longBreak') return null;
+
+      const config = POMODORO_PRESETS[current.mode as PomodoroMode];
+      const next = getNextPomodoroState(pomodoro.phase, pomodoro.currentCycle, config);
+
+      return {
+        ...current,
+        status: 'running',
+        runningAnchorAt: nowIso,
+        totalFocusSeconds: pomodoro.totalFocusSeconds,
+        pomodoroPhase: next.phase,
+        phaseSecondsLeft: next.secondsLeft,
+        currentCycle: next.cycle,
+      };
+    }).catch((error) => {
+      console.error('Erro ao pular fase do pomodoro:', error);
+    });
+  }, [hasControl, mutateTimerState]);
 
   const clearPhaseChanged = useCallback(() => {
     setPhaseJustChanged(null);
   }, []);
 
-  // ========================================
-  // Display seconds
-  // ========================================
-  const displaySeconds = isPomodoro ? phaseSecondsLeft : elapsedSeconds;
-
   return {
-    displaySeconds,
-    elapsedSeconds, // compat
-    totalFocusSeconds,
+    displaySeconds: runtime.displaySeconds,
+    elapsedSeconds: runtime.elapsedSeconds,
+    totalFocusSeconds: runtime.totalFocusSeconds,
     status,
     mode,
     selectedSubject,
@@ -366,6 +851,9 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
     totalCycles: pomodoroConfig?.cyclesBeforeLongBreak ?? 4,
     pomodoroConfig,
     phaseJustChanged,
+    hasControl,
+    activeScreens,
+    maxActiveScreens: MAX_ACTIVE_SCREENS,
     setSelectedSubject,
     setMode,
     play,
