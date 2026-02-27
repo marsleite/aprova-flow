@@ -69,6 +69,43 @@ service cloud.firestore {
       allow read, write: if request.auth != null 
                          && request.auth.uid == userId;
     }
+
+    // Estado ativo do cronômetro (documento único por usuário)
+    match /active_timers/{userId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == userId;
+
+      allow create: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.userId == request.auth.uid;
+
+      allow update: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.userId == resource.data.userId;
+
+      allow delete: if false;
+    }
+
+    // Presença de telas conectadas ao cronômetro (subcoleção clients)
+    match /timer_presence/{userId}/clients/{clientId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == userId;
+
+      allow create: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.clientId is string
+                    && request.resource.data.lastSeenAt is string;
+
+      allow update: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.clientId == resource.data.clientId
+                    && request.resource.data.lastSeenAt is string;
+
+      allow delete: if request.auth != null
+                    && request.auth.uid == userId;
+    }
     
     // Planos de estudo (editais)
     match /study_plans/{planId} {

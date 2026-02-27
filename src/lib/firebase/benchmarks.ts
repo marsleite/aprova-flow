@@ -1,5 +1,6 @@
-import { collection, doc, setDoc, getDoc, updateDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from './config';
+import { FirebaseError } from 'firebase/app';
 
 export interface BenchmarkData {
   weeklyGoalHours: number;
@@ -29,7 +30,7 @@ const USER_BENCHMARKS_COLLECTION = 'user_benchmarks';
 /**
  * Atualiza benchmarks agregados com base nos dados do usuário
  */
-export async function updateBenchmark(weeklyGoalHours: number, weeklyHours: number) {
+export async function updateBenchmark(weeklyGoalHours: number) {
   try {
     // Referência ao documento de benchmark para esta meta
     const benchmarkRef = doc(db, BENCHMARKS_COLLECTION, `goal_${weeklyGoalHours}`);
@@ -63,8 +64,15 @@ export async function updateBenchmark(weeklyGoalHours: number, weeklyHours: numb
     
     return benchmarkData;
   } catch (error) {
-    console.error('Error updating benchmark:', error);
-    throw error;
+    const isPermissionDenied =
+      error instanceof FirebaseError && error.code === 'permission-denied';
+
+    // Em client comum não há permissão para escrever benchmarks agregados.
+    // A escrita agregada deve ser feita por backend/Admin SDK.
+    if (!isPermissionDenied) {
+      console.warn('Error updating benchmark:', error);
+    }
+    return null;
   }
 }
 
@@ -73,42 +81,18 @@ export async function updateBenchmark(weeklyGoalHours: number, weeklyHours: numb
  */
 export async function calculatePercentiles(weeklyGoalHours: number): Promise<BenchmarkData['percentiles']> {
   try {
-    // Busca todos os usuários com meta semanal similar
-    const q = query(
-      collection(db, USER_BENCHMARKS_COLLECTION),
-      where('weeklyGoalHours', '>=', weeklyGoalHours - 2),
-      where('weeklyGoalHours', '<=', weeklyGoalHours + 2)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const weeklyHours: number[] = [];
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data() as UserBenchmark;
-      weeklyHours.push(data.weeklyHours);
-    });
-
-    if (weeklyHours.length === 0) {
+    // No client, usamos apenas benchmark agregado público (read-only).
+    const benchmark = await getBenchmarkData(weeklyGoalHours);
+    if (!benchmark) {
       return { p10: 0, p25: 0, p50: 0, p75: 0, p90: 0 };
     }
-
-    // Ordena horas para calcular percentis
-    weeklyHours.sort((a, b) => a - b);
-    
-    const calculatePercentile = (p: number): number => {
-      const index = Math.ceil((p / 100) * weeklyHours.length) - 1;
-      return weeklyHours[Math.max(0, Math.min(index, weeklyHours.length - 1))];
-    };
-
-    return {
-      p10: calculatePercentile(10),
-      p25: calculatePercentile(25),
-      p50: calculatePercentile(50),
-      p75: calculatePercentile(75),
-      p90: calculatePercentile(90),
-    };
+    return benchmark.percentiles;
   } catch (error) {
-    console.error('Error calculating percentiles:', error);
+    const isPermissionDenied =
+      error instanceof FirebaseError && error.code === 'permission-denied';
+    if (!isPermissionDenied) {
+      console.warn('Error calculating percentiles:', error);
+    }
     return { p10: 0, p25: 0, p50: 0, p75: 0, p90: 0 };
   }
 }
@@ -142,13 +126,17 @@ export async function saveUserBenchmark(
 
     // Salva benchmark do usuário
     await setDoc(doc(db, USER_BENCHMARKS_COLLECTION, userId), userBenchmark);
-    
-    // Atualiza benchmarks agregados
-    await updateBenchmark(weeklyGoalHours, weeklyHours);
+
+    // Atualização agregada fica para backend (Admin SDK / job server-side).
+    // No client evitamos erro de permissão.
 
     return userBenchmark;
   } catch (error) {
-    console.error('Error saving user benchmark:', error);
+    const isPermissionDenied =
+      error instanceof FirebaseError && error.code === 'permission-denied';
+    if (!isPermissionDenied) {
+      console.warn('Error saving user benchmark:', error);
+    }
     throw error;
   }
 }
