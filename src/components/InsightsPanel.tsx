@@ -99,7 +99,8 @@ export default function InsightsPanel({ insights, loading }: InsightsPanelProps)
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+      className="h-full rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
+      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
     >
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">

@@ -204,16 +204,15 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   }, []);
 
-  const cellSize = 11;
-  const cellGap = 2;
+  const cellSize = 12;
+  const cellGap = 3;
   const dayLabelWidth = 28;
   const gridWidth = numWeeks * cellSize + Math.max(0, numWeeks - 1) * cellGap;
-  const heatmapWidth = dayLabelWidth + gridWidth;
 
   if (loading) {
     return (
       <div className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
-        style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)', minHeight: 220 }}
+        style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
       >
         <div className="mb-4 h-5 w-48 rounded-lg shimmer" />
         <div className="flex-1 rounded-xl shimmer" />
@@ -245,63 +244,71 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
         </div>
       </div>
 
-      {/* Heatmap grid — fills available height */}
-      <div className="flex-1 overflow-x-auto">
-        {/* Month labels */}
-        <div className="relative mb-1.5 ml-8 h-4">
-          {monthLabels.map((m, i) => (
-            <span
-              key={i}
-              className="absolute text-[10px] font-medium text-slate-600"
-              style={{ left: `${(m.weekIndex / numWeeks) * 100}%` }}
-            >
-              {m.label}
-            </span>
-          ))}
-        </div>
-
-        {/* Grid */}
-        <div className="flex items-stretch">
-          {/* Day labels */}
-          <div className="mr-1.5 grid w-7 shrink-0 grid-rows-7 gap-[3px]">
-            {DAY_LABELS.map((label, i) => (
-              <div key={i} className="flex items-center">
-                <span className="w-6 pr-1 text-right text-[9px] font-medium text-slate-600">{label}</span>
-              </div>
+      {/* Heatmap grid */}
+      <div className="overflow-x-auto">
+        <div style={{ width: dayLabelWidth + gridWidth, minWidth: '100%' }}>
+          {/* Month labels */}
+          <div className="relative mb-1.5 h-4" style={{ marginLeft: dayLabelWidth }}>
+            {monthLabels.map((m, i) => (
+              <span
+                key={i}
+                className="absolute text-[10px] font-medium text-slate-600"
+                style={{ left: m.weekIndex * (cellSize + cellGap) }}
+              >
+                {m.label}
+              </span>
             ))}
           </div>
 
-          {/* Week columns */}
-          <div className="flex min-w-0 flex-1 gap-[3px]">
-            {Array.from({ length: numWeeks }).map((_, weekIdx) => (
-              <div key={weekIdx} className="flex min-w-0 flex-1 flex-col gap-[3px]">
-                {Array.from({ length: 7 }).map((_, dayIdx) => {
-                  const cell = grid[dayIdx][weekIdx];
-                  if (!cell) {
-                    return <div key={dayIdx} className="aspect-square w-full rounded-sm" />;
-                  }
-                  const isToday = cell.date === todayStr;
-                  const isSelected = selectedDay?.date === cell.date;
-                  return (
-                    <button
-                      key={dayIdx}
-                      onClick={() => setSelectedDay(isSelected ? null : cell)}
-                      className={`aspect-square w-full rounded-sm transition-all duration-150 hover:scale-110 hover:brightness-125 ${
-                        isToday ? 'ring-1 ring-violet-400 ring-offset-1 ring-offset-[#0f1825]' : ''
-                      } ${
-                        isSelected ? 'ring-1 ring-white ring-offset-1 ring-offset-[#0f1825]' : ''
-                      }`}
-                      style={{ background: LEVEL_INLINE[cell.level] }}
-                      title={
-                        cell.totalSeconds > 0
-                          ? `${cell.date} — ${formatDuration(cell.totalSeconds)}`
-                          : `${cell.date} — sem estudo`
-                      }
-                    />
-                  );
-                })}
-              </div>
-            ))}
+          {/* Grid */}
+          <div className="flex">
+            {/* Day labels */}
+            <div className="shrink-0 flex flex-col" style={{ width: dayLabelWidth, gap: cellGap }}>
+              {DAY_LABELS.map((label, i) => (
+                <div key={i} className="flex items-center justify-end pr-1.5" style={{ height: cellSize }}>
+                  <span className="text-[9px] font-medium text-slate-600">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Week columns — fixed-size cells */}
+            <div className="flex" style={{ gap: cellGap }}>
+              {Array.from({ length: numWeeks }).map((_, weekIdx) => (
+                <div key={weekIdx} className="flex flex-col" style={{ gap: cellGap }}>
+                  {Array.from({ length: 7 }).map((_, dayIdx) => {
+                    const cell = grid[dayIdx][weekIdx];
+                    if (!cell) {
+                      return (
+                        <div
+                          key={dayIdx}
+                          className="rounded-sm"
+                          style={{ width: cellSize, height: cellSize }}
+                        />
+                      );
+                    }
+                    const isToday = cell.date === todayStr;
+                    const isSelected = selectedDay?.date === cell.date;
+                    return (
+                      <button
+                        key={dayIdx}
+                        onClick={() => setSelectedDay(isSelected ? null : cell)}
+                        className={`rounded-sm transition-all duration-150 hover:scale-125 hover:brightness-130 ${
+                          isToday ? 'ring-1 ring-violet-400 ring-offset-1 ring-offset-[#0f1825]' : ''
+                        } ${
+                          isSelected ? 'ring-1 ring-white ring-offset-1 ring-offset-[#0f1825]' : ''
+                        }`}
+                        style={{ width: cellSize, height: cellSize, background: LEVEL_INLINE[cell.level] }}
+                        title={
+                          cell.totalSeconds > 0
+                            ? `${cell.date} — ${formatDuration(cell.totalSeconds)}`
+                            : `${cell.date} — sem estudo`
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

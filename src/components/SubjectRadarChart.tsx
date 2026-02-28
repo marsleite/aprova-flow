@@ -202,9 +202,9 @@ function FullRadarChart({ data }: { data: SubjectHours[] }) {
   }));
 
   return (
-    <div className="flex-1 min-h-[200px]">
+    <div className="flex-1 min-h-[160px]">
     <ResponsiveContainer width="100%" height="100%">
-      <RadarChart cx="50%" cy="50%" outerRadius="55%" data={chartData}>
+      <RadarChart cx="50%" cy="52%" outerRadius="72%" data={chartData}>
         <PolarGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
         <PolarAngleAxis
           dataKey="abbr"
