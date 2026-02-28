@@ -28,11 +28,11 @@ const MONTH_NAMES_SHORT = [
 const DAY_LABELS = ['', 'Seg', '', 'Qua', '', 'Sex', ''];
 
 const LEVEL_COLORS: Record<number, string> = {
-  0: 'bg-gray-800/40',
-  1: 'bg-violet-900/60',
-  2: 'bg-violet-700/70',
-  3: 'bg-violet-500/80',
-  4: 'bg-violet-400',
+  0: 'bg-white/[0.04]',
+  1: 'bg-blue-900/50',
+  2: 'bg-blue-700/60',
+  3: 'bg-blue-500/75',
+  4: 'bg-blue-400',
 };
 
 interface DayCell {

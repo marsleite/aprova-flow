@@ -56,9 +56,9 @@ export default function DailySummaryCard({
 
   if (loading) {
     return (
-      <div className="animate-pulse rounded-2xl border border-white/10 bg-gray-900/70 p-5">
-        <div className="mb-3 h-5 w-36 rounded bg-gray-800" />
-        <div className="h-8 w-24 rounded bg-gray-800" />
+      <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5">
+        <div className="mb-3 h-4 w-36 rounded shimmer" />
+        <div className="h-7 w-24 rounded shimmer" />
       </div>
     );
   }
@@ -70,15 +70,15 @@ export default function DailySummaryCard({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-5 shadow-xl"
+        className="relative overflow-hidden rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
       >
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-gray-800/50 p-2.5">
-            <Sun className="h-5 w-5 text-gray-500" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.04]">
+            <Sun className="h-4 w-4 text-slate-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-400">Resumo de Hoje</p>
-            <p className="text-xs text-gray-600">Nenhuma sessão registrada ainda. Bora estudar?</p>
+            <p className="text-sm font-medium text-slate-500">Resumo de Hoje</p>
+            <p className="text-xs text-slate-700">Nenhuma sessão registrada ainda. Bora estudar?</p>
           </div>
         </div>
       </motion.div>
@@ -90,7 +90,7 @@ export default function DailySummaryCard({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4 }}
-      className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-violet-900/30 to-gray-950 p-5 shadow-xl"
+      className="relative overflow-hidden rounded-xl border border-violet-500/15 bg-gradient-to-b from-violet-900/10 to-[#0f1825] p-5"
     >
       {/* Decoração */}
       <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-500/5" />
@@ -99,13 +99,13 @@ export default function DailySummaryCard({
         {/* Header */}
         <div className="mb-3 flex items-center gap-2">
           <Sun className="h-4 w-4 text-amber-400" />
-          <span className="text-sm font-medium text-gray-300">Resumo de Hoje</span>
+          <span className="text-sm font-medium text-slate-300">Resumo de Hoje</span>
         </div>
 
         {/* Total */}
         <p className="mb-4 text-2xl font-bold text-white sm:text-3xl">
           {formatDuration(totalTodaySeconds)}
-          <span className="mt-1 block text-sm font-normal text-gray-400 sm:ml-2 sm:mt-0 sm:inline">
+          <span className="mt-1 block text-sm font-normal text-slate-500 sm:ml-2 sm:mt-0 sm:inline">
             em {analysis.sessionCount} {analysis.sessionCount === 1 ? 'sessão' : 'sessões'}
           </span>
         </p>

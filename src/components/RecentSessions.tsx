@@ -123,16 +123,16 @@ export default function RecentSessions({ sessions, loading }: RecentSessionsProp
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
-      className="rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-6 shadow-2xl"
+      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
-        <div className="rounded-xl bg-amber-500/20 p-2.5">
-          <History className="h-5 w-5 text-amber-400" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+          <History className="h-4 w-4 text-amber-400" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-white">Sessões Recentes</h2>
-          <p className="text-sm text-gray-400">Últimas sessões de estudo</p>
+          <h2 className="text-sm font-semibold text-white">Sessões Recentes</h2>
+          <p className="text-xs text-slate-500">Últimas sessões de estudo</p>
         </div>
       </div>
 
