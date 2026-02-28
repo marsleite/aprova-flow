@@ -9,7 +9,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, BookOpen } from 'lucide-react';
+import { X, Clock, BookOpen, CalendarDays } from 'lucide-react';
 import { DayActivity } from '@/types';
 import { getMonthlyActivity } from '@/lib/firebase/sessions';
 import { formatDuration } from '@/lib/utils';
@@ -28,11 +28,19 @@ const MONTH_NAMES_SHORT = [
 const DAY_LABELS = ['', 'Seg', '', 'Qua', '', 'Sex', ''];
 
 const LEVEL_COLORS: Record<number, string> = {
-  0: 'bg-white/[0.04]',
-  1: 'bg-blue-900/50',
-  2: 'bg-blue-700/60',
-  3: 'bg-blue-500/75',
+  0: 'bg-white/[0.05]',
+  1: 'bg-blue-900/70',
+  2: 'bg-blue-700/80',
+  3: 'bg-blue-500',
   4: 'bg-blue-400',
+};
+
+const LEVEL_INLINE: Record<number, string> = {
+  0: 'rgba(255,255,255,0.05)',
+  1: 'rgba(30,58,138,0.7)',
+  2: 'rgba(29,78,216,0.85)',
+  3: '#3b82f6',
+  4: '#60a5fa',
 };
 
 interface DayCell {
@@ -204,16 +212,13 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
 
   if (loading) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-4 shadow-2xl"
+      <div className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
+        style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)', minHeight: 220 }}
       >
-        <div className="animate-pulse">
-          <div className="mb-3 h-5 w-64 rounded bg-gray-800"></div>
-          <div className="h-24 w-full rounded bg-gray-800"></div>
-        </div>
-      </motion.div>
+        <div className="mb-4 h-5 w-48 rounded-lg shimmer" />
+        <div className="flex-1 rounded-xl shimmer" />
+        <div className="mt-3 h-3 w-32 rounded shimmer" />
+      </div>
     );
   }
 
@@ -222,170 +227,100 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-4 shadow-2xl"
+      className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
+      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
     >
       {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-sm font-semibold text-white">
-          {totalDays} {totalDays === 1 ? 'dia' : 'dias'} de estudo no último ano
-        </span>
-      </div>
-
-      {/* Heatmap container */}
-      <div className="overflow-x-auto pb-1">
-        {/* Mobile: tamanho fixo com scroll horizontal */}
-        <div className="sm:hidden" style={{ width: `max(100%, ${heatmapWidth}px)` }}>
-          <div
-            className="relative mb-1 h-4"
-            style={{ marginLeft: `${dayLabelWidth + 4}px`, width: `${gridWidth}px` }}
-          >
-            {monthLabels.map((m, i) => (
-              <span
-                key={i}
-                className="absolute text-[10px] text-gray-500"
-                style={{ left: `${m.weekIndex * (cellSize + cellGap)}px` }}
-              >
-                {m.label}
-              </span>
-            ))}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10">
+            <CalendarDays className="h-3.5 w-3.5 text-blue-400" />
           </div>
-
-          <div className="flex">
-            <div className="mr-1 flex shrink-0 flex-col gap-[2px]">
-              {DAY_LABELS.map((label, i) => (
-                <div key={i} style={{ height: `${cellSize}px` }} className="flex items-center">
-                  <span className="w-6 pr-1 text-right text-[9px] text-gray-500">{label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-[2px]">
-              {Array.from({ length: numWeeks }).map((_, weekIdx) => (
-                <div
-                  key={weekIdx}
-                  className="flex shrink-0 flex-col gap-[2px]"
-                  style={{ width: `${cellSize}px` }}
-                >
-                  {Array.from({ length: 7 }).map((_, dayIdx) => {
-                    const cell = grid[dayIdx][weekIdx];
-                    if (!cell) {
-                      return (
-                        <div
-                          key={dayIdx}
-                          className="h-[11px] w-[11px] rounded-sm bg-transparent"
-                        />
-                      );
-                    }
-
-                    const isToday = cell.date === todayStr;
-                    const isSelected = selectedDay?.date === cell.date;
-
-                    return (
-                      <button
-                        key={dayIdx}
-                        onClick={() => setSelectedDay(isSelected ? null : cell)}
-                        className={`h-[11px] w-[11px] rounded-sm transition-all
-                          ${LEVEL_COLORS[cell.level]}
-                          ${isToday ? 'ring-1 ring-violet-400' : ''}
-                          ${isSelected ? 'ring-1 ring-white scale-110' : ''}
-                          hover:brightness-125 cursor-pointer
-                        `}
-                        title={
-                          cell.totalSeconds > 0
-                            ? `${cell.date} — ${formatDuration(cell.totalSeconds)}`
-                            : `${cell.date} — sem estudo`
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+          <div>
+            <p className="text-sm font-bold text-white">
+              {totalDays} {totalDays === 1 ? 'dia' : 'dias'} de estudo
+            </p>
+            <p className="text-[10px] text-slate-600">Último ano</p>
           </div>
         </div>
+      </div>
 
-        {/* Desktop: preenche largura do card mantendo alinhamento dos dias */}
-        <div className="hidden sm:block">
-          <div className="relative mb-1 ml-8 h-4">
-            {monthLabels.map((m, i) => (
-              <span
-                key={i}
-                className="absolute text-[10px] text-gray-500"
-                style={{ left: `${(m.weekIndex / numWeeks) * 100}%` }}
-              >
-                {m.label}
-              </span>
+      {/* Heatmap grid — fills available height */}
+      <div className="flex-1 overflow-x-auto">
+        {/* Month labels */}
+        <div className="relative mb-1.5 ml-8 h-4">
+          {monthLabels.map((m, i) => (
+            <span
+              key={i}
+              className="absolute text-[10px] font-medium text-slate-600"
+              style={{ left: `${(m.weekIndex / numWeeks) * 100}%` }}
+            >
+              {m.label}
+            </span>
+          ))}
+        </div>
+
+        {/* Grid */}
+        <div className="flex items-stretch">
+          {/* Day labels */}
+          <div className="mr-1.5 grid w-7 shrink-0 grid-rows-7 gap-[3px]">
+            {DAY_LABELS.map((label, i) => (
+              <div key={i} className="flex items-center">
+                <span className="w-6 pr-1 text-right text-[9px] font-medium text-slate-600">{label}</span>
+              </div>
             ))}
           </div>
 
-          <div className="flex items-stretch">
-            <div className="mr-1 grid w-7 shrink-0 grid-rows-7 gap-[2px]">
-              {DAY_LABELS.map((label, i) => (
-                <div key={i} className="flex items-center">
-                  <span className="w-6 pr-1 text-right text-[9px] text-gray-500">{label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex min-w-0 flex-1 gap-[2px]">
-              {Array.from({ length: numWeeks }).map((_, weekIdx) => (
-                <div
-                  key={weekIdx}
-                  className="flex min-w-0 flex-1 flex-col gap-[2px]"
-                >
-                  {Array.from({ length: 7 }).map((_, dayIdx) => {
-                    const cell = grid[dayIdx][weekIdx];
-                    if (!cell) {
-                      return (
-                        <div
-                          key={dayIdx}
-                          className="aspect-square w-full rounded-sm bg-transparent"
-                        />
-                      );
-                    }
-
-                    const isToday = cell.date === todayStr;
-                    const isSelected = selectedDay?.date === cell.date;
-
-                    return (
-                      <button
-                        key={dayIdx}
-                        onClick={() => setSelectedDay(isSelected ? null : cell)}
-                        className={`aspect-square w-full rounded-sm transition-all
-                          ${LEVEL_COLORS[cell.level]}
-                          ${isToday ? 'ring-1 ring-violet-400' : ''}
-                          ${isSelected ? 'ring-1 ring-white scale-110' : ''}
-                          hover:brightness-125 cursor-pointer
-                        `}
-                        title={
-                          cell.totalSeconds > 0
-                            ? `${cell.date} — ${formatDuration(cell.totalSeconds)}`
-                            : `${cell.date} — sem estudo`
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+          {/* Week columns */}
+          <div className="flex min-w-0 flex-1 gap-[3px]">
+            {Array.from({ length: numWeeks }).map((_, weekIdx) => (
+              <div key={weekIdx} className="flex min-w-0 flex-1 flex-col gap-[3px]">
+                {Array.from({ length: 7 }).map((_, dayIdx) => {
+                  const cell = grid[dayIdx][weekIdx];
+                  if (!cell) {
+                    return <div key={dayIdx} className="aspect-square w-full rounded-sm" />;
+                  }
+                  const isToday = cell.date === todayStr;
+                  const isSelected = selectedDay?.date === cell.date;
+                  return (
+                    <button
+                      key={dayIdx}
+                      onClick={() => setSelectedDay(isSelected ? null : cell)}
+                      className={`aspect-square w-full rounded-sm transition-all duration-150 hover:scale-110 hover:brightness-125 ${
+                        isToday ? 'ring-1 ring-violet-400 ring-offset-1 ring-offset-[#0f1825]' : ''
+                      } ${
+                        isSelected ? 'ring-1 ring-white ring-offset-1 ring-offset-[#0f1825]' : ''
+                      }`}
+                      style={{ background: LEVEL_INLINE[cell.level] }}
+                      title={
+                        cell.totalSeconds > 0
+                          ? `${cell.date} — ${formatDuration(cell.totalSeconds)}`
+                          : `${cell.date} — sem estudo`
+                      }
+                    />
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-xs text-gray-500">
+      <div className="mt-3 flex items-center justify-between">
+        <span className="text-xs font-medium text-slate-500">
           {formatDuration(totalSeconds)} no último ano
         </span>
-        <div className="flex items-center gap-[3px]">
-          <span className="text-[9px] text-gray-600 mr-1">Menos</span>
+        <div className="flex items-center gap-1">
+          <span className="text-[9px] text-slate-600 mr-1">Menos</span>
           {[0, 1, 2, 3, 4].map((level) => (
             <div
               key={level}
-              className={`h-[11px] w-[11px] rounded-sm ${LEVEL_COLORS[level]}`}
+              className="h-[10px] w-[10px] rounded-sm"
+              style={{ background: LEVEL_INLINE[level] }}
             />
           ))}
-          <span className="text-[9px] text-gray-600 ml-1">Mais</span>
+          <span className="text-[9px] text-slate-600 ml-1">Mais</span>
         </div>
       </div>
 
@@ -398,37 +333,27 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
             exit={{ opacity: 0, height: 0 }}
             className="mt-2 overflow-hidden"
           >
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2">
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-xs font-medium text-white">
-                  {selectedDay.date}
-                </span>
-                <button
-                  onClick={() => setSelectedDay(null)}
-                  className="text-gray-600 hover:text-gray-400"
-                >
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-semibold text-white">{selectedDay.date}</span>
+                <button onClick={() => setSelectedDay(null)} className="text-slate-600 hover:text-slate-400">
                   <X className="h-3 w-3" />
                 </button>
               </div>
-              <div className="flex flex-wrap gap-1">
-                <div className="flex items-center gap-1 rounded-lg bg-violet-500/10 px-2 py-0.5">
-                  <Clock className="h-2.5 w-2.5 text-violet-400" />
-                  <span className="text-xs text-violet-300">
-                    {formatDuration(selectedDay.totalSeconds)}
-                  </span>
+              <div className="flex flex-wrap gap-1.5">
+                <div className="flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1">
+                  <Clock className="h-2.5 w-2.5 text-blue-400" />
+                  <span className="text-xs font-medium text-blue-300">{formatDuration(selectedDay.totalSeconds)}</span>
                 </div>
-                <div className="flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-0.5">
-                  <span className="text-xs text-blue-300">
+                <div className="flex items-center gap-1 rounded-lg bg-violet-500/10 px-2 py-1">
+                  <span className="text-xs text-violet-300">
                     {selectedDay.sessionCount} {selectedDay.sessionCount === 1 ? 'sessão' : 'sessões'}
                   </span>
                 </div>
                 {selectedDay.subjects.map((s) => (
-                  <div
-                    key={s}
-                    className="flex items-center gap-1 rounded-lg bg-gray-800/50 px-2 py-0.5"
-                  >
-                    <BookOpen className="h-2.5 w-2.5 text-gray-400" />
-                    <span className="text-xs text-gray-300">{s}</span>
+                  <div key={s} className="flex items-center gap-1 rounded-lg bg-white/[0.04] px-2 py-1">
+                    <BookOpen className="h-2.5 w-2.5 text-slate-500" />
+                    <span className="text-xs text-slate-400">{s}</span>
                   </div>
                 ))}
               </div>
@@ -443,8 +368,8 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
             exit={{ opacity: 0, height: 0 }}
             className="mt-2 overflow-hidden"
           >
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2 text-center">
-              <p className="text-xs text-gray-500">Nenhum estudo registrado neste dia</p>
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-2 text-center">
+              <p className="text-xs text-slate-600">Nenhum estudo registrado neste dia</p>
             </div>
           </motion.div>
         )}

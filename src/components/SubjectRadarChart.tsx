@@ -107,15 +107,15 @@ function CustomTooltip({ active, payload }: {
 
 function ChartSkeleton() {
   return (
-    <div className="flex h-[350px] items-center justify-center">
-      <div className="h-48 w-48 rounded-full border-2 border-dashed border-white/[0.06] shimmer" />
+    <div className="flex flex-1 items-center justify-center">
+      <div className="h-40 w-40 rounded-full border-2 border-dashed border-white/[0.06] shimmer" />
     </div>
   );
 }
 
 function EmptyState() {
   return (
-    <div className="flex h-[350px] flex-col items-center justify-center">
+    <div className="flex flex-1 flex-col items-center justify-center">
       <div className="mb-3 rounded-xl bg-white/[0.03] p-3">
         <RadarIcon className="h-8 w-8 text-slate-700" />
       </div>
@@ -144,7 +144,7 @@ function FewSubjectsView({ data }: { data: SubjectHours[] }) {
   const remaining = 3 - data.length;
 
   return (
-    <div className="flex min-h-[320px] flex-col justify-between">
+    <div className="flex flex-1 flex-col justify-between">
       {/* Barras horizontais */}
       <motion.div
         variants={barContainer}
@@ -202,7 +202,8 @@ function FullRadarChart({ data }: { data: SubjectHours[] }) {
   }));
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
+    <div className="flex-1 min-h-[200px]">
+    <ResponsiveContainer width="100%" height="100%">
       <RadarChart cx="50%" cy="50%" outerRadius="55%" data={chartData}>
         <PolarGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
         <PolarAngleAxis
@@ -227,6 +228,7 @@ function FullRadarChart({ data }: { data: SubjectHours[] }) {
         <Tooltip content={<CustomTooltip />} />
       </RadarChart>
     </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -242,7 +244,8 @@ export default function SubjectRadarChart({ data, loading }: SubjectRadarChartPr
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+      className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
+      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
     >
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
