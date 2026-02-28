@@ -29,6 +29,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
+import CalendarSyncSection from '@/components/CalendarSyncSection';
 import {
   ScatterChart,
   Scatter,
@@ -270,13 +271,23 @@ export default function PlannerPage() {
                           </p>
                         </div>
 
-                        {/* Progress */}
-                        <div>
-                          <div className="mb-1 flex items-center justify-between">
-                            <span className="text-xs font-medium text-white">{stats?.progress || 0}%</span>
-                          </div>
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
-                            <div className="h-full rounded-full transition-all" style={{ width: `${stats?.progress || 0}%`, background: plan.color }} />
+                        {/* Progress — circular indicator */}
+                        <div className="flex items-center justify-center">
+                          <div className="relative h-10 w-10">
+                            <svg className="h-10 w-10 -rotate-90" viewBox="0 0 36 36">
+                              <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
+                              <circle
+                                cx="18" cy="18" r="15" fill="none"
+                                stroke={plan.color}
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeDasharray={`${(stats?.progress || 0) * 0.9425} 94.25`}
+                                className="transition-all duration-700"
+                              />
+                            </svg>
+                            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">
+                              {stats?.progress || 0}%
+                            </span>
                           </div>
                         </div>
 
@@ -431,6 +442,11 @@ export default function PlannerPage() {
           </motion.div>
         </div>
       </div>
+
+        {/* ── Calendar Sync Section ── */}
+        <div className="mt-6 px-6 pb-6">
+          <CalendarSyncSection userId={user.uid} subjects={[...new Set(plans.flatMap((p) => p.subjects.map((s) => s.subject)))]} />
+        </div>
 
       {/* PlanManager modal */}
       <PlanManager
