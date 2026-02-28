@@ -20,6 +20,10 @@ import {
   getCalendarEvents,
   CalendarEvent,
 } from '@/lib/firebase/calendar';
+import {
+  getGoogleCalendarToken,
+  createGoogleCalendarEvent,
+} from '@/lib/google-calendar';
 
 interface CalendarSyncSectionProps {
   userId: string;
@@ -123,7 +127,7 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
     );
   };
 
-  // Sync daily AI plan blocks → Firestore calendar events
+  // Sync daily AI plan blocks → Firestore + Google Calendar
   const handleSync = async () => {
     if (!userId || !todayPlan || syncing) return;
 
@@ -140,6 +144,9 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
         return;
       }
 
+      // Get Google Calendar access token (shows consent popup if needed)
+      const gcalToken = await getGoogleCalendarToken();
+
       // Build events from plan blocks with sequential timing starting at 8:00 AM
       const today = new Date();
       let currentStart = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 0, 0);
@@ -148,18 +155,32 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
       for (const block of todayPlan.blocks) {
         const startTime = new Date(currentStart);
         const endTime = new Date(startTime.getTime() + block.durationMinutes * 60 * 1000);
+        const title = `${block.subject} — ${block.objective}`;
+        const description = `Tipo: ${block.taskType} | Prioridade: ${block.priority}\n${block.objective}`;
+        const eventType = TASK_TYPE_TO_EVENT[block.taskType] || 'study';
 
+        // Write to Firestore (internal calendar)
         await createCalendarEvent({
           userId,
-          title: `${block.subject} — ${block.objective}`,
-          description: `Tipo: ${block.taskType} | Prioridade: ${block.priority}\n${block.objective}`,
+          title,
+          description,
           subject: block.subject,
           startTime,
           endTime,
           duration: block.durationMinutes,
-          type: TASK_TYPE_TO_EVENT[block.taskType] || 'study',
+          type: eventType,
           status: 'scheduled',
           priority: PRIORITY_MAP[block.priority] || 'medium',
+          reminderMinutes: 10,
+        });
+
+        // Write to Google Calendar
+        await createGoogleCalendarEvent(gcalToken, {
+          summary: title,
+          description,
+          startTime,
+          endTime,
+          type: eventType,
           reminderMinutes: 10,
         });
 
@@ -182,7 +203,7 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
     }
   };
 
-  // Manual event creation
+  // Manual event creation → Firestore + Google Calendar
   const handleCreateManual = async () => {
     if (!userId || !formSubject.trim() || creating) return;
     setCreating(true);
@@ -192,10 +213,15 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
       const [year, month, day] = formDate.split('-').map(Number);
       const startTime = new Date(year, month - 1, day, hours, mins, 0);
       const endTime = new Date(startTime.getTime() + formDuration * 60 * 1000);
+      const title = formTitle.trim() || `${formSubject} — Sessão de estudo`;
 
+      // Get Google Calendar access token
+      const gcalToken = await getGoogleCalendarToken();
+
+      // Write to Firestore
       await createCalendarEvent({
         userId,
-        title: formTitle.trim() || `${formSubject} — Sessão de estudo`,
+        title,
         description: `Evento criado manualmente`,
         subject: formSubject,
         startTime,
@@ -204,6 +230,16 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
         type: formType,
         status: 'scheduled',
         priority: formPriority,
+        reminderMinutes: 10,
+      });
+
+      // Write to Google Calendar
+      await createGoogleCalendarEvent(gcalToken, {
+        summary: title,
+        description: `${formSubject} | ${formType}`,
+        startTime,
+        endTime,
+        type: formType,
         reminderMinutes: 10,
       });
 
@@ -253,8 +289,8 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
             Nunca perca um ciclo de revisão.
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-slate-400">
-            Sincronize o Plano Diário IA ou crie eventos manualmente.
-            Organize seus blocos de estudo, revisões e simulados.
+            Sincronize o Plano Diário IA direto no seu Google Calendar,
+            ou crie eventos manualmente. Tudo aparece na sua agenda.
           </p>
 
           {/* Status indicators */}
