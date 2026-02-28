@@ -211,41 +211,34 @@ export default function DashboardPage() {
       {/* ── Metric Ribbon ── */}
       <motion.div
         custom={0} variants={fadeUp} initial="hidden" animate="show"
-        className="grid grid-cols-3 divide-x divide-white/[0.06] border-b border-white/[0.06] bg-[#0b1120]/60 backdrop-blur-sm"
+        className="grid grid-cols-3 border-b border-white/[0.06] bg-[#0b1120]/60 backdrop-blur-sm"
       >
         {[
           {
-            label: 'Precisão de Foco',
+            label: 'Focus Score',
             value: loading ? null : avgAccuracy !== null ? `${avgAccuracy}%` : '—',
-            sub: loading ? null : avgAccuracy !== null
-              ? avgAccuracy >= 70 ? 'Excelente' : avgAccuracy >= 50 ? 'Moderada' : 'Precisa melhorar'
-              : 'Sem questões',
             color: '#3b82f6',
           },
           {
-            label: 'Meta Semanal',
+            label: 'Retention Rate',
             value: loading ? null : consistency ? `${consistency.weeklyProgressPercent}%` : '—',
-            sub: loading ? null : consistency ? `${weeklyHours.toFixed(1)}h de ${consistency.weeklyGoalHours}h` : 'Sem dados',
             color: '#8b5cf6',
           },
           {
-            label: 'Sequência Ativa',
+            label: 'Study Velocity',
             value: loading ? null : `${consistency?.currentStreak ?? 0}d`,
-            sub: loading ? null : `Melhor: ${consistency?.bestStreak ?? 0} dias`,
             color: '#f59e0b',
           },
         ].map((kpi, i) => (
-          <div key={i} className="flex flex-col gap-1 px-6 py-4">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">{kpi.label}</span>
+          <div
+            key={i}
+            className={`flex items-center justify-between px-6 py-4 ${i < 2 ? 'border-r border-white/[0.08]' : ''}`}
+          >
+            <span className="text-sm font-medium text-slate-400">{kpi.label}</span>
             {loading ? (
-              <div className="h-8 w-20 rounded-lg shimmer" />
+              <div className="h-8 w-16 rounded-lg shimmer" />
             ) : (
-              <span className="text-3xl font-bold tracking-tight" style={{ color: kpi.color }}>{kpi.value}</span>
-            )}
-            {loading ? (
-              <div className="h-3 w-24 rounded shimmer" />
-            ) : (
-              <span className="text-xs text-slate-500">{kpi.sub}</span>
+              <span className="text-2xl font-bold tracking-tight" style={{ color: kpi.color }}>{kpi.value}</span>
             )}
           </div>
         ))}
@@ -383,118 +376,101 @@ export default function DashboardPage() {
 
             {loading ? (
               <div className="space-y-3">
-                <div className="h-14 w-full rounded-xl shimmer" />
-                <div className="h-3 w-full rounded shimmer" />
-                <div className="h-3 w-3/5 rounded shimmer" />
-                <div className="mt-2 h-9 w-full rounded-xl shimmer" />
+                <div className="h-5 w-24 rounded shimmer" />
+                <div className="flex gap-3">
+                  <div className="h-16 flex-1 rounded-xl shimmer" />
+                  <div className="h-16 flex-1 rounded-xl shimmer" />
+                  <div className="h-16 w-28 rounded-xl shimmer" />
+                </div>
+                <div className="h-3 w-3/4 rounded shimmer" />
               </div>
             ) : neglectedSubjects.length > 0 ? (
               <div className="space-y-3">
-                <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.07] p-3">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold uppercase tracking-wider text-amber-400">Itens de Ação</p>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-300">
-                      Priorize{' '}
-                      <span className="font-semibold text-amber-300">{neglectedSubjects[0]?.subject}</span>
-                      {neglectedSubjects[0] && (
-                        <span className="text-slate-500">{' '}— déficit de {Math.abs(neglectedSubjects[0].deviation).toFixed(0)}% do planejado</span>
-                      )}
-                    </p>
-                  </div>
+                {/* Section label */}
+                <p className="text-xs font-bold text-slate-400">Action Items</p>
+
+                {/* Horizontal cards row */}
+                <div className="flex gap-2.5">
+                  {/* Action item cards */}
+                  {neglectedSubjects.slice(0, 2).map((s) => (
+                    <div key={s.subject} className="flex-1 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
+                      <div className="flex items-start gap-2">
+                        <div className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 rounded border border-white/20" />
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-semibold text-white">{s.subject}</p>
+                          <p className="text-[10px] text-slate-600">
+                            Confiança: {(100 - Math.abs(s.deviation)).toFixed(0)}%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Confidence Score widget */}
                   {avgAccuracy !== null && (
-                    <div className="flex-shrink-0 text-right">
-                      <p className="text-[10px] uppercase tracking-wider text-slate-600">Score</p>
-                      <p className="text-lg font-bold text-blue-400">{avgAccuracy}%</p>
+                    <div className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl border border-blue-500/20 px-5 py-2"
+                      style={{ background: 'linear-gradient(135deg, #1e3a8a30, #1e1b4b30)' }}
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-blue-400">Confidence Score</p>
+                      <p className="text-[10px] text-slate-600">Overview</p>
+                      <span className="text-2xl font-bold text-blue-400">{avgAccuracy}%</span>
                     </div>
                   )}
                 </div>
 
-                {avgAccuracy !== null && (
-                  <div className="space-y-2 rounded-xl border border-white/[0.05] bg-white/[0.02] p-3">
-                    {[
-                      { label: 'Taxa de Retenção', value: avgAccuracy, color: avgAccuracy >= 70 ? '#10b981' : avgAccuracy >= 50 ? '#f59e0b' : '#ef4444' },
-                      { label: 'Prob. de Aprovação', value: avgAccuracy >= 70 ? 85 : avgAccuracy >= 50 ? 60 : 40, color: '#3b82f6' },
-                    ].map((m) => (
-                      <div key={m.label} className="space-y-1">
-                        <div className="flex justify-between text-[10px]">
-                          <span className="text-slate-500">{m.label}</span>
-                          <span className="font-bold" style={{ color: m.color }}>{m.value}%</span>
-                        </div>
-                        <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${m.value}%` }}
-                            transition={{ duration: 1, ease: 'easeOut', delay: 0.4 }}
-                            className="h-full rounded-full"
-                            style={{ background: m.color }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <Link href="/engine"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-all hover:brightness-110"
-                  style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', boxShadow: '0 4px 16px rgba(59,130,246,0.25)' }}
-                >
-                  <Zap className="h-3.5 w-3.5" />
-                  Iniciar Sessão Focada
-                </Link>
+                {/* Insight line + CTA */}
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-slate-500">
+                    Priorize <span className="font-semibold text-amber-300">{neglectedSubjects[0]?.subject}</span>
+                    {' '}— déficit de {Math.abs(neglectedSubjects[0].deviation).toFixed(0)}%
+                  </p>
+                  <Link href="/engine"
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110"
+                    style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
+                  >
+                    <Zap className="h-3 w-3" />
+                    Sessão Focada
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] p-3">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500/15"
-                    style={{ boxShadow: '0 0 20px rgba(16,185,129,0.2)' }}
-                  >
-                    <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                {/* Section label */}
+                <p className="text-xs font-bold text-slate-400">Status</p>
+
+                {/* Horizontal row: all-good card + confidence score */}
+                <div className="flex gap-2.5">
+                  <div className="flex-1 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] p-3">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
+                      <CheckCircle2 className="h-4.5 w-4.5 text-emerald-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-white">Performance Equilibrada</p>
+                      <p className="text-[11px] text-slate-500">Todas as matérias dentro do planejado.</p>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-white">Performance Equilibrada</p>
-                    <p className="text-xs text-slate-500">Todas as matérias dentro do planejado.</p>
-                  </div>
+
                   {avgAccuracy !== null && (
-                    <div className="flex-shrink-0 text-right">
-                      <p className="text-[10px] uppercase tracking-wider text-slate-600">Score</p>
-                      <p className="text-lg font-bold text-emerald-400">{avgAccuracy}%</p>
+                    <div className="flex-shrink-0 flex flex-col items-center justify-center rounded-xl border border-emerald-500/20 px-5 py-2"
+                      style={{ background: 'linear-gradient(135deg, #064e3b30, #1e1b4b20)' }}
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Confidence Score</p>
+                      <p className="text-[10px] text-slate-600">Overview</p>
+                      <span className="text-2xl font-bold text-emerald-400">{avgAccuracy}%</span>
                     </div>
                   )}
                 </div>
 
-                {avgAccuracy !== null && (
-                  <div className="space-y-2 rounded-xl border border-white/[0.05] bg-white/[0.02] p-3">
-                    {[
-                      { label: 'Taxa de Retenção', value: avgAccuracy, color: avgAccuracy >= 70 ? '#10b981' : avgAccuracy >= 50 ? '#f59e0b' : '#ef4444' },
-                      { label: 'Prob. de Aprovação', value: avgAccuracy >= 70 ? 85 : avgAccuracy >= 50 ? 60 : 40, color: '#3b82f6' },
-                    ].map((m) => (
-                      <div key={m.label} className="space-y-1">
-                        <div className="flex justify-between text-[10px]">
-                          <span className="text-slate-500">{m.label}</span>
-                          <span className="font-bold" style={{ color: m.color }}>{m.value}%</span>
-                        </div>
-                        <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${m.value}%` }}
-                            transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
-                            className="h-full rounded-full"
-                            style={{ background: m.color }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <Link href="/engine"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-all hover:brightness-110"
-                  style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', boxShadow: '0 4px 16px rgba(59,130,246,0.25)' }}
-                >
-                  <Zap className="h-3.5 w-3.5" />
-                  Nova Sessão
-                </Link>
+                {/* CTA */}
+                <div className="flex items-center justify-end">
+                  <Link href="/engine"
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110"
+                    style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
+                  >
+                    <Zap className="h-3 w-3" />
+                    Nova Sessão
+                  </Link>
+                </div>
               </div>
             )}
           </motion.div>
