@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { loadExamQuestions, getExamById, saveQuestionAttempts } from '@/lib/firebase/questions';
@@ -13,6 +13,104 @@ interface QuestionState {
   markedForReview: boolean;
 }
 
+interface PersistedExamTimer {
+  durationSeconds: number;
+  startedAt: string;
+  endsAt: string;
+}
+
+interface PersistedQuestionProgress {
+  selectedAnswer: string | null;
+  markedForReview: boolean;
+}
+
+interface PersistedExamProgress {
+  currentIndex: number;
+  responses: PersistedQuestionProgress[];
+}
+
+const EXAM_TIMER_STORAGE_KEY_PREFIX = 'aprova-flow:exam-timer';
+const EXAM_PROGRESS_STORAGE_KEY_PREFIX = 'aprova-flow:exam-progress';
+
+function getExamTimerStorageKey(userId: string, examId: string): string {
+  return `${EXAM_TIMER_STORAGE_KEY_PREFIX}:${userId}:${examId}`;
+}
+
+function getExamProgressStorageKey(userId: string, examId: string): string {
+  return `${EXAM_PROGRESS_STORAGE_KEY_PREFIX}:${userId}:${examId}`;
+}
+
+function parsePersistedExamTimer(rawValue: string | null): PersistedExamTimer | null {
+  if (!rawValue) return null;
+  try {
+    const parsed = JSON.parse(rawValue) as Partial<PersistedExamTimer>;
+    if (
+      typeof parsed.durationSeconds !== 'number' ||
+      !Number.isFinite(parsed.durationSeconds) ||
+      parsed.durationSeconds <= 0 ||
+      typeof parsed.startedAt !== 'string' ||
+      parsed.startedAt.length === 0 ||
+      typeof parsed.endsAt !== 'string' ||
+      parsed.endsAt.length === 0
+    ) {
+      return null;
+    }
+    return {
+      durationSeconds: Math.floor(parsed.durationSeconds),
+      startedAt: parsed.startedAt,
+      endsAt: parsed.endsAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function parsePersistedExamProgress(rawValue: string | null): PersistedExamProgress | null {
+  if (!rawValue) return null;
+  try {
+    const parsed = JSON.parse(rawValue) as Partial<PersistedExamProgress>;
+    if (
+      typeof parsed.currentIndex !== 'number' ||
+      !Number.isFinite(parsed.currentIndex) ||
+      parsed.currentIndex < 0 ||
+      !Array.isArray(parsed.responses)
+    ) {
+      return null;
+    }
+
+    const responses = parsed.responses.map((item) => {
+      if (!item || typeof item !== 'object') return null;
+      const selectedAnswer =
+        typeof item.selectedAnswer === 'string' || item.selectedAnswer === null
+          ? item.selectedAnswer
+          : null;
+      const markedForReview = typeof item.markedForReview === 'boolean' ? item.markedForReview : null;
+      if (markedForReview === null) return null;
+      return {
+        selectedAnswer,
+        markedForReview,
+      };
+    });
+
+    if (responses.some((item) => item === null)) return null;
+    return {
+      currentIndex: Math.floor(parsed.currentIndex),
+      responses: responses as PersistedQuestionProgress[],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function savePersistedExamTimer(storageKey: string, timer: PersistedExamTimer): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(storageKey, JSON.stringify(timer));
+}
+
+function getRemainingSecondsFromDeadline(deadlineMs: number): number {
+  return Math.max(0, Math.ceil((deadlineMs - Date.now()) / 1000));
+}
+
 export default function ExecutarProvaPage() {
   const params = useParams();
   const router = useRouter();
@@ -23,8 +121,14 @@ export default function ExecutarProvaPage() {
   const [questions, setQuestions] = useState<QuestionState[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [timerDeadlineMs, setTimerDeadlineMs] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+  const isFinishingRef = useRef(false);
+
+  useEffect(() => {
+    isFinishingRef.current = false;
+  }, [examId, user?.uid]);
 
   // Carrega prova e questões
   useEffect(() => {
@@ -40,19 +144,72 @@ export default function ExecutarProvaPage() {
         }
 
         const questionsData = await loadExamQuestions(examId);
-        
-        setExam(examData);
-        setQuestions(
-          questionsData.map(q => ({
-            question: q,
-            selectedAnswer: null,
-            markedForReview: false,
-          }))
+
+        const defaultQuestions: QuestionState[] = questionsData.map((q): QuestionState => ({
+          question: q,
+          selectedAnswer: null,
+          markedForReview: false,
+        }));
+        const progressStorageKey = getExamProgressStorageKey(user.uid, examId);
+        const persistedProgress = parsePersistedExamProgress(
+          window.localStorage.getItem(progressStorageKey)
         );
-        
-        // Configura timer
-        if (examData.durationMinutes) {
-          setTimeRemaining(examData.durationMinutes * 60);
+
+        let restoredQuestions = defaultQuestions;
+        let restoredCurrentIndex = 0;
+        if (persistedProgress && persistedProgress.responses.length === defaultQuestions.length) {
+          restoredQuestions = defaultQuestions.map((questionState, idx) => {
+            const saved = persistedProgress.responses[idx];
+            const selectedAnswer =
+              saved.selectedAnswer &&
+              questionState.question.alternatives.some((alt) => alt.key === saved.selectedAnswer)
+                ? saved.selectedAnswer
+                : null;
+            return {
+              ...questionState,
+              selectedAnswer,
+              markedForReview: saved.markedForReview,
+            };
+          });
+
+          restoredCurrentIndex = Math.min(
+            Math.max(0, persistedProgress.currentIndex),
+            Math.max(0, defaultQuestions.length - 1)
+          );
+        }
+
+        setExam(examData);
+        setQuestions(restoredQuestions);
+        setCurrentIndex(restoredCurrentIndex);
+
+        if (examData.durationMinutes && examData.durationMinutes > 0) {
+          const durationSeconds = Math.floor(examData.durationMinutes * 60);
+          const storageKey = getExamTimerStorageKey(user.uid, examId);
+          const persisted = parsePersistedExamTimer(window.localStorage.getItem(storageKey));
+
+          let deadlineMs: number | null = null;
+          if (persisted && persisted.durationSeconds === durationSeconds) {
+            const parsedDeadlineMs = Date.parse(persisted.endsAt);
+            if (!Number.isNaN(parsedDeadlineMs)) {
+              deadlineMs = parsedDeadlineMs;
+            }
+          }
+
+          if (deadlineMs === null) {
+            const startedAt = new Date();
+            deadlineMs = startedAt.getTime() + durationSeconds * 1000;
+            savePersistedExamTimer(storageKey, {
+              durationSeconds,
+              startedAt: startedAt.toISOString(),
+              endsAt: new Date(deadlineMs).toISOString(),
+            });
+          }
+
+          setTimerDeadlineMs(deadlineMs);
+          setTimeRemaining(getRemainingSecondsFromDeadline(deadlineMs));
+        } else {
+          setTimerDeadlineMs(null);
+          setTimeRemaining(0);
         }
       } catch (error) {
         console.error('Erro ao carregar prova:', error);
@@ -63,6 +220,19 @@ export default function ExecutarProvaPage() {
 
     loadData();
   }, [user, examId, router]);
+
+  useEffect(() => {
+    if (!user || !examId || questions.length === 0) return;
+    const progressStorageKey = getExamProgressStorageKey(user.uid, examId);
+    const payload: PersistedExamProgress = {
+      currentIndex,
+      responses: questions.map((question) => ({
+        selectedAnswer: question.selectedAnswer,
+        markedForReview: question.markedForReview,
+      })),
+    };
+    window.localStorage.setItem(progressStorageKey, JSON.stringify(payload));
+  }, [user, examId, questions, currentIndex]);
 
   const handleSelectAnswer = (key: string) => {
     setQuestions(prev => {
@@ -81,7 +251,17 @@ export default function ExecutarProvaPage() {
   };
 
   const handleFinish = useCallback(async () => {
-    if (!user || !exam) return;
+    if (!user || !exam || isFinishingRef.current) return;
+    isFinishingRef.current = true;
+
+    const durationSeconds =
+      exam.durationMinutes && exam.durationMinutes > 0 ? Math.floor(exam.durationMinutes * 60) : 0;
+    const remainingSeconds =
+      durationSeconds > 0 && timerDeadlineMs
+        ? getRemainingSecondsFromDeadline(timerDeadlineMs)
+        : Math.max(0, Math.floor(timeRemaining));
+    const elapsedSeconds = durationSeconds > 0 ? Math.max(0, durationSeconds - remainingSeconds) : 0;
+    const timePerQuestion = questions.length > 0 ? elapsedSeconds / questions.length : 0;
 
     // Salva tentativas
     const attempts: QuestionAttempt[] = questions
@@ -94,33 +274,41 @@ export default function ExecutarProvaPage() {
         attemptType: 'exam' as const,
         selectedOption: q.selectedAnswer!,
         correct: q.selectedAnswer === q.question.answer,
-        timeSpentSeconds: exam.durationMinutes ? (exam.durationMinutes * 60 - timeRemaining) / questions.length : 0,
+        timeSpentSeconds: timePerQuestion,
       }));
 
     try {
       await saveQuestionAttempts(attempts);
+      window.localStorage.removeItem(getExamProgressStorageKey(user.uid, examId));
+      if (exam.durationMinutes && exam.durationMinutes > 0) {
+        window.localStorage.removeItem(getExamTimerStorageKey(user.uid, examId));
+      }
+      setTimerDeadlineMs(null);
+      setTimeRemaining(0);
       router.push(`/provas/${examId}/resultado`);
     } catch (error) {
       console.error('Erro ao salvar resultado:', error);
+      isFinishingRef.current = false;
     }
-  }, [user, exam, questions, timeRemaining, examId, router]);
+  }, [user, exam, questions, timeRemaining, examId, router, timerDeadlineMs]);
 
-  // Timer countdown
+  // Timer countdown por deadline persistida
   useEffect(() => {
-    if (timeRemaining <= 0 || loading) return;
+    if (!timerDeadlineMs || loading) return;
 
-    const interval = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 1) {
-          handleFinish();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    const tick = () => {
+      const remaining = getRemainingSecondsFromDeadline(timerDeadlineMs);
+      setTimeRemaining(remaining);
+      if (remaining <= 0 && !isFinishingRef.current) {
+        void handleFinish();
+      }
+    };
 
-    return () => clearInterval(interval);
-  }, [timeRemaining, loading, handleFinish]);
+    tick();
+    const interval = window.setInterval(tick, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [timerDeadlineMs, loading, handleFinish]);
 
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
