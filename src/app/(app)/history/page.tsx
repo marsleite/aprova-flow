@@ -1,14 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
-import {
-  deduplicateDefaultPlans,
-  getActivePlan,
-  migrateToMultiPlan,
-} from '@/lib/firebase/plans';
-import { StudyPlanEdital } from '@/types';
+import { usePlanContext } from '@/contexts/PlanContext';
 import SessionHistory from '@/components/SessionHistory';
 import ActivityHeatmap from '@/components/ActivityHeatmap';
 import { History, Calendar } from 'lucide-react';
@@ -20,32 +15,15 @@ const fadeUp = {
 
 export default function HistoryPage() {
   const { user } = useAuthContext();
-  const [plans, setPlans] = useState<StudyPlanEdital[]>([]);
-  const [activePlanId, setActivePlanIdState] = useState<string | null>(null);
+  const { activePlanId, activePlan: activePlanObj } = usePlanContext();
   const [refreshKey, setRefreshKey] = useState(0);
-  const migrated = useRef(false);
 
   const filterPlanId = activePlanId || undefined;
 
-  const loadData = useCallback(async () => {
-    if (!user) return;
-    try {
-      if (!migrated.current) {
-        await migrateToMultiPlan(user.uid);
-        migrated.current = true;
-      }
-      const allPlans = await deduplicateDefaultPlans(user.uid);
-      const active = await getActivePlan(user.uid);
-      setPlans(allPlans);
-      setActivePlanIdState(active || null);
-    } catch { /* */ }
-  }, [user]);
-
-  useEffect(() => { loadData(); }, [loadData]);
+  // Re-render when activePlanId changes (no extra fetch needed — SessionHistory/ActivityHeatmap receive planId as prop)
+  useEffect(() => { setRefreshKey((k) => k + 1); }, [activePlanId]);
 
   if (!user) return null;
-
-  const activePlanObj = plans.find((p) => p.id === activePlanId) || null;
 
   return (
     <div className="min-h-screen bg-[#080c14]">

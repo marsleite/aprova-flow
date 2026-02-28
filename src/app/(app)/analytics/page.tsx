@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { usePlanContext } from '@/contexts/PlanContext';
 import {
   getStudySummary,
   getHoursBySubject,
@@ -12,12 +13,6 @@ import {
 } from '@/lib/firebase/sessions';
 import { getAccuracyAnalytics, getSubjectDeltaMap } from '@/lib/firebase/questions';
 import {
-  deduplicateDefaultPlans,
-  getActivePlan,
-  migrateToMultiPlan,
-} from '@/lib/firebase/plans';
-import {
-  StudyPlanEdital,
   StudyConsistency,
   SubjectHours,
   PlanVsActual,
@@ -50,8 +45,7 @@ const fadeUp = {
 
 export default function AnalyticsPage() {
   const { user } = useAuthContext();
-  const [plans, setPlans] = useState<StudyPlanEdital[]>([]);
-  const [activePlanId, setActivePlanIdState] = useState<string | null>(null);
+  const { activePlanId, activePlan: activePlanObj } = usePlanContext();
   const [consistency, setConsistency] = useState<StudyConsistency | null>(null);
   const [subjectHours, setSubjectHours] = useState<SubjectHours[]>([]);
   const [planVsActual, setPlanVsActual] = useState<PlanVsActual[]>([]);
@@ -61,31 +55,18 @@ export default function AnalyticsPage() {
   const [accuracyDelta, setAccuracyDelta] = useState<Record<string, number>>({});
   const [summary, setSummary] = useState({ totalToday: 0, totalWeek: 0, totalMonth: 0 });
   const [loading, setLoading] = useState(true);
-  const migrated = useRef(false);
 
-  const activePlanObj = plans.find((p) => p.id === activePlanId) || null;
   const filterPlanId = activePlanId || undefined;
 
-  const loadData = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (!user) return;
     try {
-      if (!migrated.current) {
-        await migrateToMultiPlan(user.uid);
-        migrated.current = true;
-      }
-      const allPlans = await deduplicateDefaultPlans(user.uid);
-      const active = await getActivePlan(user.uid);
-      setPlans(allPlans);
-      setActivePlanIdState(active || null);
-      const pid = active || undefined;
-      const activePlan = allPlans.find((p) => p.id === active) || null;
-
       const [summaryRes, hours, weekly, cons, pva] = await Promise.all([
-        getStudySummary(user.uid, pid),
-        getHoursBySubject(user.uid, pid),
-        getWeeklyHours(user.uid, pid),
-        getStudyConsistency(user.uid, pid, activePlan?.weeklyGoalHours).catch(() => null),
-        getPlanVsActual(user.uid, pid, activePlan?.subjects).catch(() => []),
+        getStudySummary(user.uid, filterPlanId),
+        getHoursBySubject(user.uid, filterPlanId),
+        getWeeklyHours(user.uid, filterPlanId),
+        getStudyConsistency(user.uid, filterPlanId, activePlanObj?.weeklyGoalHours).catch(() => null),
+        getPlanVsActual(user.uid, filterPlanId, activePlanObj?.subjects).catch(() => []),
       ]);
       setSummary(summaryRes);
       setSubjectHours(hours);
@@ -94,7 +75,7 @@ export default function AnalyticsPage() {
       setPlanVsActual(pva);
 
       try {
-        const analytics = await getAccuracyAnalytics(user.uid, pid);
+        const analytics = await getAccuracyAnalytics(user.uid, filterPlanId);
         setAccuracyAnalytics(analytics);
         setAccuracyData(analytics.month);
         setAccuracyDelta(getSubjectDeltaMap(analytics.month, analytics.previousMonth));
@@ -105,9 +86,9 @@ export default function AnalyticsPage() {
     } catch { /* */ } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, filterPlanId, activePlanObj]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => { if (user) fetchData(); }, [fetchData, user, activePlanId]);
 
   if (!user) return null;
 

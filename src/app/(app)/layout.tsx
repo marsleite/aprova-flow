@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
 import Sidebar, { MobileMenuButton } from '@/components/layout/Sidebar';
@@ -12,6 +12,7 @@ import {
 } from '@/lib/firebase/plans';
 import { StudyPlanEdital } from '@/types';
 import { Zap } from 'lucide-react';
+import { PlanContext } from '@/contexts/PlanContext';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -20,6 +21,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [plans, setPlans] = useState<StudyPlanEdital[]>([]);
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
   const migrated = useRef(false);
+
+  const handlePlanChange = useCallback(async (planId: string | null) => {
+    if (!user) return;
+    setActivePlanId(planId);
+    await setActivePlan(user.uid, planId);
+  }, [user]);
 
   const loadPlans = useCallback(async () => {
     if (!user) return;
@@ -47,6 +54,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     if (user) loadPlans();
   }, [user, loadPlans]);
 
+  // Must be before any early returns — Rules of Hooks
+  const planContextValue = useMemo(
+    () => ({
+      plans,
+      activePlanId,
+      activePlan: plans.find((p) => p.id === activePlanId) ?? null,
+      onPlanChange: handlePlanChange,
+    }),
+    [plans, activePlanId, handlePlanChange]
+  );
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#080c14]">
@@ -63,35 +81,38 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="app-layout">
-      {/* Sidebar */}
-      <Sidebar
-        plans={plans}
-        activePlanId={activePlanId}
-        mobileOpen={mobileOpen}
-        onToggleMobile={() => setMobileOpen((v) => !v)}
-      />
+    <PlanContext.Provider value={planContextValue}>
+      <div className="app-layout">
+        {/* Sidebar */}
+        <Sidebar
+          plans={plans}
+          activePlanId={activePlanId}
+          onPlanChange={handlePlanChange}
+          mobileOpen={mobileOpen}
+          onToggleMobile={() => setMobileOpen((v) => !v)}
+        />
 
-      {/* Main area */}
-      <div className="app-main flex flex-col">
-        {/* Mobile top bar */}
-        <div className="flex items-center gap-3 border-b border-white/5 bg-[#0b1120]/80 px-4 py-3 backdrop-blur-xl lg:hidden">
-          <MobileMenuButton onClick={() => setMobileOpen(true)} />
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-violet-600">
-              <Zap className="h-3.5 w-3.5 text-white" />
+        {/* Main area */}
+        <div className="app-main flex flex-col">
+          {/* Mobile top bar */}
+          <div className="flex items-center gap-3 border-b border-white/5 bg-[#0b1120]/80 px-4 py-3 backdrop-blur-xl lg:hidden">
+            <MobileMenuButton onClick={() => setMobileOpen(true)} />
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-violet-600">
+                <Zap className="h-3.5 w-3.5 text-white" />
+              </div>
+              <span className="text-sm font-bold text-white">
+                Aprova<span className="text-blue-400">Mind</span>
+              </span>
             </div>
-            <span className="text-sm font-bold text-white">
-              Aprova<span className="text-blue-400">Mind</span>
-            </span>
           </div>
-        </div>
 
-        {/* Page content */}
-        <main className="flex-1">
-          {children}
-        </main>
+          {/* Page content */}
+          <main className="flex-1">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </PlanContext.Provider>
   );
 }

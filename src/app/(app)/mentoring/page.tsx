@@ -1,13 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
-import {
-  deduplicateDefaultPlans,
-  getActivePlan,
-  migrateToMultiPlan,
-} from '@/lib/firebase/plans';
+import { usePlanContext } from '@/contexts/PlanContext';
 import {
   getStudyConsistency,
   getHoursBySubject,
@@ -17,7 +13,6 @@ import {
 } from '@/lib/firebase/sessions';
 import { getAccuracyAnalytics } from '@/lib/firebase/questions';
 import {
-  StudyPlanEdital,
   StudyConsistency,
   SubjectHours,
   PlanVsActual,
@@ -51,8 +46,7 @@ const fadeUp = {
 
 export default function MentoringPage() {
   const { user } = useAuthContext();
-  const [plans, setPlans] = useState<StudyPlanEdital[]>([]);
-  const [activePlanId, setActivePlanIdState] = useState<string | null>(null);
+  const { activePlanId, activePlan: activePlanObj } = usePlanContext();
   const [consistency, setConsistency] = useState<StudyConsistency | null>(null);
   const [subjectHours, setSubjectHours] = useState<SubjectHours[]>([]);
   const [planVsActual, setPlanVsActual] = useState<PlanVsActual[]>([]);
@@ -61,32 +55,18 @@ export default function MentoringPage() {
   const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const migrated = useRef(false);
 
-  const activePlanObj = plans.find((p) => p.id === activePlanId) || null;
   const filterPlanId = activePlanId || undefined;
 
-  const loadData = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (!user) return;
     try {
-      if (!migrated.current) {
-        await migrateToMultiPlan(user.uid);
-        migrated.current = true;
-      }
-      const allPlans = await deduplicateDefaultPlans(user.uid);
-      const active = await getActivePlan(user.uid);
-      setPlans(allPlans);
-      setActivePlanIdState(active || null);
-
-      const pid = active || undefined;
-      const activePlan = allPlans.find((p) => p.id === active) || null;
-
       const [cons, hours, pva, weekly, recent] = await Promise.all([
-        getStudyConsistency(user.uid, pid, activePlan?.weeklyGoalHours).catch(() => null),
-        getHoursBySubject(user.uid, pid).catch(() => []),
-        getPlanVsActual(user.uid, pid, activePlan?.subjects).catch(() => []),
-        getWeeklyHours(user.uid, pid).catch(() => []),
-        getRecentSessions(user.uid, 10, pid).catch(() => []),
+        getStudyConsistency(user.uid, filterPlanId, activePlanObj?.weeklyGoalHours).catch(() => null),
+        getHoursBySubject(user.uid, filterPlanId).catch(() => []),
+        getPlanVsActual(user.uid, filterPlanId, activePlanObj?.subjects).catch(() => []),
+        getWeeklyHours(user.uid, filterPlanId).catch(() => []),
+        getRecentSessions(user.uid, 10, filterPlanId).catch(() => []),
       ]);
       setConsistency(cons);
       setSubjectHours(hours);
@@ -95,15 +75,15 @@ export default function MentoringPage() {
       setRecentSessions(recent);
 
       try {
-        const analytics = await getAccuracyAnalytics(user.uid, pid);
+        const analytics = await getAccuracyAnalytics(user.uid, filterPlanId);
         setAccuracyData(analytics.month);
       } catch { setAccuracyData([]); }
     } catch { /* */ } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, filterPlanId, activePlanObj]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => { if (user) fetchData(); }, [fetchData, user, activePlanId]);
 
   if (!user) return null;
 

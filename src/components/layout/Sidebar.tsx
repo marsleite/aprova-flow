@@ -21,7 +21,7 @@ import {
   X,
   ChevronRight,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AccountPlanModal from '@/components/AccountPlanModal';
 
@@ -73,6 +73,7 @@ const NAV_ITEMS = [
 interface SidebarProps {
   plans?: { id?: string; name: string; color: string }[];
   activePlanId?: string | null;
+  onPlanChange?: (planId: string | null) => void;
   onToggleMobile?: () => void;
   mobileOpen?: boolean;
 }
@@ -80,6 +81,7 @@ interface SidebarProps {
 export default function Sidebar({
   plans = [],
   activePlanId,
+  onPlanChange,
   onToggleMobile,
   mobileOpen,
 }: SidebarProps) {
@@ -87,6 +89,19 @@ export default function Sidebar({
   const { user, logout } = useAuthContext();
   const { planTier, capabilities, refresh } = useEntitlements(user?.uid, user?.email);
   const [accountModalOpen, setAccountModalOpen] = useState(false);
+  const [planPickerOpen, setPlanPickerOpen] = useState(false);
+  const planPickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!planPickerOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (planPickerRef.current && !planPickerRef.current.contains(e.target as Node)) {
+        setPlanPickerOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [planPickerOpen]);
 
   const activePlan = plans.find((p) => p.id === activePlanId);
 
@@ -132,15 +147,88 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* Active plan badge */}
-        {activePlan && (
-          <div className="mx-3 mt-3 flex items-center gap-2 rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2">
-            <div
-              className="h-2 w-2 rounded-full flex-shrink-0"
-              style={{ background: activePlan.color, boxShadow: `0 0 6px ${activePlan.color}80` }}
-            />
-            <span className="min-w-0 truncate text-xs text-slate-300">{activePlan.name}</span>
-            <ChevronRight className="ml-auto h-3 w-3 flex-shrink-0 text-slate-600" />
+        {/* Active plan badge / picker */}
+        {plans.length > 0 && (
+          <div className="relative mx-3 mt-3" ref={planPickerRef}>
+            <button
+              onClick={() => setPlanPickerOpen((v) => !v)}
+              className="flex w-full items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.03] px-3 py-2 text-left transition-colors hover:bg-white/[0.06]"
+            >
+              <div
+                className="h-2 w-2 flex-shrink-0 rounded-full"
+                style={{
+                  background: activePlan?.color ?? '#64748b',
+                  boxShadow: `0 0 6px ${activePlan?.color ?? '#64748b'}80`,
+                }}
+              />
+              <span className="min-w-0 flex-1 truncate text-xs text-slate-300">
+                {activePlan?.name ?? 'Todos os Editais'}
+              </span>
+              <ChevronRight
+                className={`h-3 w-3 flex-shrink-0 text-slate-500 transition-transform duration-150 ${
+                  planPickerOpen ? 'rotate-90' : ''
+                }`}
+              />
+            </button>
+
+            <AnimatePresence>
+              {planPickerOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.97 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-white/[0.08] bg-[#111827] shadow-xl"
+                >
+                  {/* Geral — aggregate all plans */}
+                  <button
+                    onClick={() => {
+                      onPlanChange?.(null);
+                      setPlanPickerOpen(false);
+                    }}
+                    className={`flex w-full items-center gap-2.5 border-b border-white/[0.05] px-3 py-2.5 text-left text-xs transition-colors ${
+                      activePlanId === null
+                        ? 'bg-blue-600/15 text-blue-300'
+                        : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="h-2 w-2 flex-shrink-0 rounded-full bg-slate-500" />
+                    <span className="flex-1 truncate font-medium">Todos os Editais</span>
+                    <span className="text-[10px] text-slate-600">Agregado</span>
+                    {activePlanId === null && (
+                      <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400" />
+                    )}
+                  </button>
+
+                  {plans.map((plan) => {
+                    const isActive = plan.id === activePlanId;
+                    return (
+                      <button
+                        key={plan.id}
+                        onClick={() => {
+                          onPlanChange?.(plan.id ?? null);
+                          setPlanPickerOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-xs transition-colors ${
+                          isActive
+                            ? 'bg-blue-600/15 text-blue-300'
+                            : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
+                        }`}
+                      >
+                        <div
+                          className="h-2 w-2 flex-shrink-0 rounded-full"
+                          style={{ background: plan.color }}
+                        />
+                        <span className="flex-1 truncate">{plan.name}</span>
+                        {isActive && (
+                          <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
 

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { usePlanContext } from '@/contexts/PlanContext';
 import {
   getStudySummary,
   getHoursBySubject,
@@ -14,12 +15,6 @@ import {
   getFilteredSessions,
 } from '@/lib/firebase/sessions';
 import { getAccuracyAnalytics, getSubjectDeltaMap } from '@/lib/firebase/questions';
-import {
-  deduplicateDefaultPlans,
-  getActivePlan,
-  migrateToMultiPlan,
-  setActivePlan,
-} from '@/lib/firebase/plans';
 import { getTodayISO, formatDuration } from '@/lib/utils';
 import {
   StudySummary,
@@ -30,7 +25,6 @@ import {
   PlanVsActual,
   StudyInsight,
   SubjectAccuracy,
-  StudyPlanEdital,
 } from '@/types';
 import SubjectRadarChart from '@/components/SubjectRadarChart';
 import ActivityHeatmap from '@/components/ActivityHeatmap';
@@ -136,6 +130,7 @@ function SkeletonCard() {
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
+  const { plans, activePlanId, activePlan: activePlanObj } = usePlanContext();
   const [summary, setSummary] = useState<StudySummary>({ totalToday: 0, totalWeek: 0, totalMonth: 0 });
   const [subjectData, setSubjectData] = useState<SubjectHours[]>([]);
   const [weeklyData, setWeeklyData] = useState<DailyHours[]>([]);
@@ -149,26 +144,8 @@ export default function DashboardPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [plans, setPlans] = useState<StudyPlanEdital[]>([]);
-  const [activePlanId, setActivePlanId] = useState<string | null>(null);
-  const migrated = useRef(false);
 
-  const activePlanObj = plans.find((p) => p.id === activePlanId) || null;
   const filterPlanId = activePlanId || undefined;
-
-  const loadPlans = useCallback(async () => {
-    if (!user) return;
-    try {
-      if (!migrated.current) {
-        await migrateToMultiPlan(user.uid);
-        migrated.current = true;
-      }
-      const allPlans = await deduplicateDefaultPlans(user.uid);
-      const active = await getActivePlan(user.uid);
-      setPlans(allPlans);
-      setActivePlanId(active || null);
-    } catch { /* */ }
-  }, [user]);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -219,10 +196,9 @@ export default function DashboardPage() {
     }
   }, [user, filterPlanId, activePlanObj]);
 
-  useEffect(() => { loadPlans(); }, [loadPlans]);
   useEffect(() => {
-    if (plans.length > 0 || migrated.current) fetchData();
-  }, [fetchData, plans.length]);
+    if (user) fetchData();
+  }, [fetchData, user, activePlanId]);
 
   if (!user) return null;
 

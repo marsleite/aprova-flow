@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { usePlanContext } from '@/contexts/PlanContext';
 import {
-  deduplicateDefaultPlans,
-  getActivePlan,
-  migrateToMultiPlan,
   setActivePlan,
   deleteStudyPlan,
 } from '@/lib/firebase/plans';
@@ -65,37 +63,30 @@ const URGENCY_CONFIG = {
 export default function PlannerPage() {
   const { user } = useAuthContext();
   const { planTier, capabilities } = useEntitlements(user?.uid, user?.email);
-  const [plans, setPlans] = useState<StudyPlanEdital[]>([]);
-  const [activePlanId, setActivePlanIdState] = useState<string | null>(null);
+  const { plans, activePlanId, onPlanChange } = usePlanContext();
   const [planStats, setPlanStats] = useState<PlanStats[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [planManagerOpen, setPlanManagerOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<StudyPlanEdital | null>(null);
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const migrated = useRef(false);
 
   const canCreate = canCreateMorePlans(planTier, plans.length);
   const selectedPlan = plans.find((p) => p.id === selectedPlanId) || null;
   const selectedStats = planStats.find((s) => s.planId === selectedPlanId) || null;
 
-  const loadData = useCallback(async () => {
-    if (!user) return;
-    try {
-      if (!migrated.current) {
-        await migrateToMultiPlan(user.uid);
-        migrated.current = true;
-      }
-      const allPlans = await deduplicateDefaultPlans(user.uid);
-      const active = await getActivePlan(user.uid);
-      setPlans(allPlans);
-      setActivePlanIdState(active || null);
-      if (!selectedPlanId && allPlans.length > 0) {
-        setSelectedPlanId(active || allPlans[0].id || null);
-      }
+  // When context plans change, auto-select active or first plan
+  useEffect(() => {
+    if (!selectedPlanId && plans.length > 0) {
+      setSelectedPlanId(activePlanId || plans[0].id || null);
+    }
+  }, [plans, activePlanId, selectedPlanId]);
 
+  const loadData = useCallback(async () => {
+    if (!user || plans.length === 0) return;
+    try {
       const statsArr: PlanStats[] = await Promise.all(
-        allPlans.map(async (plan) => {
+        plans.map(async (plan) => {
           try {
             const [summary, pva, cons] = await Promise.all([
               getStudySummary(user.uid, plan.id),
@@ -126,14 +117,14 @@ export default function PlannerPage() {
     } catch { /* */ } finally {
       setLoading(false);
     }
-  }, [user, selectedPlanId]);
+  }, [user, plans, selectedPlanId]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
   const handleSelectActive = async (planId: string) => {
     if (!user) return;
     await setActivePlan(user.uid, planId);
-    setActivePlanIdState(planId);
+    onPlanChange(planId);
   };
 
   const handleDelete = async (planId: string) => {

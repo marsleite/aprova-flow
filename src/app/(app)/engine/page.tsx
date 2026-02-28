@@ -1,18 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
-import {
-  deduplicateDefaultPlans,
-  getActivePlan,
-  migrateToMultiPlan,
-} from '@/lib/firebase/plans';
+import { usePlanContext } from '@/contexts/PlanContext';
 import {
   getStudyConsistency,
   getRecentSessions,
 } from '@/lib/firebase/sessions';
-import { StudyPlanEdital, StudySession, StudyConsistency } from '@/types';
+import { StudySession, StudyConsistency } from '@/types';
 import StudyTimer from '@/components/StudyTimer';
 import QuestionTrackerCard from '@/components/QuestionTrackerCard';
 import DailyAiPlannerCard from '@/components/DailyAiPlannerCard';
@@ -40,45 +36,34 @@ const fadeUp = {
 
 export default function EnginePage() {
   const { user } = useAuthContext();
-  const [plans, setPlans] = useState<StudyPlanEdital[]>([]);
-  const [activePlanId, setActivePlanIdState] = useState<string | null>(null);
+  const { plans, activePlanId, activePlan: activePlanObj } = usePlanContext();
   const [recentSessions, setRecentSessions] = useState<StudySession[]>([]);
   const [consistency, setConsistency] = useState<StudyConsistency | null>(null);
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [creatingPlan, setCreatingPlan] = useState(false);
-  const migrated = useRef(false);
 
-  const activePlanObj = plans.find((p) => p.id === activePlanId) || null;
+  const filterPlanId = activePlanId || undefined;
 
-  const loadData = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (!user) return;
     try {
-      if (!migrated.current) {
-        await migrateToMultiPlan(user.uid);
-        migrated.current = true;
-      }
-      const allPlans = await deduplicateDefaultPlans(user.uid);
-      const active = await getActivePlan(user.uid);
-      setPlans(allPlans);
-      setActivePlanIdState(active || null);
-
       const [recent, cons] = await Promise.all([
-        getRecentSessions(user.uid, 8, active || undefined),
-        getStudyConsistency(user.uid, active || undefined).catch(() => null),
+        getRecentSessions(user.uid, 8, filterPlanId),
+        getStudyConsistency(user.uid, filterPlanId).catch(() => null),
       ]);
       setRecentSessions(recent);
       setConsistency(cons);
     } catch { /* */ } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, filterPlanId]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => { if (user) fetchData(); }, [fetchData, user, activePlanId]);
 
   const handleSessionSaved = async (session: { subject: string; duration: number }) => {
     setLastSavedSession(session);
-    await loadData();
+    await fetchData();
   };
 
   const handleCreateSession = async () => {
@@ -90,8 +75,7 @@ export default function EnginePage() {
         name, subjects: [], weeklyGoalHours: 10, color: '#06b6d4', isDefault: false,
       });
       await setActivePlan(user.uid, planId);
-      await loadData();
-      setActivePlanIdState(planId);
+      await fetchData();
     } finally {
       setCreatingPlan(false);
     }
@@ -190,7 +174,7 @@ export default function EnginePage() {
                 planId={activePlanId || undefined}
                 planSubjects={activePlanObj?.subjects}
                 lastSessionSubject={lastSavedSession?.subject ?? (recentSessions[0]?.subject || null)}
-                onSaved={loadData}
+                onSaved={fetchData}
               />
             </motion.div>
 
