@@ -104,9 +104,9 @@ export default function GeminiCoachCard({
 
   if (loading) {
     return (
-      <div className="animate-pulse rounded-2xl border border-white/10 bg-gray-900/70 p-5">
-        <div className="mb-3 h-5 w-32 rounded bg-gray-800" />
-        <div className="h-12 rounded bg-gray-800" />
+      <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5">
+        <div className="mb-3 h-4 w-32 rounded shimmer" />
+        <div className="h-12 rounded shimmer" />
       </div>
     );
   }
@@ -116,7 +116,7 @@ export default function GeminiCoachCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-950/40 via-gray-900 to-gray-950 p-5 shadow-2xl"
+      className="relative overflow-hidden rounded-xl border border-violet-500/20 bg-gradient-to-b from-violet-900/10 to-[#0f1825] p-5"
     >
       {/* Decoração */}
       <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-violet-500/5 blur-xl" />
@@ -124,8 +124,8 @@ export default function GeminiCoachCard({
       <div className="relative z-10">
         {/* Header */}
         <div className="mb-3 flex items-center gap-2.5">
-          <div className="rounded-lg bg-gradient-to-br from-violet-500/30 to-blue-500/20 p-2">
-            <Brain className="h-4 w-4 text-violet-300" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/15">
+            <Brain className="h-3.5 w-3.5 text-violet-300" />
           </div>
           <span className="text-sm font-semibold text-white">Coach IA</span>
           <span className="rounded-md bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-300">
@@ -136,7 +136,7 @@ export default function GeminiCoachCard({
         {/* Dica do dia */}
         <div className={`mb-4 flex items-start gap-2.5 rounded-xl border ${tip.color} px-3.5 py-3`}>
           <div className="mt-0.5 shrink-0">{tip.icon}</div>
-          <p className="text-sm leading-relaxed text-gray-300">{tip.text}</p>
+          <p className="text-sm leading-relaxed text-slate-300">{tip.text}</p>
         </div>
 
         {/* Botão conversar */}

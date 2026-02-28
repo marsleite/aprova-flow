@@ -1,15 +1,16 @@
 /**
- * Heatmap de Atividade — Grid anual estilo GitHub
+ * Heatmap de Atividade — Compact grid (últimas 25 semanas)
  *
- * Mostra os últimos 12 meses em grid horizontal (semanas como colunas, dias como linhas).
- * Clicar num dia mostra detalhes (matérias, duração, sessões).
+ * Grade compacta com células grandes que preenchem o card.
+ * Eixo X = número da semana, Eixo Y = dia da semana (1-7).
+ * Clique no dia para detalhes.
  */
 
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, BookOpen } from 'lucide-react';
+import { X, Clock, BookOpen, CalendarDays } from 'lucide-react';
 import { DayActivity } from '@/types';
 import { getMonthlyActivity } from '@/lib/firebase/sessions';
 import { formatDuration } from '@/lib/utils';
@@ -20,19 +21,16 @@ interface ActivityHeatmapProps {
   refreshKey?: number;
 }
 
-const MONTH_NAMES_SHORT = [
-  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
-];
+const DISPLAY_WEEKS = 25;
 
-const DAY_LABELS = ['', 'Seg', '', 'Qua', '', 'Sex', ''];
+const DAY_LABELS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
-const LEVEL_COLORS: Record<number, string> = {
-  0: 'bg-gray-800/40',
-  1: 'bg-violet-900/60',
-  2: 'bg-violet-700/70',
-  3: 'bg-violet-500/80',
-  4: 'bg-violet-400',
+const LEVEL_INLINE: Record<number, string> = {
+  0: 'rgba(255,255,255,0.04)',
+  1: 'rgba(30,58,138,0.65)',
+  2: 'rgba(29,78,216,0.8)',
+  3: '#3b82f6',
+  4: '#60a5fa',
 };
 
 interface DayCell {
@@ -41,17 +39,13 @@ interface DayCell {
   totalSeconds: number;
   sessionCount: number;
   subjects: string[];
-  dayOfWeek: number; // 0=Dom, 6=Sáb
+  dayOfWeek: number;
   weekIndex: number;
 }
 
 function getLevelFromSeconds(totalSeconds: number): DayActivity['level'] {
   if (totalSeconds <= 0) return 0;
-
   const minutes = totalSeconds / 60;
-
-  // Escala fixa para manter a leitura consistente em todo o período:
-  // 1-29 min -> nível 1, 30-59 -> nível 2, 60-119 -> nível 3, 120+ -> nível 4.
   if (minutes >= 120) return 4;
   if (minutes >= 60) return 3;
   if (minutes >= 30) return 2;
@@ -62,28 +56,24 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
   const [allDays, setAllDays] = useState<Map<string, DayActivity>>(new Map());
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<DayCell | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
-  // Busca dados dos últimos 12 meses
   const fetchYearData = useCallback(async () => {
     setLoading(true);
     try {
       const now = new Date();
       const promises: Promise<DayActivity[]>[] = [];
-
       for (let i = 11; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         promises.push(getMonthlyActivity(userId, d.getFullYear(), d.getMonth(), planId));
       }
-
       const results = await Promise.all(promises);
       const dayMap = new Map<string, DayActivity>();
-
       for (const monthDays of results) {
         for (const day of monthDays) {
           dayMap.set(day.date, day);
         }
       }
-
       setAllDays(dayMap);
     } catch (err) {
       console.error('Erro ao carregar heatmap:', err);
@@ -96,43 +86,32 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
     fetchYearData();
   }, [fetchYearData, refreshKey]);
 
-  // Gera grid de ~53 semanas × 7 dias (estilo GitHub)
-  const { grid, monthLabels, totalDays, totalSeconds, numWeeks } = useMemo(() => {
+  const { grid, totalDays, totalSeconds } = useMemo(() => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-    // GitHub mostra até o sábado da semana atual
+    // End at Saturday of current week
     const endDate = new Date(today);
-    endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // avança até sábado
+    endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
 
-    // Volta ~1 ano: encontra o domingo 52 semanas atrás
-    const startDate = new Date(today);
-    startDate.setFullYear(startDate.getFullYear() - 1);
-    startDate.setDate(startDate.getDate() + 1); // dia seguinte ao mesmo dia do ano passado
-    // Recua até o domingo dessa semana
-    startDate.setDate(startDate.getDate() - startDate.getDay());
+    // Start DISPLAY_WEEKS weeks back, on Sunday
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - (DISPLAY_WEEKS * 7 - 1));
 
-    // Total de dias e semanas
-    const msPerDay = 1000 * 60 * 60 * 24;
-    const totalDaysSpan = Math.round((endDate.getTime() - startDate.getTime()) / msPerDay) + 1;
-    const weeks = Math.ceil(totalDaysSpan / 7);
-
-    // Grid: 7 linhas (Dom=0..Sáb=6) × N colunas (semanas)
+    // Grid: 7 rows × DISPLAY_WEEKS cols
     const gridData: (DayCell | null)[][] = Array.from({ length: 7 }, () =>
-      Array.from({ length: weeks }, () => null)
+      Array.from({ length: DISPLAY_WEEKS }, () => null)
     );
 
-    const months: { label: string; weekIndex: number }[] = [];
-    let lastMonthTracked = -1;
     let totalSec = 0;
     let totalD = 0;
     const cursor = new Date(startDate);
     let cellIndex = 0;
 
     while (cursor <= endDate) {
-      const col = Math.floor(cellIndex / 7); // semana (coluna)
-      const row = cursor.getDay();            // dia da semana (linha)
+      const col = Math.floor(cellIndex / 7);
+      const row = cursor.getDay();
 
       const y = cursor.getFullYear();
       const m = cursor.getMonth();
@@ -140,47 +119,25 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
       const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const isFuture = dateStr > todayStr;
 
-      // Track month labels na primeira ocorrência de cada mês (quando é domingo)
-      if (m !== lastMonthTracked) {
-        if (row === 0) {
-          months.push({ label: MONTH_NAMES_SHORT[m], weekIndex: col });
-        } else if (d <= 7) {
-          // Mês começou no meio da semana, mostra na próxima coluna
-          months.push({ label: MONTH_NAMES_SHORT[m], weekIndex: col + 1 });
-        }
-        lastMonthTracked = m;
-      }
-
       const activity = allDays.get(dateStr);
       const totalSecondsForCell = activity?.totalSeconds ?? 0;
 
-      if (isFuture) {
-        // Dias futuros: quadrado vazio (nível 0) para preencher o retângulo
-        gridData[row][col] = {
-          date: dateStr,
-          level: 0,
-          totalSeconds: 0,
-          sessionCount: 0,
-          subjects: [],
-          dayOfWeek: row,
-          weekIndex: col,
-        };
-      } else {
-        const cell: DayCell = {
-          date: dateStr,
-          level: getLevelFromSeconds(totalSecondsForCell),
-          totalSeconds: totalSecondsForCell,
-          sessionCount: activity?.sessionCount ?? 0,
-          subjects: activity?.subjects ?? [],
-          dayOfWeek: row,
-          weekIndex: col,
-        };
+      const cell: DayCell = {
+        date: dateStr,
+        level: isFuture ? 0 : getLevelFromSeconds(totalSecondsForCell),
+        totalSeconds: isFuture ? 0 : totalSecondsForCell,
+        sessionCount: isFuture ? 0 : (activity?.sessionCount ?? 0),
+        subjects: isFuture ? [] : (activity?.subjects ?? []),
+        dayOfWeek: row,
+        weekIndex: col,
+      };
 
-        if (activity && activity.totalSeconds > 0) {
-          totalSec += activity.totalSeconds;
-          totalD++;
-        }
+      if (!isFuture && activity && activity.totalSeconds > 0) {
+        totalSec += activity.totalSeconds;
+        totalD++;
+      }
 
+      if (col < DISPLAY_WEEKS) {
         gridData[row][col] = cell;
       }
 
@@ -188,7 +145,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
       cellIndex++;
     }
 
-    return { grid: gridData, monthLabels: months, totalDays: totalD, totalSeconds: totalSec, numWeeks: weeks };
+    return { grid: gridData, totalDays: totalD, totalSeconds: totalSec };
   }, [allDays]);
 
   const todayStr = useMemo(() => {
@@ -196,24 +153,15 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   }, []);
 
-  const cellSize = 11;
-  const cellGap = 2;
-  const dayLabelWidth = 28;
-  const gridWidth = numWeeks * cellSize + Math.max(0, numWeeks - 1) * cellGap;
-  const heatmapWidth = dayLabelWidth + gridWidth;
-
   if (loading) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-4 shadow-2xl"
+      <div className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
+        style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
       >
-        <div className="animate-pulse">
-          <div className="mb-3 h-5 w-64 rounded bg-gray-800"></div>
-          <div className="h-24 w-full rounded bg-gray-800"></div>
-        </div>
-      </motion.div>
+        <div className="mb-3 h-5 w-28 rounded-lg shimmer" />
+        <div className="flex-1 rounded-xl shimmer" />
+        <div className="mt-3 h-3 w-32 rounded shimmer" />
+      </div>
     );
   }
 
@@ -222,213 +170,130 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-4 shadow-2xl"
+      className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
+      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
     >
       {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-sm font-semibold text-white">
-          {totalDays} {totalDays === 1 ? 'dia' : 'dias'} de estudo no último ano
-        </span>
-      </div>
-
-      {/* Heatmap container */}
-      <div className="overflow-x-auto pb-1">
-        {/* Mobile: tamanho fixo com scroll horizontal */}
-        <div className="sm:hidden" style={{ width: `max(100%, ${heatmapWidth}px)` }}>
-          <div
-            className="relative mb-1 h-4"
-            style={{ marginLeft: `${dayLabelWidth + 4}px`, width: `${gridWidth}px` }}
-          >
-            {monthLabels.map((m, i) => (
-              <span
-                key={i}
-                className="absolute text-[10px] text-gray-500"
-                style={{ left: `${m.weekIndex * (cellSize + cellGap)}px` }}
-              >
-                {m.label}
-              </span>
-            ))}
+      <div className="mb-3 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10">
+            <CalendarDays className="h-3.5 w-3.5 text-blue-400" />
           </div>
-
-          <div className="flex">
-            <div className="mr-1 flex shrink-0 flex-col gap-[2px]">
-              {DAY_LABELS.map((label, i) => (
-                <div key={i} style={{ height: `${cellSize}px` }} className="flex items-center">
-                  <span className="w-6 pr-1 text-right text-[9px] text-gray-500">{label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-[2px]">
-              {Array.from({ length: numWeeks }).map((_, weekIdx) => (
-                <div
-                  key={weekIdx}
-                  className="flex shrink-0 flex-col gap-[2px]"
-                  style={{ width: `${cellSize}px` }}
-                >
-                  {Array.from({ length: 7 }).map((_, dayIdx) => {
-                    const cell = grid[dayIdx][weekIdx];
-                    if (!cell) {
-                      return (
-                        <div
-                          key={dayIdx}
-                          className="h-[11px] w-[11px] rounded-sm bg-transparent"
-                        />
-                      );
-                    }
-
-                    const isToday = cell.date === todayStr;
-                    const isSelected = selectedDay?.date === cell.date;
-
-                    return (
-                      <button
-                        key={dayIdx}
-                        onClick={() => setSelectedDay(isSelected ? null : cell)}
-                        className={`h-[11px] w-[11px] rounded-sm transition-all
-                          ${LEVEL_COLORS[cell.level]}
-                          ${isToday ? 'ring-1 ring-violet-400' : ''}
-                          ${isSelected ? 'ring-1 ring-white scale-110' : ''}
-                          hover:brightness-125 cursor-pointer
-                        `}
-                        title={
-                          cell.totalSeconds > 0
-                            ? `${cell.date} — ${formatDuration(cell.totalSeconds)}`
-                            : `${cell.date} — sem estudo`
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop: preenche largura do card mantendo alinhamento dos dias */}
-        <div className="hidden sm:block">
-          <div className="relative mb-1 ml-8 h-4">
-            {monthLabels.map((m, i) => (
-              <span
-                key={i}
-                className="absolute text-[10px] text-gray-500"
-                style={{ left: `${(m.weekIndex / numWeeks) * 100}%` }}
-              >
-                {m.label}
-              </span>
-            ))}
-          </div>
-
-          <div className="flex items-stretch">
-            <div className="mr-1 grid w-7 shrink-0 grid-rows-7 gap-[2px]">
-              {DAY_LABELS.map((label, i) => (
-                <div key={i} className="flex items-center">
-                  <span className="w-6 pr-1 text-right text-[9px] text-gray-500">{label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex min-w-0 flex-1 gap-[2px]">
-              {Array.from({ length: numWeeks }).map((_, weekIdx) => (
-                <div
-                  key={weekIdx}
-                  className="flex min-w-0 flex-1 flex-col gap-[2px]"
-                >
-                  {Array.from({ length: 7 }).map((_, dayIdx) => {
-                    const cell = grid[dayIdx][weekIdx];
-                    if (!cell) {
-                      return (
-                        <div
-                          key={dayIdx}
-                          className="aspect-square w-full rounded-sm bg-transparent"
-                        />
-                      );
-                    }
-
-                    const isToday = cell.date === todayStr;
-                    const isSelected = selectedDay?.date === cell.date;
-
-                    return (
-                      <button
-                        key={dayIdx}
-                        onClick={() => setSelectedDay(isSelected ? null : cell)}
-                        className={`aspect-square w-full rounded-sm transition-all
-                          ${LEVEL_COLORS[cell.level]}
-                          ${isToday ? 'ring-1 ring-violet-400' : ''}
-                          ${isSelected ? 'ring-1 ring-white scale-110' : ''}
-                          hover:brightness-125 cursor-pointer
-                        `}
-                        title={
-                          cell.totalSeconds > 0
-                            ? `${cell.date} — ${formatDuration(cell.totalSeconds)}`
-                            : `${cell.date} — sem estudo`
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+          <div>
+            <p className="text-sm font-bold text-white">Activity</p>
+            <p className="text-[10px] text-slate-600">
+              {totalDays} {totalDays === 1 ? 'dia' : 'dias'} · últimas {DISPLAY_WEEKS} semanas
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-xs text-gray-500">
-          {formatDuration(totalSeconds)} no último ano
+      {/* Grid — fills remaining space */}
+      <div ref={gridRef} className="flex-1 min-h-0 flex flex-col">
+        {/* 7 rows × DISPLAY_WEEKS cols, cells fill available space */}
+        <div className="flex flex-1 min-h-0 gap-0.5">
+          {/* Day labels column */}
+          <div className="flex flex-col gap-0.5 shrink-0 pr-1.5">
+            {DAY_LABELS.map((label, i) => (
+              <div key={i} className="flex flex-1 items-center justify-end">
+                <span className="text-[9px] font-medium text-slate-600">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Week columns — each cell is flex-1 so they fill space */}
+          {Array.from({ length: DISPLAY_WEEKS }).map((_, weekIdx) => (
+            <div key={weekIdx} className="flex flex-1 min-w-0 flex-col gap-0.5">
+              {Array.from({ length: 7 }).map((_, dayIdx) => {
+                const cell = grid[dayIdx][weekIdx];
+                if (!cell) {
+                  return <div key={dayIdx} className="flex-1 rounded-[3px]" />;
+                }
+                const isToday = cell.date === todayStr;
+                const isSelected = selectedDay?.date === cell.date;
+                return (
+                  <button
+                    key={dayIdx}
+                    onClick={() => setSelectedDay(isSelected ? null : cell)}
+                    className={`flex-1 rounded-[3px] transition-all duration-150 hover:brightness-150 ${
+                      isToday ? 'ring-1 ring-violet-400/70 ring-offset-1 ring-offset-[#0f1825]' : ''
+                    } ${
+                      isSelected ? 'ring-1 ring-white/60 ring-offset-1 ring-offset-[#0f1825]' : ''
+                    }`}
+                    style={{ background: LEVEL_INLINE[cell.level], minHeight: 0 }}
+                    title={
+                      cell.totalSeconds > 0
+                        ? `${cell.date} — ${formatDuration(cell.totalSeconds)}`
+                        : `${cell.date} — sem estudo`
+                    }
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        {/* Week number axis */}
+        <div className="flex mt-1 shrink-0">
+          <div className="shrink-0 pr-1.5" style={{ width: 16 }} />
+          {Array.from({ length: DISPLAY_WEEKS }).map((_, i) => (
+            <div key={i} className="flex-1 min-w-0 text-center">
+              {(i + 1) % 5 === 0 || i === 0 ? (
+                <span className="text-[8px] text-slate-700">{i + 1}</span>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Footer — legend + total */}
+      <div className="mt-2 flex items-center justify-between shrink-0">
+        <span className="text-[11px] font-medium text-slate-500">
+          {formatDuration(totalSeconds)}
         </span>
-        <div className="flex items-center gap-[3px]">
-          <span className="text-[9px] text-gray-600 mr-1">Menos</span>
+        <div className="flex items-center gap-1">
+          <span className="text-[8px] text-slate-700 mr-0.5">Menos</span>
           {[0, 1, 2, 3, 4].map((level) => (
             <div
               key={level}
-              className={`h-[11px] w-[11px] rounded-sm ${LEVEL_COLORS[level]}`}
+              className="h-2.5 w-2.5 rounded-[2px]"
+              style={{ background: LEVEL_INLINE[level] }}
             />
           ))}
-          <span className="text-[9px] text-gray-600 ml-1">Mais</span>
+          <span className="text-[8px] text-slate-700 ml-0.5">Mais</span>
         </div>
       </div>
 
-      {/* Detalhe do dia selecionado */}
+      {/* Selected day detail */}
       <AnimatePresence>
         {selectedDay && selectedDay.totalSeconds > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-2 overflow-hidden"
+            className="mt-2 overflow-hidden shrink-0"
           >
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2">
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-xs font-medium text-white">
-                  {selectedDay.date}
-                </span>
-                <button
-                  onClick={() => setSelectedDay(null)}
-                  className="text-gray-600 hover:text-gray-400"
-                >
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-semibold text-white">{selectedDay.date}</span>
+                <button onClick={() => setSelectedDay(null)} className="text-slate-600 hover:text-slate-400">
                   <X className="h-3 w-3" />
                 </button>
               </div>
-              <div className="flex flex-wrap gap-1">
-                <div className="flex items-center gap-1 rounded-lg bg-violet-500/10 px-2 py-0.5">
-                  <Clock className="h-2.5 w-2.5 text-violet-400" />
-                  <span className="text-xs text-violet-300">
-                    {formatDuration(selectedDay.totalSeconds)}
-                  </span>
+              <div className="flex flex-wrap gap-1.5">
+                <div className="flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1">
+                  <Clock className="h-2.5 w-2.5 text-blue-400" />
+                  <span className="text-xs font-medium text-blue-300">{formatDuration(selectedDay.totalSeconds)}</span>
                 </div>
-                <div className="flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-0.5">
-                  <span className="text-xs text-blue-300">
+                <div className="flex items-center gap-1 rounded-lg bg-violet-500/10 px-2 py-1">
+                  <span className="text-xs text-violet-300">
                     {selectedDay.sessionCount} {selectedDay.sessionCount === 1 ? 'sessão' : 'sessões'}
                   </span>
                 </div>
                 {selectedDay.subjects.map((s) => (
-                  <div
-                    key={s}
-                    className="flex items-center gap-1 rounded-lg bg-gray-800/50 px-2 py-0.5"
-                  >
-                    <BookOpen className="h-2.5 w-2.5 text-gray-400" />
-                    <span className="text-xs text-gray-300">{s}</span>
+                  <div key={s} className="flex items-center gap-1 rounded-lg bg-white/[0.04] px-2 py-1">
+                    <BookOpen className="h-2.5 w-2.5 text-slate-500" />
+                    <span className="text-xs text-slate-400">{s}</span>
                   </div>
                 ))}
               </div>
@@ -441,10 +306,10 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-2 overflow-hidden"
+            className="mt-2 overflow-hidden shrink-0"
           >
-            <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2 text-center">
-              <p className="text-xs text-gray-500">Nenhum estudo registrado neste dia</p>
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-2 text-center">
+              <p className="text-xs text-slate-600">Nenhum estudo registrado neste dia</p>
             </div>
           </motion.div>
         )}

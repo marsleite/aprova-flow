@@ -205,16 +205,16 @@ export default function WeeklyMentoringCard({
   // ---- Skeleton ----
   if (parentLoading || loading) {
     return (
-      <div className="animate-pulse rounded-2xl border border-white/10 bg-gray-900/70 p-5">
+      <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5">
         <div className="mb-4 flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gray-800" />
-          <div className="h-5 w-48 rounded bg-gray-800" />
+          <div className="h-8 w-8 rounded-lg shimmer" />
+          <div className="h-4 w-48 rounded shimmer" />
         </div>
         <div className="space-y-2">
-          <div className="h-4 w-full rounded bg-gray-800" />
-          <div className="h-4 w-3/4 rounded bg-gray-800" />
+          <div className="h-3 w-full rounded shimmer" />
+          <div className="h-3 w-3/4 rounded shimmer" />
         </div>
-        <div className="mt-4 h-10 w-full rounded-xl bg-gray-800" />
+        <div className="mt-4 h-10 w-full rounded-xl shimmer" />
       </div>
     );
   }
@@ -225,18 +225,18 @@ export default function WeeklyMentoringCard({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-5 shadow-2xl"
+        className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
       >
         <div className="mb-3 flex items-center gap-2.5">
-          <div className="rounded-xl bg-violet-500/20 p-2.5">
-            <Brain className="h-5 w-5 text-violet-400" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+            <Brain className="h-4 w-4 text-violet-400" />
           </div>
           <div>
             <span className="text-sm font-semibold text-white">Mentoria Semanal</span>
-            <p className="text-[11px] text-gray-500">Análise profunda via IA</p>
+            <p className="text-[11px] text-slate-500">Análise profunda via IA</p>
           </div>
         </div>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-slate-500">
           Estude durante a semana para desbloquear sua mentoria semanal personalizada com IA.
         </p>
       </motion.div>
@@ -253,7 +253,7 @@ export default function WeeklyMentoringCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-gray-900 to-gray-950 p-5 shadow-2xl"
+      className="relative overflow-hidden rounded-xl border border-violet-500/20 bg-gradient-to-b from-violet-900/10 to-[#0f1825] p-5"
     >
       {/* Decoração */}
       <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-violet-500/5 blur-2xl" />
@@ -263,8 +263,8 @@ export default function WeeklyMentoringCard({
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="rounded-xl bg-gradient-to-br from-violet-500/30 to-blue-500/20 p-2.5">
-              <Brain className="h-5 w-5 text-violet-300" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/15">
+              <Brain className="h-4 w-4 text-violet-300" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -273,14 +273,14 @@ export default function WeeklyMentoringCard({
                   IA
                 </span>
               </div>
-              <p className="text-[11px] text-gray-500">{weekLabel}</p>
+              <p className="text-[11px] text-slate-500">{weekLabel}</p>
             </div>
           </div>
 
           {content && (
             <button
               onClick={() => setExpanded((e) => !e)}
-              className="rounded-lg p-1.5 text-gray-600 transition hover:bg-gray-800 hover:text-gray-400"
+              className="rounded-lg p-1.5 text-slate-600 transition hover:bg-white/[0.06] hover:text-slate-400"
             >
               {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
             </button>
@@ -330,7 +330,7 @@ export default function WeeklyMentoringCard({
                 >
                   {/* Diagnóstico */}
                   <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3.5">
-                    <p className="text-sm leading-relaxed text-gray-300">{content.weekDiagnosis}</p>
+                    <p className="text-sm leading-relaxed text-slate-300">{content.weekDiagnosis}</p>
                   </div>
 
                   {/* Pontos fortes */}
@@ -400,8 +400,8 @@ export default function WeeklyMentoringCard({
 
                   {/* Fechamento motivacional */}
                   {content.motivationalClose && (
-                    <div className="rounded-xl bg-gray-800/30 px-3.5 py-3">
-                      <p className="text-xs italic leading-relaxed text-gray-400">
+                    <div className="rounded-xl bg-white/[0.03] border border-white/[0.04] px-3.5 py-3">
+                      <p className="text-xs italic leading-relaxed text-slate-500">
                         &ldquo;{content.motivationalClose}&rdquo;
                       </p>
                     </div>
@@ -411,7 +411,7 @@ export default function WeeklyMentoringCard({
                   <button
                     onClick={handleGenerate}
                     disabled={generating}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-gray-800/50 px-4 py-2 text-xs text-gray-400 transition hover:bg-gray-800 disabled:opacity-40"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2 text-xs text-slate-500 transition hover:bg-white/[0.06] disabled:opacity-40"
                   >
                     {generating ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -429,7 +429,7 @@ export default function WeeklyMentoringCard({
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-xs italic text-gray-500"
+                className="text-xs italic text-slate-600"
               >
                 &ldquo;{content.motivationalClose}&rdquo;
               </motion.p>

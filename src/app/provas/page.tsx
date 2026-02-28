@@ -5,7 +5,7 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { listExamsByPlan, getAvailableSubjects } from '@/lib/firebase/questions';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { ExamMetadata } from '@/types';
-import { Clock, BookOpen, Award, Plus, Home, Lock } from 'lucide-react';
+import { Clock, BookOpen, Award, Plus, Home, Lock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 type TabType = 'oficiais' | 'simulados' | 'treino';
@@ -91,11 +91,11 @@ export default function ProvasPage() {
             </p>
           </div>
           <Link
-            href="/"
+            href="/dashboard"
             className="inline-flex items-center gap-2 rounded-lg border border-gray-600 bg-gray-800/70 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:border-gray-500 hover:bg-gray-700"
           >
-            <Home className="h-4 w-4" />
-            Principal
+            <ArrowLeft className="h-4 w-4" />
+            Dashboard
           </Link>
         </div>
 

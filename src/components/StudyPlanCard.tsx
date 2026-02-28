@@ -207,11 +207,11 @@ export default function StudyPlanCard({
 
   if (loading) {
     return (
-      <div className="animate-pulse rounded-2xl border border-white/10 bg-gray-900/70 p-6">
-        <div className="mb-4 h-6 w-40 rounded bg-gray-800" />
+      <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5">
+        <div className="mb-4 h-5 w-40 rounded shimmer" />
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-8 rounded bg-gray-800" />
+            <div key={i} className="h-8 rounded shimmer" />
           ))}
         </div>
       </div>
@@ -223,23 +223,23 @@ export default function StudyPlanCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-6 shadow-2xl"
+      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-pink-500/20 p-2.5">
-            <BookOpen className="h-5 w-5 text-pink-400" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500/10">
+            <BookOpen className="h-4 w-4 text-pink-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Plano de Estudo</h3>
-            <p className="text-sm text-gray-400">Planejado vs Real</p>
+            <h3 className="text-sm font-semibold text-white">Plano de Estudo</h3>
+            <p className="text-xs text-slate-500">Planejado vs Real</p>
           </div>
         </div>
         {!editing && (
           <button
             onClick={handleStartEdit}
-            className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-400 transition hover:border-violet-500/30 hover:text-violet-300"
+            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500 transition hover:border-blue-500/30 hover:text-blue-300"
           >
             <Settings className="h-3.5 w-3.5" />
             {hasPlan ? 'Editar' : 'Configurar'}

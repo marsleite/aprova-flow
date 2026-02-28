@@ -284,16 +284,16 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-6 shadow-2xl"
+      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-violet-500/20 p-2.5">
-            <History className="h-5 w-5 text-violet-400" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+            <History className="h-4 w-4 text-violet-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Histórico Completo</h3>
-            <p className="text-sm text-gray-400">
+            <h3 className="text-sm font-semibold text-white">Histórico Completo</h3>
+            <p className="text-xs text-slate-500">
               {sessions.length} {sessions.length === 1 ? 'sessão' : 'sessões'} encontradas
             </p>
           </div>
@@ -302,7 +302,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
         <div className="flex flex-wrap gap-2">
           <button
             onClick={openCreateForm}
-            className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs text-white transition hover:bg-violet-500"
+            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs text-white transition hover:bg-blue-500"
           >
             <Plus className="h-3.5 w-3.5" />
             Adicionar tempo
@@ -312,14 +312,14 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
             onClick={() => setFiltersOpen((v) => !v)}
             className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition ${
               hasFilters
-                ? 'border-violet-500/40 text-violet-300'
-                : 'border-white/10 text-gray-400 hover:text-white'
+                ? 'border-blue-500/40 text-blue-300'
+                : 'border-white/[0.08] text-slate-500 hover:text-white'
             }`}
           >
             <Filter className="h-3.5 w-3.5" />
             Filtros
             {hasFilters && (
-              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-violet-500 text-[10px] text-white">
+              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white">
                 !
               </span>
             )}
@@ -333,7 +333,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
           <button
             onClick={() => exportSessionsCSV(sessions)}
             disabled={sessions.length === 0}
-            className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-400 transition hover:text-white disabled:opacity-40"
+            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500 transition hover:text-white disabled:opacity-40"
           >
             <Download className="h-3.5 w-3.5" />
             CSV

@@ -52,11 +52,10 @@ function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: Car
       variants={item}
       whileHover={{ scale: 1.03, y: -2 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className={`relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${gradient} p-6 shadow-xl`}
+      className={`relative overflow-hidden rounded-xl border border-white/[0.06] bg-[#0f1825] p-5`}
     >
       {/* Decoração de fundo */}
-      <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/5" />
-      <div className="absolute -right-3 -top-3 h-20 w-20 rounded-full bg-white/5" />
+      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/[0.02]" />
 
       <div className="relative z-10">
         <div className="mb-4 flex items-center justify-between">
@@ -64,12 +63,12 @@ function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: Car
             <div className={`rounded-xl ${iconBg} p-2.5 shadow-lg ${glowColor}`}>
               {icon}
             </div>
-            <span className="text-sm font-medium text-gray-300">{title}</span>
+            <span className="text-xs font-medium text-slate-500">{title}</span>
           </div>
-          <TrendingUp className="h-4 w-4 text-gray-600" />
+          <TrendingUp className="h-3.5 w-3.5 text-slate-700" />
         </div>
-        <p className="text-3xl font-bold tracking-tight text-white sm:text-4xl">{value}</p>
-        <p className="mt-1 text-xs text-gray-400">{subtitle}</p>
+        <p className="text-2xl font-bold tracking-tight text-white">{value}</p>
+        <p className="mt-1 text-xs text-slate-600">{subtitle}</p>
       </div>
     </motion.div>
   );
@@ -77,13 +76,13 @@ function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: Car
 
 function CardSkeleton() {
   return (
-    <div className="animate-pulse rounded-2xl border border-white/10 bg-gray-900 p-6">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-gray-800" />
-        <div className="h-4 w-24 rounded bg-gray-800" />
+    <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="h-8 w-8 rounded-lg shimmer" />
+        <div className="h-3 w-24 rounded shimmer" />
       </div>
-      <div className="h-10 w-28 rounded bg-gray-800" />
-      <div className="mt-2 h-3 w-20 rounded bg-gray-800" />
+      <div className="h-8 w-28 rounded shimmer" />
+      <div className="mt-2 h-2.5 w-20 rounded shimmer" />
     </div>
   );
 }

@@ -355,17 +355,17 @@ export default function MentorCard({
   // ---- Skeleton ----
   if (parentLoading) {
     return (
-      <div className="animate-pulse rounded-2xl border border-white/10 bg-gray-900/70 p-5">
+      <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5">
         <div className="mb-4 flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gray-800" />
-          <div className="h-5 w-40 rounded bg-gray-800" />
+          <div className="h-8 w-8 rounded-lg shimmer" />
+          <div className="h-4 w-40 rounded shimmer" />
         </div>
         <div className="space-y-2">
-          <div className="h-4 w-full rounded bg-gray-800" />
-          <div className="h-4 w-3/4 rounded bg-gray-800" />
-          <div className="h-4 w-5/6 rounded bg-gray-800" />
+          <div className="h-3 w-full rounded shimmer" />
+          <div className="h-3 w-3/4 rounded shimmer" />
+          <div className="h-3 w-5/6 rounded shimmer" />
         </div>
-        <div className="mt-4 h-10 w-full rounded-xl bg-gray-800" />
+        <div className="mt-4 h-10 w-full rounded-xl shimmer" />
       </div>
     );
   }
@@ -376,26 +376,25 @@ export default function MentorCard({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/30 via-gray-900 to-gray-950 p-5 shadow-2xl"
+        className="relative overflow-hidden rounded-xl border border-amber-500/15 bg-gradient-to-b from-amber-900/10 to-[#0f1825] p-5"
       >
-        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/5 blur-2xl" />
         <div className="mb-4 flex items-center gap-2.5">
-          <div className="rounded-xl bg-gradient-to-br from-amber-500/30 to-orange-500/20 p-2.5">
-            <Shield className="h-5 w-5 text-amber-300" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+            <Shield className="h-4 w-4 text-amber-300" />
           </div>
           <div>
             <span className="text-sm font-semibold text-white">Mentor AprovaMind</span>
-            <p className="text-[11px] text-gray-500">Análise estratégica dos seus estudos</p>
+            <p className="text-[11px] text-slate-500">Análise estratégica dos seus estudos</p>
           </div>
         </div>
-        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3.5">
-          <p className="text-sm leading-relaxed text-gray-300">
+        <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-3.5">
+          <p className="text-sm leading-relaxed text-slate-300">
             Comece sua primeira sessão de estudo e eu vou analisar seu desempenho, identificar matérias que precisam de atenção e traçar a melhor estratégia para sua aprovação.
           </p>
         </div>
-        <div className="mt-3 flex items-start gap-2 rounded-xl bg-gray-800/30 px-3.5 py-3">
+        <div className="mt-3 flex items-start gap-2 rounded-xl bg-white/[0.03] px-3.5 py-3">
           <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-slate-500">
             Inicie o cronômetro acima para registrar sua primeira sessão. Sua jornada até a posse começa agora.
           </p>
         </div>
@@ -408,7 +407,7 @@ export default function MentorCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/30 via-gray-900 to-gray-950 p-5 shadow-2xl"
+      className="relative overflow-hidden rounded-xl border border-amber-500/15 bg-gradient-to-b from-amber-900/10 to-[#0f1825] p-5"
     >
       {/* Decoração de fundo */}
       <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/5 blur-2xl" />
@@ -418,19 +417,19 @@ export default function MentorCard({
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="rounded-xl bg-gradient-to-br from-amber-500/30 to-orange-500/20 p-2.5">
-              <Shield className="h-5 w-5 text-amber-300" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+              <Shield className="h-4 w-4 text-amber-300" />
             </div>
             <div>
               <span className="text-sm font-semibold text-white">Mentor AprovaMind</span>
-              <p className="text-[11px] text-gray-500">Análise estratégica dos seus estudos</p>
+              <p className="text-[11px] text-slate-500">Análise estratégica dos seus estudos</p>
             </div>
           </div>
 
           {/* Expand/Collapse */}
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="rounded-lg p-1.5 text-gray-600 transition hover:bg-gray-800 hover:text-gray-400"
+            className="rounded-lg p-1.5 text-slate-600 transition hover:bg-white/[0.05] hover:text-slate-400"
           >
             {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </button>
@@ -447,7 +446,7 @@ export default function MentorCard({
             >
               {/* Análise Estratégica */}
               <div className="mb-3 rounded-xl border border-white/5 bg-white/[0.02] p-3.5">
-                <p className="text-sm leading-relaxed text-gray-300">{data.analysis}</p>
+                <p className="text-sm leading-relaxed text-slate-300">{data.analysis}</p>
               </div>
 
               {/* Performance Insight — Constância × Precisão */}
@@ -496,9 +495,9 @@ export default function MentorCard({
               </div>
 
               {/* Frase Motivacional */}
-              <div className="flex items-start gap-2 rounded-xl bg-gray-800/30 px-3.5 py-3">
-                <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-500" />
-                <p className="text-xs italic leading-relaxed text-gray-400">
+              <div className="flex items-start gap-2 rounded-xl bg-white/[0.03] px-3.5 py-3">
+                <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-600" />
+                <p className="text-xs italic leading-relaxed text-slate-500">
                   {data.motivationalQuote}
                 </p>
               </div>
@@ -511,7 +510,7 @@ export default function MentorCard({
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-xs italic text-gray-500"
+            className="text-xs italic text-slate-600"
           >
             &ldquo;{data.motivationalQuote}&rdquo;
           </motion.p>

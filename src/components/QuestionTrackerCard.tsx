@@ -132,16 +132,16 @@ export default function QuestionTrackerCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 to-gray-950 p-6 shadow-2xl"
+      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
     >
       {/* Header */}
       <div className="mb-5 flex items-center gap-3">
-        <div className="rounded-xl bg-blue-500/20 p-2.5">
-          <ClipboardCheck className="h-5 w-5 text-blue-400" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+          <ClipboardCheck className="h-4 w-4 text-blue-400" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-white">Registro Manual de Questões</h2>
-          <p className="text-sm text-gray-400">Para questões feitas fora do AprovaMind</p>
+          <h2 className="text-sm font-semibold text-white">Registro Manual de Questões</h2>
+          <p className="text-xs text-slate-500">Para questões feitas fora do AprovaMind</p>
         </div>
       </div>
 
@@ -153,12 +153,12 @@ export default function QuestionTrackerCard({
 
         {/* Matéria */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-gray-400">Matéria</label>
+          <label className="mb-1.5 block text-xs font-medium text-slate-500">Matéria</label>
           <select
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             disabled={saving}
-            className="w-full rounded-xl border border-white/10 bg-gray-800/50 px-4 py-2.5 text-sm text-white
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white
                        outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
                        disabled:opacity-50"
           >
