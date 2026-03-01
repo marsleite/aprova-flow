@@ -12,6 +12,7 @@ const DEFAULTS: Record<AiTask, TaskConfig> = {
   'weekly-mentoring': { provider: 'gemini', model: 'gemini-2.5-flash' },
   'parse-edital': { provider: 'gemini', model: 'gemini-2.5-flash' },
   'planner-daily': { provider: 'gemini', model: 'gemini-2.5-flash' },
+  'smart-schedule': { provider: 'gemini', model: 'gemini-2.5-flash' },
 };
 
 function resolveConfig(task: AiTask): TaskConfig {
