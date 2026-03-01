@@ -3,8 +3,8 @@
  * 
  * Exibe a distribuição de horas por matéria no mês atual.
  * - 0 matérias → empty state
- * - 1–2 matérias → barras horizontais com progresso + mensagem para desbloquear radar
- * - 3+ matérias → radar chart completo
+ * - 1 matéria → barra horizontal com progresso
+ * - 2+ matérias → radar chart completo
  */
 
 'use client';
@@ -141,7 +141,7 @@ const barItem = {
 
 function FewSubjectsView({ data }: { data: SubjectHours[] }) {
   const maxHours = Math.max(...data.map((d) => d.hours), 0.01);
-  const remaining = 3 - data.length;
+  const remaining = 2 - data.length;
 
   return (
     <div className="flex flex-1 flex-col justify-between">
@@ -203,31 +203,31 @@ function FullRadarChart({ data }: { data: SubjectHours[] }) {
 
   return (
     <div className="flex-1 min-h-[160px]">
-    <ResponsiveContainer width="100%" height="100%">
-      <RadarChart cx="50%" cy="52%" outerRadius="72%" data={chartData}>
-        <PolarGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
-        <PolarAngleAxis
-          dataKey="abbr"
-          tick={(props: Record<string, unknown>) => <CustomTick {...props} />}
-        />
-        <PolarRadiusAxis
-          tick={{ fill: '#334155', fontSize: 9 }}
-          tickFormatter={(value: number) => `${value}h`}
-          axisLine={false}
-        />
-        <Radar
-          name="Horas"
-          dataKey="hours"
-          stroke="#3b82f6"
-          fill="#3b82f6"
-          fillOpacity={0.15}
-          strokeWidth={2}
-          dot={{ r: 3.5, fill: '#3b82f6', stroke: '#60a5fa', strokeWidth: 1 }}
-          activeDot={{ r: 5, fill: '#60a5fa', stroke: '#93c5fd', strokeWidth: 2 }}
-        />
-        <Tooltip content={<CustomTooltip />} />
-      </RadarChart>
-    </ResponsiveContainer>
+      <ResponsiveContainer width="100%" height="100%">
+        <RadarChart cx="50%" cy="52%" outerRadius="72%" data={chartData}>
+          <PolarGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+          <PolarAngleAxis
+            dataKey="abbr"
+            tick={(props: Record<string, unknown>) => <CustomTick {...props} />}
+          />
+          <PolarRadiusAxis
+            tick={{ fill: '#334155', fontSize: 9 }}
+            tickFormatter={(value: number) => `${value}h`}
+            axisLine={false}
+          />
+          <Radar
+            name="Horas"
+            dataKey="hours"
+            stroke="#3b82f6"
+            fill="#3b82f6"
+            fillOpacity={0.15}
+            strokeWidth={2}
+            dot={{ r: 3.5, fill: '#3b82f6', stroke: '#60a5fa', strokeWidth: 1 }}
+            activeDot={{ r: 5, fill: '#60a5fa', stroke: '#93c5fd', strokeWidth: 2 }}
+          />
+          <Tooltip content={<CustomTooltip />} />
+        </RadarChart>
+      </ResponsiveContainer>
     </div>
   );
 }
@@ -237,7 +237,7 @@ function FullRadarChart({ data }: { data: SubjectHours[] }) {
 // ============================
 
 export default function SubjectRadarChart({ data, loading }: SubjectRadarChartProps) {
-  const hasEnoughForRadar = data.length >= 3;
+  const hasEnoughForRadar = data.length >= 2;
 
   return (
     <motion.div

@@ -313,7 +313,14 @@ export default function CadernoErrosPage() {
                             <div className="text-center py-20">
                                 <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
                                 <h2 className="text-xl font-bold text-white mb-2">Nenhum erro encontrado!</h2>
-                                <p className="text-sm text-slate-500">Continue praticando nos simulados. Seus erros aparecerão aqui.</p>
+                                <p className="text-sm text-slate-500 mb-6">Continue praticando nos simulados. Seus erros aparecerão aqui.</p>
+                                <a
+                                    href="/simulations"
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl transition-colors text-sm font-semibold"
+                                >
+                                    <Sparkles className="h-4 w-4" />
+                                    Fazer um Simulado
+                                </a>
                             </div>
                         ) : (
                             <div className="space-y-6">
@@ -382,17 +389,17 @@ export default function CadernoErrosPage() {
                                                                         <div
                                                                             key={alt.key}
                                                                             className={`flex items-start gap-2 p-3 rounded-lg text-sm ${alt.key === question.answer
-                                                                                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
-                                                                                    : alt.key === attempt.selectedOption
-                                                                                        ? 'bg-red-500/10 border border-red-500/20 text-red-300'
-                                                                                        : 'bg-gray-900/30 border border-gray-800 text-gray-400'
+                                                                                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
+                                                                                : alt.key === attempt.selectedOption
+                                                                                    ? 'bg-red-500/10 border border-red-500/20 text-red-300'
+                                                                                    : 'bg-gray-900/30 border border-gray-800 text-gray-400'
                                                                                 }`}
                                                                         >
                                                                             <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${alt.key === question.answer
-                                                                                    ? 'bg-emerald-500/20 text-emerald-400'
-                                                                                    : alt.key === attempt.selectedOption
-                                                                                        ? 'bg-red-500/20 text-red-400'
-                                                                                        : 'bg-gray-800 text-gray-500'
+                                                                                ? 'bg-emerald-500/20 text-emerald-400'
+                                                                                : alt.key === attempt.selectedOption
+                                                                                    ? 'bg-red-500/20 text-red-400'
+                                                                                    : 'bg-gray-800 text-gray-500'
                                                                                 }`}>{alt.key}</span>
                                                                             <span className="flex-1">{alt.text}</span>
                                                                         </div>

@@ -43,6 +43,7 @@ import {
   CheckCircle2,
   Calendar,
   ArrowUpRight,
+  Flame,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -228,7 +229,14 @@ export default function DashboardPage() {
           {
             label: 'Study Velocity',
             value: loading ? null : `${consistency?.currentStreak ?? 0}d`,
-            color: '#f59e0b',
+            color: (() => {
+              const s = consistency?.currentStreak ?? 0;
+              if (s >= 7) return '#ef4444';
+              if (s >= 3) return '#f97316';
+              if (s >= 1) return '#f59e0b';
+              return '#64748b';
+            })(),
+            streak: consistency?.currentStreak ?? 0,
           },
         ].map((kpi, i) => (
           <div
@@ -239,7 +247,12 @@ export default function DashboardPage() {
             {loading ? (
               <div className="h-8 w-16 rounded-lg shimmer" />
             ) : (
-              <span className="text-2xl font-bold tracking-tight" style={{ color: kpi.color }}>{kpi.value}</span>
+              <span className="text-2xl font-bold tracking-tight flex items-center gap-1" style={{ color: kpi.color }}>
+                {'streak' in kpi && (kpi as { streak: number }).streak > 0 && (
+                  <Flame className={`h-5 w-5 ${(kpi as { streak: number }).streak >= 7 ? 'animate-pulse' : ''}`} />
+                )}
+                {kpi.value}
+              </span>
             )}
           </div>
         ))}
