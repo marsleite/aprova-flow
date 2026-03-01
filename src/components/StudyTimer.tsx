@@ -27,13 +27,14 @@ import {
 } from 'lucide-react';
 import { useStudyTimer } from '@/hooks/useStudyTimer';
 import { formatTimerDisplay } from '@/lib/utils';
+import InterrogationModal from '@/components/InterrogationModal';
 import { DEFAULT_SUBJECTS, TimerMode, PomodoroPhase, StudyPlanEdital } from '@/types';
 
 interface StudyTimerProps {
   userId: string;
   plans?: StudyPlanEdital[];
   activePlanId?: string | null;
-  onSessionSaved?: (session: { subject: string; duration: number }) => void;
+  onSessionSaved?: (session: { subject: string; duration: number; retentionScore?: number }) => void;
   onCreateSession?: () => Promise<void> | void;
   onCreateEdital?: () => void;
   creatingSession?: boolean;
@@ -156,9 +157,8 @@ function CycleIndicator({ current, total }: { current: number; total: number }) 
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
-          className={`h-2 w-2 rounded-full transition-colors ${
-            i < current ? 'bg-violet-400' : 'bg-gray-700'
-          }`}
+          className={`h-2 w-2 rounded-full transition-colors ${i < current ? 'bg-violet-400' : 'bg-gray-700'
+            }`}
         />
       ))}
       <span className="ml-1 text-[10px] text-gray-500">
@@ -458,13 +458,42 @@ export default function StudyTimer({
   }, [setSelectedSubject]);
 
   // ========================================
+  // Interrogation Mode State
+  // ========================================
+  const [showInterrogation, setShowInterrogation] = useState(false);
+  const [pendingSession, setPendingSession] = useState<{ subject: string; duration: number } | null>(null);
+
+  // ========================================
   // Handlers
   // ========================================
   const handleStop = async () => {
     const savedSubject = selectedSubject;
     const savedDuration = isPomodoro ? totalFocusSeconds : displaySeconds;
     await stop();
-    onSessionSaved?.({ subject: savedSubject, duration: savedDuration });
+
+    // If the session had meaningful duration (>= 60s), offer the interrogation
+    if (savedDuration >= 60 && savedSubject) {
+      setPendingSession({ subject: savedSubject, duration: savedDuration });
+      setShowInterrogation(true);
+    } else {
+      onSessionSaved?.({ subject: savedSubject, duration: savedDuration });
+    }
+  };
+
+  const handleInterrogationSkip = () => {
+    setShowInterrogation(false);
+    if (pendingSession) {
+      onSessionSaved?.(pendingSession);
+      setPendingSession(null);
+    }
+  };
+
+  const handleInterrogationComplete = (score: number) => {
+    setShowInterrogation(false);
+    if (pendingSession) {
+      onSessionSaved?.({ ...pendingSession, retentionScore: score });
+      setPendingSession(null);
+    }
   };
 
   const handleAddSubject = (subjectName: string) => {
@@ -503,14 +532,14 @@ export default function StudyTimer({
           <Clock className="h-4 w-4 text-blue-400" />
         </div>
         <div>
-            <h2 className="text-sm font-semibold text-white">Cronômetro de Estudo</h2>
-            <p className="text-xs text-slate-500">
-              {isPomodoro
-                ? `Pomodoro ${pomodoroConfig?.label}`
-                : 'Tempo corrido · Pausa manual'}
-            </p>
-          </div>
+          <h2 className="text-sm font-semibold text-white">Cronômetro de Estudo</h2>
+          <p className="text-xs text-slate-500">
+            {isPomodoro
+              ? `Pomodoro ${pomodoroConfig?.label}`
+              : 'Tempo corrido · Pausa manual'}
+          </p>
         </div>
+      </div>
 
       {!hasControl && (
         <div className="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
@@ -531,10 +560,9 @@ export default function StudyTimer({
               onClick={() => setMode(opt.value)}
               disabled={!isIdle || !hasControl}
               className={`flex flex-col items-center gap-0.5 rounded-xl border px-2 py-2 text-center transition-all
-                ${
-                  mode === opt.value
-                    ? 'border-blue-500/40 bg-blue-500/10 text-white'
-                    : 'border-white/[0.05] bg-white/[0.02] text-slate-600 hover:border-white/10 hover:text-slate-300'
+                ${mode === opt.value
+                  ? 'border-blue-500/40 bg-blue-500/10 text-white'
+                  : 'border-white/[0.05] bg-white/[0.02] text-slate-600 hover:border-white/10 hover:text-slate-300'
                 }
                 disabled:cursor-not-allowed disabled:opacity-40
               `}
@@ -665,7 +693,7 @@ export default function StudyTimer({
             className="relative z-10 flex flex-col items-center"
           >
             <span
-                className={`font-mono text-4xl font-bold tracking-wider transition-colors duration-300 sm:text-5xl
+              className={`font-mono text-4xl font-bold tracking-wider transition-colors duration-300 sm:text-5xl
                 ${isRunning && !isBreak ? 'text-blue-400' : ''}
                 ${isRunning && isBreak ? 'text-emerald-400' : ''}
                 ${isPaused ? 'text-amber-400' : ''}
@@ -826,9 +854,8 @@ export default function StudyTimer({
       )}
 
       <p
-        className={`mt-3 text-center text-[11px] ${
-          activeScreens > maxActiveScreens ? 'text-amber-300' : 'text-slate-600'
-        }`}
+        className={`mt-3 text-center text-[11px] ${activeScreens > maxActiveScreens ? 'text-amber-300' : 'text-slate-600'
+          }`}
       >
         Sincronizado em {activeScreens} tela{activeScreens === 1 ? '' : 's'}
         {activeScreens > maxActiveScreens ? ` · limite de ${maxActiveScreens}` : ''}
@@ -843,12 +870,20 @@ export default function StudyTimer({
             exit={{ opacity: 0, height: 0 }}
             className="mt-4 overflow-hidden rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-2"
           >
-              <p className="text-center text-xs text-amber-300">
+            <p className="text-center text-xs text-amber-300">
               O cronômetro continua rodando mesmo com esta aba em segundo plano
-              </p>
-            </motion.div>
-          )}
+            </p>
+          </motion.div>
+        )}
       </AnimatePresence>
+
+      {/* Interrogation Modal */}
+      <InterrogationModal
+        isOpen={showInterrogation}
+        subjectName={pendingSession?.subject || selectedSubject || 'Matéria'}
+        onSkip={handleInterrogationSkip}
+        onEvaluationComplete={handleInterrogationComplete}
+      />
     </motion.div>
   );
 }

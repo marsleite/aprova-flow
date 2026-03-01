@@ -1,5 +1,5 @@
 export type PlanTier = 'free' | 'pro' | 'premium' | 'admin';
-export type AiTaskKey = 'chat' | 'weekly-mentoring' | 'planner-daily' | 'parse-edital' | 'smart-schedule';
+export type AiTaskKey = 'chat' | 'weekly-mentoring' | 'planner-daily' | 'parse-edital' | 'smart-schedule' | 'interrogation';
 export type QuotaWindow = 'hour' | 'day' | 'week';
 
 export interface PlanCapabilities {
@@ -50,6 +50,7 @@ const AI_QUOTAS_BY_TIER: Record<Exclude<PlanTier, 'admin'>, AiQuotaByTask> = {
     'planner-daily': { limit: 8, window: 'day' },
     'parse-edital': { limit: 5, window: 'week' },
     'smart-schedule': { limit: 10, window: 'week' },
+    'interrogation': { limit: 15, window: 'day' },
   },
   pro: {
     chat: { limit: 260, window: 'day' },
@@ -57,6 +58,7 @@ const AI_QUOTAS_BY_TIER: Record<Exclude<PlanTier, 'admin'>, AiQuotaByTask> = {
     'planner-daily': { limit: 30, window: 'day' },
     'parse-edital': { limit: 15, window: 'week' },
     'smart-schedule': { limit: 30, window: 'week' },
+    'interrogation': { limit: 50, window: 'day' },
   },
   premium: {
     chat: { limit: 700, window: 'day' },
@@ -64,6 +66,7 @@ const AI_QUOTAS_BY_TIER: Record<Exclude<PlanTier, 'admin'>, AiQuotaByTask> = {
     'planner-daily': { limit: 80, window: 'day' },
     'parse-edital': { limit: 30, window: 'week' },
     'smart-schedule': { limit: 60, window: 'week' },
+    'interrogation': { limit: 100, window: 'day' },
   },
 };
 
