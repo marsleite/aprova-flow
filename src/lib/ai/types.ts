@@ -1,4 +1,4 @@
-export type AiTask = 'chat' | 'weekly-mentoring' | 'parse-edital' | 'planner-daily' | 'smart-schedule' | 'interrogation';
+export type AiTask = 'chat' | 'weekly-mentoring' | 'parse-edital' | 'planner-daily' | 'smart-schedule' | 'interrogation' | 'predictive-exam' | 'explain-answer';
 
 export type AiProvider = 'gemini' | 'openai';
 

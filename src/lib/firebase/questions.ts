@@ -14,8 +14,6 @@ import {
   query,
   where,
   addDoc,
-  orderBy,
-  limit,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './config';
@@ -147,27 +145,55 @@ export async function listExamsByPlan(planId?: string | null): Promise<ExamMetad
 }
 
 export async function saveQuestionAttempt(attempt: QuestionAttempt): Promise<string> {
+  // Strip undefined values — Firestore rejects them
+  const sanitized: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(attempt)) {
+    if (value !== undefined) sanitized[key] = value;
+  }
   const ref = await addDoc(collection(db, ATTEMPTS_COLLECTION), {
-    ...attempt,
+    ...sanitized,
     createdAt: serverTimestamp(),
   });
   return ref.id;
 }
 
 export async function getRecentAttempts(userId: string, limitCount = 20): Promise<QuestionAttempt[]> {
+  // Query only by userId — avoids needing a composite index (userId + createdAt)
   const q = query(
     collection(db, ATTEMPTS_COLLECTION),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-    limit(limitCount)
+    where('userId', '==', userId)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as QuestionAttempt) }));
+  const attempts = snap.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as QuestionAttempt) }));
+  // Sort and limit client-side (createdAt can be a Firestore Timestamp or ISO string)
+  attempts.sort((a, b) => {
+    const tA = a.createdAt && typeof a.createdAt === 'object' && 'toMillis' in (a.createdAt as Record<string, unknown>)
+      ? (a.createdAt as unknown as { toMillis: () => number }).toMillis()
+      : typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : 0;
+    const tB = b.createdAt && typeof b.createdAt === 'object' && 'toMillis' in (b.createdAt as Record<string, unknown>)
+      ? (b.createdAt as unknown as { toMillis: () => number }).toMillis()
+      : typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : 0;
+    return tB - tA;
+  });
+  return attempts.slice(0, limitCount);
 }
 
 export async function saveSimulatedConfig(config: SimulatedConfig): Promise<string> {
+  // Strip undefined values — Firestore rejects them
+  const sanitized: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(config)) {
+    if (value !== undefined) sanitized[key] = value;
+  }
+  // Also sanitize nested filters object
+  if (config.filters) {
+    const sanitizedFilters: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(config.filters)) {
+      if (value !== undefined) sanitizedFilters[key] = value;
+    }
+    sanitized.filters = sanitizedFilters;
+  }
   const ref = await addDoc(collection(db, SIMULATED_CONFIGS_COLLECTION), {
-    ...config,
+    ...sanitized,
     createdAt: serverTimestamp(),
   });
   return ref.id;
@@ -177,6 +203,13 @@ export async function getSimulatedConfigs(userId: string): Promise<SimulatedConf
   const q = query(collection(db, SIMULATED_CONFIGS_COLLECTION), where('userId', '==', userId));
   const snap = await getDocs(q);
   return snap.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as SimulatedConfig) }));
+}
+
+export async function getSimulatedConfigById(id: string): Promise<SimulatedConfig | null> {
+  const ref = doc(db, SIMULATED_CONFIGS_COLLECTION, id);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...(snap.data() as SimulatedConfig) };
 }
 
 /**
@@ -191,8 +224,14 @@ export async function saveQuestionSession(
       ? Math.round((session.correctAnswers / session.totalQuestions) * 100)
       : 0;
 
+  // Strip undefined values — Firestore rejects them
+  const sanitized: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(session)) {
+    if (value !== undefined) sanitized[key] = value;
+  }
+
   const docRef = await addDoc(collection(db, QUESTIONS_STATS_COLLECTION), {
-    ...session,
+    ...sanitized,
     subject,
     accuracy,
     createdAt: new Date().toISOString(),
@@ -331,10 +370,103 @@ export async function getRandomQuestions(
   count: number
 ): Promise<QuestionBankItem[]> {
   const allQuestions = await listQuestionsByFilter(filters);
-  
+
   // Embaralha e pega N questões
   const shuffled = allQuestions.sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
+}
+
+/**
+ * Busca questões de forma inteligente, priorizando matérias fracas do aluno.
+ * Distribui `count` questões proporcionalmente ao peso: pesoEdital × (1 - acerto/100).
+ * Matérias com alto peso no edital e baixa precisão recebem mais questões.
+ */
+export async function getPredictiveQuestions(
+  accuracyData: SubjectAccuracy[],
+  planWeights: { subject: string; weight: number }[],
+  count: number,
+  filters?: { bancas?: string[]; dificuldades?: QuestionDifficulty[] }
+): Promise<QuestionBankItem[]> {
+  // 1. Build weight map from plan
+  const weightMap = new Map<string, number>();
+  for (const pw of planWeights) {
+    weightMap.set(subjectKey(pw.subject), pw.weight);
+  }
+
+  // 2. Build accuracy map from student data
+  const accMap = new Map<string, number>();
+  for (const acc of accuracyData) {
+    accMap.set(subjectKey(acc.subject), acc.accuracy);
+  }
+
+  // 3. Collect all subject keys (union of plan subjects + accuracy subjects)
+  const allSubjectKeys = new Set<string>([
+    ...planWeights.map(pw => subjectKey(pw.subject)),
+    ...accuracyData.map(a => subjectKey(a.subject)),
+  ]);
+
+  // 4. Calculate adjusted weight for each subject: weight × (1 - accuracy/100)
+  //    Subjects with no accuracy data get full penalty (accuracy = 0)
+  //    Subjects with no edital weight get a base weight of 1.0
+  const subjectScores: { key: string; label: string; score: number }[] = [];
+  for (const key of allSubjectKeys) {
+    const weight = weightMap.get(key) ?? 1.0;
+    const accuracy = accMap.get(key) ?? 0;
+    const score = weight * (1 - accuracy / 100);
+    const label = planWeights.find(pw => subjectKey(pw.subject) === key)?.subject
+      || accuracyData.find(a => subjectKey(a.subject) === key)?.subject
+      || key;
+    subjectScores.push({ key, label, score: Math.max(score, 0.05) }); // minimum 0.05 so no subject is fully excluded
+  }
+
+  // 5. Normalize scores into a proportion of total questions
+  const totalScore = subjectScores.reduce((sum, s) => sum + s.score, 0);
+  const distribution = subjectScores.map(s => ({
+    ...s,
+    targetCount: Math.max(1, Math.round((s.score / totalScore) * count)),
+  }));
+
+  // 6. Fetch all available questions
+  const allQuestions = await listQuestionsByFilter({
+    bancas: filters?.bancas,
+    dificuldades: filters?.dificuldades,
+  });
+
+  // 7. Group questions by subject
+  const bySubject = new Map<string, QuestionBankItem[]>();
+  for (const q of allQuestions) {
+    const key = subjectKey(q.materia || '');
+    if (!bySubject.has(key)) bySubject.set(key, []);
+    bySubject.get(key)!.push(q);
+  }
+
+  // 8. Pick questions per subject, shuffled within each
+  const selected: QuestionBankItem[] = [];
+  const usedIds = new Set<string>();
+
+  for (const dist of distribution.sort((a, b) => b.score - a.score)) {
+    const pool = (bySubject.get(dist.key) || [])
+      .filter(q => !usedIds.has(q.id || ''))
+      .sort(() => Math.random() - 0.5);
+
+    const pick = pool.slice(0, dist.targetCount);
+    for (const q of pick) {
+      selected.push(q);
+      if (q.id) usedIds.add(q.id);
+    }
+  }
+
+  // 9. If we still have room, fill remaining with random unused questions
+  if (selected.length < count) {
+    const remaining = allQuestions
+      .filter(q => !usedIds.has(q.id || ''))
+      .sort(() => Math.random() - 0.5)
+      .slice(0, count - selected.length);
+    selected.push(...remaining);
+  }
+
+  // 10. Final shuffle to mix subjects
+  return selected.sort(() => Math.random() - 0.5).slice(0, count);
 }
 
 /**
@@ -401,14 +533,14 @@ export async function saveQuestionAttempts(attempts: QuestionAttempt[]): Promise
 export async function getAvailableSubjects(): Promise<string[]> {
   const snapshot = await getDocs(collection(db, QUESTIONS_COLLECTION));
   const subjects = new Set<string>();
-  
+
   snapshot.forEach(doc => {
     const data = doc.data();
     if (data.materia) {
       subjects.add(data.materia);
     }
   });
-  
+
   return Array.from(subjects).sort();
 }
 
@@ -418,13 +550,13 @@ export async function getAvailableSubjects(): Promise<string[]> {
 export async function getAvailableBancas(): Promise<string[]> {
   const snapshot = await getDocs(collection(db, QUESTIONS_COLLECTION));
   const bancas = new Set<string>();
-  
+
   snapshot.forEach(doc => {
     const data = doc.data();
     if (data.banca) {
       bancas.add(data.banca);
     }
   });
-  
+
   return Array.from(bancas).sort();
 }

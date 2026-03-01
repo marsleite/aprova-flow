@@ -43,9 +43,27 @@ Este documento rastreia a implementação das funcionalidades baseadas em Inteli
 
 ---
 
-## Fase 3: Simulador de Prova Preditivo
+## Fase 3: Simulador de Prova Preditivo ✅ (parcial)
 
-> Planejamento futuro
+| Item | Status |
+|---|---|
+| Algoritmo `getPredictiveQuestions()` com seleção calibrada por fraquezas | ✅ |
+| Endpoint `POST /api/explain-answer` para explicações IA de erros | ✅ |
+| Toggle "Simulado Inteligente (IA)" na criação de simulado | ✅ |
+| Botão "Explicar com IA" na tela de execução | ⏳ Pendente |
+| Pontuação Projetada ponderada | ⏳ Pendente |
+
+**Arquivos principais:**
+- `src/lib/firebase/questions.ts` (novo: `getPredictiveQuestions`)
+- `src/app/api/explain-answer/route.ts`
+- `src/app/provas/criar-simulado/page.tsx` (modificado)
+
+**Quotas configuradas:**
+| Plano | predictive-exam | explain-answer |
+|---|---|---|
+| Free | 5/dia | ❌ Bloqueado |
+| Pro | 20/dia | 30/dia |
+| Premium | 50/dia | 80/dia |
 
 ---
 

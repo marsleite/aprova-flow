@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { saveSimulatedConfig, getRandomQuestions } from '@/lib/firebase/questions';
+import { saveSimulatedConfig, getRandomQuestions, getPredictiveQuestions, getAccuracyBySubject } from '@/lib/firebase/questions';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { QuestionDifficulty, DEFAULT_SUBJECTS } from '@/types';
-import { ArrowLeft, Play, Lock } from 'lucide-react';
+import { ArrowLeft, Play, Lock, Brain, Shuffle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CriarSimuladoPage() {
@@ -20,6 +20,7 @@ export default function CriarSimuladoPage() {
   const [selectedDificuldades, setSelectedDificuldades] = useState<QuestionDifficulty[]>([]);
   const [selectedBancas, setSelectedBancas] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [smartMode, setSmartMode] = useState(true);
 
   const bancasDisponiveis = ['FGV', 'CESPE/CEBRASPE', 'FCC', 'VUNESP', 'IBFC'];
   const dificuldades: QuestionDifficulty[] = ['fácil', 'médio', 'difícil', 'extremo'];
@@ -53,28 +54,32 @@ export default function CriarSimuladoPage() {
 
     setLoading(true);
     try {
-      // Salva config do simulado
-      const configId = await saveSimulatedConfig({
-        userId: user.uid,
-        planId: null,
-        questionCount,
-        durationMinutes: durationMinutes > 0 ? durationMinutes : undefined,
-        filters: {
-          materias: selectedMaterias.length > 0 ? selectedMaterias : undefined,
-          dificuldades: selectedDificuldades.length > 0 ? selectedDificuldades : undefined,
-          bancas: selectedBancas.length > 0 ? selectedBancas : undefined,
-        },
-      });
+      // Build filters sans undefined (Firestore rejects undefined values)
+      const filters: Record<string, string[]> = {};
+      if (selectedMaterias.length > 0) filters.materias = selectedMaterias;
+      if (selectedDificuldades.length > 0) filters.dificuldades = selectedDificuldades;
+      if (selectedBancas.length > 0) filters.bancas = selectedBancas;
 
-      // Busca questões aleatórias
-      const questions = await getRandomQuestions(
-        {
-          materias: selectedMaterias.length > 0 ? selectedMaterias : undefined,
+      // 1. Seleciona questões primeiro
+      let questions;
+      if (smartMode) {
+        const accuracyData = await getAccuracyBySubject(user.uid);
+        const planWeights = (selectedMaterias.length > 0 ? selectedMaterias : DEFAULT_SUBJECTS as unknown as string[])
+          .map(m => ({ subject: m, weight: 1.0 }));
+        questions = await getPredictiveQuestions(accuracyData, planWeights, questionCount, {
           bancas: selectedBancas.length > 0 ? selectedBancas : undefined,
           dificuldades: selectedDificuldades.length > 0 ? selectedDificuldades : undefined,
-        },
-        questionCount
-      );
+        });
+      } else {
+        questions = await getRandomQuestions(
+          {
+            materias: selectedMaterias.length > 0 ? selectedMaterias : undefined,
+            bancas: selectedBancas.length > 0 ? selectedBancas : undefined,
+            dificuldades: selectedDificuldades.length > 0 ? selectedDificuldades : undefined,
+          },
+          questionCount
+        );
+      }
 
       if (questions.length === 0) {
         alert('Nenhuma questão encontrada com os filtros selecionados. Tente ajustar os critérios.');
@@ -82,8 +87,20 @@ export default function CriarSimuladoPage() {
         return;
       }
 
-      // Redireciona para execução do simulado
-      router.push(`/provas/simulado/${configId}/executar`);
+      // 2. Salva config COM questionIds
+      const questionIds = questions.map(q => q.id).filter(Boolean) as string[];
+      const configId = await saveSimulatedConfig({
+        userId: user.uid,
+        planId: null,
+        questionCount: questionIds.length,
+        ...(durationMinutes > 0 ? { durationMinutes } : {}),
+        questionIds,
+        smartMode,
+        filters,
+      });
+
+      // 3. Redireciona para execução
+      router.push('/provas/' + configId + '/executar');
     } catch (error) {
       console.error('Erro ao criar simulado:', error);
       alert('Erro ao criar simulado. Tente novamente.');
@@ -155,7 +172,30 @@ export default function CriarSimuladoPage() {
         {/* Configurações Básicas */}
         <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 space-y-4">
           <h2 className="text-xl font-semibold text-white mb-4">Configurações</h2>
-          
+
+          {/* Smart Mode Toggle */}
+          <div className="flex items-center gap-3 rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
+            <button
+              onClick={() => setSmartMode(!smartMode)}
+              className={'relative inline-flex h-7 w-12 items-center rounded-full transition-colors ' + (smartMode ? 'bg-violet-600' : 'bg-gray-600')}
+            >
+              <span className={'inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ' + (smartMode ? 'translate-x-6' : 'translate-x-1')} />
+            </button>
+            <div className="flex items-center gap-2">
+              {smartMode ? <Brain className="h-5 w-5 text-violet-400" /> : <Shuffle className="h-5 w-5 text-gray-400" />}
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  {smartMode ? 'Simulado Inteligente (IA)' : 'Simulado Clássico'}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {smartMode
+                    ? 'Questões priorizadas pelos seus pontos fracos e peso do edital'
+                    : 'Questões selecionadas aleatoriamente'}
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -193,17 +233,16 @@ export default function CriarSimuladoPage() {
           <p className="text-sm text-gray-400 mb-4">
             Deixe vazio para incluir todas as matérias
           </p>
-          
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
             {DEFAULT_SUBJECTS.map((materia) => (
               <button
                 key={materia}
                 onClick={() => toggleMateria(materia)}
-                className={`px-4 py-2 rounded-lg border-2 transition-all text-sm ${
-                  selectedMaterias.includes(materia)
-                    ? 'border-violet-500 bg-violet-500/10 text-violet-300'
-                    : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
-                }`}
+                className={`px-4 py-2 rounded-lg border-2 transition-all text-sm ${selectedMaterias.includes(materia)
+                  ? 'border-violet-500 bg-violet-500/10 text-violet-300'
+                  : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
+                  }`}
               >
                 {materia}
               </button>
@@ -217,17 +256,16 @@ export default function CriarSimuladoPage() {
           <p className="text-sm text-gray-400 mb-4">
             Deixe vazio para incluir todas as bancas
           </p>
-          
+
           <div className="flex flex-wrap gap-3">
             {bancasDisponiveis.map((banca) => (
               <button
                 key={banca}
                 onClick={() => toggleBanca(banca)}
-                className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                  selectedBancas.includes(banca)
-                    ? 'border-violet-500 bg-violet-500/10 text-violet-300'
-                    : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
-                }`}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${selectedBancas.includes(banca)
+                  ? 'border-violet-500 bg-violet-500/10 text-violet-300'
+                  : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
+                  }`}
               >
                 {banca}
               </button>
@@ -241,17 +279,16 @@ export default function CriarSimuladoPage() {
           <p className="text-sm text-gray-400 mb-4">
             Deixe vazio para incluir todas as dificuldades
           </p>
-          
+
           <div className="flex flex-wrap gap-3">
             {dificuldades.map((dif) => (
               <button
                 key={dif}
                 onClick={() => toggleDificuldade(dif)}
-                className={`px-4 py-2 rounded-lg border-2 transition-all capitalize ${
-                  selectedDificuldades.includes(dif)
-                    ? 'border-violet-500 bg-violet-500/10 text-violet-300'
-                    : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
-                }`}
+                className={`px-4 py-2 rounded-lg border-2 transition-all capitalize ${selectedDificuldades.includes(dif)
+                  ? 'border-violet-500 bg-violet-500/10 text-violet-300'
+                  : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
+                  }`}
               >
                 {dif}
               </button>
