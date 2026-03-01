@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { loadExamQuestions, getExamById, getRecentAttempts } from '@/lib/firebase/questions';
+import { loadExamQuestions, getExamById, getRecentAttempts, getSimulatedConfigById, getQuestionById } from '@/lib/firebase/questions';
 import { ExamMetadata, QuestionBankItem, QuestionAttempt } from '@/types';
 import { Check, X, TrendingUp, TrendingDown, Award, BookOpen, Clock, Home } from 'lucide-react';
 import Link from 'next/link';
+import { ExplainAnswerButton } from '@/components/ExplainAnswerButton';
 
 interface QuestionResult {
   question: QuestionBankItem;
@@ -39,18 +40,38 @@ export default function ResultadoProvaPage() {
     const loadResults = async () => {
       setLoading(true);
       try {
-        const examData = await getExamById(examId);
-        if (!examData) {
-          router.push('/provas');
-          return;
+        // Tenta carregar como exame primeiro
+        let examData = await getExamById(examId);
+        let questionsData: QuestionBankItem[] = [];
+
+        if (examData) {
+          questionsData = await loadExamQuestions(examId);
+        } else {
+          // Tenta como simulado personalizado
+          const simuladoConfig = await getSimulatedConfigById(examId);
+          if (!simuladoConfig || !simuladoConfig.questionIds || simuladoConfig.questionIds.length === 0) {
+            router.push('/provas');
+            return;
+          }
+
+          const loadedQuestions = await Promise.all(
+            simuladoConfig.questionIds.map(qId => getQuestionById(qId))
+          );
+          questionsData = loadedQuestions.filter(Boolean) as QuestionBankItem[];
+
+          examData = {
+            id: simuladoConfig.id,
+            name: simuladoConfig.smartMode ? 'Simulado Inteligente' : 'Simulado Personalizado',
+            durationMinutes: simuladoConfig.durationMinutes,
+            questions: simuladoConfig.questionIds,
+          };
         }
 
-        const questionsData = await loadExamQuestions(examId);
-        const recentAttempts = await getRecentAttempts(user.uid, 100);
-        
-        // Filtra tentativas desta prova
+        const recentAttempts = await getRecentAttempts(user.uid, 200);
+
+        // Filtra tentativas desta prova/simulado
         const examAttempts = recentAttempts.filter(a => a.examId === examId);
-        
+
         // Monta resultados
         const resultsData: QuestionResult[] = [];
         for (const q of questionsData) {
@@ -216,13 +237,12 @@ export default function ResultadoProvaPage() {
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-2">
                     <div
-                      className={`h-2 rounded-full transition-all ${
-                        subject.accuracy >= 70
-                          ? 'bg-green-500'
-                          : subject.accuracy >= 50
+                      className={`h-2 rounded-full transition-all ${subject.accuracy >= 70
+                        ? 'bg-green-500'
+                        : subject.accuracy >= 50
                           ? 'bg-yellow-500'
                           : 'bg-red-500'
-                      }`}
+                        }`}
                       style={{ width: `${subject.accuracy}%` }}
                     />
                   </div>
@@ -247,11 +267,10 @@ export default function ResultadoProvaPage() {
             {results.map((result, idx) => (
               <div
                 key={result.question.id}
-                className={`p-4 rounded-lg border-l-4 ${
-                  result.attempt.correct
-                    ? 'bg-green-900/20 border-green-500'
-                    : 'bg-red-900/20 border-red-500'
-                }`}
+                className={`p-4 rounded-lg border-l-4 ${result.attempt.correct
+                  ? 'bg-green-900/20 border-green-500'
+                  : 'bg-red-900/20 border-red-500'
+                  }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -296,6 +315,14 @@ export default function ResultadoProvaPage() {
                     )}
                   </div>
                 </div>
+
+                {/* Explain with AI Button - only for incorrect answers */}
+                {!result.attempt.correct && (
+                  <ExplainAnswerButton
+                    question={result.question}
+                    studentAnswer={result.attempt.selectedOption}
+                  />
+                )}
               </div>
             ))}
           </div>

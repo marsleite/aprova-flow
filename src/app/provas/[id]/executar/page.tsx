@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { loadExamQuestions, getExamById, saveQuestionAttempts } from '@/lib/firebase/questions';
+import { loadExamQuestions, getExamById, saveQuestionAttempts, getSimulatedConfigById, getQuestionById } from '@/lib/firebase/questions';
 import { ExamMetadata, QuestionBankItem, QuestionAttempt } from '@/types';
 import { Clock, ChevronLeft, ChevronRight, Flag } from 'lucide-react';
 
@@ -137,13 +137,35 @@ export default function ExecutarProvaPage() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const examData = await getExamById(examId);
-        if (!examData) {
-          router.push('/provas');
-          return;
-        }
+        // Tenta carregar como exame primeiro
+        let examData = await getExamById(examId);
+        let questionsData: QuestionBankItem[] = [];
 
-        const questionsData = await loadExamQuestions(examId);
+        if (examData) {
+          // É um exame oficial
+          questionsData = await loadExamQuestions(examId);
+        } else {
+          // Tenta como simulado personalizado
+          const simuladoConfig = await getSimulatedConfigById(examId);
+          if (!simuladoConfig || !simuladoConfig.questionIds || simuladoConfig.questionIds.length === 0) {
+            router.push('/provas');
+            return;
+          }
+
+          // Carrega questões individuais
+          const loadedQuestions = await Promise.all(
+            simuladoConfig.questionIds.map(qId => getQuestionById(qId))
+          );
+          questionsData = loadedQuestions.filter(Boolean) as QuestionBankItem[];
+
+          // Cria um ExamMetadata virtual para reutilizar toda a lógica existente
+          examData = {
+            id: simuladoConfig.id,
+            name: simuladoConfig.smartMode ? 'Simulado Inteligente' : 'Simulado Personalizado',
+            durationMinutes: simuladoConfig.durationMinutes,
+            questions: simuladoConfig.questionIds,
+          };
+        }
 
         const defaultQuestions: QuestionState[] = questionsData.map((q): QuestionState => ({
           question: q,
@@ -162,7 +184,7 @@ export default function ExecutarProvaPage() {
             const saved = persistedProgress.responses[idx];
             const selectedAnswer =
               saved.selectedAnswer &&
-              questionState.question.alternatives.some((alt) => alt.key === saved.selectedAnswer)
+                questionState.question.alternatives.some((alt) => alt.key === saved.selectedAnswer)
                 ? saved.selectedAnswer
                 : null;
             return {
@@ -268,10 +290,10 @@ export default function ExecutarProvaPage() {
       .filter(q => q.selectedAnswer !== null)
       .map(q => ({
         userId: user.uid,
-        planId: exam.planId || undefined,
+        planId: exam.planId || null,
         questionId: q.question.id!,
-        examId: exam.id!,
-        attemptType: 'exam' as const,
+        examId: exam.id || null,
+        attemptType: 'simulado' as const,
         selectedOption: q.selectedAnswer!,
         correct: q.selectedAnswer === q.question.answer,
         timeSpentSeconds: timePerQuestion,
@@ -356,7 +378,7 @@ export default function ExecutarProvaPage() {
               Questão {currentIndex + 1} de {questions.length}
             </p>
           </div>
-          
+
           <div className="flex items-center justify-between gap-3 sm:justify-end sm:gap-6">
             {exam.durationMinutes && (
               <div className="flex items-center gap-2 text-white">
@@ -364,7 +386,7 @@ export default function ExecutarProvaPage() {
                 <span className="text-lg font-mono sm:text-xl">{formatTime(timeRemaining)}</span>
               </div>
             )}
-            
+
             <button
               onClick={() => setShowFinishConfirm(true)}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
@@ -391,18 +413,16 @@ export default function ExecutarProvaPage() {
               <button
                 key={alt.key}
                 onClick={() => handleSelectAnswer(alt.key)}
-                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                  currentQuestion.selectedAnswer === alt.key
-                    ? 'border-violet-500 bg-violet-500/10'
-                    : 'border-gray-700 bg-gray-800 hover:border-gray-600'
-                }`}
+                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${currentQuestion.selectedAnswer === alt.key
+                  ? 'border-violet-500 bg-violet-500/10'
+                  : 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                  }`}
               >
                 <div className="flex items-start gap-3">
-                  <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
-                    currentQuestion.selectedAnswer === alt.key
-                      ? 'bg-violet-500 text-white'
-                      : 'bg-gray-700 text-gray-300'
-                  }`}>
+                  <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold ${currentQuestion.selectedAnswer === alt.key
+                    ? 'bg-violet-500 text-white'
+                    : 'bg-gray-700 text-gray-300'
+                    }`}>
                     {alt.key}
                   </span>
                   <span className="text-gray-200 flex-1">{alt.text}</span>
@@ -415,11 +435,10 @@ export default function ExecutarProvaPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               onClick={handleToggleReview}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                currentQuestion.markedForReview
-                  ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${currentQuestion.markedForReview
+                ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                }`}
             >
               <Flag className="h-4 w-4" />
               {currentQuestion.markedForReview ? 'Desmarca Revisão' : 'Marcar para Revisar'}
@@ -434,7 +453,7 @@ export default function ExecutarProvaPage() {
                 <ChevronLeft className="h-4 w-4" />
                 Anterior
               </button>
-              
+
               <button
                 onClick={() => setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1))}
                 disabled={currentIndex === questions.length - 1}
@@ -472,15 +491,14 @@ export default function ExecutarProvaPage() {
                 <button
                   key={idx}
                   onClick={() => setCurrentIndex(idx)}
-                  className={`aspect-square rounded flex items-center justify-center text-sm font-medium transition-all ${
-                    idx === currentIndex
-                      ? 'bg-violet-600 text-white ring-2 ring-violet-400'
-                      : q.selectedAnswer
+                  className={`aspect-square rounded flex items-center justify-center text-sm font-medium transition-all ${idx === currentIndex
+                    ? 'bg-violet-600 text-white ring-2 ring-violet-400'
+                    : q.selectedAnswer
                       ? 'bg-green-600 text-white hover:bg-green-700'
                       : q.markedForReview
-                      ? 'bg-amber-600 text-white hover:bg-amber-700'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                        ? 'bg-amber-600 text-white hover:bg-amber-700'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
                 >
                   {idx + 1}
                 </button>

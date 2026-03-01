@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Brain,
   Target,
+  BookX,
   BarChart2,
   History,
   Settings,
@@ -55,6 +56,12 @@ const NAV_ITEMS = [
     icon: Target,
     label: 'Simulados',
     description: 'Centro de provas',
+  },
+  {
+    href: '/caderno-erros',
+    icon: BookX,
+    label: 'Caderno de Erros',
+    description: 'Erros e padrões',
   },
   {
     href: '/analytics',
@@ -165,9 +172,8 @@ export default function Sidebar({
                 {activePlan?.name ?? 'Todos os Editais'}
               </span>
               <ChevronRight
-                className={`h-3 w-3 flex-shrink-0 text-slate-500 transition-transform duration-150 ${
-                  planPickerOpen ? 'rotate-90' : ''
-                }`}
+                className={`h-3 w-3 flex-shrink-0 text-slate-500 transition-transform duration-150 ${planPickerOpen ? 'rotate-90' : ''
+                  }`}
               />
             </button>
 
@@ -186,11 +192,10 @@ export default function Sidebar({
                       onPlanChange?.(null);
                       setPlanPickerOpen(false);
                     }}
-                    className={`flex w-full items-center gap-2.5 border-b border-white/[0.05] px-3 py-2.5 text-left text-xs transition-colors ${
-                      activePlanId === null
+                    className={`flex w-full items-center gap-2.5 border-b border-white/[0.05] px-3 py-2.5 text-left text-xs transition-colors ${activePlanId === null
                         ? 'bg-blue-600/15 text-blue-300'
                         : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
-                    }`}
+                      }`}
                   >
                     <div className="h-2 w-2 flex-shrink-0 rounded-full bg-slate-500" />
                     <span className="flex-1 truncate font-medium">Todos os Editais</span>
@@ -209,11 +214,10 @@ export default function Sidebar({
                           onPlanChange?.(plan.id ?? null);
                           setPlanPickerOpen(false);
                         }}
-                        className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-xs transition-colors ${
-                          isActive
+                        className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-xs transition-colors ${isActive
                             ? 'bg-blue-600/15 text-blue-300'
                             : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
-                        }`}
+                          }`}
                       >
                         <div
                           className="h-2 w-2 flex-shrink-0 rounded-full"

@@ -12,6 +12,11 @@ const DEFAULTS: Record<AiTask, TaskConfig> = {
   'weekly-mentoring': { provider: 'gemini', model: 'gemini-2.5-flash' },
   'parse-edital': { provider: 'gemini', model: 'gemini-2.5-flash' },
   'planner-daily': { provider: 'gemini', model: 'gemini-2.5-flash' },
+  'smart-schedule': { provider: 'gemini', model: 'gemini-2.5-flash' },
+  'interrogation': { provider: 'gemini', model: 'gemini-2.5-flash' },
+  'predictive-exam': { provider: 'gemini', model: 'gemini-2.5-flash' },
+  'explain-answer': { provider: 'gemini', model: 'gemini-2.5-flash' },
+  'error-diagnosis': { provider: 'gemini', model: 'gemini-2.5-flash' },
 };
 
 function resolveConfig(task: AiTask): TaskConfig {

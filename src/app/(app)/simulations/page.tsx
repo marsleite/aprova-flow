@@ -78,8 +78,22 @@ export default function SimulationsPage() {
   const worstSubject = [...accuracyData].sort((a, b) => a.accuracy - b.accuracy)[0] || null;
   const bestSubject = [...accuracyData].sort((a, b) => b.accuracy - a.accuracy)[0] || null;
 
-  // Projected score (simple heuristic)
-  const projectedScore = avgAccuracy > 0 ? Math.round((avgAccuracy / 100) * 1000) : null;
+  // Projected score (Weighted by exam relevance)
+  let totalWeightedAccuracy = 0;
+  let totalWeights = 0;
+
+  accuracyData.forEach(item => {
+    const weight = ACCURACY_WEIGHTS[item.subject] || 1.0;
+    // Only count subjects where the user has actually answered questions
+    if (item.totalQuestions > 0) {
+      totalWeightedAccuracy += item.accuracy * weight;
+      totalWeights += weight;
+    }
+  });
+
+  const weightedAvgAccuracy = totalWeights > 0 ? totalWeightedAccuracy / totalWeights : avgAccuracy;
+  const projectedScore = weightedAvgAccuracy > 0 ? Math.round((weightedAvgAccuracy / 100) * 1000) : null;
+
   const percentile = projectedScore
     ? projectedScore >= 900 ? 'Top 1%' : projectedScore >= 800 ? 'Top 5%' : projectedScore >= 700 ? 'Top 15%' : 'Top 30%'
     : null;

@@ -31,6 +31,7 @@ import ActivityHeatmap from '@/components/ActivityHeatmap';
 import InsightsPanel from '@/components/InsightsPanel';
 import ChatPanel from '@/components/ChatPanel';
 import PostSessionToast from '@/components/PostSessionToast';
+import SmartScheduleCard from '@/components/SmartScheduleCard';
 import {
   TrendingUp,
   Zap,
@@ -42,6 +43,7 @@ import {
   CheckCircle2,
   Calendar,
   ArrowUpRight,
+  Flame,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -187,9 +189,9 @@ export default function DashboardPage() {
             <p className="mt-1 text-sm text-slate-500">
               {activePlanObj
                 ? <>
-                    <span className="text-slate-600">Focando em </span>
-                    <span className="font-semibold" style={{ color: activePlanObj.color }}>{activePlanObj.name}</span>
-                  </>
+                  <span className="text-slate-600">Focando em </span>
+                  <span className="font-semibold" style={{ color: activePlanObj.color }}>{activePlanObj.name}</span>
+                </>
                 : 'Rastreamento estratégico e diagnóstico por IA em tempo real'}
             </p>
           </div>
@@ -227,7 +229,14 @@ export default function DashboardPage() {
           {
             label: 'Study Velocity',
             value: loading ? null : `${consistency?.currentStreak ?? 0}d`,
-            color: '#f59e0b',
+            color: (() => {
+              const s = consistency?.currentStreak ?? 0;
+              if (s >= 7) return '#ef4444';
+              if (s >= 3) return '#f97316';
+              if (s >= 1) return '#f59e0b';
+              return '#64748b';
+            })(),
+            streak: consistency?.currentStreak ?? 0,
           },
         ].map((kpi, i) => (
           <div
@@ -238,7 +247,12 @@ export default function DashboardPage() {
             {loading ? (
               <div className="h-8 w-16 rounded-lg shimmer" />
             ) : (
-              <span className="text-2xl font-bold tracking-tight" style={{ color: kpi.color }}>{kpi.value}</span>
+              <span className="text-2xl font-bold tracking-tight flex items-center gap-1" style={{ color: kpi.color }}>
+                {'streak' in kpi && (kpi as { streak: number }).streak > 0 && (
+                  <Flame className={`h-5 w-5 ${(kpi as { streak: number }).streak >= 7 ? 'animate-pulse' : ''}`} />
+                )}
+                {kpi.value}
+              </span>
             )}
           </div>
         ))}
@@ -480,13 +494,26 @@ export default function DashboardPage() {
           </motion.div>
         </div>
 
-        {/* ── Row 3: Insights + Recent Sessions ── */}
+        {/* ── Row 3: Insights + SmartSchedule + Recent Sessions ── */}
         <div className="grid gap-4 lg:grid-cols-2">
-          <motion.div custom={6} variants={fadeUp} initial="hidden" animate="show" className="h-full">
-            <InsightsPanel insights={insights} loading={loading} />
-          </motion.div>
+          {/* Col 1: Insights & SmartSchedule */}
+          <div className="flex flex-col gap-4">
+            <motion.div custom={6} variants={fadeUp} initial="hidden" animate="show" className="h-full">
+              <InsightsPanel insights={insights} loading={loading} />
+            </motion.div>
 
-          {/* Recent sessions */}
+            <motion.div custom={6.5} variants={fadeUp} initial="hidden" animate="show">
+              <SmartScheduleCard
+                userId={user.uid}
+                userName={user.displayName?.split(' ')[0] || 'Estudante'}
+                consistency={consistency}
+                planWeights={activePlanObj?.subjects || []}
+                accuracyData={accuracyData}
+              />
+            </motion.div>
+          </div>
+
+          {/* Col 2: Recent sessions */}
           <motion.div custom={7} variants={fadeUp} initial="hidden" animate="show"
             className="h-full relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
             style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}

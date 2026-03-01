@@ -304,6 +304,7 @@ export interface QuestionAttempt {
   correct: boolean;
   timeSpentSeconds: number;
   createdAt?: string;
+  mastered?: boolean;
 }
 
 export interface SimulatedConfig {
@@ -312,6 +313,7 @@ export interface SimulatedConfig {
   planId?: string | null;
   questionCount: number;
   durationMinutes?: number;
+  questionIds?: string[];  // IDs das questões selecionadas para execução
   filters: {
     materias?: string[];
     dificuldades?: QuestionDifficulty[];
@@ -319,5 +321,6 @@ export interface SimulatedConfig {
     anos?: number[];
     tags?: string[];
   };
+  smartMode?: boolean;     // true = seleção preditiva, false/undefined = aleatória
   createdAt?: string;
 }
