@@ -14,6 +14,7 @@ import {
   query,
   where,
   addDoc,
+  updateDoc,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './config';
@@ -559,4 +560,49 @@ export async function getAvailableBancas(): Promise<string[]> {
   });
 
   return Array.from(bancas).sort();
+}
+
+// ============ Caderno de Erros ============
+
+/**
+ * Busca tentativas incorretas do aluno.
+ * Se `includeMastered` for false (padrão), exclui as que o aluno marcou como dominadas.
+ */
+export async function getWrongAttempts(
+  userId: string,
+  limitCount = 50,
+  includeMastered = false
+): Promise<QuestionAttempt[]> {
+  const q = query(
+    collection(db, ATTEMPTS_COLLECTION),
+    where('userId', '==', userId),
+    where('correct', '==', false)
+  );
+  const snap = await getDocs(q);
+  let attempts = snap.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as QuestionAttempt) }));
+
+  if (!includeMastered) {
+    attempts = attempts.filter(a => !a.mastered);
+  }
+
+  // Sort by createdAt desc (handles Firestore Timestamp or string)
+  attempts.sort((a, b) => {
+    const tA = a.createdAt && typeof a.createdAt === 'object' && 'toMillis' in (a.createdAt as Record<string, unknown>)
+      ? (a.createdAt as unknown as { toMillis: () => number }).toMillis()
+      : typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : 0;
+    const tB = b.createdAt && typeof b.createdAt === 'object' && 'toMillis' in (b.createdAt as Record<string, unknown>)
+      ? (b.createdAt as unknown as { toMillis: () => number }).toMillis()
+      : typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : 0;
+    return tB - tA;
+  });
+
+  return attempts.slice(0, limitCount);
+}
+
+/**
+ * Marca ou desmarca uma tentativa como "dominada" (o aluno já entendeu o erro).
+ */
+export async function markAttemptAsMastered(attemptId: string, mastered = true): Promise<void> {
+  const ref = doc(db, ATTEMPTS_COLLECTION, attemptId);
+  await updateDoc(ref, { mastered });
 }

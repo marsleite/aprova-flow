@@ -43,15 +43,15 @@ Este documento rastreia a implementação das funcionalidades baseadas em Inteli
 
 ---
 
-## Fase 3: Simulador de Prova Preditivo ✅ (parcial)
+## Fase 3: Simulador de Prova Preditivo ✅
 
 | Item | Status |
 |---|---|
 | Algoritmo `getPredictiveQuestions()` com seleção calibrada por fraquezas | ✅ |
 | Endpoint `POST /api/explain-answer` para explicações IA de erros | ✅ |
 | Toggle "Simulado Inteligente (IA)" na criação de simulado | ✅ |
-| Botão "Explicar com IA" na tela de execução | ⏳ Pendente |
-| Pontuação Projetada ponderada | ⏳ Pendente |
+| Botão "Explicar com IA" na tela de resultados | ✅ |
+| Pontuação Projetada ponderada | ✅ |
 
 **Arquivos principais:**
 - `src/lib/firebase/questions.ts` (novo: `getPredictiveQuestions`)
@@ -67,6 +67,26 @@ Este documento rastreia a implementação das funcionalidades baseadas em Inteli
 
 ---
 
-## Fase 4: Gerador de Cadernos de Erros Automatizado
+## Fase 4: Gerador de Cadernos de Erros Automatizado ✅
 
-> Planejamento futuro
+| Item | Status |
+|---|---|
+| `'error-diagnosis'` em `AiTask`, `gateway.ts`, `entitlements.ts` | ✅ |
+| Campo `mastered` no `QuestionAttempt` | ✅ |
+| `getWrongAttempts()` e `markAttemptAsMastered()` em `questions.ts` | ✅ |
+| Endpoint `POST /api/error-diagnosis` (diagnóstico IA de padrões) | ✅ |
+| Página `/caderno-erros` com KPIs, filtros, lista agrupada | ✅ |
+| Link "Caderno de Erros" no Sidebar | ✅ |
+
+**Arquivos principais:**
+- `src/app/api/error-diagnosis/route.ts`
+- `src/app/(app)/caderno-erros/page.tsx`
+- `src/lib/firebase/questions.ts` (novo: `getWrongAttempts`, `markAttemptAsMastered`)
+- `src/components/layout/Sidebar.tsx` (modificado)
+
+**Quotas configuradas:**
+| Plano | error-diagnosis |
+|---|---|
+| Free | ❌ Bloqueado |
+| Pro | 5/dia |
+| Premium | 15/dia |

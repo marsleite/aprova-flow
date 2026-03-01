@@ -1,5 +1,5 @@
 export type PlanTier = 'free' | 'pro' | 'premium' | 'admin';
-export type AiTaskKey = 'chat' | 'weekly-mentoring' | 'planner-daily' | 'parse-edital' | 'smart-schedule' | 'interrogation' | 'predictive-exam' | 'explain-answer';
+export type AiTaskKey = 'chat' | 'weekly-mentoring' | 'planner-daily' | 'parse-edital' | 'smart-schedule' | 'interrogation' | 'predictive-exam' | 'explain-answer' | 'error-diagnosis';
 export type QuotaWindow = 'hour' | 'day' | 'week';
 
 export interface PlanCapabilities {
@@ -53,6 +53,7 @@ const AI_QUOTAS_BY_TIER: Record<Exclude<PlanTier, 'admin'>, AiQuotaByTask> = {
     'interrogation': { limit: 15, window: 'day' },
     'predictive-exam': { limit: 5, window: 'day' },
     'explain-answer': { limit: 0, window: 'day' },
+    'error-diagnosis': { limit: 0, window: 'day' },
   },
   pro: {
     chat: { limit: 260, window: 'day' },
@@ -63,6 +64,7 @@ const AI_QUOTAS_BY_TIER: Record<Exclude<PlanTier, 'admin'>, AiQuotaByTask> = {
     'interrogation': { limit: 50, window: 'day' },
     'predictive-exam': { limit: 20, window: 'day' },
     'explain-answer': { limit: 30, window: 'day' },
+    'error-diagnosis': { limit: 5, window: 'day' },
   },
   premium: {
     chat: { limit: 700, window: 'day' },
@@ -73,6 +75,7 @@ const AI_QUOTAS_BY_TIER: Record<Exclude<PlanTier, 'admin'>, AiQuotaByTask> = {
     'interrogation': { limit: 100, window: 'day' },
     'predictive-exam': { limit: 50, window: 'day' },
     'explain-answer': { limit: 80, window: 'day' },
+    'error-diagnosis': { limit: 15, window: 'day' },
   },
 };
 

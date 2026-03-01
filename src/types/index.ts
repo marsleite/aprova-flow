@@ -304,6 +304,7 @@ export interface QuestionAttempt {
   correct: boolean;
   timeSpentSeconds: number;
   createdAt?: string;
+  mastered?: boolean;
 }
 
 export interface SimulatedConfig {

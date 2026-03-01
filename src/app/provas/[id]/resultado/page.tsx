@@ -7,6 +7,7 @@ import { loadExamQuestions, getExamById, getRecentAttempts, getSimulatedConfigBy
 import { ExamMetadata, QuestionBankItem, QuestionAttempt } from '@/types';
 import { Check, X, TrendingUp, TrendingDown, Award, BookOpen, Clock, Home } from 'lucide-react';
 import Link from 'next/link';
+import { ExplainAnswerButton } from '@/components/ExplainAnswerButton';
 
 interface QuestionResult {
   question: QuestionBankItem;
@@ -237,10 +238,10 @@ export default function ResultadoProvaPage() {
                   <div className="w-full bg-gray-700 rounded-full h-2">
                     <div
                       className={`h-2 rounded-full transition-all ${subject.accuracy >= 70
-                          ? 'bg-green-500'
-                          : subject.accuracy >= 50
-                            ? 'bg-yellow-500'
-                            : 'bg-red-500'
+                        ? 'bg-green-500'
+                        : subject.accuracy >= 50
+                          ? 'bg-yellow-500'
+                          : 'bg-red-500'
                         }`}
                       style={{ width: `${subject.accuracy}%` }}
                     />
@@ -267,8 +268,8 @@ export default function ResultadoProvaPage() {
               <div
                 key={result.question.id}
                 className={`p-4 rounded-lg border-l-4 ${result.attempt.correct
-                    ? 'bg-green-900/20 border-green-500'
-                    : 'bg-red-900/20 border-red-500'
+                  ? 'bg-green-900/20 border-green-500'
+                  : 'bg-red-900/20 border-red-500'
                   }`}
               >
                 <div className="flex items-start justify-between">
@@ -314,6 +315,14 @@ export default function ResultadoProvaPage() {
                     )}
                   </div>
                 </div>
+
+                {/* Explain with AI Button - only for incorrect answers */}
+                {!result.attempt.correct && (
+                  <ExplainAnswerButton
+                    question={result.question}
+                    studentAnswer={result.attempt.selectedOption}
+                  />
+                )}
               </div>
             ))}
           </div>
