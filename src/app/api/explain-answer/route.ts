@@ -3,22 +3,31 @@ import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { searchRelevantLaw } from '@/lib/firebase/legalKnowledge';
 
 const SYSTEM_INSTRUCTION = [
-    'Você é um professor de concursos públicos extremamente didático.',
-    'O aluno acabou de ERRAR uma questão de prova. Seu trabalho é explicar o porquê a alternativa correta é a certa e o porquê a alternativa escolhida pelo aluno está errada.',
+    'Você é um professor de Direito para concursos públicos com nível de doutorado.',
+    'O aluno acabou de ERRAR uma questão de prova. Seu trabalho é dar uma explicação completa, didática e fundamentada.',
+    '',
+    'MÉTODO DE ANÁLISE (siga esta ordem):',
+    '1. Identifique o tema jurídico central da questão',
+    '2. Consulte a BASE LEGAL fornecida no contexto (se houver)',
+    '3. Explique por que a alternativa CORRETA é a certa, citando artigos/súmulas',
+    '4. Explique por que a alternativa do ALUNO está errada',
+    '5. Dê uma dica prática para nunca mais errar',
     '',
     'REGRAS:',
-    '- Seja conciso. A explicação deve ter no MÁXIMO 4 frases.',
-    '- A dica (tip) deve ter no MÁXIMO 1 frase curta.',
-    '- Use linguagem acessível, como se estivesse explicando para um colega de estudo.',
-    '- Cite artigos de lei, súmulas ou jurisprudência quando for relevante e puder agregar.',
-    '- Retorne EXCLUSIVAMENTE um JSON válido. Sem markdown.',
+    '- Cite APENAS artigos de lei, súmulas ou jurisprudência que estejam no contexto fornecido ou que você tenha CERTEZA ABSOLUTA que existem.',
+    '- Se não tiver certeza de um artigo específico, diga "conforme a legislação vigente" em vez de inventar números.',
+    '- Seja didático mas completo. Pode usar até 6-8 frases na explicação.',
+    '- A dica deve ser um macete prático, mnemônico ou resumo para fixação.',
+    '- Retorne EXCLUSIVAMENTE um JSON válido, sem markdown, sem ```.',
     '',
-    'FORMATO:',
+    'FORMATO JSON:',
     '{',
-    '  "explanation": "<por que a correta é correta e a escolhida está errada>",',
-    '  "tip": "<macete ou dica prática para nunca mais errar>"',
+    '  "explanation": "<explicação completa e fundamentada>",',
+    '  "legalBasis": "<artigo(s) de lei, súmula(s) ou jurisprudência citados — ou null se não houver>",',
+    '  "tip": "<macete ou dica prática para fixação>"',
     '}',
 ].join('\n');
 
@@ -36,7 +45,7 @@ export async function POST(request: NextRequest) {
         if (!quota.allowed) return quota.response;
 
         const body = await request.json().catch(() => ({}));
-        const { questionText, alternatives, correctAnswer, studentAnswer, subject } = body;
+        const { questionText, alternatives, correctAnswer, studentAnswer, subject, subtema } = body;
 
         if (!questionText || !correctAnswer || !studentAnswer) {
             return NextResponse.json(
@@ -51,8 +60,27 @@ export async function POST(request: NextRequest) {
                 .join('\n')
             : '';
 
+        // ── RAG: buscar contexto jurídico relevante ──
+        let legalContext = '';
+        try {
+            const relevantDocs = await searchRelevantLaw(
+                questionText,
+                subject || 'Geral',
+                5
+            );
+            if (relevantDocs.length > 0) {
+                legalContext = '\n\nBASE LEGAL (use para fundamentar sua explicação):\n' +
+                    relevantDocs.map((doc: { title: string; content: string; source: string }, i: number) =>
+                        `[${i + 1}] ${doc.title} (${doc.source})\n${doc.content}`
+                    ).join('\n\n');
+            }
+        } catch (ragError) {
+            console.warn('[ExplainAnswer] RAG search failed, continuing without context:', ragError);
+        }
+
         const prompt = [
             'MATÉRIA: ' + (subject || 'Não informada'),
+            subtema ? 'SUBTEMA: ' + subtema : '',
             '',
             'ENUNCIADO:',
             questionText,
@@ -61,7 +89,8 @@ export async function POST(request: NextRequest) {
             '',
             'ALTERNATIVA CORRETA: ' + correctAnswer,
             'ALTERNATIVA DO ALUNO (ERRADA): ' + studentAnswer,
-        ].join('\n');
+            legalContext,
+        ].filter(Boolean).join('\n');
 
         const aiResponse = await runAiText({
             task: 'explain-answer',
@@ -69,11 +98,15 @@ export async function POST(request: NextRequest) {
             prompt,
             preferJson: true,
             temperature: 0.3,
-            maxOutputTokens: 512,
+            maxOutputTokens: 2048,
         });
 
         const text = aiResponse.text?.trim() || '{}';
-        const jsonStr = text.replace(/^```json/g, '').replace(/```$/g, '').trim();
+        // Strip markdown code fences if Gemini wraps the JSON
+        const jsonStr = text
+            .replace(/^```(?:json)?\s*/gi, '')
+            .replace(/\s*```\s*$/gi, '')
+            .trim();
 
         const usageEvent = {
             route: '/api/explain-answer',
@@ -97,6 +130,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     explanation: parsed.explanation || 'Explicação indisponível.',
+                    legalBasis: parsed.legalBasis || null,
                     tip: parsed.tip || '',
                 },
                 {
@@ -109,6 +143,15 @@ export async function POST(request: NextRequest) {
             );
         } catch {
             console.error('[ExplainAnswer] Falha ao parsear JSON:', jsonStr);
+            // Fallback: try to extract useful text even from malformed JSON
+            const explanationMatch = jsonStr.match(/"explanation"\s*:\s*"([^"]+)"/);
+            if (explanationMatch) {
+                return NextResponse.json({
+                    explanation: explanationMatch[1],
+                    legalBasis: null,
+                    tip: '',
+                });
+            }
             return NextResponse.json(
                 { error: 'A IA retornou formato inválido.' },
                 { status: 500 }

@@ -4,17 +4,23 @@ import { useState } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { auth } from '@/lib/firebase/config';
 import { QuestionBankItem } from '@/types';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, BookOpen, Lightbulb, Scale } from 'lucide-react';
 
 interface ExplainAnswerButtonProps {
     question: QuestionBankItem;
     studentAnswer: string;
 }
 
+interface ExplanationData {
+    text: string;
+    legalBasis: string | null;
+    tip: string;
+}
+
 export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerButtonProps) {
     const { user } = useAuthContext();
     const [loading, setLoading] = useState(false);
-    const [explanation, setExplanation] = useState<{ text: string; tip: string } | null>(null);
+    const [explanation, setExplanation] = useState<ExplanationData | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const handleExplain = async () => {
@@ -42,7 +48,8 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                     alternatives: alternativesObj,
                     correctAnswer: question.answer,
                     studentAnswer,
-                    subject: question.materia
+                    subject: question.materia,
+                    subtema: question.subtema,
                 })
             });
 
@@ -52,7 +59,11 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                 throw new Error(data.error || 'Erro ao gerar explicação.');
             }
 
-            setExplanation({ text: data.explanation, tip: data.tip });
+            setExplanation({
+                text: data.explanation,
+                legalBasis: data.legalBasis || null,
+                tip: data.tip,
+            });
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -79,9 +90,12 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
             )}
 
             {loading && (
-                <div className="flex items-center gap-2 text-violet-400 text-sm">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-500"></div>
-                    Analisando questão...
+                <div className="flex items-center gap-3 text-violet-400 text-sm p-3 bg-violet-600/10 rounded-lg border border-violet-500/20">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-500"></div>
+                    <div>
+                        <span className="font-medium">Analisando questão...</span>
+                        <p className="text-xs text-violet-400/60 mt-0.5">Consultando legislação e fundamentação jurídica</p>
+                    </div>
                 </div>
             )}
 
@@ -98,26 +112,43 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
             )}
 
             {explanation && (
-                <div className="mt-4 p-4 bg-gray-900 border border-violet-500/30 rounded-lg relative overflow-hidden">
+                <div className="mt-4 p-5 bg-gray-900 border border-violet-500/30 rounded-xl relative overflow-hidden">
                     {/* Decorative background glow */}
-                    <div className="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-violet-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                    <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-violet-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full pointer-events-none"></div>
 
-                    <h4 className="flex items-center gap-2 text-violet-400 font-semibold mb-3">
+                    <h4 className="flex items-center gap-2 text-violet-400 font-semibold mb-4">
                         <Sparkles className="h-4 w-4" />
-                        Explicação do Professor IA
+                        Professor IA — Explicação Fundamentada
                     </h4>
 
                     <div className="space-y-4">
-                        <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
-                            {explanation.text}
-                        </p>
+                        {/* Explicação principal */}
+                        <div className="flex gap-3 items-start">
+                            <BookOpen className="h-5 w-5 text-violet-400 mt-0.5 flex-shrink-0" />
+                            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                {explanation.text}
+                            </p>
+                        </div>
 
-                        {explanation.tip && (
-                            <div className="flex gap-3 items-start bg-gray-800/50 p-3 rounded border border-gray-700">
-                                <span className="text-xl">💡</span>
+                        {/* Base legal */}
+                        {explanation.legalBasis && (
+                            <div className="flex gap-3 items-start bg-blue-900/20 p-3.5 rounded-lg border border-blue-500/20">
+                                <Scale className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
                                 <div>
-                                    <strong className="text-sm text-gray-200 block mb-1">Dica de Ouro</strong>
-                                    <p className="text-sm text-gray-400 italic">{explanation.tip}</p>
+                                    <strong className="text-sm text-blue-300 block mb-1">📜 Base Legal</strong>
+                                    <p className="text-sm text-blue-200/80 leading-relaxed">{explanation.legalBasis}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Dica prática */}
+                        {explanation.tip && (
+                            <div className="flex gap-3 items-start bg-amber-900/15 p-3.5 rounded-lg border border-amber-500/20">
+                                <Lightbulb className="h-5 w-5 text-amber-400 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <strong className="text-sm text-amber-300 block mb-1">💡 Dica de Ouro</strong>
+                                    <p className="text-sm text-amber-200/70 italic leading-relaxed">{explanation.tip}</p>
                                 </div>
                             </div>
                         )}

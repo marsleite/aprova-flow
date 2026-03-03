@@ -42,6 +42,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Base de conhecimento jurídico para RAG (leis são informação pública)
+    match /legal_knowledge/{docId} {
+      allow read: if true;  // Server-side API route precisa ler sem auth context
+      allow create, update, delete: if isAdmin();
+    }
+
     // Tentativas de questões (histórico do usuário)
     match /question_attempts/{attemptId} {
       allow read: if request.auth != null 
