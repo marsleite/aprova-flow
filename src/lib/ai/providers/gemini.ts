@@ -57,22 +57,35 @@ export async function generateGeminiPdf(params: {
   const startedAt = Date.now();
   const ai = new GoogleGenAI({ apiKey: getGeminiApiKey() });
 
+  const parts: Array<{ inlineData: { mimeType: string; data: string } } | { text: string }> = [
+    {
+      inlineData: {
+        mimeType: 'application/pdf',
+        data: params.request.pdfBase64,
+      },
+    },
+  ];
+
+  // Append extra PDFs (e.g., answer key / gabarito)
+  if (params.request.extraPdfsBase64?.length) {
+    for (const extraPdf of params.request.extraPdfsBase64) {
+      parts.push({
+        inlineData: {
+          mimeType: 'application/pdf',
+          data: extraPdf,
+        },
+      });
+    }
+  }
+
+  parts.push({ text: params.request.prompt });
+
   const response = await ai.models.generateContent({
     model: params.model,
     contents: [
       {
         role: 'user',
-        parts: [
-          {
-            inlineData: {
-              mimeType: 'application/pdf',
-              data: params.request.pdfBase64,
-            },
-          },
-          {
-            text: params.request.prompt,
-          },
-        ],
+        parts,
       },
     ],
     config: {

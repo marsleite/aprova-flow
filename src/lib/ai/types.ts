@@ -30,6 +30,7 @@ export interface AiTextRequest {
 export interface AiPdfRequest {
   task: 'parse-edital';
   pdfBase64: string;
+  extraPdfsBase64?: string[];  // additional PDFs (e.g., answer key / gabarito)
   prompt: string;
   systemInstruction?: string;
   temperature?: number;

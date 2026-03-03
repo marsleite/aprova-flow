@@ -16,6 +16,7 @@ import {
   addDoc,
   updateDoc,
   serverTimestamp,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from './config';
 import {
@@ -605,4 +606,120 @@ export async function getWrongAttempts(
 export async function markAttemptAsMastered(attemptId: string, mastered = true): Promise<void> {
   const ref = doc(db, ATTEMPTS_COLLECTION, attemptId);
   await updateDoc(ref, { mastered });
+}
+
+// ─── Admin: salvar questões importadas no banco ───
+
+interface SaveQuestionInput {
+  statement: string;
+  alternatives: { key: string; text: string }[];
+  answer: string;
+  materia: string;
+  subtema?: string;
+  difficulty?: string;
+  explanation?: string;
+}
+
+interface SaveQuestionsParams {
+  examName: string;
+  banca?: string;
+  year?: number;
+  planId?: string;
+  questions: SaveQuestionInput[];
+  userId: string;
+}
+
+function hashStatement(statement: string): string {
+  const normalized = statement.trim().toLowerCase().replace(/\s+/g, ' ').substring(0, 120);
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i++) {
+    const char = normalized.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return `h_${Math.abs(hash).toString(36)}`;
+}
+
+export async function saveQuestionsToBank(params: SaveQuestionsParams): Promise<{
+  examId: string;
+  totalSaved: number;
+  duplicatesSkipped: number;
+}> {
+  const { examName, banca, year, planId, questions, userId } = params;
+  const BATCH_SIZE = 450; // Firestore max 500, leave margin
+  const now = new Date().toISOString();
+  const questionIds: string[] = [];
+  const dedupeSet = new Set<string>();
+  let duplicateCount = 0;
+
+  const validDifficulties = ['fácil', 'médio', 'difícil', 'extremo'];
+
+  for (let i = 0; i < questions.length; i += BATCH_SIZE) {
+    const batch = writeBatch(db);
+    const chunk = questions.slice(i, i + BATCH_SIZE);
+
+    for (const q of chunk) {
+      const hash = hashStatement(q.statement);
+      if (dedupeSet.has(hash)) {
+        duplicateCount++;
+        continue;
+      }
+      dedupeSet.add(hash);
+
+      const qRef = doc(collection(db, QUESTIONS_COLLECTION));
+      const difficulty = validDifficulties.includes(q.difficulty || '')
+        ? q.difficulty as QuestionDifficulty
+        : 'médio' as QuestionDifficulty;
+
+      // Build data without undefined values (Firestore rejects undefined)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const questionData: Record<string, any> = {
+        statement: q.statement.trim(),
+        alternatives: q.alternatives.map(a => ({
+          key: a.key.toUpperCase(),
+          text: a.text.trim(),
+        })),
+        answer: q.answer.toUpperCase(),
+        materia: q.materia.trim(),
+        difficulty,
+        sourceExamId: null,
+        createdBy: userId,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      if (q.subtema?.trim()) questionData.subtema = q.subtema.trim();
+      if (banca) questionData.banca = banca;
+      if (year) questionData.year = year;
+      if (q.explanation?.trim()) questionData.explanation = q.explanation.trim();
+
+      batch.set(qRef, questionData);
+      questionIds.push(qRef.id);
+    }
+
+    await batch.commit();
+  }
+
+  // Criar ExamMetadata
+  const examBatch = writeBatch(db);
+  const examRef = doc(collection(db, EXAMS_COLLECTION));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const examData: Record<string, any> = {
+    name: examName.trim(),
+    planId: planId || null,
+    questions: questionIds,
+    createdAt: now,
+    updatedAt: now,
+  };
+  if (banca) examData.banca = banca;
+  if (year) examData.year = year;
+
+  examBatch.set(examRef, examData);
+  await examBatch.commit();
+
+  return {
+    examId: examRef.id,
+    totalSaved: questionIds.length,
+    duplicatesSkipped: duplicateCount,
+  };
 }

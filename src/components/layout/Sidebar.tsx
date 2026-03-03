@@ -25,6 +25,7 @@ import {
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AccountPlanModal from '@/components/AccountPlanModal';
+import { isAdminIdentity } from '@/lib/admin';
 
 const NAV_ITEMS = [
   {
@@ -95,6 +96,7 @@ export default function Sidebar({
   const pathname = usePathname();
   const { user, logout } = useAuthContext();
   const { planTier, capabilities, refresh } = useEntitlements(user?.uid, user?.email);
+  const isAdmin = user ? isAdminIdentity({ uid: user.uid, email: user.email }) : false;
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [planPickerOpen, setPlanPickerOpen] = useState(false);
   const planPickerRef = useRef<HTMLDivElement>(null);
@@ -193,8 +195,8 @@ export default function Sidebar({
                       setPlanPickerOpen(false);
                     }}
                     className={`flex w-full items-center gap-2.5 border-b border-white/[0.05] px-3 py-2.5 text-left text-xs transition-colors ${activePlanId === null
-                        ? 'bg-blue-600/15 text-blue-300'
-                        : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
+                      ? 'bg-blue-600/15 text-blue-300'
+                      : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
                       }`}
                   >
                     <div className="h-2 w-2 flex-shrink-0 rounded-full bg-slate-500" />
@@ -215,8 +217,8 @@ export default function Sidebar({
                           setPlanPickerOpen(false);
                         }}
                         className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-xs transition-colors ${isActive
-                            ? 'bg-blue-600/15 text-blue-300'
-                            : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
+                          ? 'bg-blue-600/15 text-blue-300'
+                          : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
                           }`}
                       >
                         <div
@@ -279,6 +281,21 @@ export default function Sidebar({
               Gerenciar
             </span>
           </button>
+
+          {/* Admin link */}
+          {isAdmin && (
+            <Link
+              href="/admin/questions"
+              onClick={() => mobileOpen && onToggleMobile?.()}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${pathname?.startsWith('/admin')
+                  ? 'bg-violet-600/15 text-violet-300 font-medium'
+                  : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                }`}
+            >
+              <Settings className="h-4 w-4 flex-shrink-0 text-violet-400" />
+              <span>Gerenciar Questões</span>
+            </Link>
+          )}
 
           {/* Settings */}
           <Link
