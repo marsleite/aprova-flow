@@ -1,0 +1,3 @@
+# Ignorar JSONs extraídos (dados locais)
+*.json
+!.gitignore

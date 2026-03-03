@@ -1,0 +1,3 @@
+# Ignorar PDFs de provas (dados locais)
+*.pdf
+!.gitignore

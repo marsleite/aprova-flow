@@ -41,9 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Provas e extrações (dados locais)
-docs/*.pdf
-extracted_exam*.json
+# Script de extração (dados locais)
 scripts/script-exam/venv/
 scripts/script-exam/.env
 scripts/script-exam/__pycache__/
