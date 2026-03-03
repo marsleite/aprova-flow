@@ -2,6 +2,15 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper: verifica se o usuário é admin
+    function isAdmin() {
+      return request.auth != null 
+             && request.auth.token.email in [
+               'marsleite@gmail.com',
+               'graceandradeleite@gmail.com'
+             ];
+    }
     
     // Sessões de estudo
     match /sessions/{sessionId} {
@@ -21,14 +30,16 @@ service cloud.firestore {
                     && resource.data.userId == request.auth.uid;
     }
 
-    // Banco de questões (somente leitura pelo app; escrita via Admin SDK)
+    // Banco de questões (leitura para todos autenticados; escrita apenas admin)
     match /questions_bank/{questionId} {
       allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin();
     }
 
-    // Provas oficiais
+    // Provas oficiais (leitura para todos autenticados; escrita apenas admin)
     match /exams/{examId} {
       allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin();
     }
 
     // Tentativas de questões (histórico do usuário)
