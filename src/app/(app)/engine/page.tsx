@@ -43,6 +43,8 @@ export default function EnginePage() {
   const [loading, setLoading] = useState(true);
   const [creatingPlan, setCreatingPlan] = useState(false);
 
+  const initialRecoveryMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('recovery') === 'true';
+
   const filterPlanId = activePlanId || undefined;
 
   const fetchData = useCallback(async () => {
@@ -162,7 +164,7 @@ export default function EnginePage() {
                 activePlanId={activePlanId}
                 onSessionSaved={handleSessionSaved}
                 onCreateSession={handleCreateSession}
-                onCreateEdital={() => {}}
+                onCreateEdital={() => { }}
                 creatingSession={creatingPlan}
               />
             </motion.div>
@@ -189,6 +191,7 @@ export default function EnginePage() {
                 planVsActual={[]}
                 accuracyData={[]}
                 totalTodaySeconds={0}
+                initialRecoveryMode={initialRecoveryMode}
               />
             </motion.div>
           </div>

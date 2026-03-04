@@ -34,6 +34,7 @@ interface DailyAiPlannerCardProps {
   planVsActual: PlanVsActual[];
   accuracyData?: SubjectAccuracy[];
   totalTodaySeconds: number;
+  initialRecoveryMode?: boolean;
 }
 
 function taskTypeLabel(taskType: DailyPlanBlock['taskType']): string {
@@ -59,7 +60,7 @@ function blockIdentityKey(block: DailyPlanBlock): string {
     .toLowerCase()}`;
 }
 
-type GenerateMode = 'manual' | 'session_saved';
+type GenerateMode = 'manual' | 'session_saved' | 'recovery';
 
 export default function DailyAiPlannerCard({
   userId,
@@ -70,6 +71,7 @@ export default function DailyAiPlannerCard({
   planVsActual,
   accuracyData,
   totalTodaySeconds,
+  initialRecoveryMode,
 }: DailyAiPlannerCardProps) {
   const [loading, setLoading] = useState(false);
   const [loadingSavedPlan, setLoadingSavedPlan] = useState(true);
@@ -163,6 +165,15 @@ export default function DailyAiPlannerCard({
     };
   }, [userId, plan, planSignature]);
 
+  // Hook for triggering recovery mode on mount
+  const hasTriggeredRecoveryRef = useRef(false);
+  useEffect(() => {
+    if (initialRecoveryMode && !hasTriggeredRecoveryRef.current && hasContext) {
+      hasTriggeredRecoveryRef.current = true;
+      void generatePlan('recovery');
+    }
+  }, [initialRecoveryMode, hasContext]); // Excluded generatePlan from deps intentionaly to run once
+
   const persistProgress = async (nextCompleted: number[], nextDeferred: number[]) => {
     if (!userId || !plan || !planSignature) return;
     try {
@@ -240,6 +251,12 @@ export default function DailyAiPlannerCard({
             .map((block) => blockIdentityKey(block))
         );
 
+        let gapInsights = undefined;
+        try {
+          const stored = typeof window !== 'undefined' ? localStorage.getItem('aprovamind_last_gaps') : null;
+          if (stored) gapInsights = JSON.parse(stored);
+        } catch { /* ignore */ }
+
         const res = await fetch('/api/planner-daily', {
           method: 'POST',
           headers: {
@@ -270,12 +287,13 @@ export default function DailyAiPlannerCard({
               accuracy: a.accuracy,
               totalQuestions: a.totalQuestions,
             })),
+            gapInsights,
             executionContext: previousPlan
               ? {
-                  currentBlocks: previousPlan.blocks,
-                  completedBlockIndexes: previousCompleted,
-                  deferredBlockIndexes: previousDeferred,
-                }
+                currentBlocks: previousPlan.blocks,
+                completedBlockIndexes: previousCompleted,
+                deferredBlockIndexes: previousDeferred,
+              }
               : undefined,
           }),
         });
@@ -384,7 +402,7 @@ export default function DailyAiPlannerCard({
 
         <button
           onClick={() => void generatePlan('manual')}
-          disabled={loading || !hasContext}
+          disabled={loading || (!hasContext && !initialRecoveryMode)}
           className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-3 py-2 text-xs font-medium text-white shadow-lg shadow-violet-500/15 transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : plan ? <RefreshCw className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
@@ -392,7 +410,7 @@ export default function DailyAiPlannerCard({
         </button>
       </div>
 
-      {!hasContext && (
+      {!hasContext && !initialRecoveryMode && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
           Registre sessões para a IA montar um plano diário personalizado.
         </div>
@@ -411,6 +429,12 @@ export default function DailyAiPlannerCard({
 
       {autoReplanning && (
         <p className="mb-3 text-xs text-cyan-300">Sessão detectada. Replanejando automaticamente os próximos blocos...</p>
+      )}
+
+      {initialRecoveryMode && !plan && !loading && !loadingSavedPlan && (
+        <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+          Você ativou o Modo Recuperação. Clique em "Gerar plano" para a IA montar seu resgate estratégico focado em Gaps.
+        </div>
       )}
 
       {plan && (
@@ -442,13 +466,12 @@ export default function DailyAiPlannerCard({
               return (
                 <div
                   key={`${block.subject}-${idx}`}
-                  className={`rounded-xl border p-3 transition-colors ${
-                    done
-                      ? 'border-emerald-500/30 bg-emerald-500/10'
-                      : deferred
-                        ? 'border-amber-500/30 bg-amber-500/10'
-                        : 'border-white/10 bg-gray-900/50'
-                  }`}
+                  className={`rounded-xl border p-3 transition-colors ${done
+                    ? 'border-emerald-500/30 bg-emerald-500/10'
+                    : deferred
+                      ? 'border-amber-500/30 bg-amber-500/10'
+                      : 'border-white/10 bg-gray-900/50'
+                    }`}
                 >
                   <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                     <p className={`text-sm font-medium ${done ? 'text-emerald-200' : 'text-white'}`}>
@@ -476,18 +499,16 @@ export default function DailyAiPlannerCard({
                     </button>
                     <button
                       onClick={() => toggleCompleted(idx)}
-                      className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] transition ${
-                        done ? 'bg-emerald-500/30 text-emerald-100' : 'bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25'
-                      }`}
+                      className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] transition ${done ? 'bg-emerald-500/30 text-emerald-100' : 'bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25'
+                        }`}
                     >
                       <CheckCircle2 className="h-3 w-3" />
                       {done ? 'Concluído' : 'Concluir'}
                     </button>
                     <button
                       onClick={() => toggleDeferred(idx)}
-                      className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] transition ${
-                        deferred ? 'bg-amber-500/30 text-amber-100' : 'bg-amber-500/15 text-amber-200 hover:bg-amber-500/25'
-                      }`}
+                      className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] transition ${deferred ? 'bg-amber-500/30 text-amber-100' : 'bg-amber-500/15 text-amber-200 hover:bg-amber-500/25'
+                        }`}
                     >
                       <Clock4 className="h-3 w-3" />
                       {deferred ? 'Adiado' : 'Adiar'}

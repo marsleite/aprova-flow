@@ -219,6 +219,9 @@ export default function CadernoErrosPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Erro ao gerar diagnóstico.');
             setDiagnosis(data);
+            if (data.gaps) {
+                localStorage.setItem('aprovamind_last_gaps', JSON.stringify(data.gaps));
+            }
         } catch (err) {
             setDiagnosisError(err instanceof Error ? err.message : 'Erro desconhecido.');
         } finally {

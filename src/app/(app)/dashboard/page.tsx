@@ -46,6 +46,8 @@ import {
   Flame,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import RecoveryBanner from '@/components/RecoveryBanner';
 import {
   AreaChart,
   Area,
@@ -91,6 +93,7 @@ export default function DashboardPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const filterPlanId = activePlanId || undefined;
 
@@ -259,6 +262,11 @@ export default function DashboardPage() {
       </motion.div>
 
       <div className="px-6 py-5">
+        <RecoveryBanner
+          consistency={consistency}
+          onActivateRecovery={() => router.push('/engine?recovery=true')}
+        />
+
         {/* Section title */}
         <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show"
           className="mb-5 flex items-center justify-between"
