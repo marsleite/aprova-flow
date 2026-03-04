@@ -3,26 +3,69 @@ import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { searchRelevantLaw } from '@/lib/firebase/legalKnowledge';
+
+// ── Prompt avançado: Gap Analyzer PhD ──
 
 const SYSTEM_INSTRUCTION = [
-    'Você é um especialista em preparação para concursos públicos.',
-    'Você receberá uma lista de erros que um aluno cometeu em questões de concurso.',
-    'Analise os erros e identifique PADRÕES recorrentes e recomendações práticas.',
+    'Você é o **Professor Analista de Performance** do AprovaMind, PhD em preparação para concursos.',
+    'Você receberá uma lista de erros que um aluno cometeu em questões de concurso,',
+    'junto com estatísticas agregadas por matéria e subtema.',
+    '',
+    'Sua missão é fazer uma ANÁLISE PROFUNDA e CRUZADA dos erros, identificando:',
+    '',
+    '1. **GAPS OCULTOS**: Padrões cruzados que o aluno não percebe.',
+    '   Ex: "Você acerta 90% de Constitucional, mas erra 80% quando a questão envolve jurisprudência do STF"',
+    '   Ex: "Seus erros em Civil são concentrados em prescrição e decadência — confunde prazos"',
+    '',
+    '2. **SCORING POR DIMENSÃO**: Classifique cada gap como:',
+    '   - "legislacao" (erra por não conhecer o artigo/lei)',
+    '   - "jurisprudencia" (erra por não conhecer súmula/entendimento dos tribunais)',
+    '   - "interpretacao" (erra por má interpretação do enunciado)',
+    '   - "conceitual" (erra por desconhecer o conceito doutrinário)',
+    '',
+    '3. **FICHAS DE REVISÃO**: Para os 3 gaps mais críticos, gere fichas de revisão curtas e diretas,',
+    '   com o conceito que o aluno precisa memorizar.',
     '',
     'REGRAS:',
-    '- Máximo 3 padrões de erro identificados.',
-    '- Máximo 3 recomendações práticas e acionáveis.',
-    '- Identifique as matérias mais críticas (máximo 3).',
-    '- Seja direto e objetivo.',
+    '- Analise os PADRÕES CRUZADOS (matéria × subtema × tipo de erro)',
+    '- Máximo 5 gaps identificados, ordenados por gravidade',
+    '- Cada gap deve ter: descrição, dimensão, severidade (1-10), e conselho',
+    '- Gere exatamente 3 fichas de revisão para os temas mais errados',
     '- Retorne EXCLUSIVAMENTE um JSON válido. Sem markdown.',
     '',
-    'FORMATO:',
+    'FORMATO JSON:',
     '{',
-    '  "patterns": ["padrão 1", "padrão 2", ...],',
-    '  "recommendations": ["recomendação 1", "recomendação 2", ...],',
-    '  "criticalSubjects": ["matéria 1", "matéria 2", ...]',
+    '  "gaps": [',
+    '    {',
+    '      "description": "Você erra 80% das questões de prescrição quando envolvem prazos especiais do Art. 206 CC",',
+    '      "dimension": "legislacao",',
+    '      "severity": 9,',
+    '      "materia": "Direito Civil",',
+    '      "subtema": "Prescrição e Decadência",',
+    '      "advice": "Foque na tabela de prazos do Art. 206 do CC: 1, 2, 3, 4 e 5 anos"',
+    '    }',
+    '  ],',
+    '  "overallScore": {',
+    '    "legislacao": 65,',
+    '    "jurisprudencia": 40,',
+    '    "interpretacao": 75,',
+    '    "conceitual": 55',
+    '  },',
+    '  "flashcards": [',
+    '    {',
+    '      "topic": "Prazos Prescricionais (Art. 206 CC)",',
+    '      "front": "Qual o prazo prescricional para reparação civil?",',
+    '      "back": "3 anos (Art. 206, § 3º, V do CC/2002)",',
+    '      "source": "CC/2002, Art. 206"',
+    '    }',
+    '  ],',
+    '  "criticalSubjects": ["Direito Civil", "Direito Penal"],',
+    '  "summary": "Resumo geral de 2 linhas sobre o perfil do aluno"',
     '}',
 ].join('\n');
+
+// ── Tipos ──
 
 interface ErrorItem {
     materia: string;
@@ -31,6 +74,32 @@ interface ErrorItem {
     correctAnswer: string;
     studentAnswer: string;
 }
+
+interface SubjectStats {
+    materia: string;
+    total: number;
+    subtemas: Record<string, number>;
+}
+
+// ── Funções auxiliares ──
+
+function buildStatistics(errors: ErrorItem[]): SubjectStats[] {
+    const statsMap = new Map<string, SubjectStats>();
+
+    for (const e of errors) {
+        if (!statsMap.has(e.materia)) {
+            statsMap.set(e.materia, { materia: e.materia, total: 0, subtemas: {} });
+        }
+        const stat = statsMap.get(e.materia)!;
+        stat.total++;
+        const sub = e.subtema || 'Geral';
+        stat.subtemas[sub] = (stat.subtemas[sub] || 0) + 1;
+    }
+
+    return [...statsMap.values()].sort((a, b) => b.total - a.total);
+}
+
+// ── POST Handler ──
 
 export async function POST(request: NextRequest) {
     try {
@@ -55,31 +124,80 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Build the prompt from the errors list
+        // ── 1. Gerar estatísticas agregadas ──
+        const stats = buildStatistics(errors);
+        const topMateria = stats[0]?.materia || '';
+
+        // ── 2. RAG: buscar contexto jurídico para os temas mais errados ──
+        let ragContext = '';
+        try {
+            const topSubtemas = stats.slice(0, 2).flatMap(s =>
+                Object.entries(s.subtemas)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 2)
+                    .map(([sub]) => sub)
+            );
+
+            const ragQuery = `${topMateria} ${topSubtemas.join(' ')}`;
+            const relevantDocs = await searchRelevantLaw(ragQuery, topMateria, 5);
+
+            if (relevantDocs.length > 0) {
+                ragContext = '\n\nCONTEXTO JURÍDICO RELEVANTE (use para gerar fichas de revisão precisas):\n' +
+                    relevantDocs.map((doc: { title: string; content: string; source: string }, i: number) =>
+                        `[${i + 1}] ${doc.title} (${doc.source}): ${doc.content}`
+                    ).join('\n');
+            }
+        } catch (ragErr) {
+            console.warn('[GapAnalyzer] RAG failed, continuing without context:', ragErr);
+        }
+
+        // ── 3. Montar prompt com estatísticas + erros ──
+        const statsBlock = stats.map(s => {
+            const subtemaDetails = Object.entries(s.subtemas)
+                .sort((a, b) => b[1] - a[1])
+                .map(([sub, count]) => `    - ${sub}: ${count} erros`)
+                .join('\n');
+            return `📊 ${s.materia}: ${s.total} erros\n${subtemaDetails}`;
+        }).join('\n\n');
+
         const errorsSummary = errors.slice(0, 50).map((e, i) =>
-            `${i + 1}. [${e.materia}${e.subtema ? ' > ' + e.subtema : ''}] "${e.statement.substring(0, 120)}..." → Resposta: ${e.studentAnswer} (Correta: ${e.correctAnswer})`
+            `${i + 1}. [${e.materia}${e.subtema ? ' > ' + e.subtema : ''}] "${e.statement.substring(0, 150)}..." → Resposta: ${e.studentAnswer} (Correta: ${e.correctAnswer})`
         ).join('\n');
 
         const prompt = [
-            `O aluno errou ${errors.length} questões. Aqui estão os erros:`,
+            `O aluno errou ${errors.length} questões. Aqui está a análise estatística:`,
+            '',
+            statsBlock,
+            '',
+            '--- DETALHAMENTO DOS ERROS ---',
             '',
             errorsSummary,
+            ragContext,
             '',
-            'Analise os padrões de erro e forneça recomendações.',
+            'Faça a análise profunda de gaps seguindo o formato JSON especificado.',
         ].join('\n');
 
+        // ── 4. Chamar IA ──
         const aiResponse = await runAiText({
             task: 'error-diagnosis',
             systemInstruction: SYSTEM_INSTRUCTION,
             prompt,
             preferJson: true,
-            temperature: 0.3,
-            maxOutputTokens: 1024,
+            temperature: 0.4,
+            maxOutputTokens: 2048,
         });
 
         const text = aiResponse.text?.trim() || '{}';
-        const jsonStr = text.replace(/^```json/g, '').replace(/```$/g, '').trim();
+        // Extrair JSON mesmo que venha com markdown
+        let jsonStr = text;
+        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (jsonMatch) {
+            jsonStr = jsonMatch[1].trim();
+        } else {
+            jsonStr = text.replace(/^```json/g, '').replace(/```$/g, '').trim();
+        }
 
+        // ── 5. Logging ──
         const usageEvent = {
             route: '/api/error-diagnosis',
             task: 'error-diagnosis',
@@ -97,13 +215,37 @@ export async function POST(request: NextRequest) {
         logAiUsageEvent(usageEvent);
         void saveAiUsageEvent(usageEvent, auth.idToken);
 
+        // ── 6. Parse e retorno ──
         try {
             const parsed = JSON.parse(jsonStr);
+
+            // Backward-compat: se a IA retornar no formato antigo, converte
+            if (parsed.patterns && !parsed.gaps) {
+                return NextResponse.json(
+                    {
+                        gaps: [],
+                        overallScore: { legislacao: 50, jurisprudencia: 50, interpretacao: 50, conceitual: 50 },
+                        flashcards: [],
+                        criticalSubjects: parsed.criticalSubjects || [],
+                        summary: parsed.patterns?.join('. ') || '',
+                        // backward compat
+                        patterns: parsed.patterns || [],
+                        recommendations: parsed.recommendations || [],
+                    },
+                    { headers: { ...quota.headers, 'x-ai-provider': aiResponse.provider, 'x-ai-model': aiResponse.model } }
+                );
+            }
+
             return NextResponse.json(
                 {
-                    patterns: parsed.patterns || [],
-                    recommendations: parsed.recommendations || [],
+                    gaps: parsed.gaps || [],
+                    overallScore: parsed.overallScore || { legislacao: 50, jurisprudencia: 50, interpretacao: 50, conceitual: 50 },
+                    flashcards: parsed.flashcards || [],
                     criticalSubjects: parsed.criticalSubjects || [],
+                    summary: parsed.summary || '',
+                    // backward compat
+                    patterns: (parsed.gaps || []).map((g: { description: string }) => g.description),
+                    recommendations: (parsed.gaps || []).map((g: { advice: string }) => g.advice),
                 },
                 {
                     headers: {
@@ -114,7 +256,7 @@ export async function POST(request: NextRequest) {
                 }
             );
         } catch {
-            console.error('[ErrorDiagnosis] Falha ao parsear JSON:', jsonStr);
+            console.error('[GapAnalyzer] Falha ao parsear JSON:', jsonStr);
             return NextResponse.json(
                 { error: 'A IA retornou formato inválido.' },
                 { status: 500 }

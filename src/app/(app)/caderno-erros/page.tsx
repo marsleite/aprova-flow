@@ -26,10 +26,95 @@ interface ErrorEntry {
     question: QuestionBankItem;
 }
 
+interface GapItem {
+    description: string;
+    dimension: 'legislacao' | 'jurisprudencia' | 'interpretacao' | 'conceitual';
+    severity: number;
+    materia: string;
+    subtema?: string;
+    advice: string;
+}
+
+interface Flashcard {
+    topic: string;
+    front: string;
+    back: string;
+    source: string;
+}
+
 interface DiagnosisResult {
-    patterns: string[];
-    recommendations: string[];
+    gaps: GapItem[];
+    overallScore: {
+        legislacao: number;
+        jurisprudencia: number;
+        interpretacao: number;
+        conceitual: number;
+    };
+    flashcards: Flashcard[];
     criticalSubjects: string[];
+    summary: string;
+    // backward compat
+    patterns?: string[];
+    recommendations?: string[];
+}
+
+const DIMENSION_LABELS: Record<string, { label: string; color: string; emoji: string }> = {
+    legislacao: { label: 'Legislação', color: 'text-blue-400', emoji: '📜' },
+    jurisprudencia: { label: 'Jurisprudência', color: 'text-purple-400', emoji: '⚖️' },
+    interpretacao: { label: 'Interpretação', color: 'text-amber-400', emoji: '🔍' },
+    conceitual: { label: 'Conceitual', color: 'text-emerald-400', emoji: '📚' },
+};
+
+function SeverityBar({ value }: { value: number }) {
+    const color = value >= 8 ? 'bg-red-500' : value >= 5 ? 'bg-amber-500' : 'bg-emerald-500';
+    return (
+        <div className="flex items-center gap-2">
+            <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${color} transition-all duration-500`} style={{ width: `${value * 10}%` }} />
+            </div>
+            <span className="text-xs text-gray-400 w-6 text-right">{value}</span>
+        </div>
+    );
+}
+
+function ScoreBar({ label, emoji, value, color }: { label: string; emoji: string; value: number; color: string }) {
+    const barColor = value >= 70 ? 'bg-emerald-500' : value >= 40 ? 'bg-amber-500' : 'bg-red-500';
+    return (
+        <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs">
+                <span className={`${color} font-medium`}>{emoji} {label}</span>
+                <span className="text-gray-400">{value}%</span>
+            </div>
+            <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${barColor} transition-all duration-700`} style={{ width: `${value}%` }} />
+            </div>
+        </div>
+    );
+}
+
+function FlashcardItem({ card }: { card: Flashcard }) {
+    const [flipped, setFlipped] = useState(false);
+    return (
+        <div
+            onClick={() => setFlipped(prev => !prev)}
+            className="cursor-pointer rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 min-h-[120px] flex flex-col justify-between hover:border-emerald-500/40 transition-colors"
+        >
+            <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 mb-2">{card.topic}</p>
+                {flipped ? (
+                    <p className="text-sm text-emerald-200 font-medium">{card.back}</p>
+                ) : (
+                    <p className="text-sm text-gray-300">{card.front}</p>
+                )}
+            </div>
+            <div className="flex items-center justify-between mt-3">
+                <span className="text-[10px] text-gray-500">{card.source}</span>
+                <span className="text-[10px] text-emerald-500 font-medium">
+                    {flipped ? '← Voltar' : 'Ver resposta →'}
+                </span>
+            </div>
+        </div>
+    );
 }
 
 export default function CadernoErrosPage() {
@@ -251,60 +336,116 @@ export default function CadernoErrosPage() {
                         )}
 
                         {diagnosis && (
-                            <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-6 space-y-5 relative overflow-hidden">
+                            <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-6 space-y-6 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-violet-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                                <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full pointer-events-none"></div>
 
-                                <h3 className="flex items-center gap-2 text-lg font-bold text-white">
-                                    <Sparkles className="h-5 w-5 text-violet-400" />
-                                    Diagnóstico do Mentor IA
-                                </h3>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="flex items-center gap-2 text-lg font-bold text-white">
+                                        <Sparkles className="h-5 w-5 text-violet-400" />
+                                        🕵️ Gap Analyzer — Diagnóstico Profundo
+                                    </h3>
+                                </div>
 
-                                <div className="grid gap-4 md:grid-cols-3">
-                                    {/* Patterns */}
-                                    <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <AlertTriangle className="h-4 w-4 text-red-400" />
-                                            <h4 className="text-sm font-bold text-red-400 uppercase tracking-wider">Padrões de Erro</h4>
-                                        </div>
-                                        <ul className="space-y-2">
-                                            {diagnosis.patterns.map((p, i) => (
-                                                <li key={i} className="text-sm text-gray-300 flex gap-2">
-                                                    <TrendingDown className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
-                                                    {p}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                {/* Summary */}
+                                {diagnosis.summary && (
+                                    <p className="text-sm text-gray-300 bg-white/[0.03] rounded-lg p-3 border border-white/[0.05]">
+                                        {diagnosis.summary}
+                                    </p>
+                                )}
+
+                                <div className="grid gap-5 md:grid-cols-2">
+                                    {/* Left: Gaps List */}
+                                    <div className="space-y-3">
+                                        <h4 className="flex items-center gap-2 text-sm font-bold text-red-400 uppercase tracking-wider">
+                                            <AlertTriangle className="h-4 w-4" />
+                                            Gaps Identificados
+                                        </h4>
+                                        {diagnosis.gaps.length > 0 ? (
+                                            diagnosis.gaps.map((gap, i) => {
+                                                const dim = DIMENSION_LABELS[gap.dimension] || DIMENSION_LABELS.conceitual;
+                                                return (
+                                                    <div key={i} className="rounded-lg border border-white/[0.06] bg-[#0b1120] p-4 space-y-2">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <span className="text-sm text-gray-200">{gap.description}</span>
+                                                            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${dim.color} border-current whitespace-nowrap`}>
+                                                                {dim.emoji} {dim.label}
+                                                            </span>
+                                                        </div>
+                                                        <SeverityBar value={gap.severity} />
+                                                        <div className="flex items-start gap-2 mt-1">
+                                                            <Lightbulb className="h-3.5 w-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
+                                                            <p className="text-xs text-amber-300/80">{gap.advice}</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : diagnosis.patterns && diagnosis.patterns.length > 0 ? (
+                                            /* Backward compat: old format */
+                                            diagnosis.patterns.map((p, i) => (
+                                                <div key={i} className="rounded-lg border border-white/[0.06] bg-[#0b1120] p-4">
+                                                    <div className="flex items-start gap-2">
+                                                        <TrendingDown className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
+                                                        <span className="text-sm text-gray-300">{p}</span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : null}
                                     </div>
 
-                                    {/* Recommendations */}
-                                    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <Lightbulb className="h-4 w-4 text-emerald-400" />
-                                            <h4 className="text-sm font-bold text-emerald-400 uppercase tracking-wider">Recomendações</h4>
-                                        </div>
-                                        <ul className="space-y-2">
-                                            {diagnosis.recommendations.map((r, i) => (
-                                                <li key={i} className="text-sm text-gray-300 flex gap-2">
-                                                    <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                                                    {r}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                    {/* Right: Score + Critical */}
+                                    <div className="space-y-5">
+                                        {/* Dimension Scores */}
+                                        {diagnosis.overallScore && (
+                                            <div className="rounded-lg border border-white/[0.06] bg-[#0b1120] p-4 space-y-3">
+                                                <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+                                                    Perfil por Dimensão
+                                                </h4>
+                                                {Object.entries(DIMENSION_LABELS).map(([key, dim]) => (
+                                                    <ScoreBar
+                                                        key={key}
+                                                        label={dim.label}
+                                                        emoji={dim.emoji}
+                                                        value={diagnosis.overallScore[key as keyof typeof diagnosis.overallScore] || 50}
+                                                        color={dim.color}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
 
-                                    {/* Critical Subjects */}
-                                    <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <AlertTriangle className="h-4 w-4 text-amber-400" />
-                                            <h4 className="text-sm font-bold text-amber-400 uppercase tracking-wider">Matérias Críticas</h4>
-                                        </div>
-                                        <ul className="space-y-2">
-                                            {diagnosis.criticalSubjects.map((s, i) => (
-                                                <li key={i} className="text-sm text-gray-300 font-medium">{s}</li>
-                                            ))}
-                                        </ul>
+                                        {/* Critical Subjects */}
+                                        {diagnosis.criticalSubjects.length > 0 && (
+                                            <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+                                                <h4 className="flex items-center gap-2 text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">
+                                                    <AlertTriangle className="h-4 w-4" />
+                                                    Matérias Críticas
+                                                </h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {diagnosis.criticalSubjects.map((s, i) => (
+                                                        <span key={i} className="text-xs px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-300 font-medium">
+                                                            {s}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+
+                                {/* Flashcards */}
+                                {diagnosis.flashcards && diagnosis.flashcards.length > 0 && (
+                                    <div className="space-y-3">
+                                        <h4 className="flex items-center gap-2 text-sm font-bold text-emerald-400 uppercase tracking-wider">
+                                            <Lightbulb className="h-4 w-4" />
+                                            Fichas de Revisão Rápida
+                                        </h4>
+                                        <div className="grid gap-3 md:grid-cols-3">
+                                            {diagnosis.flashcards.map((card, i) => (
+                                                <FlashcardItem key={i} card={card} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
