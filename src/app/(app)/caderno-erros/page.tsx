@@ -188,7 +188,7 @@ export default function CadernoErrosPage() {
     };
 
     const handleDiagnosis = async () => {
-        if (!user || errors.length === 0) return;
+        if (!user || filteredErrors.length === 0) return;
         try {
             setDiagnosisLoading(true);
             setDiagnosisError(null);
@@ -196,10 +196,13 @@ export default function CadernoErrosPage() {
             const token = await auth.currentUser?.getIdToken();
             if (!token) throw new Error('Sessão expirada.');
 
-            const errorPayload = errors.slice(0, 50).map(e => ({
+            // Use filtered errors (by matéria) or limit to 15 most recent
+            const errorsToAnalyze = filteredErrors.slice(0, 15);
+
+            const errorPayload = errorsToAnalyze.map(e => ({
                 materia: e.question.materia,
                 subtema: e.question.subtema || '',
-                statement: e.question.statement,
+                statement: e.question.statement.substring(0, 80),
                 correctAnswer: e.question.answer,
                 studentAnswer: e.attempt.selectedOption,
             }));
@@ -316,7 +319,7 @@ export default function CadernoErrosPage() {
 
                             <button
                                 onClick={handleDiagnosis}
-                                disabled={diagnosisLoading || errors.length === 0}
+                                disabled={diagnosisLoading || filteredErrors.length === 0}
                                 className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-lg transition-colors text-sm font-medium"
                             >
                                 {diagnosisLoading ? (
@@ -324,7 +327,10 @@ export default function CadernoErrosPage() {
                                 ) : (
                                     <Sparkles className="h-4 w-4" />
                                 )}
-                                Diagnóstico IA
+                                {filterMateria
+                                    ? `🕵️ Analisar ${filterMateria}`
+                                    : `🕵️ Analisar (${Math.min(filteredErrors.length, 15)} erros)`
+                                }
                             </button>
                         </div>
 

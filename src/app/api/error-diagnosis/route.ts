@@ -27,23 +27,24 @@ const SYSTEM_INSTRUCTION = [
     '3. **FICHAS DE REVISÃO**: Para os 3 gaps mais críticos, gere fichas de revisão curtas e diretas,',
     '   com o conceito que o aluno precisa memorizar.',
     '',
-    'REGRAS:',
-    '- Analise os PADRÕES CRUZADOS (matéria × subtema × tipo de erro)',
-    '- Máximo 5 gaps identificados, ordenados por gravidade',
-    '- Cada gap deve ter: descrição, dimensão, severidade (1-10), e conselho',
-    '- Gere exatamente 3 fichas de revisão para os temas mais errados',
-    '- Retorne EXCLUSIVAMENTE um JSON válido. Sem markdown.',
+    'REGRAS CRÍTICAS:',
+    '- Máximo 3 gaps identificados, ordenados por gravidade',
+    '- Descrições CURTAS: máximo 1 frase por gap (até 100 caracteres)',
+    '- Conselhos CURTOS: máximo 1 frase (até 80 caracteres)',
+    '- Gere exatamente 3 fichas de revisão CURTAS para os temas mais errados',
+    '- Retorne EXCLUSIVAMENTE um JSON válido. Sem markdown, sem explicações extras.',
+    '- IMPORTANTE: O JSON PRECISA estar completo e válido. Seja conciso.',
     '',
     'FORMATO JSON:',
     '{',
     '  "gaps": [',
     '    {',
-    '      "description": "Você erra 80% das questões de prescrição quando envolvem prazos especiais do Art. 206 CC",',
+    '      "description": "Confunde prazos prescricionais do Art. 206 CC",',
     '      "dimension": "legislacao",',
     '      "severity": 9,',
     '      "materia": "Direito Civil",',
-    '      "subtema": "Prescrição e Decadência",',
-    '      "advice": "Foque na tabela de prazos do Art. 206 do CC: 1, 2, 3, 4 e 5 anos"',
+    '      "subtema": "Prescrição",',
+    '      "advice": "Estude a tabela de prazos: 1, 2, 3, 4 e 5 anos"',
     '    }',
     '  ],',
     '  "overallScore": {',
@@ -181,10 +182,11 @@ export async function POST(request: NextRequest) {
         const aiResponse = await runAiText({
             task: 'error-diagnosis',
             systemInstruction: SYSTEM_INSTRUCTION,
-            prompt,
+            prompt: prompt.substring(0, 6000),
             preferJson: true,
             temperature: 0.4,
-            maxOutputTokens: 2048,
+            maxOutputTokens: 4096,
+            thinkingBudget: 0,
         });
 
         const text = aiResponse.text?.trim() || '{}';
@@ -195,6 +197,47 @@ export async function POST(request: NextRequest) {
             jsonStr = jsonMatch[1].trim();
         } else {
             jsonStr = text.replace(/^```json/g, '').replace(/```$/g, '').trim();
+        }
+
+        // Robust JSON repair for truncated output
+        try {
+            JSON.parse(jsonStr);
+        } catch {
+            console.warn('[GapAnalyzer] JSON inválido, tentando reparar...');
+            let repaired = jsonStr;
+            // Remove trailing incomplete string value (e.g., truncated mid-sentence)
+            repaired = repaired.replace(/,\s*"[^"]*":\s*"[^"]*$/, '');
+            repaired = repaired.replace(/,\s*"[^"]*$/, '');
+            // Remove trailing comma
+            repaired = repaired.replace(/,\s*$/, '');
+            // Close any open brackets/braces
+            const open = (s: string, c: string) => (s.match(new RegExp('\\' + c, 'g')) || []).length;
+            let openBrackets = open(repaired, '[') - open(repaired, ']');
+            let openBraces = open(repaired, '{') - open(repaired, '}');
+            for (let i = 0; i < openBrackets; i++) repaired += ']';
+            for (let i = 0; i < openBraces; i++) repaired += '}';
+            try {
+                JSON.parse(repaired);
+                jsonStr = repaired;
+                console.log('[GapAnalyzer] JSON reparado com sucesso');
+            } catch {
+                // Last resort: truncate to last complete structure
+                const lastGood = Math.max(repaired.lastIndexOf('}'), repaired.lastIndexOf(']'));
+                if (lastGood > 0) {
+                    repaired = repaired.substring(0, lastGood + 1);
+                    openBrackets = open(repaired, '[') - open(repaired, ']');
+                    openBraces = open(repaired, '{') - open(repaired, '}');
+                    for (let i = 0; i < openBrackets; i++) repaired += ']';
+                    for (let i = 0; i < openBraces; i++) repaired += '}';
+                    try {
+                        JSON.parse(repaired);
+                        jsonStr = repaired;
+                        console.log('[GapAnalyzer] JSON reparado (fallback)');
+                    } catch {
+                        console.error('[GapAnalyzer] Reparação falhou completamente');
+                    }
+                }
+            }
         }
 
         // ── 5. Logging ──
