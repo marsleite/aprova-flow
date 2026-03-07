@@ -14,7 +14,7 @@ const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   show: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { duration: 0.45, delay: i * 0.07, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.45, delay: i * 0.07, ease: [0.25, 0.46, 0.45, 0.94] as const },
   }),
 };
 
@@ -262,8 +262,8 @@ export default function CriarSimuladoPage() {
                   key={materia}
                   onClick={() => toggleMateria(materia)}
                   className={`px-4 py-2.5 rounded-full border-2 transition-all text-sm font-medium ${selectedMaterias.includes(materia)
-                      ? 'border-[#F59768]/50 text-[#F59768]'
-                      : 'border-white/[0.10] text-[#666] hover:border-white/[0.20] hover:text-slate-300'
+                    ? 'border-[#F59768]/50 text-[#F59768]'
+                    : 'border-white/[0.10] text-[#666] hover:border-white/[0.20] hover:text-slate-300'
                     }`}
                   style={selectedMaterias.includes(materia) ? { background: 'rgba(245,151,104,0.1)' } : { background: 'rgba(255,255,255,0.02)' }}
                 >
@@ -286,8 +286,8 @@ export default function CriarSimuladoPage() {
                   key={banca}
                   onClick={() => toggleBanca(banca)}
                   className={`px-5 py-2.5 rounded-full border-2 transition-all text-sm font-medium ${selectedBancas.includes(banca)
-                      ? 'border-[#3150AA]/50 text-[#F59768]'
-                      : 'border-white/[0.10] text-[#666] hover:border-white/[0.20] hover:text-slate-300'
+                    ? 'border-[#3150AA]/50 text-[#F59768]'
+                    : 'border-white/[0.10] text-[#666] hover:border-white/[0.20] hover:text-slate-300'
                     }`}
                   style={selectedBancas.includes(banca) ? { background: 'rgba(49,80,170,0.15)' } : { background: 'rgba(255,255,255,0.02)' }}
                 >
@@ -310,8 +310,8 @@ export default function CriarSimuladoPage() {
                   key={dif}
                   onClick={() => toggleDificuldade(dif)}
                   className={`px-5 py-2.5 rounded-full border-2 transition-all text-sm font-medium capitalize ${selectedDificuldades.includes(dif)
-                      ? 'border-[#F59768]/50 text-[#F59768]'
-                      : 'border-white/[0.10] text-[#666] hover:border-white/[0.20] hover:text-slate-300'
+                    ? 'border-[#F59768]/50 text-[#F59768]'
+                    : 'border-white/[0.10] text-[#666] hover:border-white/[0.20] hover:text-slate-300'
                     }`}
                   style={selectedDificuldades.includes(dif) ? { background: 'rgba(245,151,104,0.1)' } : { background: 'rgba(255,255,255,0.02)' }}
                 >

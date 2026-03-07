@@ -31,7 +31,7 @@ const fadeUp = {
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.45, delay: i * 0.07, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.45, delay: i * 0.07, ease: [0.25, 0.46, 0.45, 0.94] as const },
   }),
 };
 
@@ -195,8 +195,8 @@ export default function SimulationsPage() {
                     key={d}
                     onClick={() => setSelectedDuration(d)}
                     className={`px-4 py-2 text-xs font-bold transition-all font-mono ${selectedDuration === d
-                        ? 'text-white'
-                        : 'text-[#666] hover:text-slate-300'
+                      ? 'text-white'
+                      : 'text-[#666] hover:text-slate-300'
                       }`}
                     style={selectedDuration === d ? { background: 'var(--identity-grad)' } : undefined}
                   >

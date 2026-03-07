@@ -15,7 +15,7 @@ const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   show: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { duration: 0.45, delay: i * 0.07, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.45, delay: i * 0.07, ease: [0.25, 0.46, 0.45, 0.94] as const },
   }),
 };
 
@@ -134,8 +134,8 @@ export default function ProvasPage() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`relative whitespace-nowrap px-5 py-3.5 text-sm font-medium transition-colors ${activeTab === tab.key
-                  ? 'text-[#F59768]'
-                  : 'text-[#666] hover:text-slate-300'
+                ? 'text-[#F59768]'
+                : 'text-[#666] hover:text-slate-300'
                 }`}
             >
               {tab.label}
