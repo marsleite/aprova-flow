@@ -9,7 +9,7 @@ interface PlannerDailyRequest {
   userName: string;
   activePlanName?: string | null;
   dateISO?: string;
-  replanMode?: 'manual' | 'session_saved';
+  replanMode?: 'manual' | 'session_saved' | 'recovery';
   weeklyGoalHours: number;
   weeklyTotalHours: number;
   weeklyProgressPercent: number;
@@ -20,6 +20,13 @@ interface PlannerDailyRequest {
   subjectHours: { subject: string; hours: number }[];
   planVsActual: { subject: string; plannedPercent: number; actualPercent: number; status: string }[];
   accuracyBySubject?: { subject: string; accuracy: number; totalQuestions: number }[];
+  gapInsights?: {
+    materia: string;
+    subtema?: string;
+    description: string;
+    severity: number;
+    dimension: string;
+  }[];
   executionContext?: {
     completedBlockIndexes?: number[];
     deferredBlockIndexes?: number[];
@@ -111,16 +118,25 @@ function buildPlannerPrompt(ctx: PlannerDailyRequest): string {
   const planSummary =
     ctx.planVsActual.length > 0
       ? ctx.planVsActual
-          .map((p) => `  - ${p.subject}: planejado ${p.plannedPercent}% | real ${p.actualPercent}% [${p.status}]`)
-          .join('\n')
+        .map((p) => `  - ${p.subject}: planejado ${p.plannedPercent}% | real ${p.actualPercent}% [${p.status}]`)
+        .join('\n')
       : '  Sem plano vs real disponível.';
 
   const accuracySummary =
     ctx.accuracyBySubject && ctx.accuracyBySubject.length > 0
       ? ctx.accuracyBySubject
-          .map((a) => `  - ${a.subject}: ${a.accuracy}% (${a.totalQuestions} questões)`)
-          .join('\n')
+        .map((a) => `  - ${a.subject}: ${a.accuracy}% (${a.totalQuestions} questões)`)
+        .join('\n')
       : '  Sem dados de questões.';
+
+  const gapSummary =
+    ctx.gapInsights && ctx.gapInsights.length > 0
+      ? ctx.gapInsights
+        .sort((a, b) => b.severity - a.severity)
+        .slice(0, 4)
+        .map((g) => `  - [SEV ${g.severity}/10] ${g.materia} (${g.subtema || 'Geral'}): ${g.description}`)
+        .join('\n')
+      : '  Sem gaps críticos identificados.';
 
   const dateISO = ctx.dateISO || new Date().toISOString().slice(0, 10);
   const available = Math.max(30, Math.min(720, ctx.availableMinutesToday ?? 180));
@@ -130,15 +146,15 @@ function buildPlannerPrompt(ctx: PlannerDailyRequest): string {
   const deferredIndexes = new Set(ctx.executionContext?.deferredBlockIndexes || []);
   const executionSummary = hasExecutionContext
     ? ctx.executionContext!.currentBlocks!
-        .map((block, idx) => {
-          const status = completedIndexes.has(idx)
-            ? 'concluído'
-            : deferredIndexes.has(idx)
-              ? 'adiado'
-              : 'pendente';
-          return `  - [${idx + 1}] ${block.subject} (${block.durationMinutes} min, ${block.taskType}, prioridade ${block.priority}) -> ${status}`;
-        })
-        .join('\n')
+      .map((block, idx) => {
+        const status = completedIndexes.has(idx)
+          ? 'concluído'
+          : deferredIndexes.has(idx)
+            ? 'adiado'
+            : 'pendente';
+        return `  - [${idx + 1}] ${block.subject} (${block.durationMinutes} min, ${block.taskType}, prioridade ${block.priority}) -> ${status}`;
+      })
+      .join('\n')
     : '  Sem execução anterior para hoje.';
   const replanMode = ctx.replanMode || 'manual';
 
@@ -147,16 +163,18 @@ function buildPlannerPrompt(ctx: PlannerDailyRequest): string {
 OBJETIVO:
 Gerar um plano diário de estudo altamente executável para HOJE, baseado estritamente nos dados do aluno.
 
-REGRAS:
-- Responda APENAS em JSON válido.
-- Não invente matérias fora do contexto fornecido.
-- Priorize matérias negligenciadas e/ou com baixa taxa de acerto.
-- Entregue entre 3 e 6 blocos.
-- Cada bloco deve ter duração entre 20 e 120 minutos.
-- Soma dos blocos deve ficar próxima de ${available} minutos (variação máxima de 20%).
-- Se houver contexto de execução prévia, replaneje os blocos restantes com base no que já foi concluído.
-- Se não houver dados suficientes, ainda assim gere plano simples e prático.
+REGRAS GERAIS:
+- Responda APENAS em JSON válido. Sem formatação markdown de código ao redor ou delimitadores (retorne cru).
+- Não invente matérias fora do contexto fornecido (Plano vs Real).
+- Priorize matérias negligenciadas, de menor acurácia, e principalmente os GAPS DIAGNÓSTICADOS de alta severidade.
+- Entregue entre 3 e 6 blocos. Cada bloco deve ter duração entre 20 e 120 minutos.
+- A soma dos blocos deve ficar próxima de ${available} minutos (variação máxima de 20%).
 - Idioma: português brasileiro.
+
+REGRAS DE REPLANEJAMENTO E RECUPERAÇÃO:
+- Se replanMode = "session_saved": assuma que o aluno acabou de terminar uma sessão. Evite blocos já concluídos. Tente recolocar blocos pendentes/adiados de forma realista.
+- Se replanMode = "recovery": o aluno perdeu dias de estudo ou está com frequência baixa. Gere um "Plano de Resgate". Corte gordura e conteúdos excessivamente teóricos. Foque EXCLUSIVAMENTE em matérias negligenciadas e recuperação dos Gaps diagnosticados usando blocos de revisão e questões. O "rationale" deve ser motivacional, focado em recuperar a semana.
+- Se houver GAPS DIAGNÓSTICADOS, crie ao menos 1 bloco focado explicitamente em corrigir o gap mais grave (Prioridade Alta, tarefa tipo 'revisao' ou 'questoes', citando o subtema no objective).
 
 DADOS DO ALUNO:
 - Nome: ${ctx.userName}
@@ -170,6 +188,9 @@ DADOS DO ALUNO:
 - Janela disponível hoje (alvo): ${available} minutos
 - Tipo de solicitação: ${replanMode}
 
+GAPS DIAGNÓSTICADOS (Alta Prioridade):
+${gapSummary}
+
 HORAS POR MATÉRIA:
 ${subjectSummary}
 
@@ -182,28 +203,22 @@ ${accuracySummary}
 EXECUÇÃO DO PLANO DE HOJE:
 ${executionSummary}
 
-ORIENTAÇÃO ESPECÍFICA DE REPLANEJAMENTO:
-- Se tipo de solicitação for "session_saved", assuma que o aluno acabou de terminar uma sessão agora.
-- Evite repetir blocos marcados como concluídos.
-- Se houver blocos adiados, tente recolocá-los de forma realista.
-- Preserve foco nas matérias negligenciadas e de menor acurácia.
-
-Schema de saída (JSON exato):
+Schema de saída (JSON exato, sem chaves extras):
 {
   "dateISO": "${dateISO}",
-  "rationale": "resumo em 2-4 frases da estratégia do dia",
+  "rationale": "resumo em 2-4 frases da estratégia do dia. Se modo recovery, tom energizante e focado em resgate.",
   "blocks": [
     {
-      "subject": "Nome da matéria",
+      "subject": "Nome exato da matéria tirado do Plano vs Real",
       "durationMinutes": 50,
-      "objective": "objetivo concreto do bloco",
+      "objective": "objetivo concreto do bloco apontando o que fazer (ex: revisar gap em Controle de Constitucionalidade)",
       "taskType": "teoria|questoes|revisao|simulado",
       "priority": "alta|media|baixa"
     }
   ],
   "contingencies": [
     "Se atrasar, reduzir bloco X para 30 min e manter bloco Y",
-    "Se sobrar tempo, fazer 10 questões da matéria Z"
+    "Se sobrar tempo, fazer 10 questões da matéria Z para melhorar acurácia"
   ],
   "estimatedTotalMinutes": 180
 }`;
@@ -238,14 +253,14 @@ function sanitizePlan(raw: Record<string, unknown>, fallbackDateISO: string): Pl
   const safeBlocks: DailyPlanBlock[] = blocks.length > 0
     ? blocks
     : [
-        {
-          subject: 'Matéria prioritária',
-          durationMinutes: 45,
-          objective: 'Revisão ativa + questões de fixação',
-          taskType: 'revisao',
-          priority: 'alta',
-        },
-      ];
+      {
+        subject: 'Matéria prioritária',
+        durationMinutes: 45,
+        objective: 'Revisão ativa + questões de fixação',
+        taskType: 'revisao',
+        priority: 'alta',
+      },
+    ];
 
   const contingencies = Array.isArray(raw.contingencies)
     ? raw.contingencies.filter((c): c is string => typeof c === 'string').slice(0, 4)

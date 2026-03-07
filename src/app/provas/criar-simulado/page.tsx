@@ -6,8 +6,17 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { saveSimulatedConfig, getRandomQuestions, getPredictiveQuestions, getAccuracyBySubject } from '@/lib/firebase/questions';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { QuestionDifficulty, DEFAULT_SUBJECTS } from '@/types';
-import { ArrowLeft, Play, Lock, Brain, Shuffle } from 'lucide-react';
+import { ArrowLeft, Play, Lock, Brain, Shuffle, Zap, Sparkles, Target } from 'lucide-react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { duration: 0.45, delay: i * 0.07, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  }),
+};
 
 export default function CriarSimuladoPage() {
   const router = useRouter();
@@ -27,40 +36,29 @@ export default function CriarSimuladoPage() {
 
   const toggleMateria = (materia: string) => {
     setSelectedMaterias(prev =>
-      prev.includes(materia)
-        ? prev.filter(m => m !== materia)
-        : [...prev, materia]
+      prev.includes(materia) ? prev.filter(m => m !== materia) : [...prev, materia]
     );
   };
-
   const toggleDificuldade = (dif: QuestionDifficulty) => {
     setSelectedDificuldades(prev =>
-      prev.includes(dif)
-        ? prev.filter(d => d !== dif)
-        : [...prev, dif]
+      prev.includes(dif) ? prev.filter(d => d !== dif) : [...prev, dif]
     );
   };
-
   const toggleBanca = (banca: string) => {
     setSelectedBancas(prev =>
-      prev.includes(banca)
-        ? prev.filter(b => b !== banca)
-        : [...prev, banca]
+      prev.includes(banca) ? prev.filter(b => b !== banca) : [...prev, banca]
     );
   };
 
   const handleStart = async () => {
     if (!user) return;
-
     setLoading(true);
     try {
-      // Build filters sans undefined (Firestore rejects undefined values)
       const filters: Record<string, string[]> = {};
       if (selectedMaterias.length > 0) filters.materias = selectedMaterias;
       if (selectedDificuldades.length > 0) filters.dificuldades = selectedDificuldades;
       if (selectedBancas.length > 0) filters.bancas = selectedBancas;
 
-      // 1. Seleciona questões primeiro
       let questions;
       if (smartMode) {
         const accuracyData = await getAccuracyBySubject(user.uid);
@@ -87,7 +85,6 @@ export default function CriarSimuladoPage() {
         return;
       }
 
-      // 2. Salva config COM questionIds
       const questionIds = questions.map(q => q.id).filter(Boolean) as string[];
       const configId = await saveSimulatedConfig({
         userId: user.uid,
@@ -99,7 +96,6 @@ export default function CriarSimuladoPage() {
         filters,
       });
 
-      // 3. Redireciona para execução
       router.push('/provas/' + configId + '/executar');
     } catch (error) {
       console.error('Erro ao criar simulado:', error);
@@ -110,42 +106,42 @@ export default function CriarSimuladoPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <p className="text-gray-400">Faça login para criar simulados</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
+        <p className="text-[#666] font-mono">Faça login para criar simulados</p>
       </div>
     );
   }
 
   if (!capabilities.canCreateSimulados) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
-        <div className="mx-auto max-w-3xl space-y-6">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/provas"
-              className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5 text-gray-400" />
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-white sm:text-3xl">Criar Simulado</h1>
-              <p className="text-gray-400">Recurso de plano Pro/Premium</p>
+      <div className="relative min-h-screen bg-[#0A0A0A]">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 right-1/4 h-[400px] w-[400px] rounded-full bg-[#3150AA]/8 blur-[140px]" />
+        </div>
+        <div className="relative px-6 py-8">
+          <div className="mx-auto max-w-3xl space-y-6">
+            <div className="flex items-center gap-4">
+              <Link href="/provas" className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.03] text-[#666] transition-all hover:bg-white/[0.06] hover:text-slate-300">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+              <div>
+                <h1 className="font-brand text-2xl font-bold text-white">Criar Simulado</h1>
+                <p className="text-sm text-[#666] font-mono">Recurso Pro/Premium</p>
+              </div>
             </div>
-          </div>
-
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-8 text-center">
-            <Lock className="mx-auto mb-4 h-12 w-12 text-amber-300" />
-            <p className="text-lg font-semibold text-amber-100">Simulados personalizados estão no plano Pro/Premium</p>
-            <p className="mt-2 text-sm text-amber-200/80">
-              Você pode continuar usando provas oficiais na seção Provas &amp; Simulados.
-            </p>
-            <Link
-              href="/provas"
-              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-amber-500/20 px-4 py-2 text-sm text-amber-100 hover:bg-amber-500/30"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar para Provas
-            </Link>
+            <div className="rounded-2xl border border-[#F59768]/20 p-10 text-center" style={{ background: 'linear-gradient(135deg, rgba(245,151,104,0.05), rgba(49,80,170,0.05))' }}>
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F59768]/15">
+                <Lock className="h-7 w-7 text-[#F59768]" />
+              </div>
+              <p className="font-brand text-lg font-semibold text-white">Simulados personalizados — Pro/Premium</p>
+              <p className="mt-2 text-sm text-[#666] max-w-md mx-auto">
+                Você pode continuar usando provas oficiais na seção Provas &amp; Simulados.
+              </p>
+              <Link href="/provas" className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.03] px-5 py-2.5 text-sm text-[#666] transition-all hover:bg-white/[0.06] hover:text-slate-300 font-mono">
+                <ArrowLeft className="h-4 w-4" />
+                Voltar para Provas
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -153,168 +149,198 @@ export default function CriarSimuladoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-4 sm:p-6">
-      <div className="mx-auto max-w-4xl space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Link
-            href="/provas"
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-400" />
+    <div className="relative min-h-screen bg-[#0A0A0A]">
+      {/* Atmospheric depth */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 left-1/4 h-[400px] w-[400px] rounded-full bg-[#3150AA]/8 blur-[140px]" />
+        <div className="absolute bottom-1/4 -right-40 h-[350px] w-[350px] rounded-full bg-[#F59768]/5 blur-[120px]" />
+      </div>
+
+      {/* Hero Header */}
+      <div className="relative border-b border-white/[0.07] px-6 py-8"
+        style={{ background: 'linear-gradient(180deg, rgba(14,17,27,0.9) 0%, rgba(10,10,10,0.95) 100%)' }}
+      >
+        <div className="rds-grid-bg absolute inset-0 pointer-events-none" />
+        <div className="relative mx-auto max-w-4xl flex items-center gap-4">
+          <Link href="/provas" className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.03] text-[#666] transition-all hover:bg-white/[0.06] hover:text-slate-300">
+            <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-white sm:text-3xl">Criar Simulado</h1>
-            <p className="text-gray-400">Configure seu simulado personalizado</p>
+            <div className="flex items-center gap-2.5 mb-1">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#F59768] opacity-40" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#F59768]" style={{ boxShadow: '0 0 10px rgba(245,151,104,0.6)' }} />
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#666] font-mono">Configuração</span>
+            </div>
+            <h1 className="font-brand text-2xl font-bold text-white">Criar Simulado</h1>
+            <p className="text-sm text-[#666]">Configure seu simulado personalizado</p>
           </div>
         </div>
+      </div>
 
-        {/* Configurações Básicas */}
-        <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-white mb-4">Configurações</h2>
+      {/* Content */}
+      <div className="relative px-6 py-6">
+        <div className="mx-auto max-w-4xl space-y-5">
 
-          {/* Smart Mode Toggle */}
-          <div className="flex items-center gap-3 rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
-            <button
-              onClick={() => setSmartMode(!smartMode)}
-              className={'relative inline-flex h-7 w-12 items-center rounded-full transition-colors ' + (smartMode ? 'bg-violet-600' : 'bg-gray-600')}
+          {/* Configurações Básicas */}
+          <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show"
+            className="relative overflow-hidden rounded-2xl border border-white/[0.10] p-6"
+            style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+          >
+            <h2 className="font-brand text-lg font-bold text-white mb-5">Configurações</h2>
+
+            {/* Smart Mode Toggle */}
+            <div className="flex items-center gap-4 rounded-2xl border border-[#F59768]/20 p-5 mb-5"
+              style={{ background: smartMode ? 'rgba(245,151,104,0.05)' : 'rgba(255,255,255,0.02)' }}
             >
-              <span className={'inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ' + (smartMode ? 'translate-x-6' : 'translate-x-1')} />
-            </button>
-            <div className="flex items-center gap-2">
-              {smartMode ? <Brain className="h-5 w-5 text-violet-400" /> : <Shuffle className="h-5 w-5 text-gray-400" />}
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  {smartMode ? 'Simulado Inteligente (IA)' : 'Simulado Clássico'}
-                </p>
-                <p className="text-xs text-gray-400">
-                  {smartMode
-                    ? 'Questões priorizadas pelos seus pontos fracos e peso do edital'
-                    : 'Questões selecionadas aleatoriamente'}
-                </p>
+              <button
+                onClick={() => setSmartMode(!smartMode)}
+                className={'relative inline-flex h-7 w-12 items-center rounded-full transition-colors'}
+                style={{ background: smartMode ? 'var(--identity-grad)' : 'rgba(255,255,255,0.1)' }}
+              >
+                <span className={'inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ' + (smartMode ? 'translate-x-6' : 'translate-x-1')} />
+              </button>
+              <div className="flex items-center gap-2.5">
+                {smartMode
+                  ? <Brain className="h-5 w-5 text-[#F59768]" />
+                  : <Shuffle className="h-5 w-5 text-[#666]" />
+                }
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    {smartMode ? 'Simulado Inteligente (IA)' : 'Simulado Clássico'}
+                  </p>
+                  <p className="text-xs text-[#666] font-mono">
+                    {smartMode
+                      ? 'Questões priorizadas pelos seus pontos fracos e peso do edital'
+                      : 'Questões selecionadas aleatoriamente'}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Número de questões
-              </label>
-              <input
-                type="number"
-                min={1}
-                max={100}
-                value={questionCount}
-                onChange={(e) => setQuestionCount(Number(e.target.value))}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#666] font-mono mb-2">
+                  Número de questões
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={questionCount}
+                  onChange={(e) => setQuestionCount(Number(e.target.value))}
+                  className="w-full rounded-full border border-white/[0.10] bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-all focus:border-[#3150AA]/50 focus:ring-1 focus:ring-[#3150AA]/30"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#666] font-mono mb-2">
+                  Duração (min) — 0 para ilimitado
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={300}
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(Number(e.target.value))}
+                  className="w-full rounded-full border border-white/[0.10] bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-all focus:border-[#3150AA]/50 focus:ring-1 focus:ring-[#3150AA]/30"
+                />
+              </div>
             </div>
+          </motion.div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Duração (minutos) - 0 para ilimitado
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={300}
-                value={durationMinutes}
-                onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Filtro de Matérias */}
-        <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Matérias</h2>
-          <p className="text-sm text-gray-400 mb-4">
-            Deixe vazio para incluir todas as matérias
-          </p>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-            {DEFAULT_SUBJECTS.map((materia) => (
-              <button
-                key={materia}
-                onClick={() => toggleMateria(materia)}
-                className={`px-4 py-2 rounded-lg border-2 transition-all text-sm ${selectedMaterias.includes(materia)
-                  ? 'border-violet-500 bg-violet-500/10 text-violet-300'
-                  : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
-                  }`}
-              >
-                {materia}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Filtro de Bancas */}
-        <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Bancas</h2>
-          <p className="text-sm text-gray-400 mb-4">
-            Deixe vazio para incluir todas as bancas
-          </p>
-
-          <div className="flex flex-wrap gap-3">
-            {bancasDisponiveis.map((banca) => (
-              <button
-                key={banca}
-                onClick={() => toggleBanca(banca)}
-                className={`px-4 py-2 rounded-lg border-2 transition-all ${selectedBancas.includes(banca)
-                  ? 'border-violet-500 bg-violet-500/10 text-violet-300'
-                  : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
-                  }`}
-              >
-                {banca}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Filtro de Dificuldade */}
-        <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Dificuldade</h2>
-          <p className="text-sm text-gray-400 mb-4">
-            Deixe vazio para incluir todas as dificuldades
-          </p>
-
-          <div className="flex flex-wrap gap-3">
-            {dificuldades.map((dif) => (
-              <button
-                key={dif}
-                onClick={() => toggleDificuldade(dif)}
-                className={`px-4 py-2 rounded-lg border-2 transition-all capitalize ${selectedDificuldades.includes(dif)
-                  ? 'border-violet-500 bg-violet-500/10 text-violet-300'
-                  : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
-                  }`}
-              >
-                {dif}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Botão Iniciar */}
-        <div className="flex gap-4">
-          <button
-            onClick={handleStart}
-            disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          {/* Matérias */}
+          <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show"
+            className="relative overflow-hidden rounded-2xl border border-white/[0.10] p-6"
+            style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}
           >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                Preparando...
-              </>
-            ) : (
-              <>
-                <Play className="h-5 w-5" />
-                Iniciar Simulado
-              </>
-            )}
-          </button>
+            <h2 className="font-brand text-lg font-bold text-white mb-2">Matérias</h2>
+            <p className="text-xs text-[#666] font-mono mb-5">Deixe vazio para incluir todas</p>
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
+              {DEFAULT_SUBJECTS.map((materia) => (
+                <button
+                  key={materia}
+                  onClick={() => toggleMateria(materia)}
+                  className={`px-4 py-2.5 rounded-full border-2 transition-all text-sm font-medium ${selectedMaterias.includes(materia)
+                    ? 'border-[#F59768]/50 text-[#F59768]'
+                    : 'border-white/[0.10] text-[#666] hover:border-white/[0.20] hover:text-slate-300'
+                    }`}
+                  style={selectedMaterias.includes(materia) ? { background: 'rgba(245,151,104,0.1)' } : { background: 'rgba(255,255,255,0.02)' }}
+                >
+                  {materia}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Bancas */}
+          <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show"
+            className="relative overflow-hidden rounded-2xl border border-white/[0.10] p-6"
+            style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+          >
+            <h2 className="font-brand text-lg font-bold text-white mb-2">Bancas</h2>
+            <p className="text-xs text-[#666] font-mono mb-5">Deixe vazio para incluir todas</p>
+            <div className="flex flex-wrap gap-2.5">
+              {bancasDisponiveis.map((banca) => (
+                <button
+                  key={banca}
+                  onClick={() => toggleBanca(banca)}
+                  className={`px-5 py-2.5 rounded-full border-2 transition-all text-sm font-medium ${selectedBancas.includes(banca)
+                    ? 'border-[#3150AA]/50 text-[#F59768]'
+                    : 'border-white/[0.10] text-[#666] hover:border-white/[0.20] hover:text-slate-300'
+                    }`}
+                  style={selectedBancas.includes(banca) ? { background: 'rgba(49,80,170,0.15)' } : { background: 'rgba(255,255,255,0.02)' }}
+                >
+                  {banca}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Dificuldade */}
+          <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show"
+            className="relative overflow-hidden rounded-2xl border border-white/[0.10] p-6"
+            style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+          >
+            <h2 className="font-brand text-lg font-bold text-white mb-2">Dificuldade</h2>
+            <p className="text-xs text-[#666] font-mono mb-5">Deixe vazio para incluir todas</p>
+            <div className="flex flex-wrap gap-2.5">
+              {dificuldades.map((dif) => (
+                <button
+                  key={dif}
+                  onClick={() => toggleDificuldade(dif)}
+                  className={`px-5 py-2.5 rounded-full border-2 transition-all text-sm font-medium capitalize ${selectedDificuldades.includes(dif)
+                    ? 'border-[#F59768]/50 text-[#F59768]'
+                    : 'border-white/[0.10] text-[#666] hover:border-white/[0.20] hover:text-slate-300'
+                    }`}
+                  style={selectedDificuldades.includes(dif) ? { background: 'rgba(245,151,104,0.1)' } : { background: 'rgba(255,255,255,0.02)' }}
+                >
+                  {dif}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Start button */}
+          <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
+            <button
+              onClick={handleStart}
+              disabled={loading}
+              className="rds-btn-identity w-full flex items-center justify-center gap-3 px-6 py-4 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  Preparando...
+                </>
+              ) : (
+                <>
+                  <Play className="h-5 w-5" />
+                  Iniciar Simulado
+                </>
+              )}
+            </button>
+          </motion.div>
         </div>
       </div>
     </div>

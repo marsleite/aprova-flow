@@ -55,12 +55,12 @@ export default function Header({
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         {/* Logo & Nome */}
         <div className="flex items-center gap-3 self-start sm:self-auto">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-blue-500 shadow-lg shadow-violet-500/25">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-blue-500 shadow-lg shadow-[#3150AA]/25">
             <Zap className="h-5 w-5 text-white" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">
-              Aprova<span className="text-violet-400">Mind</span>
+              Aprova<span className="text-[#F59768]">Mind</span>
             </h1>
             <p className="hidden text-xs text-gray-500 sm:block">
               Rastreie seu progresso

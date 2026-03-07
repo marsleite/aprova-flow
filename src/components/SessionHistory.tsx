@@ -284,16 +284,16 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
-            <History className="h-4 w-4 text-violet-400" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3150AA]/10">
+            <History className="h-4 w-4 text-[#F59768]" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white">Histórico Completo</h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[#666]">
               {sessions.length} {sessions.length === 1 ? 'sessão' : 'sessões'} encontradas
             </p>
           </div>
@@ -312,8 +312,8 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
             onClick={() => setFiltersOpen((v) => !v)}
             className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition ${
               hasFilters
-                ? 'border-blue-500/40 text-blue-300'
-                : 'border-white/[0.08] text-slate-500 hover:text-white'
+                ? 'border-blue-500/40 text-[#F59768]/80'
+                : 'border-white/[0.08] text-[#666] hover:text-white'
             }`}
           >
             <Filter className="h-3.5 w-3.5" />
@@ -333,7 +333,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
           <button
             onClick={() => exportSessionsCSV(sessions)}
             disabled={sessions.length === 0}
-            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500 transition hover:text-white disabled:opacity-40"
+            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-[#666] transition hover:text-white disabled:opacity-40"
           >
             <Download className="h-3.5 w-3.5" />
             CSV
@@ -445,7 +445,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                   <p className="truncate text-sm font-medium text-white">{s.subject}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {s.source === 'manual' && (
-                      <span className="rounded-md bg-blue-500/15 px-2 py-0.5 text-[10px] font-medium text-blue-300">
+                      <span className="rounded-md bg-[#3150AA]/15 px-2 py-0.5 text-[10px] font-medium text-[#F59768]/80">
                         Manual
                       </span>
                     )}
@@ -473,7 +473,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                 </div>
 
                 <div className="flex items-center gap-2 self-start sm:self-auto">
-                  <span className="rounded-lg bg-violet-500/10 px-2.5 py-1 text-xs font-medium text-violet-300">
+                  <span className="rounded-lg bg-[#3150AA]/10 px-2.5 py-1 text-xs font-medium text-violet-300">
                     {formatRelativeDate(s.date)}
                   </span>
                   <button

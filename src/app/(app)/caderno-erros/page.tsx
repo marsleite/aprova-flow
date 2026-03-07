@@ -26,10 +26,95 @@ interface ErrorEntry {
     question: QuestionBankItem;
 }
 
+interface GapItem {
+    description: string;
+    dimension: 'legislacao' | 'jurisprudencia' | 'interpretacao' | 'conceitual';
+    severity: number;
+    materia: string;
+    subtema?: string;
+    advice: string;
+}
+
+interface Flashcard {
+    topic: string;
+    front: string;
+    back: string;
+    source: string;
+}
+
 interface DiagnosisResult {
-    patterns: string[];
-    recommendations: string[];
+    gaps: GapItem[];
+    overallScore: {
+        legislacao: number;
+        jurisprudencia: number;
+        interpretacao: number;
+        conceitual: number;
+    };
+    flashcards: Flashcard[];
     criticalSubjects: string[];
+    summary: string;
+    // backward compat
+    patterns?: string[];
+    recommendations?: string[];
+}
+
+const DIMENSION_LABELS: Record<string, { label: string; color: string; emoji: string }> = {
+    legislacao: { label: 'Legislação', color: 'text-[#F59768]', emoji: '📜' },
+    jurisprudencia: { label: 'Jurisprudência', color: 'text-purple-400', emoji: '⚖️' },
+    interpretacao: { label: 'Interpretação', color: 'text-amber-400', emoji: '🔍' },
+    conceitual: { label: 'Conceitual', color: 'text-emerald-400', emoji: '📚' },
+};
+
+function SeverityBar({ value }: { value: number }) {
+    const color = value >= 8 ? 'bg-red-500' : value >= 5 ? 'bg-amber-500' : 'bg-emerald-500';
+    return (
+        <div className="flex items-center gap-2">
+            <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${color} transition-all duration-500`} style={{ width: `${value * 10}%` }} />
+            </div>
+            <span className="text-xs text-gray-400 w-6 text-right">{value}</span>
+        </div>
+    );
+}
+
+function ScoreBar({ label, emoji, value, color }: { label: string; emoji: string; value: number; color: string }) {
+    const barColor = value >= 70 ? 'bg-emerald-500' : value >= 40 ? 'bg-amber-500' : 'bg-red-500';
+    return (
+        <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs">
+                <span className={`${color} font-medium`}>{emoji} {label}</span>
+                <span className="text-gray-400">{value}%</span>
+            </div>
+            <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${barColor} transition-all duration-700`} style={{ width: `${value}%` }} />
+            </div>
+        </div>
+    );
+}
+
+function FlashcardItem({ card }: { card: Flashcard }) {
+    const [flipped, setFlipped] = useState(false);
+    return (
+        <div
+            onClick={() => setFlipped(prev => !prev)}
+            className="cursor-pointer rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 min-h-[120px] flex flex-col justify-between hover:border-emerald-500/40 transition-colors"
+        >
+            <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 mb-2">{card.topic}</p>
+                {flipped ? (
+                    <p className="text-sm text-emerald-200 font-medium">{card.back}</p>
+                ) : (
+                    <p className="text-sm text-gray-300">{card.front}</p>
+                )}
+            </div>
+            <div className="flex items-center justify-between mt-3">
+                <span className="text-[10px] text-gray-500">{card.source}</span>
+                <span className="text-[10px] text-emerald-500 font-medium">
+                    {flipped ? '← Voltar' : 'Ver resposta →'}
+                </span>
+            </div>
+        </div>
+    );
 }
 
 export default function CadernoErrosPage() {
@@ -103,7 +188,7 @@ export default function CadernoErrosPage() {
     };
 
     const handleDiagnosis = async () => {
-        if (!user || errors.length === 0) return;
+        if (!user || filteredErrors.length === 0) return;
         try {
             setDiagnosisLoading(true);
             setDiagnosisError(null);
@@ -111,10 +196,13 @@ export default function CadernoErrosPage() {
             const token = await auth.currentUser?.getIdToken();
             if (!token) throw new Error('Sessão expirada.');
 
-            const errorPayload = errors.slice(0, 50).map(e => ({
+            // Use filtered errors (by matéria) or limit to 15 most recent
+            const errorsToAnalyze = filteredErrors.slice(0, 15);
+
+            const errorPayload = errorsToAnalyze.map(e => ({
                 materia: e.question.materia,
                 subtema: e.question.subtema || '',
-                statement: e.question.statement,
+                statement: e.question.statement.substring(0, 80),
                 correctAnswer: e.question.answer,
                 studentAnswer: e.attempt.selectedOption,
             }));
@@ -131,6 +219,9 @@ export default function CadernoErrosPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Erro ao gerar diagnóstico.');
             setDiagnosis(data);
+            if (data.gaps) {
+                localStorage.setItem('aprovamind_last_gaps', JSON.stringify(data.gaps));
+            }
         } catch (err) {
             setDiagnosisError(err instanceof Error ? err.message : 'Erro desconhecido.');
         } finally {
@@ -163,16 +254,16 @@ export default function CadernoErrosPage() {
     const worstMateria = sortedGroups[0]?.[0] || '—';
 
     return (
-        <div className="min-h-screen bg-[#080c14]">
+        <div className="min-h-screen bg-[#0A0A0A]">
             {/* Header */}
-            <div className="border-b border-white/[0.05] bg-[#0b1120]/60 px-6 py-5 backdrop-blur-sm">
+            <div className="border-b border-white/[0.05] bg-[#0E111B]/60 px-6 py-5 backdrop-blur-sm">
                 <div className="flex items-start justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <BookX className="h-6 w-6 text-red-400" />
                             <h1 className="text-2xl font-bold text-white">Caderno de Erros</h1>
                         </div>
-                        <p className="mt-0.5 text-sm text-slate-500">
+                        <p className="mt-0.5 text-sm text-[#666]">
                             Seus erros organizados com diagnóstico IA para nunca mais repetir
                         </p>
                     </div>
@@ -188,27 +279,27 @@ export default function CadernoErrosPage() {
                     <>
                         {/* KPI Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4">
+                            <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
                                 <p className="text-[10px] font-semibold uppercase tracking-wider text-red-400">Total de Erros</p>
                                 <p className="mt-1 text-3xl font-bold text-white">{totalErrors}</p>
-                                <p className="text-xs text-slate-500 mt-1">{showMastered ? 'incluindo dominados' : 'não dominados'}</p>
+                                <p className="text-xs text-[#666] mt-1">{showMastered ? 'incluindo dominados' : 'não dominados'}</p>
                             </div>
-                            <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4">
+                            <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
                                 <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-400">Matérias Afetadas</p>
                                 <p className="mt-1 text-3xl font-bold text-white">{activeMaterias}</p>
-                                <p className="text-xs text-slate-500 mt-1">matérias com erros</p>
+                                <p className="text-xs text-[#666] mt-1">matérias com erros</p>
                             </div>
-                            <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4">
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-400">Matéria Mais Fraca</p>
+                            <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#F59768]">Matéria Mais Fraca</p>
                                 <p className="mt-1 text-lg font-bold text-white truncate">{worstMateria}</p>
-                                <p className="text-xs text-slate-500 mt-1">{sortedGroups[0]?.[1]?.length || 0} erros</p>
+                                <p className="text-xs text-[#666] mt-1">{sortedGroups[0]?.[1]?.length || 0} erros</p>
                             </div>
                         </div>
 
                         {/* Filters & Actions */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                             <div className="flex items-center gap-2">
-                                <Filter className="h-4 w-4 text-slate-500" />
+                                <Filter className="h-4 w-4 text-[#666]" />
                                 <select
                                     value={filterMateria}
                                     onChange={(e) => setFilterMateria(e.target.value)}
@@ -231,7 +322,7 @@ export default function CadernoErrosPage() {
 
                             <button
                                 onClick={handleDiagnosis}
-                                disabled={diagnosisLoading || errors.length === 0}
+                                disabled={diagnosisLoading || filteredErrors.length === 0}
                                 className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-lg transition-colors text-sm font-medium"
                             >
                                 {diagnosisLoading ? (
@@ -239,7 +330,10 @@ export default function CadernoErrosPage() {
                                 ) : (
                                     <Sparkles className="h-4 w-4" />
                                 )}
-                                Diagnóstico IA
+                                {filterMateria
+                                    ? `🕵️ Analisar ${filterMateria}`
+                                    : `🕵️ Analisar (${Math.min(filteredErrors.length, 15)} erros)`
+                                }
                             </button>
                         </div>
 
@@ -251,60 +345,116 @@ export default function CadernoErrosPage() {
                         )}
 
                         {diagnosis && (
-                            <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-6 space-y-5 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-violet-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                            <div className="rounded-xl border border-[#3150AA]/20 bg-violet-500/5 p-6 space-y-6 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-[#3150AA]/10 blur-3xl rounded-full pointer-events-none"></div>
+                                <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-[#3150AA]/10 blur-3xl rounded-full pointer-events-none"></div>
 
-                                <h3 className="flex items-center gap-2 text-lg font-bold text-white">
-                                    <Sparkles className="h-5 w-5 text-violet-400" />
-                                    Diagnóstico do Mentor IA
-                                </h3>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="flex items-center gap-2 text-lg font-bold text-white">
+                                        <Sparkles className="h-5 w-5 text-[#F59768]" />
+                                        🕵️ Gap Analyzer — Diagnóstico Profundo
+                                    </h3>
+                                </div>
 
-                                <div className="grid gap-4 md:grid-cols-3">
-                                    {/* Patterns */}
-                                    <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <AlertTriangle className="h-4 w-4 text-red-400" />
-                                            <h4 className="text-sm font-bold text-red-400 uppercase tracking-wider">Padrões de Erro</h4>
-                                        </div>
-                                        <ul className="space-y-2">
-                                            {diagnosis.patterns.map((p, i) => (
-                                                <li key={i} className="text-sm text-gray-300 flex gap-2">
-                                                    <TrendingDown className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
-                                                    {p}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                {/* Summary */}
+                                {diagnosis.summary && (
+                                    <p className="text-sm text-gray-300 bg-white/[0.03] rounded-lg p-3 border border-white/[0.05]">
+                                        {diagnosis.summary}
+                                    </p>
+                                )}
+
+                                <div className="grid gap-5 md:grid-cols-2">
+                                    {/* Left: Gaps List */}
+                                    <div className="space-y-3">
+                                        <h4 className="flex items-center gap-2 text-sm font-bold text-red-400 uppercase tracking-wider">
+                                            <AlertTriangle className="h-4 w-4" />
+                                            Gaps Identificados
+                                        </h4>
+                                        {diagnosis.gaps.length > 0 ? (
+                                            diagnosis.gaps.map((gap, i) => {
+                                                const dim = DIMENSION_LABELS[gap.dimension] || DIMENSION_LABELS.conceitual;
+                                                return (
+                                                    <div key={i} className="rounded-lg border border-white/[0.07] bg-[#0E111B] p-4 space-y-2">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <span className="text-sm text-gray-200">{gap.description}</span>
+                                                            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${dim.color} border-current whitespace-nowrap`}>
+                                                                {dim.emoji} {dim.label}
+                                                            </span>
+                                                        </div>
+                                                        <SeverityBar value={gap.severity} />
+                                                        <div className="flex items-start gap-2 mt-1">
+                                                            <Lightbulb className="h-3.5 w-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
+                                                            <p className="text-xs text-amber-300/80">{gap.advice}</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : diagnosis.patterns && diagnosis.patterns.length > 0 ? (
+                                            /* Backward compat: old format */
+                                            diagnosis.patterns.map((p, i) => (
+                                                <div key={i} className="rounded-lg border border-white/[0.07] bg-[#0E111B] p-4">
+                                                    <div className="flex items-start gap-2">
+                                                        <TrendingDown className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
+                                                        <span className="text-sm text-gray-300">{p}</span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : null}
                                     </div>
 
-                                    {/* Recommendations */}
-                                    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <Lightbulb className="h-4 w-4 text-emerald-400" />
-                                            <h4 className="text-sm font-bold text-emerald-400 uppercase tracking-wider">Recomendações</h4>
-                                        </div>
-                                        <ul className="space-y-2">
-                                            {diagnosis.recommendations.map((r, i) => (
-                                                <li key={i} className="text-sm text-gray-300 flex gap-2">
-                                                    <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                                                    {r}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                    {/* Right: Score + Critical */}
+                                    <div className="space-y-5">
+                                        {/* Dimension Scores */}
+                                        {diagnosis.overallScore && (
+                                            <div className="rounded-lg border border-white/[0.07] bg-[#0E111B] p-4 space-y-3">
+                                                <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+                                                    Perfil por Dimensão
+                                                </h4>
+                                                {Object.entries(DIMENSION_LABELS).map(([key, dim]) => (
+                                                    <ScoreBar
+                                                        key={key}
+                                                        label={dim.label}
+                                                        emoji={dim.emoji}
+                                                        value={diagnosis.overallScore[key as keyof typeof diagnosis.overallScore] || 50}
+                                                        color={dim.color}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
 
-                                    {/* Critical Subjects */}
-                                    <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <AlertTriangle className="h-4 w-4 text-amber-400" />
-                                            <h4 className="text-sm font-bold text-amber-400 uppercase tracking-wider">Matérias Críticas</h4>
-                                        </div>
-                                        <ul className="space-y-2">
-                                            {diagnosis.criticalSubjects.map((s, i) => (
-                                                <li key={i} className="text-sm text-gray-300 font-medium">{s}</li>
-                                            ))}
-                                        </ul>
+                                        {/* Critical Subjects */}
+                                        {diagnosis.criticalSubjects.length > 0 && (
+                                            <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+                                                <h4 className="flex items-center gap-2 text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">
+                                                    <AlertTriangle className="h-4 w-4" />
+                                                    Matérias Críticas
+                                                </h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {diagnosis.criticalSubjects.map((s, i) => (
+                                                        <span key={i} className="text-xs px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-300 font-medium">
+                                                            {s}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+
+                                {/* Flashcards */}
+                                {diagnosis.flashcards && diagnosis.flashcards.length > 0 && (
+                                    <div className="space-y-3">
+                                        <h4 className="flex items-center gap-2 text-sm font-bold text-emerald-400 uppercase tracking-wider">
+                                            <Lightbulb className="h-4 w-4" />
+                                            Fichas de Revisão Rápida
+                                        </h4>
+                                        <div className="grid gap-3 md:grid-cols-3">
+                                            {diagnosis.flashcards.map((card, i) => (
+                                                <FlashcardItem key={i} card={card} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -313,7 +463,7 @@ export default function CadernoErrosPage() {
                             <div className="text-center py-20">
                                 <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
                                 <h2 className="text-xl font-bold text-white mb-2">Nenhum erro encontrado!</h2>
-                                <p className="text-sm text-slate-500 mb-6">Continue praticando nos simulados. Seus erros aparecerão aqui.</p>
+                                <p className="text-sm text-[#666] mb-6">Continue praticando nos simulados. Seus erros aparecerão aqui.</p>
                                 <a
                                     href="/simulations"
                                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl transition-colors text-sm font-semibold"
@@ -325,7 +475,7 @@ export default function CadernoErrosPage() {
                         ) : (
                             <div className="space-y-6">
                                 {sortedGroups.map(([materia, entries]) => (
-                                    <div key={materia} className="rounded-xl border border-white/[0.06] bg-[#0f1825] overflow-hidden">
+                                    <div key={materia} className="rounded-xl border border-white/[0.07] bg-[#0E111B] overflow-hidden">
                                         {/* Group Header */}
                                         <div className="flex items-center justify-between px-5 py-3 bg-white/[0.02] border-b border-white/[0.05]">
                                             <div className="flex items-center gap-3">
@@ -370,7 +520,7 @@ export default function CadernoErrosPage() {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="flex-shrink-0 text-slate-500">
+                                                            <div className="flex-shrink-0 text-[#666]">
                                                                 {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                                                             </div>
                                                         </div>

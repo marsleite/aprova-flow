@@ -67,12 +67,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#080c14]">
+      <div className="flex min-h-screen items-center justify-center bg-[#0A0A0A]">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-600">
+          <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
             <Zap className="h-6 w-6 text-white" />
           </div>
-          <p className="text-xs text-slate-500">Carregando...</p>
+          <p className="text-xs text-[#666] font-mono">Carregando...</p>
         </div>
       </div>
     );
@@ -95,14 +95,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Main area */}
         <div className="app-main flex flex-col">
           {/* Mobile top bar */}
-          <div className="flex items-center gap-3 border-b border-white/5 bg-[#0b1120]/80 px-4 py-3 backdrop-blur-xl lg:hidden">
+          <div className="flex items-center gap-3 border-b border-white/[0.07] bg-[#0E111B]/80 px-4 py-3 backdrop-blur-xl lg:hidden">
             <MobileMenuButton onClick={() => setMobileOpen(true)} />
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-violet-600">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
                 <Zap className="h-3.5 w-3.5 text-white" />
               </div>
-              <span className="text-sm font-bold text-white">
-                Aprova<span className="text-blue-400">Mind</span>
+              <span className="font-brand text-sm font-bold text-white">
+                Aprova<span className="text-[#F59768]">Mind</span>
               </span>
             </div>
           </div>

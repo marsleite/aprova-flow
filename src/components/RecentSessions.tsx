@@ -21,7 +21,7 @@ interface RecentSessionsProps {
 function getSubjectColor(subject: string): { bg: string; text: string; dot: string } {
   const colors = [
     { bg: 'bg-violet-500/15', text: 'text-violet-300', dot: 'bg-violet-400' },
-    { bg: 'bg-blue-500/15', text: 'text-blue-300', dot: 'bg-blue-400' },
+    { bg: 'bg-[#3150AA]/15', text: 'text-[#F59768]/80', dot: 'bg-blue-400' },
     { bg: 'bg-cyan-500/15', text: 'text-cyan-300', dot: 'bg-cyan-400' },
     { bg: 'bg-emerald-500/15', text: 'text-emerald-300', dot: 'bg-emerald-400' },
     { bg: 'bg-amber-500/15', text: 'text-amber-300', dot: 'bg-amber-400' },
@@ -123,7 +123,7 @@ export default function RecentSessions({ sessions, loading }: RecentSessionsProp
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
@@ -132,7 +132,7 @@ export default function RecentSessions({ sessions, loading }: RecentSessionsProp
         </div>
         <div>
           <h2 className="text-sm font-semibold text-white">Sessões Recentes</h2>
-          <p className="text-xs text-slate-500">Últimas sessões de estudo</p>
+          <p className="text-xs text-[#666]">Últimas sessões de estudo</p>
         </div>
       </div>
 

@@ -46,8 +46,8 @@ const PLAN_CARDS: PlanCard[] = [
     priceLabel: 'R$ 29/mês',
     description: 'Para constância diária',
     highlight: 'Mais escolhido',
-    accentClass: 'text-blue-300',
-    borderClass: 'border-blue-500/30',
+    accentClass: 'text-[#F59768]/80',
+    borderClass: 'border-[#3150AA]/30',
   },
   {
     tier: 'premium',
@@ -273,7 +273,7 @@ export default function AccountPlanModal({
                           <p className="mt-0.5 whitespace-nowrap text-[28px] leading-none text-white">{plan.priceLabel}</p>
                         </div>
                         {plan.highlight && (
-                          <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] text-violet-200">
+                          <span className="rounded-full bg-[#3150AA]/20 px-2 py-0.5 text-[10px] text-violet-200">
                             {plan.highlight}
                           </span>
                         )}
@@ -330,7 +330,7 @@ export default function AccountPlanModal({
                         className={`mt-auto flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
                           isCurrent
                             ? 'bg-white/10 text-gray-300'
-                            : 'bg-gradient-to-r from-violet-600 to-blue-600 text-white hover:brightness-110'
+                            : 'bg-gradient-to-r from-[#F59768] to-[#3150AA] text-white hover:brightness-110'
                         } disabled:cursor-not-allowed disabled:opacity-70`}
                       >
                         {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -361,7 +361,7 @@ export default function AccountPlanModal({
                         <tr className="border-b border-white/10">
                           <th className="px-3 py-2 text-gray-400">Recurso</th>
                           <th className="px-3 py-2 text-gray-200">Free</th>
-                          <th className="px-3 py-2 text-blue-300">Pro</th>
+                          <th className="px-3 py-2 text-[#F59768]/80">Pro</th>
                           <th className="px-3 py-2 text-violet-300">Premium</th>
                         </tr>
                       </thead>

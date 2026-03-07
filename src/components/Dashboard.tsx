@@ -433,7 +433,7 @@ export default function Dashboard() {
           className="mb-8"
         >
           <div className="mb-4 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-violet-400" />
+            <TrendingUp className="h-5 w-5 text-[#F59768]" />
             <h3 className="text-lg font-semibold text-white">Visão Geral</h3>
           </div>
           <SummaryCards summary={summary} loading={loading} />
@@ -503,17 +503,17 @@ export default function Dashboard() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="mb-2 flex items-center gap-2">
-                    <BookOpen className="h-6 w-6 text-violet-400" />
+                    <BookOpen className="h-6 w-6 text-[#F59768]" />
                     <h3 className="text-xl font-semibold text-white">Provas & Simulados</h3>
                   </div>
                   <p className="mb-4 text-sm text-gray-400">
                     Pratique com provas oficiais, crie simulados personalizados e teste seus conhecimentos
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300">
+                    <span className="rounded-full bg-[#3150AA]/10 px-3 py-1 text-xs font-medium text-violet-300">
                       Provas Oficiais
                     </span>
-                    <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300">
+                    <span className="rounded-full bg-[#3150AA]/10 px-3 py-1 text-xs font-medium text-[#F59768]/80">
                       Simulados
                     </span>
                     <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
@@ -522,7 +522,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="flex-shrink-0 opacity-50 transition-opacity group-hover:opacity-100">
-                  <TrendingUp className="h-8 w-8 text-violet-400" />
+                  <TrendingUp className="h-8 w-8 text-[#F59768]" />
                 </div>
               </div>
             </div>
@@ -723,7 +723,7 @@ export default function Dashboard() {
               loading={loading}
             />
           ) : (
-            <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-6">
+            <div className="rounded-xl border border-[#3150AA]/30 bg-[#3150AA]/10 p-6">
               <h3 className="text-lg font-semibold text-white">Calendário avançado</h3>
               <p className="mt-2 text-sm text-blue-100/90">
                 Disponível nos planos Pro e Premium para organizar sessões com agenda mensal.
@@ -739,7 +739,7 @@ export default function Dashboard() {
         animate={{ scale: 1 }}
         transition={{ delay: 1, type: 'spring', stiffness: 200 }}
         onClick={() => setChatOpen(true)}
-        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-blue-600 shadow-xl shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 sm:bottom-6 sm:right-6"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#F59768] to-[#3150AA] shadow-xl shadow-[#3150AA]/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 sm:bottom-6 sm:right-6"
         title="Conversar com o Coach IA"
       >
         <MessageCircle className="h-6 w-6 text-white" />

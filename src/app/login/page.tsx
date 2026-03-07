@@ -53,8 +53,8 @@ export default function LoginPage() {
 
   if (loading || user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#080c14]">
-        <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-600">
+      <div className="flex min-h-screen items-center justify-center bg-[#0A0A0A]">
+        <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
           <Zap className="h-6 w-6 text-white" />
         </div>
       </div>
@@ -62,21 +62,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-[#080c14]">
-      {/* Ambient background */}
+    <div className="relative flex min-h-screen overflow-hidden bg-[#0A0A0A]">
+      {/* Ambient background — RDS atmospheric depth */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-64 -top-64 h-[600px] w-[600px] rounded-full bg-blue-600/10 blur-[120px]" />
-        <div className="absolute -bottom-64 -right-64 h-[600px] w-[600px] rounded-full bg-violet-600/10 blur-[120px]" />
-        <div className="absolute left-1/2 top-1/4 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-600/5 blur-[100px]" />
-        {/* Grid overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.015]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
-        />
+        <div className="absolute -left-64 -top-64 h-[600px] w-[600px] rounded-full bg-[#3150AA]/10 blur-[120px]" />
+        <div className="absolute -bottom-64 -right-64 h-[600px] w-[600px] rounded-full bg-[#F59768]/8 blur-[120px]" />
+        <div className="absolute left-1/2 top-1/4 h-96 w-96 -translate-x-1/2 rounded-full bg-[#3150AA]/5 blur-[100px]" />
+        {/* Radial Mask Grid */}
+        <div className="rds-grid-bg absolute inset-0" />
       </div>
 
       {/* Left panel — branding */}
@@ -88,14 +81,14 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 shadow-xl shadow-blue-500/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full shadow-xl" style={{ background: 'var(--identity-grad)', boxShadow: '0 0 20px rgba(245,151,104,0.2)' }}>
             <Zap className="h-5 w-5 text-white" />
           </div>
           <div>
-            <p className="text-lg font-bold text-white leading-none">
-              Aprova<span className="text-blue-400">Mind</span>
+            <p className="font-brand text-lg font-bold text-white leading-none">
+              Aprova<span className="text-[#F59768]">Mind</span>
             </p>
-            <p className="text-[10px] uppercase tracking-wider text-slate-500">
+            <p className="text-[10px] uppercase tracking-wider text-[#666] font-mono">
               Strategic Engine
             </p>
           </div>
@@ -103,17 +96,17 @@ export default function LoginPage() {
 
         {/* Hero text */}
         <div className="max-w-md">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1">
-            <div className="status-dot-blue h-1.5 w-1.5 rounded-full bg-blue-400" />
-            <span className="text-xs text-blue-300">IA de Alta Performance para Concursos</span>
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#3150AA]/30 bg-[#3150AA]/10 px-3 py-1">
+            <div className="status-dot-blue h-1.5 w-1.5 rounded-full" />
+            <span className="text-xs text-[#F59768] font-mono uppercase tracking-wider">IA de Alta Performance para Concursos</span>
           </div>
-          <h1 className="mb-4 text-4xl font-bold leading-tight text-white xl:text-5xl">
+          <h1 className="font-brand mb-4 text-4xl font-bold leading-tight text-white xl:text-5xl">
             Sua aprovação começa com{' '}
-            <span className="bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#F59768] to-[#3150AA] bg-clip-text text-transparent">
               estratégia inteligente
             </span>
           </h1>
-          <p className="text-base text-slate-400 leading-relaxed">
+          <p className="text-base text-[#666] leading-relaxed">
             AprovaMind é o sistema de alta performance que combina IA diagnóstica, gestão
             multi-edital e análise de performance em tempo real para acelerar sua aprovação.
           </p>
@@ -129,19 +122,19 @@ export default function LoginPage() {
           ].map(({ icon: Icon, label, desc }) => (
             <div
               key={label}
-              className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4"
+              className="rds-card p-4"
             >
-              <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/15">
-                <Icon className="h-4 w-4 text-blue-400" />
+              <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#3150AA]/15">
+                <Icon className="h-4 w-4 text-[#F59768]" />
               </div>
-              <p className="text-sm font-medium text-white">{label}</p>
-              <p className="text-xs text-slate-500">{desc}</p>
+              <p className="font-brand text-sm font-semibold text-white">{label}</p>
+              <p className="text-xs text-[#666]">{desc}</p>
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-2 text-xs text-slate-600">
+        <div className="flex items-center gap-2 text-xs text-[#666] font-mono">
           <Shield className="h-3.5 w-3.5" />
           <span>Dados armazenados com segurança no Firebase · SSL/TLS</span>
         </div>
@@ -157,22 +150,22 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
               <Zap className="h-5 w-5 text-white" />
             </div>
-            <p className="text-xl font-bold text-white">
-              Aprova<span className="text-blue-400">Mind</span>
+            <p className="font-brand text-xl font-bold text-white">
+              Aprova<span className="text-[#F59768]">Mind</span>
             </p>
           </div>
 
           {/* Card */}
-          <div className="rounded-2xl border border-white/[0.07] bg-[#0f1825]/90 p-8 shadow-2xl backdrop-blur-xl">
+          <div className="rds-glass rounded-2xl p-8 shadow-2xl">
             {/* Header */}
             <div className="mb-6">
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="font-brand text-xl font-bold text-white">
                 {mode === 'login' ? 'Acesse sua conta' : 'Criar conta gratuita'}
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-[#666]">
                 {mode === 'login'
                   ? 'Continue de onde parou na sua jornada'
                   : 'Comece sua jornada rumo à aprovação'}
@@ -183,7 +176,7 @@ export default function LoginPage() {
             <button
               onClick={signInWithGoogle}
               disabled={isDisabled}
-              className="group flex w-full items-center justify-center gap-3 rounded-xl bg-white px-5 py-3 font-medium text-gray-900 transition-all hover:bg-gray-50 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+              className="group flex w-full items-center justify-center gap-3 rounded-full bg-white px-5 py-3 font-medium text-gray-900 transition-all hover:bg-gray-50 hover:shadow-lg hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <svg className="h-4.5 w-4.5" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -197,9 +190,9 @@ export default function LoginPage() {
 
             {/* Divider */}
             <div className="my-5 flex items-center gap-3">
-              <div className="h-px flex-1 bg-white/[0.06]" />
-              <span className="text-xs text-slate-600">ou acesse com email</span>
-              <div className="h-px flex-1 bg-white/[0.06]" />
+              <div className="h-px flex-1 bg-white/[0.10]" />
+              <span className="text-xs text-[#666] font-mono">ou acesse com email</span>
+              <div className="h-px flex-1 bg-white/[0.10]" />
             </div>
 
             {/* Form */}
@@ -211,7 +204,7 @@ export default function LoginPage() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-blue-500/40 focus:bg-white/[0.06] focus:ring-1 focus:ring-blue-500/20"
+                  className="w-full rounded-full border border-white/[0.10] bg-white/[0.04] px-4 py-3 text-sm text-white placeholder-[#666] outline-none transition-all focus:border-[#3150AA]/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-[#3150AA]/30"
                 />
               )}
               <input
@@ -220,7 +213,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-blue-500/40 focus:bg-white/[0.06] focus:ring-1 focus:ring-blue-500/20"
+                className="w-full rounded-full border border-white/[0.10] bg-white/[0.04] px-4 py-3 text-sm text-white placeholder-[#666] outline-none transition-all focus:border-[#3150AA]/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-[#3150AA]/30"
               />
               <div className="relative">
                 <input
@@ -230,12 +223,12 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] px-4 py-3 pr-11 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-blue-500/40 focus:bg-white/[0.06] focus:ring-1 focus:ring-blue-500/20"
+                  className="w-full rounded-full border border-white/[0.10] bg-white/[0.04] px-4 py-3 pr-11 text-sm text-white placeholder-[#666] outline-none transition-all focus:border-[#3150AA]/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-[#3150AA]/30"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666] hover:text-slate-400 transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -244,7 +237,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isDisabled}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-5 py-3 font-medium text-white shadow-lg shadow-blue-500/20 transition-all hover:shadow-blue-500/30 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rds-btn-identity flex w-full items-center justify-center gap-2 px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Mail className="h-4 w-4" />
                 {submitting
@@ -256,13 +249,13 @@ export default function LoginPage() {
             </form>
 
             {/* Toggle */}
-            <p className="mt-4 text-center text-sm text-slate-600">
+            <p className="mt-4 text-center text-sm text-[#666]">
               {mode === 'login' ? (
                 <>
                   Não tem conta?{' '}
                   <button
                     onClick={() => setMode('register')}
-                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                    className="text-[#F59768] hover:text-[#F59768]/80 transition-colors"
                   >
                     Criar gratuitamente
                   </button>
@@ -272,7 +265,7 @@ export default function LoginPage() {
                   Já tem conta?{' '}
                   <button
                     onClick={() => setMode('login')}
-                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                    className="text-[#F59768] hover:text-[#F59768]/80 transition-colors"
                   >
                     Fazer login
                   </button>
@@ -282,7 +275,7 @@ export default function LoginPage() {
 
             {/* Error */}
             {error && (
-              <div className="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
+              <div className="mt-4 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-3">
                 <p className="text-center text-sm text-red-400">{error}</p>
               </div>
             )}

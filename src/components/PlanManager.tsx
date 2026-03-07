@@ -136,7 +136,7 @@ function SubjectAutocomplete({
             {canAddCustom && (
               <button
                 onClick={() => handleAdd(trimmed)}
-                className="flex w-full items-center gap-2 border-b border-white/5 px-3 py-2 text-left text-sm text-violet-400 transition hover:bg-violet-500/10"
+                className="flex w-full items-center gap-2 border-b border-white/5 px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Adicionar &quot;{trimmed}&quot;</span>
@@ -510,13 +510,13 @@ export default function PlanManager({
                     className={`relative cursor-pointer rounded-xl border-2 border-dashed px-4 py-5 text-center transition-all ${
                       dragging
                         ? 'border-violet-400 bg-violet-500/15 shadow-[0_0_20px_rgba(139,92,246,0.15)]'
-                        : 'border-violet-500/30 bg-violet-500/5 hover:border-violet-500/50 hover:bg-violet-500/10'
+                        : 'border-violet-500/30 bg-violet-500/5 hover:border-violet-500/50 hover:bg-[#3150AA]/10'
                     } ${importing ? 'cursor-wait opacity-60' : ''}`}
                   >
                     {importing ? (
                       <div className="flex flex-col items-center gap-2">
-                        <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
-                        <span className="text-sm text-violet-400">
+                        <Loader2 className="h-6 w-6 animate-spin text-[#F59768]" />
+                        <span className="text-sm text-[#F59768]">
                           Analisando edital...
                         </span>
                       </div>
@@ -529,8 +529,8 @@ export default function PlanManager({
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-1.5">
-                        <FileUp className="h-5 w-5 text-violet-400" />
-                        <span className="text-sm text-violet-400">
+                        <FileUp className="h-5 w-5 text-[#F59768]" />
+                        <span className="text-sm text-[#F59768]">
                           Importar Edital (PDF)
                         </span>
                         <span className="text-[10px] text-gray-500">
@@ -576,7 +576,7 @@ export default function PlanManager({
                   {subjects.length > 0 && (
                     <button
                       onClick={distributeEvenly}
-                      className="text-xs text-violet-400 transition hover:text-violet-300"
+                      className="text-xs text-[#F59768] transition hover:text-violet-300"
                     >
                       Distribuir igual
                     </button>
@@ -677,7 +677,7 @@ export default function PlanManager({
                 <button
                   onClick={handleSave}
                   disabled={!isValid || saving}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-5 py-2 text-sm font-medium text-white shadow-lg shadow-violet-500/15 transition-all hover:shadow-violet-500/25 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[#3150AA]/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
                 >
                   {saving ? (
                     <>

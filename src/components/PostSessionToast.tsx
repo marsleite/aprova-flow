@@ -144,7 +144,7 @@ export default function PostSessionToast({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-          className="fixed bottom-4 left-4 right-4 z-50 overflow-hidden rounded-2xl border border-violet-500/20 bg-gray-900/95 shadow-2xl backdrop-blur-xl sm:bottom-24 sm:left-auto sm:right-6 sm:w-80"
+          className="fixed bottom-4 left-4 right-4 z-50 overflow-hidden rounded-2xl border border-[#3150AA]/20 bg-gray-900/95 shadow-2xl backdrop-blur-xl sm:bottom-24 sm:left-auto sm:right-6 sm:w-80"
         >
           {/* Barra de progresso auto-dismiss */}
           <motion.div
@@ -182,9 +182,9 @@ export default function PostSessionToast({
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  className="mt-2 flex items-start gap-2 rounded-lg bg-violet-500/10 px-3 py-2"
+                  className="mt-2 flex items-start gap-2 rounded-lg bg-[#3150AA]/10 px-3 py-2"
                 >
-                  <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-400" />
+                  <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#F59768]" />
                   <p className="text-xs leading-relaxed text-gray-300">{feedback}</p>
                 </motion.div>
               )}

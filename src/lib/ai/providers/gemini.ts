@@ -25,6 +25,7 @@ export async function generateGeminiText(params: {
       maxOutputTokens: params.request.maxOutputTokens,
       systemInstruction: params.request.systemInstruction,
       ...(params.request.preferJson ? { responseMimeType: 'application/json' } : {}),
+      ...(params.request.thinkingBudget !== undefined ? { thinkingConfig: { thinkingBudget: params.request.thinkingBudget } } : {}),
     },
   });
 

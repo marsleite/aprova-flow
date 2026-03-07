@@ -132,28 +132,28 @@ export default function QuestionTrackerCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
     >
       {/* Header */}
       <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-          <ClipboardCheck className="h-4 w-4 text-blue-400" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3150AA]/10">
+          <ClipboardCheck className="h-4 w-4 text-[#F59768]" />
         </div>
         <div>
           <h2 className="text-sm font-semibold text-white">Registro Manual de Questões</h2>
-          <p className="text-xs text-slate-500">Para questões feitas fora do AprovaMind</p>
+          <p className="text-xs text-[#666]">Para questões feitas fora do AprovaMind</p>
         </div>
       </div>
 
       {/* Formulário */}
       <div className="space-y-4">
-        <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-xs text-blue-300">
+        <div className="rounded-lg border border-[#3150AA]/20 bg-[#3150AA]/10 px-3 py-2 text-xs text-[#F59768]/80">
           Provas e simulados do AprovaMind já entram automaticamente na taxa de acerto.
         </div>
 
         {/* Matéria */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-500">Matéria</label>
+          <label className="mb-1.5 block text-xs font-medium text-[#666]">Matéria</label>
           <select
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
@@ -320,8 +320,8 @@ export default function QuestionTrackerCard({
               exit={{ opacity: 0 }}
               onClick={handleSave}
               disabled={!isValid || saving || hasOverflow}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-4 py-2.5 text-sm font-medium text-white
-                         shadow-lg shadow-blue-500/15 transition-all hover:shadow-blue-500/25 hover:brightness-110
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-4 py-2.5 text-sm font-medium text-white
+                         shadow-lg shadow-blue-500/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110
                          disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
             >
               {saving ? (

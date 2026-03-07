@@ -59,7 +59,7 @@ function InsightItem({ insight }: { insight: StudyInsight }) {
       </div>
       <div className="min-w-0">
         <p className="text-sm font-medium text-white">{insight.title}</p>
-        <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
+        <p className="mt-0.5 text-xs leading-relaxed text-[#666]">
           {insight.message}
         </p>
       </div>
@@ -71,7 +71,7 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center py-8 text-center">
       <Sparkles className="mb-2 h-8 w-8 text-slate-700" />
-      <p className="text-sm text-slate-600">Nenhum insight disponível</p>
+      <p className="text-sm text-[#666]">Nenhum insight disponível</p>
       <p className="mt-1 text-xs text-slate-700">Configure seu plano de estudo e registre sessões para receber dicas</p>
     </div>
   );
@@ -99,17 +99,17 @@ export default function InsightsPanel({ insights, loading }: InsightsPanelProps)
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
-      className="h-full rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
+      className="h-full rounded-2xl border border-white/[0.07] bg-[#0E111B] p-5"
       style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
     >
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
-          <Sparkles className="h-4 w-4 text-violet-400" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3150AA]/10">
+          <Sparkles className="h-4 w-4 text-[#F59768]" />
         </div>
         <div>
           <h3 className="text-sm font-semibold text-white">Insights Estratégicos</h3>
-          <p className="text-xs text-slate-500">Recomendações baseadas nos seus dados</p>
+          <p className="text-xs text-[#666]">Recomendações baseadas nos seus dados</p>
         </div>
       </div>
 

@@ -35,11 +35,11 @@ function CustomTooltip({ active, payload }: {
 
   const { day, hours, isToday } = payload[0].payload;
   return (
-    <div className="rounded-lg border border-white/[0.08] bg-[#0f1825] px-3 py-2 shadow-xl backdrop-blur-sm">
+    <div className="rounded-lg border border-white/[0.08] bg-[#0E111B] px-3 py-2 shadow-xl backdrop-blur-sm">
       <p className="text-sm font-medium text-white">
-        {day} {isToday && <span className="text-violet-400">(Hoje)</span>}
+        {day} {isToday && <span className="text-[#F59768]">(Hoje)</span>}
       </p>
-      <p className="text-sm text-violet-400">
+      <p className="text-sm text-[#F59768]">
         {hours < 1
           ? `${Math.round(hours * 60)} min`
           : `${hours.toFixed(1)}h`}
@@ -66,7 +66,7 @@ function EmptyState() {
       <div className="mb-3 rounded-xl bg-white/[0.03] p-3">
         <BarChart3 className="h-8 w-8 text-slate-700" />
       </div>
-      <p className="text-center text-sm text-slate-600">Nenhum dado nesta semana</p>
+      <p className="text-center text-sm text-[#666]">Nenhum dado nesta semana</p>
       <p className="mt-1 text-center text-xs text-slate-700">Registre sessões para ver a evolução</p>
     </div>
   );
@@ -80,7 +80,7 @@ export default function WeeklyBarChart({ data, loading }: WeeklyBarChartProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
@@ -89,7 +89,7 @@ export default function WeeklyBarChart({ data, loading }: WeeklyBarChartProps) {
         </div>
         <div>
           <h2 className="text-sm font-semibold text-white">Evolução Semanal</h2>
-          <p className="text-xs text-slate-500">Horas por dia esta semana</p>
+          <p className="text-xs text-[#666]">Horas por dia esta semana</p>
         </div>
       </div>
 
@@ -141,14 +141,14 @@ export default function WeeklyBarChart({ data, loading }: WeeklyBarChartProps) {
         <div className="mt-2 flex items-center justify-center gap-4 border-t border-white/5 pt-3">
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-sm bg-blue-500" />
-            <span className="text-xs text-slate-500">Hoje</span>
+            <span className="text-xs text-[#666]">Hoje</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-sm bg-slate-700" />
-            <span className="text-xs text-slate-500">Outros dias</span>
+            <span className="text-xs text-[#666]">Outros dias</span>
           </div>
           <span className="text-xs text-slate-700">|</span>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-[#666]">
             Semana: {data.reduce((acc, d) => acc + d.hours, 0).toFixed(1)}h
           </span>
         </div>

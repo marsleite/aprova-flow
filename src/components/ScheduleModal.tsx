@@ -161,7 +161,7 @@ export default function ScheduleModal({
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-800">
             <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-violet-400" />
+              <Calendar className="h-5 w-5 text-[#F59768]" />
               <h2 className="text-xl font-semibold text-white">
                 Agendar Sessão
               </h2>
@@ -322,9 +322,9 @@ export default function ScheduleModal({
             </div>
 
             {/* Alerta de info */}
-            <div className="p-3 bg-violet-500/10 border border-violet-500/30 rounded-lg">
+            <div className="p-3 bg-[#3150AA]/10 border border-violet-500/30 rounded-lg">
               <div className="flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-violet-400 mt-0.5" />
+                <AlertCircle className="h-4 w-4 text-[#F59768] mt-0.5" />
                 <p className="text-xs text-violet-300">
                   A sessão será agendada e aparecerá no seu calendário. 
                   Você poderá marcá-la como concluída quando realizar o estudo.

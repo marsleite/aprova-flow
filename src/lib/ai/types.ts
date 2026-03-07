@@ -25,6 +25,7 @@ export interface AiTextRequest {
   temperature?: number;
   maxOutputTokens?: number;
   preferJson?: boolean;
+  thinkingBudget?: number;
 }
 
 export interface AiPdfRequest {

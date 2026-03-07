@@ -319,12 +319,12 @@ export default function ChatPanel({
                     <div
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
                         msg.role === 'assistant'
-                          ? 'bg-violet-500/20'
+                          ? 'bg-[#3150AA]/20'
                           : 'bg-gray-800'
                       }`}
                     >
                       {msg.role === 'assistant' ? (
-                        <Brain className="h-3.5 w-3.5 text-violet-400" />
+                        <Brain className="h-3.5 w-3.5 text-[#F59768]" />
                       ) : (
                         <User className="h-3.5 w-3.5 text-gray-400" />
                       )}
@@ -350,8 +350,8 @@ export default function ChatPanel({
                     animate={{ opacity: 1 }}
                     className="flex gap-2.5"
                   >
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/20">
-                      <Brain className="h-3.5 w-3.5 text-violet-400" />
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#3150AA]/20">
+                      <Brain className="h-3.5 w-3.5 text-[#F59768]" />
                     </div>
                     <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-white/5 bg-gray-900 px-4 py-3">
                       {[0, 1, 2].map((i) => (

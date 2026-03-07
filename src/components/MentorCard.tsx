@@ -355,7 +355,7 @@ export default function MentorCard({
   // ---- Skeleton ----
   if (parentLoading) {
     return (
-      <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5">
+      <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg shimmer" />
           <div className="h-4 w-40 rounded shimmer" />
@@ -384,7 +384,7 @@ export default function MentorCard({
           </div>
           <div>
             <span className="text-sm font-semibold text-white">Mentor AprovaMind</span>
-            <p className="text-[11px] text-slate-500">Análise estratégica dos seus estudos</p>
+            <p className="text-[11px] text-[#666]">Análise estratégica dos seus estudos</p>
           </div>
         </div>
         <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-3.5">
@@ -394,7 +394,7 @@ export default function MentorCard({
         </div>
         <div className="mt-3 flex items-start gap-2 rounded-xl bg-white/[0.03] px-3.5 py-3">
           <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[#666]">
             Inicie o cronômetro acima para registrar sua primeira sessão. Sua jornada até a posse começa agora.
           </p>
         </div>
@@ -422,14 +422,14 @@ export default function MentorCard({
             </div>
             <div>
               <span className="text-sm font-semibold text-white">Mentor AprovaMind</span>
-              <p className="text-[11px] text-slate-500">Análise estratégica dos seus estudos</p>
+              <p className="text-[11px] text-[#666]">Análise estratégica dos seus estudos</p>
             </div>
           </div>
 
           {/* Expand/Collapse */}
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="rounded-lg p-1.5 text-slate-600 transition hover:bg-white/[0.05] hover:text-slate-400"
+            className="rounded-lg p-1.5 text-[#666] transition hover:bg-white/[0.05] hover:text-[#666]"
           >
             {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </button>
@@ -484,8 +484,8 @@ export default function MentorCard({
               )}
 
               {/* Ação Imediata */}
-              <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-violet-500/20 bg-violet-500/10 px-3.5 py-3">
-                <Zap className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" />
+              <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-[#3150AA]/20 bg-[#3150AA]/10 px-3.5 py-3">
+                <Zap className="mt-0.5 h-4 w-4 shrink-0 text-[#F59768]" />
                 <div>
                   <span className="text-xs font-semibold text-violet-300">Ação Imediata</span>
                   <p className="mt-0.5 text-sm leading-relaxed text-violet-200/80">
@@ -496,8 +496,8 @@ export default function MentorCard({
 
               {/* Frase Motivacional */}
               <div className="flex items-start gap-2 rounded-xl bg-white/[0.03] px-3.5 py-3">
-                <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-600" />
-                <p className="text-xs italic leading-relaxed text-slate-500">
+                <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#666]" />
+                <p className="text-xs italic leading-relaxed text-[#666]">
                   {data.motivationalQuote}
                 </p>
               </div>
@@ -510,7 +510,7 @@ export default function MentorCard({
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-xs italic text-slate-600"
+            className="text-xs italic text-[#666]"
           >
             &ldquo;{data.motivationalQuote}&rdquo;
           </motion.p>

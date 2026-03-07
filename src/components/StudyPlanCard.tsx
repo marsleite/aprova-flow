@@ -104,7 +104,7 @@ function SubjectInput({
             {canAddCustom && (
               <button
                 onClick={() => handleAdd(trimmed)}
-                className="flex w-full items-center gap-2 border-b border-white/5 px-3 py-2 text-left text-sm text-violet-400 transition hover:bg-violet-500/10"
+                className="flex w-full items-center gap-2 border-b border-white/5 px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Adicionar &quot;{trimmed}&quot;</span>
@@ -141,7 +141,7 @@ function StatusBadge({ status }: { status: PlanVsActual['status'] }) {
   const map = {
     ok: { label: 'OK', cls: 'bg-emerald-500/15 text-emerald-400' },
     neglected: { label: 'Abaixo', cls: 'bg-amber-500/15 text-amber-400' },
-    over: { label: 'Acima', cls: 'bg-blue-500/15 text-blue-400' },
+    over: { label: 'Acima', cls: 'bg-[#3150AA]/15 text-[#F59768]' },
   };
   const { label, cls } = map[status];
   return (
@@ -207,7 +207,7 @@ export default function StudyPlanCard({
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5">
+      <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
         <div className="mb-4 h-5 w-40 rounded shimmer" />
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
@@ -223,7 +223,7 @@ export default function StudyPlanCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
@@ -233,13 +233,13 @@ export default function StudyPlanCard({
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white">Plano de Estudo</h3>
-            <p className="text-xs text-slate-500">Planejado vs Real</p>
+            <p className="text-xs text-[#666]">Planejado vs Real</p>
           </div>
         </div>
         {!editing && (
           <button
             onClick={handleStartEdit}
-            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500 transition hover:border-blue-500/30 hover:text-blue-300"
+            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-[#666] transition hover:border-[#3150AA]/30 hover:text-[#F59768]/80"
           >
             <Settings className="h-3.5 w-3.5" />
             {hasPlan ? 'Editar' : 'Configurar'}
