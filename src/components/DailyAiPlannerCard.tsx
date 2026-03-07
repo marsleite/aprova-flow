@@ -387,11 +387,11 @@ export default function DailyAiPlannerCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-950/30 via-gray-900 to-gray-950 p-6 shadow-2xl"
+      className="rounded-2xl border border-[#3150AA]/20 bg-gradient-to-br from-violet-950/30 via-gray-900 to-gray-950 p-6 shadow-2xl"
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-violet-500/20 p-2.5">
+          <div className="rounded-xl bg-[#3150AA]/20 p-2.5">
             <Brain className="h-5 w-5 text-violet-300" />
           </div>
           <div>
@@ -403,7 +403,7 @@ export default function DailyAiPlannerCard({
         <button
           onClick={() => void generatePlan('manual')}
           disabled={loading || (!hasContext && !initialRecoveryMode)}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-3 py-2 text-xs font-medium text-white shadow-lg shadow-violet-500/15 transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-3 py-2 text-xs font-medium text-white shadow-lg shadow-[#3150AA]/15 transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : plan ? <RefreshCw className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
           {plan ? 'Regerar' : 'Gerar plano'}
@@ -478,7 +478,7 @@ export default function DailyAiPlannerCard({
                       {idx + 1}. {block.subject}
                     </p>
                     <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-blue-500/15 px-2 py-0.5 text-[11px] text-blue-300">
+                      <span className="rounded-md bg-[#3150AA]/15 px-2 py-0.5 text-[11px] text-[#F59768]/80">
                         {taskTypeLabel(block.taskType)}
                       </span>
                       <span className={`rounded-md border px-2 py-0.5 text-[11px] ${priorityClasses(block.priority)}`}>

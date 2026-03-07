@@ -173,7 +173,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
       {/* Header do calendário */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <CalendarIcon className="h-5 w-5 text-violet-400" />
+          <CalendarIcon className="h-5 w-5 text-[#F59768]" />
           <h3 className="text-lg font-semibold text-white">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h3>
@@ -235,7 +235,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
               }}
               className={`
                 h-20 p-1 rounded-lg border cursor-pointer transition-all
-                ${today ? 'border-violet-500 bg-violet-500/10' : 'border-gray-800 bg-gray-800/50'}
+                ${today ? 'border-violet-500 bg-[#3150AA]/10' : 'border-gray-800 bg-gray-800/50'}
                 ${selected ? 'ring-2 ring-violet-400' : ''}
                 ${hasEvents ? 'hover:bg-gray-700/50' : 'hover:bg-gray-800'}
               `}
@@ -244,7 +244,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
                 {/* Número do dia */}
                 <div className={`
                   text-sm font-medium mb-1
-                  ${today ? 'text-violet-400' : 'text-gray-400'}
+                  ${today ? 'text-[#F59768]' : 'text-gray-400'}
                 `}>
                   {date.getDate()}
                 </div>

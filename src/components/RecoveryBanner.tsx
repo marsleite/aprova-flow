@@ -69,7 +69,7 @@ export default function RecoveryBanner({ consistency, onActivateRecovery }: Reco
                         </button>
                         <button
                             onClick={() => setDismissed(true)}
-                            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-[#666] transition-colors hover:bg-white/10 hover:text-white"
                         >
                             <X className="h-4 w-4" />
                         </button>

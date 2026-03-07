@@ -108,17 +108,17 @@ export default function AnalyticsPage() {
   const strongSubjects = planVsActual.filter((p) => p.status === 'over' || p.status === 'ok');
 
   return (
-    <div className="min-h-screen bg-[#080c14]">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
-      <div className="border-b border-white/[0.05] bg-[#0b1120]/60 px-6 py-5 backdrop-blur-sm">
+      <div className="border-b border-white/[0.05] bg-[#0E111B]/60 px-6 py-5 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <BarChart2 className="h-3.5 w-3.5 text-blue-400" />
-              <span className="text-xs text-slate-500 uppercase tracking-wider">Performance Analytics</span>
+              <BarChart2 className="h-3.5 w-3.5 text-[#F59768]" />
+              <span className="text-xs text-[#666] uppercase tracking-wider">Performance Analytics</span>
             </div>
             <h1 className="text-2xl font-bold text-white">Análises de Performance</h1>
-            <p className="mt-0.5 text-sm text-slate-500">
+            <p className="mt-0.5 text-sm text-[#666]">
               Visão detalhada do seu progresso estratégico
               {activePlanObj && <> — <span style={{ color: activePlanObj.color }}>{activePlanObj.name}</span></>}
             </p>
@@ -136,8 +136,8 @@ export default function AnalyticsPage() {
               sub: `Esta semana: ${weeklyHours.toFixed(1)}h`,
               icon: Clock,
               trend: null,
-              color: 'text-blue-400',
-              bg: 'bg-blue-500/10',
+              color: 'text-[#F59768]',
+              bg: 'bg-[#3150AA]/10',
             },
             {
               label: 'Sequência',
@@ -154,8 +154,8 @@ export default function AnalyticsPage() {
               sub: `${accuracyData.reduce((a, b) => a + b.correctAnswers, 0)} corretas`,
               icon: Target,
               trend: null,
-              color: 'text-violet-400',
-              bg: 'bg-violet-500/10',
+              color: 'text-[#F59768]',
+              bg: 'bg-[#3150AA]/10',
             },
             {
               label: 'Precisão Média',
@@ -168,7 +168,7 @@ export default function AnalyticsPage() {
             },
           ].map(({ label, value, sub, icon: Icon, trend, color, bg }, i) => (
             <motion.div key={label} custom={i} variants={fadeUp} initial="hidden" animate="show"
-              className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+              className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
             >
               <div className="mb-3 flex items-start justify-between">
                 <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${bg}`}>
@@ -182,8 +182,8 @@ export default function AnalyticsPage() {
                 )}
               </div>
               <p className="text-2xl font-bold text-white">{value}</p>
-              <p className="mt-0.5 text-xs text-slate-500">{label}</p>
-              {sub && <p className="mt-1 text-[10px] text-slate-600">{sub}</p>}
+              <p className="mt-0.5 text-xs text-[#666]">{label}</p>
+              {sub && <p className="mt-1 text-[10px] text-[#666]">{sub}</p>}
             </motion.div>
           ))}
         </div>
@@ -211,10 +211,10 @@ export default function AnalyticsPage() {
 
           {/* Plan vs Actual */}
           <motion.div custom={7} variants={fadeUp} initial="hidden" animate="show"
-            className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+            className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
           >
             <div className="mb-4 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-slate-500" />
+              <TrendingUp className="h-4 w-4 text-[#666]" />
               <h3 className="text-sm font-semibold text-white">Planejado vs. Real</h3>
             </div>
             {loading ? (
@@ -223,7 +223,7 @@ export default function AnalyticsPage() {
               </div>
             ) : planVsActual.length === 0 ? (
               <div className="py-8 text-center">
-                <p className="text-sm text-slate-600">Configure um plano de estudos para ver a comparação</p>
+                <p className="text-sm text-[#666]">Configure um plano de estudos para ver a comparação</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -242,7 +242,7 @@ export default function AnalyticsPage() {
                           <span className="text-sm text-slate-300">{pva.subject.length > 22 ? pva.subject.substring(0, 20) + '…' : pva.subject}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-slate-600">{pva.plannedPercent}% plan</span>
+                          <span className="text-xs text-[#666]">{pva.plannedPercent}% plan</span>
                           <span className={`text-xs font-medium ${isNeglected ? 'text-amber-400' : 'text-emerald-400'}`}>
                             {pva.deviation >= 0 ? '+' : ''}{pva.deviation.toFixed(0)}%
                           </span>
@@ -275,10 +275,10 @@ export default function AnalyticsPage() {
 
         {/* Strategic summary */}
         <motion.div custom={9} variants={fadeUp} initial="hidden" animate="show"
-          className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+          className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
         >
           <div className="mb-4 flex items-center gap-2">
-            <Brain className="h-4 w-4 text-violet-400" />
+            <Brain className="h-4 w-4 text-[#F59768]" />
             <h3 className="text-sm font-semibold text-white">Resumo Estratégico</h3>
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
@@ -297,7 +297,7 @@ export default function AnalyticsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-600">Configure matérias para identificar forças</p>
+                <p className="text-sm text-[#666]">Configure matérias para identificar forças</p>
               )}
             </div>
             <div>
@@ -315,7 +315,7 @@ export default function AnalyticsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-600">Todas as matérias estão equilibradas</p>
+                <p className="text-sm text-[#666]">Todas as matérias estão equilibradas</p>
               )}
             </div>
           </div>

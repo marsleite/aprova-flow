@@ -83,7 +83,7 @@ export default function InterrogationModal({
                 className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-indigo-500/20 bg-gray-950 p-6 shadow-2xl"
             >
                 {/* Glow Effects */}
-                <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-violet-600/10 blur-[80px]" />
+                <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#3150AA]/10 blur-[80px]" />
                 <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-blue-600/10 blur-[80px]" />
 
                 {/* Header */}

@@ -88,30 +88,30 @@ export default function EnginePage() {
   const weeklyHours = consistency ? consistency.weeklyTotalSeconds / 3600 : 0;
 
   return (
-    <div className="min-h-screen bg-[#080c14]">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
-      <div className="border-b border-white/[0.05] bg-[#0b1120]/60 px-6 py-5 backdrop-blur-sm">
+      <div className="border-b border-white/[0.07] bg-[#0E111B]/60 px-6 py-5 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Zap className="h-3.5 w-3.5 text-blue-400" />
-              <span className="text-xs text-slate-500 uppercase tracking-wider">Precision Study Engine</span>
+              <Zap className="h-3.5 w-3.5 text-[#F59768]" />
+              <span className="text-xs text-[#666] uppercase tracking-wider font-mono">Precision Study Engine</span>
             </div>
-            <h1 className="text-2xl font-bold text-white">Sessão de Estudo</h1>
-            <p className="mt-0.5 text-sm text-slate-500">Cronômetro de alta performance com foco total</p>
+            <h1 className="font-brand text-2xl font-bold text-white">Sessão de Estudo</h1>
+            <p className="mt-0.5 text-sm text-[#666]">Cronômetro de alta performance com foco total</p>
           </div>
           {consistency && (
             <div className="hidden items-center gap-4 lg:flex">
               <div className="text-right">
-                <p className="text-xs text-slate-600">Esta semana</p>
+                <p className="text-xs text-[#666] font-mono">Esta semana</p>
                 <p className="text-lg font-bold text-white">{weeklyHours.toFixed(1)}h</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-slate-600">Sequência</p>
+                <p className="text-xs text-[#666] font-mono">Sequência</p>
                 <p className="text-lg font-bold text-white">{consistency.currentStreak}d</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-slate-600">Meta semanal</p>
+                <p className="text-xs text-[#666] font-mono">Meta semanal</p>
                 <p className="text-lg font-bold text-white">{consistency.weeklyGoalHours}h</p>
               </div>
             </div>
@@ -126,12 +126,12 @@ export default function EnginePage() {
             {/* Context bar */}
             {activePlanObj && (
               <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show"
-                className="flex items-center gap-3 rounded-xl border border-white/[0.05] bg-[#0f1825] px-4 py-3"
+                className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-[#0E111B] px-4 py-3"
               >
                 <div className="flex items-center gap-2 flex-1">
-                  <span className="text-xs text-slate-500">Edital:</span>
+                  <span className="text-xs text-[#666] font-mono">Edital:</span>
                   <div
-                    className="flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium"
+                    className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium font-mono"
                     style={{
                       background: `${activePlanObj.color}15`,
                       color: activePlanObj.color,
@@ -144,10 +144,10 @@ export default function EnginePage() {
                 </div>
                 {activePlanObj.subjects.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-600">
+                    <span className="text-xs text-[#666] font-mono">
                       {activePlanObj.subjects.length} matérias configuradas
                     </span>
-                    <Link href="/planner" className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-0.5">
+                    <Link href="/planner" className="text-xs text-[#F59768] hover:text-[#F59768]/80 transition-colors flex items-center gap-0.5 font-mono">
                       Gerenciar <ChevronRight className="h-3 w-3" />
                     </Link>
                   </div>
@@ -203,29 +203,29 @@ export default function EnginePage() {
               className="grid grid-cols-2 gap-3"
             >
               {[
-                { label: 'Sequência', value: `${consistency?.currentStreak || 0}d`, icon: Flame, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-                { label: 'Meta', value: `${consistency?.weeklyProgressPercent || 0}%`, icon: Target, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+                { label: 'Sequência', value: `${consistency?.currentStreak || 0}d`, icon: Flame, color: 'text-[#F59768]', bg: 'bg-[#F59768]/10' },
+                { label: 'Meta', value: `${consistency?.weeklyProgressPercent || 0}%`, icon: Target, color: 'text-[#3150AA]', bg: 'bg-[#3150AA]/10' },
               ].map(({ label, value, icon: Icon, color, bg }) => (
-                <div key={label} className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4">
+                <div key={label} className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
                   <div className={`mb-2 flex h-7 w-7 items-center justify-center rounded-lg ${bg}`}>
                     <Icon className={`h-3.5 w-3.5 ${color}`} />
                   </div>
                   <p className="text-lg font-bold text-white">{value}</p>
-                  <p className="text-xs text-slate-600">{label}</p>
+                  <p className="text-xs text-[#666] font-mono">{label}</p>
                 </div>
               ))}
             </motion.div>
 
             {/* Execution log (recent sessions) */}
             <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show"
-              className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4"
+              className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4"
             >
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-slate-500" />
-                  <h3 className="text-sm font-semibold text-white">Log de Execução</h3>
+                  <Clock className="h-4 w-4 text-[#666]" />
+                  <h3 className="text-sm font-semibold text-white font-brand">Log de Execução</h3>
                 </div>
-                <Link href="/history" className="text-xs text-slate-600 hover:text-slate-400 transition-colors flex items-center gap-1">
+                <Link href="/history" className="text-xs text-[#666] hover:text-slate-400 transition-colors flex items-center gap-1 font-mono">
                   Tudo <ChevronRight className="h-3 w-3" />
                 </Link>
               </div>
@@ -236,8 +236,8 @@ export default function EnginePage() {
                 </div>
               ) : recentSessions.length === 0 ? (
                 <div className="py-6 text-center">
-                  <BookOpen className="mx-auto mb-2 h-6 w-6 text-slate-700" />
-                  <p className="text-xs text-slate-600">Nenhuma sessão registrada</p>
+                  <BookOpen className="mx-auto mb-2 h-6 w-6 text-[#666]/50" />
+                  <p className="text-xs text-[#666]">Nenhuma sessão registrada</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -250,19 +250,19 @@ export default function EnginePage() {
                           key={session.id || i}
                           initial={isRecent ? { opacity: 0, x: 10 } : false}
                           animate={{ opacity: 1, x: 0 }}
-                          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isRecent ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-white/[0.02]'}`}
+                          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isRecent ? 'bg-[#3150AA]/10 border border-[#3150AA]/20' : 'bg-white/[0.02]'}`}
                         >
-                          <div className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md ${isRecent ? 'bg-blue-500/20' : 'bg-white/[0.04]'}`}>
+                          <div className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md ${isRecent ? 'bg-[#3150AA]/20' : 'bg-white/[0.04]'}`}>
                             {isRecent
-                              ? <CheckCircle2 className="h-3 w-3 text-blue-400" />
-                              : <div className="h-1.5 w-1.5 rounded-full bg-slate-600" />
+                              ? <CheckCircle2 className="h-3 w-3 text-[#F59768]" />
+                              : <div className="h-1.5 w-1.5 rounded-full bg-[#666]" />
                             }
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-xs font-medium text-slate-300">{session.subject}</p>
-                            <p className="text-[10px] text-slate-600">{session.date}</p>
+                            <p className="text-[10px] text-[#666] font-mono">{session.date}</p>
                           </div>
-                          <span className="flex-shrink-0 text-xs text-slate-500">{mins}m</span>
+                          <span className="flex-shrink-0 text-xs text-[#666] font-mono">{mins}m</span>
                         </motion.div>
                       );
                     })}
@@ -273,13 +273,13 @@ export default function EnginePage() {
 
             {/* AI Insight panel */}
             <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show"
-              className="rounded-xl border border-violet-500/20 bg-gradient-to-b from-violet-600/10 to-transparent p-4"
+              className="rounded-xl border border-[#3150AA]/20 bg-gradient-to-b from-[#3150AA]/10 to-transparent p-4"
             >
               <div className="mb-3 flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-violet-500/20">
-                  <Sparkles className="h-3 w-3 text-violet-400" />
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#F59768]/20">
+                  <Sparkles className="h-3 w-3 text-[#F59768]" />
                 </div>
-                <span className="text-xs font-semibold text-violet-400">AI Insight</span>
+                <span className="text-xs font-semibold text-[#F59768] font-mono uppercase">AI Insight</span>
               </div>
               {loading ? (
                 <div className="space-y-1.5">
@@ -287,7 +287,7 @@ export default function EnginePage() {
                   <div className="h-3 w-3/4 rounded shimmer" />
                 </div>
               ) : recentSessions.length > 0 ? (
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-[#666] leading-relaxed">
                   {consistency && consistency.weeklyProgressPercent >= 80
                     ? `Excelente ritmo! Você está em ${consistency.weeklyProgressPercent}% da meta semanal. Continue focado.`
                     : consistency && consistency.weeklyProgressPercent > 0
@@ -295,7 +295,7 @@ export default function EnginePage() {
                       : 'Inicie uma sessão para receber insights personalizados sobre sua performance.'}
                 </p>
               ) : (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[#666]">
                   Inicie sua primeira sessão para ativar o diagnóstico de IA.
                 </p>
               )}
@@ -304,11 +304,11 @@ export default function EnginePage() {
             {/* Planner link */}
             {plans.length === 0 && (
               <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show"
-                className="rounded-xl border border-dashed border-white/[0.08] p-4 text-center"
+                className="rounded-xl border border-dashed border-white/[0.10] p-4 text-center"
               >
-                <Plus className="mx-auto mb-2 h-5 w-5 text-slate-600" />
-                <p className="text-xs font-medium text-slate-500">Nenhum edital configurado</p>
-                <Link href="/planner" className="mt-2 inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                <Plus className="mx-auto mb-2 h-5 w-5 text-[#666]" />
+                <p className="text-xs font-medium text-[#666]">Nenhum edital configurado</p>
+                <Link href="/planner" className="mt-2 inline-flex items-center gap-1 text-xs text-[#F59768] hover:text-[#F59768]/80 transition-colors font-mono">
                   Criar plano de estudos <ChevronRight className="h-3 w-3" />
                 </Link>
               </motion.div>

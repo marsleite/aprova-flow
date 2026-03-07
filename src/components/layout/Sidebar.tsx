@@ -131,15 +131,15 @@ export default function Sidebar({
         className={`app-sidebar ${mobileOpen ? 'open' : ''} flex flex-col`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 border-b border-white/5 px-5 py-5">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 shadow-lg shadow-blue-500/20">
+        <div className="flex items-center gap-3 border-b border-white/[0.07] px-5 py-5">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full shadow-lg" style={{ background: 'var(--identity-grad)', boxShadow: '0 0 16px rgba(245,151,104,0.2)' }}>
             <Zap className="h-4.5 w-4.5 text-white" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-white leading-none">
-              Aprova<span className="text-blue-400">Mind</span>
+            <p className="font-brand text-sm font-bold text-white leading-none">
+              Aprova<span className="text-[#F59768]">Mind</span>
             </p>
-            <p className="mt-0.5 text-[10px] text-slate-500 uppercase tracking-wider">
+            <p className="mt-0.5 text-[10px] text-[#666] uppercase tracking-wider font-mono">
               Strategic Engine
             </p>
           </div>
@@ -147,7 +147,7 @@ export default function Sidebar({
           {onToggleMobile && (
             <button
               onClick={onToggleMobile}
-              className="ml-auto text-slate-500 hover:text-white lg:hidden"
+              className="ml-auto text-[#666] hover:text-white lg:hidden"
             >
               <X className="h-4 w-4" />
             </button>
@@ -159,20 +159,20 @@ export default function Sidebar({
           <div className="relative mx-3 mt-3" ref={planPickerRef}>
             <button
               onClick={() => setPlanPickerOpen((v) => !v)}
-              className="flex w-full items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.03] px-3 py-2 text-left transition-colors hover:bg-white/[0.06]"
+              className="flex w-full items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.03] px-3 py-2 text-left transition-colors hover:bg-white/[0.06]"
             >
               <div
                 className="h-2 w-2 flex-shrink-0 rounded-full"
                 style={{
-                  background: activePlan?.color ?? '#64748b',
-                  boxShadow: `0 0 6px ${activePlan?.color ?? '#64748b'}80`,
+                  background: activePlan?.color ?? '#666',
+                  boxShadow: `0 0 6px ${activePlan?.color ?? '#666'}80`,
                 }}
               />
-              <span className="min-w-0 flex-1 truncate text-xs text-slate-300">
+              <span className="min-w-0 flex-1 truncate text-xs text-slate-300 font-mono">
                 {activePlan?.name ?? 'Todos os Editais'}
               </span>
               <ChevronRight
-                className={`h-3 w-3 flex-shrink-0 text-slate-500 transition-transform duration-150 ${planPickerOpen ? 'rotate-90' : ''
+                className={`h-3 w-3 flex-shrink-0 text-[#666] transition-transform duration-150 ${planPickerOpen ? 'rotate-90' : ''
                   }`}
               />
             </button>
@@ -184,7 +184,7 @@ export default function Sidebar({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.97 }}
                   transition={{ duration: 0.12 }}
-                  className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-white/[0.08] bg-[#111827] shadow-xl"
+                  className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-white/[0.10] bg-[#0E111B] shadow-xl"
                 >
                   {/* Geral — aggregate all plans */}
                   <button
@@ -192,16 +192,16 @@ export default function Sidebar({
                       onPlanChange?.(null);
                       setPlanPickerOpen(false);
                     }}
-                    className={`flex w-full items-center gap-2.5 border-b border-white/[0.05] px-3 py-2.5 text-left text-xs transition-colors ${activePlanId === null
-                        ? 'bg-blue-600/15 text-blue-300'
-                        : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
+                    className={`flex w-full items-center gap-2.5 border-b border-white/[0.07] px-3 py-2.5 text-left text-xs transition-colors ${activePlanId === null
+                      ? 'bg-[#3150AA]/15 text-[#F59768]'
+                      : 'text-[#666] hover:bg-white/[0.05] hover:text-slate-200'
                       }`}
                   >
-                    <div className="h-2 w-2 flex-shrink-0 rounded-full bg-slate-500" />
-                    <span className="flex-1 truncate font-medium">Todos os Editais</span>
-                    <span className="text-[10px] text-slate-600">Agregado</span>
+                    <div className="h-2 w-2 flex-shrink-0 rounded-full bg-[#666]" />
+                    <span className="flex-1 truncate font-medium font-mono">Todos os Editais</span>
+                    <span className="text-[10px] text-[#666]">Agregado</span>
                     {activePlanId === null && (
-                      <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400" />
+                      <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#F59768]" />
                     )}
                   </button>
 
@@ -215,17 +215,17 @@ export default function Sidebar({
                           setPlanPickerOpen(false);
                         }}
                         className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-xs transition-colors ${isActive
-                            ? 'bg-blue-600/15 text-blue-300'
-                            : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
+                          ? 'bg-[#3150AA]/15 text-[#F59768]'
+                          : 'text-[#666] hover:bg-white/[0.05] hover:text-slate-200'
                           }`}
                       >
                         <div
                           className="h-2 w-2 flex-shrink-0 rounded-full"
                           style={{ background: plan.color }}
                         />
-                        <span className="flex-1 truncate">{plan.name}</span>
+                        <span className="flex-1 truncate font-mono">{plan.name}</span>
                         {isActive && (
-                          <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400" />
+                          <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#F59768]" />
                         )}
                       </button>
                     );
@@ -238,7 +238,7 @@ export default function Sidebar({
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-          <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
+          <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-[#666] font-mono">
             Navegação
           </p>
           {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
@@ -249,17 +249,17 @@ export default function Sidebar({
                 href={href}
                 onClick={() => mobileOpen && onToggleMobile?.()}
                 className={`
-                  relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-150
+                  relative flex items-center gap-3 rounded-full px-3 py-2.5 text-sm transition-all duration-150
                   ${isActive
-                    ? 'bg-blue-600/15 text-blue-300 font-medium'
-                    : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                    ? 'bg-[#3150AA]/15 text-[#F59768] font-medium'
+                    : 'text-[#666] hover:bg-white/[0.04] hover:text-slate-200'
                   }
                 `}
               >
-                <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-blue-400' : 'text-slate-500'}`} />
+                <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-[#F59768]' : 'text-[#666]'}`} />
                 <span className="truncate">{label}</span>
                 {isActive && (
-                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-400" />
+                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#F59768]" />
                 )}
               </Link>
             );
@@ -267,15 +267,15 @@ export default function Sidebar({
         </nav>
 
         {/* Bottom section */}
-        <div className="border-t border-white/5 p-3 space-y-1">
+        <div className="border-t border-white/[0.07] p-3 space-y-1">
           {/* Plan tier badge */}
           <button
             onClick={() => setAccountModalOpen(true)}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-slate-400 hover:bg-white/[0.04] hover:text-slate-200 transition-colors"
+            className="flex w-full items-center gap-2 rounded-full px-3 py-2 text-xs text-[#666] hover:bg-white/[0.04] hover:text-slate-200 transition-colors"
           >
-            <Crown className="h-3.5 w-3.5 text-violet-400 flex-shrink-0" />
-            <span className="uppercase font-medium tracking-wide">{planTier}</span>
-            <span className="ml-auto text-[10px] text-slate-600 hover:text-slate-400">
+            <Crown className="h-3.5 w-3.5 text-[#F59768] flex-shrink-0" />
+            <span className="uppercase font-medium tracking-wide font-mono">{planTier}</span>
+            <span className="ml-auto text-[10px] text-[#666] hover:text-slate-400 font-mono">
               Gerenciar
             </span>
           </button>
@@ -283,15 +283,15 @@ export default function Sidebar({
           {/* Settings */}
           <Link
             href="/settings"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-white/[0.04] hover:text-slate-200 transition-colors"
+            className="flex items-center gap-3 rounded-full px-3 py-2 text-sm text-[#666] hover:bg-white/[0.04] hover:text-slate-200 transition-colors"
           >
-            <Settings className="h-4 w-4 flex-shrink-0 text-slate-500" />
+            <Settings className="h-4 w-4 flex-shrink-0 text-[#666]" />
             <span>Configurações</span>
           </Link>
 
           {/* User + logout */}
           {user && (
-            <div className="flex items-center gap-2 rounded-lg px-3 py-2">
+            <div className="flex items-center gap-2 rounded-full px-3 py-2">
               {user.photoURL ? (
                 <Image
                   src={user.photoURL}
@@ -301,7 +301,7 @@ export default function Sidebar({
                   className="rounded-full ring-1 ring-white/10 flex-shrink-0"
                 />
               ) : (
-                <div className="flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-slate-700 text-xs text-slate-300">
+                <div className="flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-[#3150AA]/30 text-xs text-[#F59768]">
                   {(user.displayName || user.email || 'U')[0].toUpperCase()}
                 </div>
               )}
@@ -309,13 +309,13 @@ export default function Sidebar({
                 <p className="truncate text-xs font-medium text-slate-300">
                   {user.displayName?.split(' ')[0] || user.email}
                 </p>
-                <p className="truncate text-[10px] text-slate-600">
+                <p className="truncate text-[10px] text-[#666] font-mono">
                   {user.email}
                 </p>
               </div>
               <button
                 onClick={logout}
-                className="flex-shrink-0 text-slate-600 hover:text-red-400 transition-colors"
+                className="flex-shrink-0 text-[#666] hover:text-red-400 transition-colors"
                 title="Sair"
               >
                 <LogOut className="h-3.5 w-3.5" />
@@ -326,7 +326,7 @@ export default function Sidebar({
           {/* System status */}
           <div className="flex items-center gap-2 px-3 py-1.5">
             <div className="status-dot flex-shrink-0" />
-            <span className="text-[10px] text-slate-600">AI Engine · Online</span>
+            <span className="text-[10px] text-[#666] font-mono uppercase tracking-wide">AI Engine · Online</span>
           </div>
         </div>
       </aside>
@@ -354,7 +354,7 @@ export function MobileMenuButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-slate-400 hover:bg-white/[0.04] hover:text-white transition-colors lg:hidden"
+      className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-[#666] hover:bg-white/[0.04] hover:text-white transition-colors lg:hidden"
     >
       <Menu className="h-4.5 w-4.5" />
     </button>

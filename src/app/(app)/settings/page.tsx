@@ -40,24 +40,24 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#080c14]">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
-      <div className="border-b border-white/[0.05] bg-[#0b1120]/60 px-6 py-5 backdrop-blur-sm">
+      <div className="border-b border-white/[0.05] bg-[#0E111B]/60 px-6 py-5 backdrop-blur-sm">
         <div className="flex items-center gap-2 mb-1">
-          <Settings className="h-3.5 w-3.5 text-blue-400" />
-          <span className="text-xs text-slate-500 uppercase tracking-wider">Configurações</span>
+          <Settings className="h-3.5 w-3.5 text-[#F59768]" />
+          <span className="text-xs text-[#666] uppercase tracking-wider">Configurações</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Conta e Configurações</h1>
-        <p className="mt-0.5 text-sm text-slate-500">Gerencie sua conta e preferências</p>
+        <p className="mt-0.5 text-sm text-[#666]">Gerencie sua conta e preferências</p>
       </div>
 
       <div className="mx-auto max-w-2xl px-6 py-6 space-y-6">
         {/* Profile card */}
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show"
-          className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+          className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
         >
           <div className="mb-4 flex items-center gap-2">
-            <User className="h-4 w-4 text-slate-500" />
+            <User className="h-4 w-4 text-[#666]" />
             <h2 className="text-sm font-semibold text-white">Perfil</h2>
           </div>
           <div className="flex items-center gap-4">
@@ -70,28 +70,28 @@ export default function SettingsPage() {
                 className="rounded-full ring-2 ring-white/10"
               />
             ) : (
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-violet-600 text-xl font-bold text-white">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#F59768] to-[#3150AA] text-xl font-bold text-white">
                 {(user.displayName || user.email || 'U')[0].toUpperCase()}
               </div>
             )}
             <div>
               <p className="text-base font-semibold text-white">{user.displayName || 'Usuário'}</p>
-              <p className="text-sm text-slate-500">{user.email}</p>
-              <p className="mt-1 text-xs text-slate-600">UID: {user.uid.substring(0, 12)}…</p>
+              <p className="text-sm text-[#666]">{user.email}</p>
+              <p className="mt-1 text-xs text-[#666]">UID: {user.uid.substring(0, 12)}…</p>
             </div>
           </div>
         </motion.div>
 
         {/* Plan card */}
         <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show"
-          className="rounded-xl border border-violet-500/20 bg-gradient-to-b from-violet-600/10 to-[#0f1825] p-5"
+          className="rounded-xl border border-[#3150AA]/20 bg-gradient-to-b from-violet-600/10 to-[#0f1825] p-5"
         >
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Crown className="h-4 w-4 text-violet-400" />
+              <Crown className="h-4 w-4 text-[#F59768]" />
               <h2 className="text-sm font-semibold text-white">Plano Atual</h2>
             </div>
-            <span className="rounded-full bg-violet-500/20 px-3 py-0.5 text-xs font-bold uppercase text-violet-300">
+            <span className="rounded-full bg-[#3150AA]/20 px-3 py-0.5 text-xs font-bold uppercase text-violet-300">
               {planTier}
             </span>
           </div>
@@ -101,9 +101,9 @@ export default function SettingsPage() {
               <div key={label} className="flex items-center gap-2">
                 {available
                   ? <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400" />
-                  : <Lock className="h-3.5 w-3.5 flex-shrink-0 text-slate-600" />
+                  : <Lock className="h-3.5 w-3.5 flex-shrink-0 text-[#666]" />
                 }
-                <span className={`text-xs ${available ? 'text-slate-300' : 'text-slate-600'}`}>{label}</span>
+                <span className={`text-xs ${available ? 'text-slate-300' : 'text-[#666]'}`}>{label}</span>
               </div>
             ))}
           </div>
@@ -122,13 +122,13 @@ export default function SettingsPage() {
 
         {/* Security */}
         <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show"
-          className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+          className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
         >
           <div className="mb-4 flex items-center gap-2">
-            <Shield className="h-4 w-4 text-slate-500" />
+            <Shield className="h-4 w-4 text-[#666]" />
             <h2 className="text-sm font-semibold text-white">Segurança e Privacidade</h2>
           </div>
-          <div className="space-y-2 text-xs text-slate-500">
+          <div className="space-y-2 text-xs text-[#666]">
             <p>• Dados armazenados com segurança no Firebase (Google Cloud)</p>
             <p>• Autenticação via OAuth 2.0 (Google) ou email/senha</p>
             <p>• Conexão criptografada via SSL/TLS</p>

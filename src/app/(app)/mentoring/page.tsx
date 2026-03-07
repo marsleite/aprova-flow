@@ -99,21 +99,21 @@ export default function MentoringPage() {
   const strengths = planVsActual.filter((p) => p.status === 'ok' || p.status === 'over');
 
   return (
-    <div className="min-h-screen bg-[#080c14]">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
-      <div className="border-b border-white/[0.05] bg-[#0b1120]/60 px-6 py-5 backdrop-blur-sm">
+      <div className="border-b border-white/[0.05] bg-[#0E111B]/60 px-6 py-5 backdrop-blur-sm">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Brain className="h-3.5 w-3.5 text-violet-400" />
-              <span className="text-xs text-slate-500 uppercase tracking-wider">AI Strategic Advisor</span>
+              <Brain className="h-3.5 w-3.5 text-[#F59768]" />
+              <span className="text-xs text-[#666] uppercase tracking-wider">AI Strategic Advisor</span>
               <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 4px rgba(52,211,153,0.8)' }} />
                 AI Online
               </span>
             </div>
             <h1 className="text-2xl font-bold text-white">Mentoria Estratégica</h1>
-            <p className="mt-0.5 text-sm text-slate-500">
+            <p className="mt-0.5 text-sm text-[#666]">
               Diagnóstico semanal de IA com análise comparativa e recomendações estratégicas
             </p>
           </div>
@@ -139,16 +139,16 @@ export default function MentoringPage() {
                 value: `${(consistency.weeklyTotalSeconds / 3600).toFixed(1)}h`,
                 sub: `Meta: ${consistency.weeklyGoalHours}h`,
                 icon: Clock,
-                color: 'text-blue-400',
-                bg: 'bg-blue-500/10',
+                color: 'text-[#F59768]',
+                bg: 'bg-[#3150AA]/10',
               },
               {
                 label: 'Progresso semanal',
                 value: `${consistency.weeklyProgressPercent}%`,
                 sub: `${consistency.daysStudiedThisWeek} dias estudados`,
                 icon: TrendingUp,
-                color: 'text-violet-400',
-                bg: 'bg-violet-500/10',
+                color: 'text-[#F59768]',
+                bg: 'bg-[#3150AA]/10',
               },
               {
                 label: 'Sequência atual',
@@ -168,14 +168,14 @@ export default function MentoringPage() {
               },
             ].map(({ label, value, sub, icon: Icon, color, bg }, i) => (
               <motion.div key={label} custom={i} variants={fadeUp} initial="hidden" animate="show"
-                className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4"
+                className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4"
               >
                 <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg ${bg}`}>
                   <Icon className={`h-3.5 w-3.5 ${color}`} />
                 </div>
                 <p className="text-xl font-bold text-white">{value}</p>
-                <p className="text-xs text-slate-500">{label}</p>
-                <p className="mt-0.5 text-[10px] text-slate-600">{sub}</p>
+                <p className="text-xs text-[#666]">{label}</p>
+                <p className="mt-0.5 text-[10px] text-[#666]">{sub}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -186,8 +186,8 @@ export default function MentoringPage() {
           <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show"
             className="space-y-4"
           >
-            <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#666]">
                 Log de Ajustes IA
               </p>
 
@@ -206,9 +206,9 @@ export default function MentoringPage() {
                         <div key={pva.subject} className="relative flex gap-3 pl-6">
                           <div className={`absolute left-0 top-1.5 h-[11px] w-[11px] rounded-full border-2 ${i === 0 ? 'border-blue-400 bg-blue-400/30' : 'border-slate-600 bg-slate-700'}`} />
                           <div>
-                            <p className="text-[10px] text-slate-600">{i === 0 ? 'HOJE' : '2 DIAS ATRÁS'}</p>
+                            <p className="text-[10px] text-[#666]">{i === 0 ? 'HOJE' : '2 DIAS ATRÁS'}</p>
                             <p className="text-xs font-semibold text-white">Ajuste de Peso</p>
-                            <p className="text-[10px] text-slate-500">{pva.subject}: aumento de {Math.abs(pva.deviation).toFixed(0)}% sugerido</p>
+                            <p className="text-[10px] text-[#666]">{pva.subject}: aumento de {Math.abs(pva.deviation).toFixed(0)}% sugerido</p>
                           </div>
                         </div>
                       ))}
@@ -216,9 +216,9 @@ export default function MentoringPage() {
                         <div key={pva.subject} className="relative flex gap-3 pl-6">
                           <div className="absolute left-0 top-1.5 h-[11px] w-[11px] rounded-full border-2 border-slate-600 bg-slate-700" />
                           <div>
-                            <p className="text-[10px] text-slate-600">3 DIAS ATRÁS</p>
+                            <p className="text-[10px] text-[#666]">3 DIAS ATRÁS</p>
                             <p className="text-xs font-semibold text-white">Marco Atingido</p>
-                            <p className="text-[10px] text-slate-500">{pva.subject}: cobertura em dia</p>
+                            <p className="text-[10px] text-[#666]">{pva.subject}: cobertura em dia</p>
                           </div>
                         </div>
                       ))}
@@ -226,37 +226,37 @@ export default function MentoringPage() {
                         <div className="relative flex gap-3 pl-6">
                           <div className="absolute left-0 top-1.5 h-[11px] w-[11px] rounded-full border-2 border-emerald-400 bg-emerald-400/30" />
                           <div>
-                            <p className="text-[10px] text-slate-600">ESTA SEMANA</p>
+                            <p className="text-[10px] text-[#666]">ESTA SEMANA</p>
                             <p className="text-xs font-semibold text-white">Sequência Mantida</p>
-                            <p className="text-[10px] text-slate-500">{consistency.currentStreak} dias consecutivos de estudo</p>
+                            <p className="text-[10px] text-[#666]">{consistency.currentStreak} dias consecutivos de estudo</p>
                           </div>
                         </div>
                       )}
                     </>
                   ) : (
-                    <p className="text-xs text-slate-600 pl-6">Sem ajustes registrados. Estude mais para gerar diagnósticos.</p>
+                    <p className="text-xs text-[#666] pl-6">Sem ajustes registrados. Estude mais para gerar diagnósticos.</p>
                   )}
                 </div>
               )}
             </div>
 
             {/* Study plan status */}
-            <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Status do Sistema</p>
+            <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#666]">Status do Sistema</p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">AI Engine</span>
+                  <span className="text-xs text-[#666]">AI Engine</span>
                   <div className="flex items-center gap-1.5">
                     <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 4px rgba(52,211,153,0.8)' }} />
                     <span className="text-xs text-emerald-400">v4.3-pro</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Sync</span>
+                  <span className="text-xs text-[#666]">Sync</span>
                   <span className="text-xs text-emerald-400">Ativo em tempo real</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Edital ativo</span>
+                  <span className="text-xs text-[#666]">Edital ativo</span>
                   <span className="text-xs text-slate-300">{activePlanObj?.name || 'Geral'}</span>
                 </div>
               </div>
@@ -304,11 +304,11 @@ export default function MentoringPage() {
           <motion.div custom={7} variants={fadeUp} initial="hidden" animate="show"
             className="space-y-4"
           >
-            <div className="rounded-xl border border-violet-500/20 bg-gradient-to-b from-violet-600/10 to-[#0f1825] p-4">
+            <div className="rounded-xl border border-[#3150AA]/20 bg-gradient-to-b from-violet-600/10 to-[#0f1825] p-4">
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-violet-500/20">
-                    <Sparkles className="h-3 w-3 text-violet-400" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#3150AA]/20">
+                    <Sparkles className="h-3 w-3 text-[#F59768]" />
                   </div>
                   <p className="text-xs font-semibold text-violet-300">Strategic Copilot</p>
                 </div>
@@ -332,7 +332,7 @@ export default function MentoringPage() {
                     {neglected.length > 0 && (
                       <button
                         onClick={() => setChatOpen(true)}
-                        className="w-full rounded-lg border border-violet-500/20 bg-violet-500/[0.06] px-3 py-2 text-left text-xs text-violet-300 transition-colors hover:bg-violet-500/10"
+                        className="w-full rounded-lg border border-[#3150AA]/20 bg-violet-500/[0.06] px-3 py-2 text-left text-xs text-violet-300 transition-colors hover:bg-[#3150AA]/10"
                       >
                         Como realocar tempo em {neglected[0].subject}?
                       </button>
@@ -340,7 +340,7 @@ export default function MentoringPage() {
                     {avgAccuracy !== null && avgAccuracy < 70 && (
                       <button
                         onClick={() => setChatOpen(true)}
-                        className="w-full rounded-lg border border-violet-500/20 bg-violet-500/[0.06] px-3 py-2 text-left text-xs text-violet-300 transition-colors hover:bg-violet-500/10"
+                        className="w-full rounded-lg border border-[#3150AA]/20 bg-violet-500/[0.06] px-3 py-2 text-left text-xs text-violet-300 transition-colors hover:bg-[#3150AA]/10"
                       >
                         Como melhorar a taxa de acerto?
                       </button>
@@ -361,17 +361,17 @@ export default function MentoringPage() {
 
             {/* Comparative matrix */}
             {planVsActual.length > 0 && (
-              <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#666]">
                   Matriz Comparativa
                 </p>
                 <div className="overflow-hidden rounded-lg border border-white/[0.05]">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-white/[0.05] bg-white/[0.02]">
-                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-600">Matéria</th>
-                        <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-slate-600">Real</th>
-                        <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-slate-600">Gap</th>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[#666]">Matéria</th>
+                        <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[#666]">Real</th>
+                        <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[#666]">Gap</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/[0.03]">
@@ -397,22 +397,22 @@ export default function MentoringPage() {
             {/* Quick actions */}
             <div className="space-y-2">
               <Link href="/simulations"
-                className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-[#0f1825] px-4 py-3 text-sm text-slate-300 transition-colors hover:bg-white/[0.04]"
+                className="flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#0E111B] px-4 py-3 text-sm text-slate-300 transition-colors hover:bg-white/[0.04]"
               >
                 <div className="flex items-center gap-2">
-                  <BarChart2 className="h-4 w-4 text-slate-500" />
+                  <BarChart2 className="h-4 w-4 text-[#666]" />
                   Fazer simulado
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-600" />
+                <ChevronRight className="h-4 w-4 text-[#666]" />
               </Link>
               <Link href="/analytics"
-                className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-[#0f1825] px-4 py-3 text-sm text-slate-300 transition-colors hover:bg-white/[0.04]"
+                className="flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#0E111B] px-4 py-3 text-sm text-slate-300 transition-colors hover:bg-white/[0.04]"
               >
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-slate-500" />
+                  <TrendingUp className="h-4 w-4 text-[#666]" />
                   Ver análises
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-600" />
+                <ChevronRight className="h-4 w-4 text-[#666]" />
               </Link>
             </div>
           </motion.div>

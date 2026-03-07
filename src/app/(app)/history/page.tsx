@@ -26,16 +26,16 @@ export default function HistoryPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#080c14]">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
-      <div className="border-b border-white/[0.05] bg-[#0b1120]/60 px-6 py-5 backdrop-blur-sm">
+      <div className="border-b border-white/[0.05] bg-[#0E111B]/60 px-6 py-5 backdrop-blur-sm">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <History className="h-3.5 w-3.5 text-blue-400" />
-            <span className="text-xs text-slate-500 uppercase tracking-wider">Session History</span>
+            <History className="h-3.5 w-3.5 text-[#F59768]" />
+            <span className="text-xs text-[#666] uppercase tracking-wider">Session History</span>
           </div>
           <h1 className="text-2xl font-bold text-white">Histórico de Sessões</h1>
-          <p className="mt-0.5 text-sm text-slate-500">
+          <p className="mt-0.5 text-sm text-[#666]">
             Registro completo de todas as sessões de estudo
             {activePlanObj && <> — <span style={{ color: activePlanObj.color }}>{activePlanObj.name}</span></>}
           </p>

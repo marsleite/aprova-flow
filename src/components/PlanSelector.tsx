@@ -147,7 +147,7 @@ export default function PlanSelector({
                       }}
                       title="Editar edital"
                     >
-                      <Pencil className="h-3.5 w-3.5 text-gray-400 hover:text-violet-400" />
+                      <Pencil className="h-3.5 w-3.5 text-gray-400 hover:text-[#F59768]" />
                     </button>
                     <button
                       onClick={(e) => {
@@ -190,7 +190,7 @@ export default function PlanSelector({
                 onCreatePlan();
                 setOpen(false);
               }}
-              className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-violet-400 transition-colors hover:bg-violet-500/10"
+              className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-[#F59768] transition-colors hover:bg-[#3150AA]/10"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Novo Edital</span>

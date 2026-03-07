@@ -43,7 +43,7 @@ export default function LoginScreen() {
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-violet-600/20 blur-3xl" />
         <div className="absolute -bottom-40 -right-40 h-80 w-80 rounded-full bg-blue-600/20 blur-3xl" />
-        <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-500/10 blur-3xl" />
+        <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#3150AA]/10 blur-3xl" />
       </div>
 
       {/* Conteúdo */}
@@ -56,7 +56,7 @@ export default function LoginScreen() {
               <Zap className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-white">
-              Aprova<span className="text-violet-400">Mind</span>
+              Aprova<span className="text-[#F59768]">Mind</span>
             </h1>
             <p className="mt-2 text-center text-sm text-gray-400">
               Rastreie seu tempo de estudo e acelere sua aprovação
@@ -66,11 +66,11 @@ export default function LoginScreen() {
           {/* Features */}
           <div className="mb-8 space-y-3">
             <Feature
-              icon={<Clock className="h-4 w-4 text-violet-400" />}
+              icon={<Clock className="h-4 w-4 text-[#F59768]" />}
               text="Cronômetro inteligente com horas líquidas"
             />
             <Feature
-              icon={<TrendingUp className="h-4 w-4 text-blue-400" />}
+              icon={<TrendingUp className="h-4 w-4 text-[#F59768]" />}
               text="Dashboard de progresso por matéria"
             />
             <Feature
@@ -184,7 +184,7 @@ export default function LoginScreen() {
                 Não tem conta?{' '}
                 <button
                   onClick={() => setMode('register')}
-                  className="text-violet-400 hover:text-violet-300 transition-colors"
+                  className="text-[#F59768] hover:text-violet-300 transition-colors"
                 >
                   Criar conta
                 </button>
@@ -194,7 +194,7 @@ export default function LoginScreen() {
                 Já tem conta?{' '}
                 <button
                   onClick={() => setMode('login')}
-                  className="text-violet-400 hover:text-violet-300 transition-colors"
+                  className="text-[#F59768] hover:text-violet-300 transition-colors"
                 >
                   Fazer login
                 </button>

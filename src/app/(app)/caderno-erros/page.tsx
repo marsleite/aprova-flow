@@ -59,7 +59,7 @@ interface DiagnosisResult {
 }
 
 const DIMENSION_LABELS: Record<string, { label: string; color: string; emoji: string }> = {
-    legislacao: { label: 'Legislação', color: 'text-blue-400', emoji: '📜' },
+    legislacao: { label: 'Legislação', color: 'text-[#F59768]', emoji: '📜' },
     jurisprudencia: { label: 'Jurisprudência', color: 'text-purple-400', emoji: '⚖️' },
     interpretacao: { label: 'Interpretação', color: 'text-amber-400', emoji: '🔍' },
     conceitual: { label: 'Conceitual', color: 'text-emerald-400', emoji: '📚' },
@@ -254,16 +254,16 @@ export default function CadernoErrosPage() {
     const worstMateria = sortedGroups[0]?.[0] || '—';
 
     return (
-        <div className="min-h-screen bg-[#080c14]">
+        <div className="min-h-screen bg-[#0A0A0A]">
             {/* Header */}
-            <div className="border-b border-white/[0.05] bg-[#0b1120]/60 px-6 py-5 backdrop-blur-sm">
+            <div className="border-b border-white/[0.05] bg-[#0E111B]/60 px-6 py-5 backdrop-blur-sm">
                 <div className="flex items-start justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <BookX className="h-6 w-6 text-red-400" />
                             <h1 className="text-2xl font-bold text-white">Caderno de Erros</h1>
                         </div>
-                        <p className="mt-0.5 text-sm text-slate-500">
+                        <p className="mt-0.5 text-sm text-[#666]">
                             Seus erros organizados com diagnóstico IA para nunca mais repetir
                         </p>
                     </div>
@@ -279,27 +279,27 @@ export default function CadernoErrosPage() {
                     <>
                         {/* KPI Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4">
+                            <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
                                 <p className="text-[10px] font-semibold uppercase tracking-wider text-red-400">Total de Erros</p>
                                 <p className="mt-1 text-3xl font-bold text-white">{totalErrors}</p>
-                                <p className="text-xs text-slate-500 mt-1">{showMastered ? 'incluindo dominados' : 'não dominados'}</p>
+                                <p className="text-xs text-[#666] mt-1">{showMastered ? 'incluindo dominados' : 'não dominados'}</p>
                             </div>
-                            <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4">
+                            <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
                                 <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-400">Matérias Afetadas</p>
                                 <p className="mt-1 text-3xl font-bold text-white">{activeMaterias}</p>
-                                <p className="text-xs text-slate-500 mt-1">matérias com erros</p>
+                                <p className="text-xs text-[#666] mt-1">matérias com erros</p>
                             </div>
-                            <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-4">
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-400">Matéria Mais Fraca</p>
+                            <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#F59768]">Matéria Mais Fraca</p>
                                 <p className="mt-1 text-lg font-bold text-white truncate">{worstMateria}</p>
-                                <p className="text-xs text-slate-500 mt-1">{sortedGroups[0]?.[1]?.length || 0} erros</p>
+                                <p className="text-xs text-[#666] mt-1">{sortedGroups[0]?.[1]?.length || 0} erros</p>
                             </div>
                         </div>
 
                         {/* Filters & Actions */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                             <div className="flex items-center gap-2">
-                                <Filter className="h-4 w-4 text-slate-500" />
+                                <Filter className="h-4 w-4 text-[#666]" />
                                 <select
                                     value={filterMateria}
                                     onChange={(e) => setFilterMateria(e.target.value)}
@@ -345,13 +345,13 @@ export default function CadernoErrosPage() {
                         )}
 
                         {diagnosis && (
-                            <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-6 space-y-6 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-violet-500/10 blur-3xl rounded-full pointer-events-none"></div>
-                                <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                            <div className="rounded-xl border border-[#3150AA]/20 bg-violet-500/5 p-6 space-y-6 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-[#3150AA]/10 blur-3xl rounded-full pointer-events-none"></div>
+                                <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-[#3150AA]/10 blur-3xl rounded-full pointer-events-none"></div>
 
                                 <div className="flex items-center justify-between">
                                     <h3 className="flex items-center gap-2 text-lg font-bold text-white">
-                                        <Sparkles className="h-5 w-5 text-violet-400" />
+                                        <Sparkles className="h-5 w-5 text-[#F59768]" />
                                         🕵️ Gap Analyzer — Diagnóstico Profundo
                                     </h3>
                                 </div>
@@ -374,7 +374,7 @@ export default function CadernoErrosPage() {
                                             diagnosis.gaps.map((gap, i) => {
                                                 const dim = DIMENSION_LABELS[gap.dimension] || DIMENSION_LABELS.conceitual;
                                                 return (
-                                                    <div key={i} className="rounded-lg border border-white/[0.06] bg-[#0b1120] p-4 space-y-2">
+                                                    <div key={i} className="rounded-lg border border-white/[0.07] bg-[#0E111B] p-4 space-y-2">
                                                         <div className="flex items-start justify-between gap-2">
                                                             <span className="text-sm text-gray-200">{gap.description}</span>
                                                             <span className={`text-[10px] px-2 py-0.5 rounded-full border ${dim.color} border-current whitespace-nowrap`}>
@@ -392,7 +392,7 @@ export default function CadernoErrosPage() {
                                         ) : diagnosis.patterns && diagnosis.patterns.length > 0 ? (
                                             /* Backward compat: old format */
                                             diagnosis.patterns.map((p, i) => (
-                                                <div key={i} className="rounded-lg border border-white/[0.06] bg-[#0b1120] p-4">
+                                                <div key={i} className="rounded-lg border border-white/[0.07] bg-[#0E111B] p-4">
                                                     <div className="flex items-start gap-2">
                                                         <TrendingDown className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
                                                         <span className="text-sm text-gray-300">{p}</span>
@@ -406,7 +406,7 @@ export default function CadernoErrosPage() {
                                     <div className="space-y-5">
                                         {/* Dimension Scores */}
                                         {diagnosis.overallScore && (
-                                            <div className="rounded-lg border border-white/[0.06] bg-[#0b1120] p-4 space-y-3">
+                                            <div className="rounded-lg border border-white/[0.07] bg-[#0E111B] p-4 space-y-3">
                                                 <h4 className="text-sm font-bold text-white uppercase tracking-wider">
                                                     Perfil por Dimensão
                                                 </h4>
@@ -463,7 +463,7 @@ export default function CadernoErrosPage() {
                             <div className="text-center py-20">
                                 <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
                                 <h2 className="text-xl font-bold text-white mb-2">Nenhum erro encontrado!</h2>
-                                <p className="text-sm text-slate-500 mb-6">Continue praticando nos simulados. Seus erros aparecerão aqui.</p>
+                                <p className="text-sm text-[#666] mb-6">Continue praticando nos simulados. Seus erros aparecerão aqui.</p>
                                 <a
                                     href="/simulations"
                                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl transition-colors text-sm font-semibold"
@@ -475,7 +475,7 @@ export default function CadernoErrosPage() {
                         ) : (
                             <div className="space-y-6">
                                 {sortedGroups.map(([materia, entries]) => (
-                                    <div key={materia} className="rounded-xl border border-white/[0.06] bg-[#0f1825] overflow-hidden">
+                                    <div key={materia} className="rounded-xl border border-white/[0.07] bg-[#0E111B] overflow-hidden">
                                         {/* Group Header */}
                                         <div className="flex items-center justify-between px-5 py-3 bg-white/[0.02] border-b border-white/[0.05]">
                                             <div className="flex items-center gap-3">
@@ -520,7 +520,7 @@ export default function CadernoErrosPage() {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="flex-shrink-0 text-slate-500">
+                                                            <div className="flex-shrink-0 text-[#666]">
                                                                 {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                                                             </div>
                                                         </div>

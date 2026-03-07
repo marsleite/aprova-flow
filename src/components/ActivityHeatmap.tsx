@@ -155,7 +155,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
 
   if (loading) {
     return (
-      <div className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
+      <div className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0E111B] p-5"
         style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
       >
         <div className="mb-3 h-5 w-28 rounded-lg shimmer" />
@@ -170,18 +170,18 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0f1825] p-5"
+      className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0E111B] p-5"
       style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
     >
       {/* Header */}
       <div className="mb-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10">
-            <CalendarDays className="h-3.5 w-3.5 text-blue-400" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#3150AA]/10">
+            <CalendarDays className="h-3.5 w-3.5 text-[#F59768]" />
           </div>
           <div>
             <p className="text-sm font-bold text-white">Activity</p>
-            <p className="text-[10px] text-slate-600">
+            <p className="text-[10px] text-[#666]">
               {totalDays} {totalDays === 1 ? 'dia' : 'dias'} · últimas {DISPLAY_WEEKS} semanas
             </p>
           </div>
@@ -196,7 +196,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
           <div className="flex flex-col gap-0.5 shrink-0 pr-1.5">
             {DAY_LABELS.map((label, i) => (
               <div key={i} className="flex flex-1 items-center justify-end">
-                <span className="text-[9px] font-medium text-slate-600">{label}</span>
+                <span className="text-[9px] font-medium text-[#666]">{label}</span>
               </div>
             ))}
           </div>
@@ -248,7 +248,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
 
       {/* Footer — legend + total */}
       <div className="mt-2 flex items-center justify-between shrink-0">
-        <span className="text-[11px] font-medium text-slate-500">
+        <span className="text-[11px] font-medium text-[#666]">
           {formatDuration(totalSeconds)}
         </span>
         <div className="flex items-center gap-1">
@@ -276,24 +276,24 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
             <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-semibold text-white">{selectedDay.date}</span>
-                <button onClick={() => setSelectedDay(null)} className="text-slate-600 hover:text-slate-400">
+                <button onClick={() => setSelectedDay(null)} className="text-[#666] hover:text-[#666]">
                   <X className="h-3 w-3" />
                 </button>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                <div className="flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1">
-                  <Clock className="h-2.5 w-2.5 text-blue-400" />
-                  <span className="text-xs font-medium text-blue-300">{formatDuration(selectedDay.totalSeconds)}</span>
+                <div className="flex items-center gap-1 rounded-lg bg-[#3150AA]/10 px-2 py-1">
+                  <Clock className="h-2.5 w-2.5 text-[#F59768]" />
+                  <span className="text-xs font-medium text-[#F59768]/80">{formatDuration(selectedDay.totalSeconds)}</span>
                 </div>
-                <div className="flex items-center gap-1 rounded-lg bg-violet-500/10 px-2 py-1">
+                <div className="flex items-center gap-1 rounded-lg bg-[#3150AA]/10 px-2 py-1">
                   <span className="text-xs text-violet-300">
                     {selectedDay.sessionCount} {selectedDay.sessionCount === 1 ? 'sessão' : 'sessões'}
                   </span>
                 </div>
                 {selectedDay.subjects.map((s) => (
                   <div key={s} className="flex items-center gap-1 rounded-lg bg-white/[0.04] px-2 py-1">
-                    <BookOpen className="h-2.5 w-2.5 text-slate-500" />
-                    <span className="text-xs text-slate-400">{s}</span>
+                    <BookOpen className="h-2.5 w-2.5 text-[#666]" />
+                    <span className="text-xs text-[#666]">{s}</span>
                   </div>
                 ))}
               </div>
@@ -309,7 +309,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
             className="mt-2 overflow-hidden shrink-0"
           >
             <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-2 text-center">
-              <p className="text-xs text-slate-600">Nenhum estudo registrado neste dia</p>
+              <p className="text-xs text-[#666]">Nenhum estudo registrado neste dia</p>
             </div>
           </motion.div>
         )}

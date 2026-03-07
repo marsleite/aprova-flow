@@ -35,7 +35,7 @@ export default function GoalAndStreakCard({
 
   if (loading || !data) {
     return (
-      <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5">
+      <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
         <div className="mb-4 h-5 w-40 rounded shimmer" />
         <div className="mb-3 h-10 w-full rounded shimmer" />
         <div className="h-2 w-full rounded shimmer" />
@@ -50,28 +50,28 @@ export default function GoalAndStreakCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
     >
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-          <Target className="h-4 w-4 text-blue-400" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3150AA]/10">
+          <Target className="h-4 w-4 text-[#F59768]" />
         </div>
         <div>
           <h3 className="text-sm font-semibold text-white">Meta & Consistência</h3>
-          <p className="text-xs text-slate-500">Seu ritmo da semana</p>
+          <p className="text-xs text-[#666]">Seu ritmo da semana</p>
         </div>
       </div>
 
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-          <div className="mb-1 flex items-center gap-1 text-xs text-slate-500">
+          <div className="mb-1 flex items-center gap-1 text-xs text-[#666]">
             <Flame className="h-3.5 w-3.5 text-orange-400" />
             Streak Atual
           </div>
           <p className="text-2xl font-bold text-white">{data.currentStreak}d</p>
         </div>
         <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-          <div className="mb-1 flex items-center gap-1 text-xs text-slate-500">
+          <div className="mb-1 flex items-center gap-1 text-xs text-[#666]">
             <Trophy className="h-3.5 w-3.5 text-amber-400" />
             Melhor Streak
           </div>
@@ -80,12 +80,12 @@ export default function GoalAndStreakCard({
       </div>
 
       <div className="mb-3 rounded-xl border border-white/5 bg-white/[0.02] p-3">
-        <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
+        <div className="mb-2 flex items-center justify-between text-xs text-[#666]">
           <span>
             Progresso semanal ({formatDuration(data.weeklyTotalSeconds)} de{' '}
             {data.weeklyGoalHours}h)
           </span>
-          <span className={goalReached ? 'text-emerald-400' : 'text-blue-300'}>
+          <span className={goalReached ? 'text-emerald-400' : 'text-[#F59768]/80'}>
             {data.weeklyProgressPercent}%
           </span>
         </div>
@@ -97,7 +97,7 @@ export default function GoalAndStreakCard({
             style={{ width: `${Math.max(4, data.weeklyProgressPercent)}%` }}
           />
         </div>
-        <p className="mt-2 text-xs text-slate-600">
+        <p className="mt-2 text-xs text-[#666]">
           {goalReached
             ? 'Meta da semana batida. Excelente!'
             : `Faltam ${formatDuration(data.remainingSeconds)} para concluir a meta.`}
@@ -106,7 +106,7 @@ export default function GoalAndStreakCard({
 
       <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-end">
         <div className="flex-1">
-          <label className="mb-1 block text-xs text-slate-500">Meta semanal (horas)</label>
+          <label className="mb-1 block text-xs text-[#666]">Meta semanal (horas)</label>
           <input
             type="number"
             min={1}

@@ -71,9 +71,9 @@ const MODE_OPTIONS: { value: TimerMode; label: string; icon: React.ReactNode; de
 ];
 
 const PHASE_LABELS: Record<PomodoroPhase, { label: string; color: string; bgColor: string }> = {
-  focus: { label: 'Foco', color: 'text-violet-400', bgColor: 'bg-violet-500/20' },
+  focus: { label: 'Foco', color: 'text-[#F59768]', bgColor: 'bg-[#3150AA]/20' },
   shortBreak: { label: 'Pausa Curta', color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
-  longBreak: { label: 'Pausa Longa', color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  longBreak: { label: 'Pausa Longa', color: 'text-[#F59768]', bgColor: 'bg-[#3150AA]/20' },
 };
 
 // ========================================
@@ -280,7 +280,7 @@ function SubjectDropdown({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border border-white/[0.08] bg-[#111827] shadow-xl"
+            className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0E111B] shadow-xl"
           >
             <div className="border-b border-white/5 p-2">
               <div className="relative">
@@ -292,7 +292,7 @@ function SubjectDropdown({
                   onChange={(event) => setQuery(event.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Buscar ou digitar matéria..."
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] py-2 pl-9 pr-3 text-sm text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] py-2 pl-9 pr-3 text-sm text-slate-200 outline-none transition-all placeholder:text-[#666] focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
                 />
               </div>
             </div>
@@ -302,7 +302,7 @@ function SubjectDropdown({
                 <button
                   type="button"
                   onClick={() => handleAdd(trimmed)}
-                  className="flex w-full items-center gap-2 border-b border-white/[0.05] px-3 py-2 text-left text-sm text-blue-400 transition hover:bg-blue-500/10"
+                  className="flex w-full items-center gap-2 border-b border-white/[0.05] px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Adicionar &quot;{trimmed}&quot;</span>
@@ -312,7 +312,7 @@ function SubjectDropdown({
               <button
                 type="button"
                 onClick={() => handleSelect('')}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-400 transition hover:bg-white/[0.04] hover:text-white"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#666] transition hover:bg-white/[0.04] hover:text-white"
               >
                 <span className="flex-1">Selecione uma matéria...</span>
               </button>
@@ -524,16 +524,16 @@ export default function StudyTimer({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5"
+      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
     >
       {/* Header */}
       <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-          <Clock className="h-4 w-4 text-blue-400" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3150AA]/10">
+          <Clock className="h-4 w-4 text-[#F59768]" />
         </div>
         <div>
           <h2 className="text-sm font-semibold text-white">Cronômetro de Estudo</h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[#666]">
             {isPomodoro
               ? `Pomodoro ${pomodoroConfig?.label}`
               : 'Tempo corrido · Pausa manual'}
@@ -552,7 +552,7 @@ export default function StudyTimer({
 
       {/* Seletor de Modo */}
       <div className="mb-5">
-        <label className="mb-2 block text-xs font-medium text-slate-500">Modo</label>
+        <label className="mb-2 block text-xs font-medium text-[#666]">Modo</label>
         <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
           {MODE_OPTIONS.map((opt) => (
             <button
@@ -561,8 +561,8 @@ export default function StudyTimer({
               disabled={!isIdle || !hasControl}
               className={`flex flex-col items-center gap-0.5 rounded-xl border px-2 py-2 text-center transition-all
                 ${mode === opt.value
-                  ? 'border-blue-500/40 bg-blue-500/10 text-white'
-                  : 'border-white/[0.05] bg-white/[0.02] text-slate-600 hover:border-white/10 hover:text-slate-300'
+                  ? 'border-blue-500/40 bg-[#3150AA]/10 text-white'
+                  : 'border-white/[0.05] bg-white/[0.02] text-[#666] hover:border-white/10 hover:text-slate-300'
                 }
                 disabled:cursor-not-allowed disabled:opacity-40
               `}
@@ -578,7 +578,7 @@ export default function StudyTimer({
       {/* Seletor de Edital (só aparece se houver mais de 1 plano) */}
       {plans.length > 1 && (
         <div className="mb-4">
-          <label className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-500">
+          <label className="mb-2 flex items-center gap-2 text-xs font-medium text-[#666]">
             <BookOpen className="h-3.5 w-3.5" />
             Edital
           </label>
@@ -604,7 +604,7 @@ export default function StudyTimer({
 
       {/* Seletor de Matéria */}
       <div className="mb-5">
-        <label className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-500">
+        <label className="mb-2 flex items-center gap-2 text-xs font-medium text-[#666]">
           <BookOpen className="h-3.5 w-3.5" />
           Matéria
         </label>
@@ -639,7 +639,7 @@ export default function StudyTimer({
               </button>
               <button
                 onClick={onCreateEdital}
-                className="rounded-lg bg-violet-500/20 px-3 py-2 text-xs font-medium text-violet-100 transition-colors hover:bg-violet-500/30"
+                className="rounded-lg bg-[#3150AA]/20 px-3 py-2 text-xs font-medium text-violet-100 transition-colors hover:bg-violet-500/30"
               >
                 Criar Edital
               </button>
@@ -694,17 +694,17 @@ export default function StudyTimer({
           >
             <span
               className={`font-mono text-4xl font-bold tracking-wider transition-colors duration-300 sm:text-5xl
-                ${isRunning && !isBreak ? 'text-blue-400' : ''}
+                ${isRunning && !isBreak ? 'text-[#F59768]' : ''}
                 ${isRunning && isBreak ? 'text-emerald-400' : ''}
                 ${isPaused ? 'text-amber-400' : ''}
-                ${isIdle ? 'text-slate-600' : ''}
+                ${isIdle ? 'text-[#666]' : ''}
               `}
             >
               {formatTimerDisplay(displaySeconds)}
             </span>
             {/* Total de foco acumulado (em pomodoro, durante breaks) */}
             {isPomodoro && !isIdle && totalFocusSeconds > 0 && isBreak && (
-              <span className="mt-1 text-xs text-slate-600">
+              <span className="mt-1 text-xs text-[#666]">
                 Foco total: {formatTimerDisplay(totalFocusSeconds)}
               </span>
             )}
@@ -741,8 +741,8 @@ export default function StudyTimer({
             )}
             {isSaving && (
               <>
-                <Save className="h-4 w-4 animate-spin text-violet-400" />
-                <span className="text-sm text-violet-400">Salvando sessão...</span>
+                <Save className="h-4 w-4 animate-spin text-[#F59768]" />
+                <span className="text-sm text-[#F59768]">Salvando sessão...</span>
               </>
             )}
             {isIdle && selectedSubject && (
@@ -848,13 +848,13 @@ export default function StudyTimer({
 
       {/* Dica */}
       {isIdle && !selectedSubject && (
-        <p className="mt-4 text-center text-xs text-slate-600">
+        <p className="mt-4 text-center text-xs text-[#666]">
           Selecione uma matéria para começar a estudar
         </p>
       )}
 
       <p
-        className={`mt-3 text-center text-[11px] ${activeScreens > maxActiveScreens ? 'text-amber-300' : 'text-slate-600'
+        className={`mt-3 text-center text-[11px] ${activeScreens > maxActiveScreens ? 'text-amber-300' : 'text-[#666]'
           }`}
       >
         Sincronizado em {activeScreens} tela{activeScreens === 1 ? '' : 's'}

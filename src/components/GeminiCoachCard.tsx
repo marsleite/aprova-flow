@@ -39,7 +39,7 @@ export default function GeminiCoachCard({
   const tip: QuickTip = useMemo(() => {
     if (!consistency) {
       return {
-        icon: <Sparkles className="h-4 w-4 text-violet-400" />,
+        icon: <Sparkles className="h-4 w-4 text-[#F59768]" />,
         text: 'Configure sua meta semanal e plano de estudo para receber dicas personalizadas.',
         color: 'border-violet-500/15 bg-violet-500/5',
       };
@@ -89,14 +89,14 @@ export default function GeminiCoachCard({
     if (subjectHours.length > 0) {
       const least = [...subjectHours].sort((a, b) => a.hours - b.hours)[0];
       return {
-        icon: <Sparkles className="h-4 w-4 text-violet-400" />,
+        icon: <Sparkles className="h-4 w-4 text-[#F59768]" />,
         text: `${least.subject} é sua matéria com menos horas. Que tal dedicar um tempo a ela?`,
         color: 'border-violet-500/15 bg-violet-500/5',
       };
     }
 
     return {
-      icon: <Sparkles className="h-4 w-4 text-violet-400" />,
+      icon: <Sparkles className="h-4 w-4 text-[#F59768]" />,
       text: 'Comece a estudar para receber dicas inteligentes do seu coach.',
       color: 'border-violet-500/15 bg-violet-500/5',
     };
@@ -104,7 +104,7 @@ export default function GeminiCoachCard({
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-white/[0.06] bg-[#0f1825] p-5">
+      <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
         <div className="mb-3 h-4 w-32 rounded shimmer" />
         <div className="h-12 rounded shimmer" />
       </div>
@@ -116,7 +116,7 @@ export default function GeminiCoachCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="relative overflow-hidden rounded-xl border border-violet-500/20 bg-gradient-to-b from-violet-900/10 to-[#0f1825] p-5"
+      className="relative overflow-hidden rounded-xl border border-[#3150AA]/20 bg-gradient-to-b from-violet-900/10 to-[#0f1825] p-5"
     >
       {/* Decoração */}
       <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-violet-500/5 blur-xl" />
@@ -142,7 +142,7 @@ export default function GeminiCoachCard({
         {/* Botão conversar */}
         <button
           onClick={onOpenChat}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-violet-500/15 transition-all hover:shadow-violet-500/25 hover:brightness-110"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-[#3150AA]/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110"
         >
           <MessageCircle className="h-4 w-4" />
           Conversar com o Coach
