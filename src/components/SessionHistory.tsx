@@ -284,7 +284,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
+      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -292,8 +292,8 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
             <History className="h-4 w-4 text-[#F59768]" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Histórico Completo</h3>
-            <p className="text-xs text-[#666]">
+            <h3 className="text-sm font-semibold text-am-text-primary">Histórico Completo</h3>
+            <p className="text-xs text-am-text-secondary">
               {sessions.length} {sessions.length === 1 ? 'sessão' : 'sessões'} encontradas
             </p>
           </div>
@@ -302,7 +302,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
         <div className="flex flex-wrap gap-2">
           <button
             onClick={openCreateForm}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs text-white transition hover:bg-blue-500"
+            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs text-am-text-primary transition hover:bg-blue-500"
           >
             <Plus className="h-3.5 w-3.5" />
             Adicionar tempo
@@ -313,13 +313,13 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
             className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition ${
               hasFilters
                 ? 'border-blue-500/40 text-[#F59768]/80'
-                : 'border-white/[0.08] text-[#666] hover:text-white'
+                : 'border-am-border-strong text-am-text-secondary hover:text-am-text-primary'
             }`}
           >
             <Filter className="h-3.5 w-3.5" />
             Filtros
             {hasFilters && (
-              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white">
+              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] text-am-text-primary">
                 !
               </span>
             )}
@@ -333,7 +333,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
           <button
             onClick={() => exportSessionsCSV(sessions)}
             disabled={sessions.length === 0}
-            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-[#666] transition hover:text-white disabled:opacity-40"
+            className="flex items-center gap-1.5 rounded-lg border border-am-border-strong px-3 py-1.5 text-xs text-am-text-secondary transition hover:text-am-text-primary disabled:opacity-40"
           >
             <Download className="h-3.5 w-3.5" />
             CSV
@@ -349,13 +349,13 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
             exit={{ height: 0, opacity: 0 }}
             className="mb-4 overflow-hidden"
           >
-            <div className="grid gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 rounded-xl border border-am-border-default bg-am-surface-subtle p-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label className="mb-1 block text-xs text-gray-400">Matéria</label>
                 <select
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2 text-sm text-white outline-none focus:border-violet-500"
+                  className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
                 >
                   <option value="">Todas</option>
                   {subjectOptions.map((s) => (
@@ -372,7 +372,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2 text-sm text-white outline-none focus:border-violet-500"
+                  className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
                 />
               </div>
 
@@ -382,7 +382,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2 text-sm text-white outline-none focus:border-violet-500"
+                  className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
                 />
               </div>
 
@@ -394,7 +394,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                   value={minMinutes}
                   onChange={(e) => setMinMinutes(e.target.value)}
                   placeholder="0"
-                  className="w-full rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2 text-sm text-white outline-none focus:border-violet-500"
+                  className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
                 />
               </div>
             </div>
@@ -438,11 +438,11 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
             {paginatedSessions.map((s, idx) => (
               <div
                 key={s.id || idx}
-                className="flex flex-col gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 transition-colors hover:bg-white/[0.04] sm:flex-row sm:items-center sm:gap-3"
+                className="flex flex-col gap-2 rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-2.5 transition-colors hover:bg-am-surface-subtle sm:flex-row sm:items-center sm:gap-3"
               >
                 <div className="h-2 w-2 shrink-0 rounded-full bg-violet-400" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-white">{s.subject}</p>
+                  <p className="truncate text-sm font-medium text-am-text-primary">{s.subject}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {s.source === 'manual' && (
                       <span className="rounded-md bg-[#3150AA]/15 px-2 py-0.5 text-[10px] font-medium text-[#F59768]/80">
@@ -478,7 +478,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                   </span>
                   <button
                     onClick={() => openEditForm(s)}
-                    className="rounded-lg border border-white/10 p-1.5 text-gray-400 transition hover:text-white"
+                    className="rounded-lg border border-am-border-default p-1.5 text-gray-400 transition hover:text-am-text-primary"
                     title="Editar sessão"
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -489,11 +489,11 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
           </div>
 
           {totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
+            <div className="mt-4 flex items-center justify-between border-t border-am-border-default pt-3">
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-gray-400 hover:text-white disabled:opacity-30 sm:px-3"
+                className="rounded-lg border border-am-border-default px-2.5 py-1.5 text-xs text-gray-400 hover:text-am-text-primary disabled:opacity-30 sm:px-3"
               >
                 Anterior
               </button>
@@ -503,7 +503,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-gray-400 hover:text-white disabled:opacity-30 sm:px-3"
+                className="rounded-lg border border-am-border-default px-2.5 py-1.5 text-xs text-gray-400 hover:text-am-text-primary disabled:opacity-30 sm:px-3"
               >
                 Próxima
               </button>
@@ -527,11 +527,11 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
               exit={{ y: 16, opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg rounded-2xl border border-white/10 bg-gray-900 p-5 shadow-2xl"
+              className="w-full max-w-lg rounded-2xl border border-am-border-default bg-gray-900 p-5 shadow-2xl"
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div>
-                  <h4 className="text-lg font-semibold text-white">
+                  <h4 className="text-lg font-semibold text-am-text-primary">
                     {editingSession ? 'Editar sessão' : 'Adicionar sessão manual'}
                   </h4>
                   <p className="text-xs text-gray-400">
@@ -541,7 +541,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                 <button
                   onClick={closeForm}
                   disabled={saving}
-                  className="rounded-lg border border-white/10 p-1.5 text-gray-400 transition hover:text-white disabled:opacity-50"
+                  className="rounded-lg border border-am-border-default p-1.5 text-gray-400 transition hover:text-am-text-primary disabled:opacity-50"
                   title="Fechar"
                 >
                   <X className="h-4 w-4" />
@@ -558,7 +558,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                       setSaveError('');
                     }}
                     list="session-subject-options"
-                    className="w-full rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2 text-sm text-white outline-none focus:border-violet-500"
+                    className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
                     placeholder="Ex: Direito Constitucional"
                     required
                   />
@@ -580,7 +580,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                         setFormState((prev) => ({ ...prev, date: e.target.value }));
                         setSaveError('');
                       }}
-                      className="w-full rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2 text-sm text-white outline-none focus:border-violet-500"
+                      className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
                       required
                     />
                   </div>
@@ -594,7 +594,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                         setFormState((prev) => ({ ...prev, startTime: e.target.value }));
                         setSaveError('');
                       }}
-                      className="w-full rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2 text-sm text-white outline-none focus:border-violet-500"
+                      className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
                       required
                     />
                   </div>
@@ -608,14 +608,14 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                         setFormState((prev) => ({ ...prev, endTime: e.target.value }));
                         setSaveError('');
                       }}
-                      className="w-full rounded-lg border border-white/10 bg-gray-800/60 px-3 py-2 text-sm text-white outline-none focus:border-violet-500"
+                      className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-white/10 bg-gray-800/40 px-3 py-2 text-xs text-gray-300">
-                  Tempo calculado: <span className="font-medium text-white">{durationPreview > 0 ? formatDuration(durationPreview) : '--'}</span>
+                <div className="rounded-lg border border-am-border-default bg-gray-800/40 px-3 py-2 text-xs text-gray-300">
+                  Tempo calculado: <span className="font-medium text-am-text-primary">{durationPreview > 0 ? formatDuration(durationPreview) : '--'}</span>
                 </div>
 
                 {saveError && (
@@ -629,14 +629,14 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                     type="button"
                     onClick={closeForm}
                     disabled={saving}
-                    className="rounded-lg border border-white/10 px-3 py-2 text-xs text-gray-300 transition hover:text-white disabled:opacity-50"
+                    className="rounded-lg border border-am-border-default px-3 py-2 text-xs text-gray-300 transition hover:text-am-text-primary disabled:opacity-50"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs text-white transition hover:bg-violet-500 disabled:opacity-60"
+                    className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs text-am-text-primary transition hover:bg-violet-500 disabled:opacity-60"
                   >
                     {saving ? (
                       <>

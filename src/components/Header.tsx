@@ -51,15 +51,15 @@ export default function Header({
   }, []);
 
   return (
-    <header className="relative z-50 border-b border-white/10 bg-gray-950/80 backdrop-blur-xl">
+    <header className="relative z-50 border-b border-am-border-default bg-gray-950/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         {/* Logo & Nome */}
         <div className="flex items-center gap-3 self-start sm:self-auto">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-blue-500 shadow-lg shadow-[#3150AA]/25">
-            <Zap className="h-5 w-5 text-white" />
+            <Zap className="h-5 w-5 text-am-text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">
+            <h1 className="text-xl font-bold text-am-text-primary">
               Aprova<span className="text-[#F59768]">Mind</span>
             </h1>
             <p className="hidden text-xs text-gray-500 sm:block">
@@ -102,7 +102,7 @@ export default function Header({
             <div ref={menuRef} className="relative shrink-0">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="flex items-center gap-2 rounded-lg border border-white/10 px-2.5 py-2 text-sm text-gray-300 transition-colors hover:border-white/20 hover:bg-gray-900"
+                className="flex items-center gap-2 rounded-lg border border-am-border-default px-2.5 py-2 text-sm text-gray-300 transition-colors hover:border-am-border-default hover:bg-gray-900"
               >
                 {user.photoURL ? (
                   <Image
@@ -124,13 +124,13 @@ export default function Header({
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-white/10 bg-gray-900 shadow-2xl shadow-black/50">
-                  <div className="border-b border-white/5 px-3 py-2.5">
-                    <p className="truncate text-sm font-medium text-white">{user.displayName || 'Usuário'}</p>
+                <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-am-border-default bg-gray-900 shadow-2xl shadow-black/50">
+                  <div className="border-b border-am-border-default px-3 py-2.5">
+                    <p className="truncate text-sm font-medium text-am-text-primary">{user.displayName || 'Usuário'}</p>
                     <p className="truncate text-xs text-gray-400">{user.email}</p>
                   </div>
 
-                  <div className="space-y-1 border-b border-white/5 px-3 py-2.5">
+                  <div className="space-y-1 border-b border-am-border-default px-3 py-2.5">
                     <p className="inline-flex items-center gap-1 text-xs text-gray-400">
                       <Crown className="h-3.5 w-3.5 text-violet-300" />
                       Plano atual
@@ -155,7 +155,7 @@ export default function Header({
                         setMenuOpen(false);
                         setAccountModalOpen(true);
                       }}
-                      className="mb-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-gray-200 transition-colors hover:bg-white/10"
+                      className="mb-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-gray-200 transition-colors hover:bg-am-surface-subtle"
                     >
                       <CreditCard className="h-4 w-4 text-violet-300" />
                       Conta e plano

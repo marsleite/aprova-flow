@@ -387,25 +387,25 @@ export default function DailyAiPlannerCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-2xl border border-[#3150AA]/20 bg-gradient-to-br from-violet-950/30 via-gray-900 to-gray-950 p-6 shadow-2xl"
+      className="rounded-am-xl border border-am-border-default border-t border-t-am-ai-default/30 bg-am-surface p-8 shadow-am-md relative overflow-hidden"
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-[#3150AA]/20 p-2.5">
-            <Brain className="h-5 w-5 text-violet-300" />
+          <div className="rounded-am-md border border-am-border-default bg-am-surface-deep p-2">
+            <Brain className="h-4 w-4 text-am-text-tertiary" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white">Plano Diário IA</h2>
-            <p className="text-sm text-gray-400">Blocos executáveis para hoje</p>
+            <h2 className="font-brand text-am-body-lg font-bold text-am-text-primary tracking-tight">Plano Diário</h2>
+            <p className="text-am-caption text-am-text-secondary mt-0.5 font-mono uppercase tracking-widest">Execução Inteligente</p>
           </div>
         </div>
 
         <button
           onClick={() => void generatePlan('manual')}
           disabled={loading || (!hasContext && !initialRecoveryMode)}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-3 py-2 text-xs font-medium text-white shadow-lg shadow-[#3150AA]/15 transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-am-md border border-am-border-default bg-am-surface-elevated px-4 py-2 text-am-caption font-medium text-am-text-primary shadow-am-sm transition-colors hover:bg-am-surface-subtle hover:border-am-border-strong disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : plan ? <RefreshCw className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
+          {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : plan ? <RefreshCw className="h-3 w-3" /> : <Sparkles className="h-3 w-3 text-am-ai-default" />}
           {plan ? 'Regerar' : 'Gerar plano'}
         </button>
       </div>
@@ -439,7 +439,7 @@ export default function DailyAiPlannerCard({
 
       {plan && (
         <div className="space-y-3">
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+          <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
             <p className="text-sm text-gray-200">{plan.rationale}</p>
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-400">
               <span className="inline-flex items-center gap-1">
@@ -470,11 +470,11 @@ export default function DailyAiPlannerCard({
                     ? 'border-emerald-500/30 bg-emerald-500/10'
                     : deferred
                       ? 'border-amber-500/30 bg-amber-500/10'
-                      : 'border-white/10 bg-gray-900/50'
+                      : 'border-am-border-default bg-gray-900/50'
                     }`}
                 >
                   <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                    <p className={`text-sm font-medium ${done ? 'text-emerald-200' : 'text-white'}`}>
+                    <p className={`text-sm font-medium ${done ? 'text-emerald-200' : 'text-am-text-primary'}`}>
                       {idx + 1}. {block.subject}
                     </p>
                     <div className="flex items-center gap-2">
@@ -520,7 +520,7 @@ export default function DailyAiPlannerCard({
           </div>
 
           {plan.contingencies?.length > 0 && (
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
               <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">Plano B</p>
               <ul className="space-y-1 text-xs text-gray-300">
                 {plan.contingencies.map((item, idx) => (

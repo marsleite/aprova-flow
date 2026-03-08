@@ -49,13 +49,13 @@ export default function LoginScreen() {
       {/* Conteúdo */}
       <div className="relative z-10 mx-4 w-full max-w-md">
         {/* Card principal */}
-        <div className="rounded-3xl border border-white/10 bg-gray-900/80 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
+        <div className="rounded-3xl border border-am-border-default bg-gray-900/80 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-blue-500 shadow-xl shadow-violet-500/30">
-              <Zap className="h-8 w-8 text-white" />
+              <Zap className="h-8 w-8 text-am-text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-3xl font-bold text-am-text-primary">
               Aprova<span className="text-[#F59768]">Mind</span>
             </h1>
             <p className="mt-2 text-center text-sm text-gray-400">
@@ -114,9 +114,9 @@ export default function LoginScreen() {
 
           {/* Divisor */}
           <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/10" />
+            <div className="h-px flex-1 bg-am-surface-subtle" />
             <span className="text-xs text-gray-500">ou</span>
-            <div className="h-px flex-1 bg-white/10" />
+            <div className="h-px flex-1 bg-am-surface-subtle" />
           </div>
 
           {/* Formulário Email/Senha */}
@@ -128,8 +128,8 @@ export default function LoginScreen() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 required
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white 
-                           placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
+                className="w-full rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-3 text-sm text-am-text-primary 
+                           placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-am-surface-subtle"
               />
             )}
             <input
@@ -138,8 +138,8 @@ export default function LoginScreen() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white 
-                         placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
+              className="w-full rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-3 text-sm text-am-text-primary 
+                         placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-am-surface-subtle"
             />
             <div className="relative">
               <input
@@ -149,8 +149,8 @@ export default function LoginScreen() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-11 text-sm text-white 
-                           placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
+                className="w-full rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-3 pr-11 text-sm text-am-text-primary 
+                           placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-am-surface-subtle"
               />
               <button
                 type="button"
@@ -165,7 +165,7 @@ export default function LoginScreen() {
               type="submit"
               disabled={isDisabled}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 
-                         px-6 py-3.5 font-medium text-white shadow-lg shadow-violet-500/20 transition-all 
+                         px-6 py-3.5 font-medium text-am-text-primary shadow-lg shadow-violet-500/20 transition-all 
                          hover:shadow-xl hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Mail className="h-4 w-4" />
@@ -221,7 +221,7 @@ export default function LoginScreen() {
 
 function Feature({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg bg-white/5 px-4 py-2.5">
+    <div className="flex items-center gap-3 rounded-lg bg-am-surface-subtle px-4 py-2.5">
       {icon}
       <span className="text-sm text-gray-300">{text}</span>
     </div>

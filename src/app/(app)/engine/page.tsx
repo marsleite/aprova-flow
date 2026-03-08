@@ -26,13 +26,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.3, delay: i * 0.05, ease: 'easeOut' as const },
-  }),
-};
+// RDS Components
+import { KPICard, Badge, Button, Card } from '@/components';
+import { fadeUp } from '@/design-system/tokens';
 
 export default function EnginePage() {
   const { user } = useAuthContext();
@@ -88,68 +84,65 @@ export default function EnginePage() {
   const weeklyHours = consistency ? consistency.weeklyTotalSeconds / 3600 : 0;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
-      {/* Header */}
-      <div className="border-b border-white/[0.07] bg-[#0E111B]/60 px-6 py-5 backdrop-blur-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Zap className="h-3.5 w-3.5 text-[#F59768]" />
-              <span className="text-xs text-[#666] uppercase tracking-wider font-mono">Precision Study Engine</span>
-            </div>
-            <h1 className="font-brand text-2xl font-bold text-white">Sessão de Estudo</h1>
-            <p className="mt-0.5 text-sm text-[#666]">Cronômetro de alta performance com foco total</p>
+    <div className="flex flex-col gap-8 pb-10">
+      {/* Flush Topbar */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-12 pb-6 px-8">
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Badge variant="outline" className="border-white/10 text-am-text-secondary bg-transparent"><Zap className="h-3 w-3 mr-1" /> Precision Engine</Badge>
           </div>
-          {consistency && (
-            <div className="hidden items-center gap-4 lg:flex">
-              <div className="text-right">
-                <p className="text-xs text-[#666] font-mono">Esta semana</p>
-                <p className="text-lg font-bold text-white">{weeklyHours.toFixed(1)}h</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-[#666] font-mono">Sequência</p>
-                <p className="text-lg font-bold text-white">{consistency.currentStreak}d</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-[#666] font-mono">Meta semanal</p>
-                <p className="text-lg font-bold text-white">{consistency.weeklyGoalHours}h</p>
-              </div>
-            </div>
-          )}
+          <h1 className="font-brand text-[40px] font-light text-am-text-primary tracking-tighter leading-none">
+            Sessão
+          </h1>
         </div>
+
+        {consistency && (
+          <div className="hidden items-center gap-8 lg:flex mt-4 sm:mt-0">
+            <div className="text-right">
+              <p className="text-[10px] text-am-text-tertiary uppercase font-mono tracking-widest">Esta semana</p>
+              <p className="text-[28px] font-light text-am-text-primary tracking-tighter leading-none mt-1">{weeklyHours.toFixed(1)}<span className="text-sm text-am-text-secondary ml-1">h</span></p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] text-am-text-tertiary uppercase font-mono tracking-widest">Sequência</p>
+              <p className="text-[28px] font-light text-am-text-primary tracking-tighter leading-none mt-1 flex items-center justify-end gap-1">{consistency.currentStreak} <Flame className="h-4 w-4 text-am-text-tertiary" /></p>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="px-6 py-6">
-        <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="px-8">
+        <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
           {/* Left: Timer + Question Tracker */}
           <div className="space-y-6">
             {/* Context bar */}
             {activePlanObj && (
               <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show"
-                className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-[#0E111B] px-4 py-3"
+                className="flex items-center gap-4 rounded-am-md border border-am-border-default bg-am-surface px-5 py-3 shadow-am-sm"
               >
-                <div className="flex items-center gap-2 flex-1">
-                  <span className="text-xs text-[#666] font-mono">Edital:</span>
+                <div className="flex items-center gap-3 flex-1">
+                  <span className="text-am-caption font-bold text-am-text-tertiary uppercase tracking-wider hidden sm:inline-block">Contexto Ativo:</span>
                   <div
-                    className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium font-mono"
+                    className="flex items-center gap-2 rounded-am-full px-3 py-1 text-xs font-semibold"
                     style={{
-                      background: `${activePlanObj.color}15`,
+                      background: `color-mix(in srgb, ${activePlanObj.color} 15%, transparent)`,
                       color: activePlanObj.color,
-                      border: `1px solid ${activePlanObj.color}30`,
+                      border: `1px solid color-mix(in srgb, ${activePlanObj.color} 30%, transparent)`,
                     }}
                   >
-                    <div className="h-1.5 w-1.5 rounded-full" style={{ background: activePlanObj.color }} />
+                    <div className="h-2 w-2 rounded-am-full shadow-[0_0_8px_currentColor]" style={{ background: activePlanObj.color }} />
                     {activePlanObj.name}
                   </div>
                 </div>
                 {activePlanObj.subjects.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-[#666] font-mono">
-                      {activePlanObj.subjects.length} matérias configuradas
+                  <div className="flex items-center gap-3">
+                    <span className="text-am-caption text-am-text-secondary hidden md:inline-block">
+                      {activePlanObj.subjects.length} matérias
                     </span>
-                    <Link href="/planner" className="text-xs text-[#F59768] hover:text-[#F59768]/80 transition-colors flex items-center gap-0.5 font-mono">
-                      Gerenciar <ChevronRight className="h-3 w-3" />
-                    </Link>
+                    <Button asChild variant="outline" size="sm" className="h-8">
+                      <Link href="/planner">
+                        Gerenciar Edital <ChevronRight className="h-3 w-3 ml-1" />
+                      </Link>
+                    </Button>
                   </div>
                 )}
               </motion.div>
@@ -157,31 +150,37 @@ export default function EnginePage() {
 
             {/* Timer */}
             <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show">
-              <StudyTimer
-                key={activePlanId || 'all'}
-                userId={user.uid}
-                plans={plans}
-                activePlanId={activePlanId}
-                onSessionSaved={handleSessionSaved}
-                onCreateSession={handleCreateSession}
-                onCreateEdital={() => { }}
-                creatingSession={creatingPlan}
-              />
+              <div className="rounded-am-xl bg-am-surface shadow-am-lg border border-am-border-default overflow-hidden">
+                <StudyTimer
+                  key={activePlanId || 'all'}
+                  userId={user.uid}
+                  plans={plans}
+                  activePlanId={activePlanId}
+                  onSessionSaved={handleSessionSaved}
+                  onCreateSession={handleCreateSession}
+                  onCreateEdital={() => { }}
+                  creatingSession={creatingPlan}
+                />
+              </div>
             </motion.div>
 
             {/* Question Tracker */}
             <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
-              <QuestionTrackerCard
-                userId={user.uid}
-                planId={activePlanId || undefined}
-                planSubjects={activePlanObj?.subjects}
-                lastSessionSubject={lastSavedSession?.subject ?? (recentSessions[0]?.subject || null)}
-                onSaved={fetchData}
-              />
+              <div className="rounded-am-xl bg-am-surface shadow-am-md border border-am-border-default overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-am-brand-primary/5 blur-3xl pointer-events-none" />
+                <QuestionTrackerCard
+                  userId={user.uid}
+                  planId={activePlanId || undefined}
+                  planSubjects={activePlanObj?.subjects}
+                  lastSessionSubject={lastSavedSession?.subject ?? (recentSessions[0]?.subject || null)}
+                  onSaved={fetchData}
+                />
+              </div>
             </motion.div>
 
             {/* Daily AI Planner */}
-            <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show">
+            <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show" className="rounded-am-xl bg-am-surface shadow-am-md border border-am-ai-border/40 overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-64 h-64 bg-am-ai-glow/10 blur-[80px] pointer-events-none" />
               <DailyAiPlannerCard
                 userId={user.uid}
                 userName={user.displayName?.split(' ')[0] || 'Estudante'}
@@ -197,120 +196,125 @@ export default function EnginePage() {
           </div>
 
           {/* Right: Execution Log + Stats */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Quick stats */}
-            <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show"
-              className="grid grid-cols-2 gap-3"
-            >
-              {[
-                { label: 'Sequência', value: `${consistency?.currentStreak || 0}d`, icon: Flame, color: 'text-[#F59768]', bg: 'bg-[#F59768]/10' },
-                { label: 'Meta', value: `${consistency?.weeklyProgressPercent || 0}%`, icon: Target, color: 'text-[#3150AA]', bg: 'bg-[#3150AA]/10' },
-              ].map(({ label, value, icon: Icon, color, bg }) => (
-                <div key={label} className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
-                  <div className={`mb-2 flex h-7 w-7 items-center justify-center rounded-lg ${bg}`}>
-                    <Icon className={`h-3.5 w-3.5 ${color}`} />
-                  </div>
-                  <p className="text-lg font-bold text-white">{value}</p>
-                  <p className="text-xs text-[#666] font-mono">{label}</p>
-                </div>
-              ))}
-            </motion.div>
-
-            {/* Execution log (recent sessions) */}
-            <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show"
-              className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4"
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-[#666]" />
-                  <h3 className="text-sm font-semibold text-white font-brand">Log de Execução</h3>
-                </div>
-                <Link href="/history" className="text-xs text-[#666] hover:text-slate-400 transition-colors flex items-center gap-1 font-mono">
-                  Tudo <ChevronRight className="h-3 w-3" />
-                </Link>
-              </div>
-
-              {loading ? (
-                <div className="space-y-2">
-                  {Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 rounded shimmer" />)}
-                </div>
-              ) : recentSessions.length === 0 ? (
-                <div className="py-6 text-center">
-                  <BookOpen className="mx-auto mb-2 h-6 w-6 text-[#666]/50" />
-                  <p className="text-xs text-[#666]">Nenhuma sessão registrada</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <AnimatePresence>
-                    {recentSessions.slice(0, 7).map((session, i) => {
-                      const mins = Math.floor(session.duration / 60);
-                      const isRecent = i === 0 && lastSavedSession?.subject === session.subject;
-                      return (
-                        <motion.div
-                          key={session.id || i}
-                          initial={isRecent ? { opacity: 0, x: 10 } : false}
-                          animate={{ opacity: 1, x: 0 }}
-                          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isRecent ? 'bg-[#3150AA]/10 border border-[#3150AA]/20' : 'bg-white/[0.02]'}`}
-                        >
-                          <div className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md ${isRecent ? 'bg-[#3150AA]/20' : 'bg-white/[0.04]'}`}>
-                            {isRecent
-                              ? <CheckCircle2 className="h-3 w-3 text-[#F59768]" />
-                              : <div className="h-1.5 w-1.5 rounded-full bg-[#666]" />
-                            }
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-medium text-slate-300">{session.subject}</p>
-                            <p className="text-[10px] text-[#666] font-mono">{session.date}</p>
-                          </div>
-                          <span className="flex-shrink-0 text-xs text-[#666] font-mono">{mins}m</span>
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
-              )}
+            <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-2 gap-4">
+              <KPICard
+                title="Sequência"
+                value={`${consistency?.currentStreak || 0}d`}
+                icon={Flame}
+                loading={false}
+              />
+              <KPICard
+                title="Meta Semanal"
+                value={`${consistency?.weeklyProgressPercent || 0}%`}
+                icon={Target}
+                loading={false}
+              />
             </motion.div>
 
             {/* AI Insight panel */}
-            <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show"
-              className="rounded-xl border border-[#3150AA]/20 bg-gradient-to-b from-[#3150AA]/10 to-transparent p-4"
+            <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show"
+              className="rounded-am-xl border border-am-ai-border/40 bg-am-surface p-5 shadow-am-sm relative overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(139, 92, 246, 0.04) 100%)' }}
             >
-              <div className="mb-3 flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#F59768]/20">
-                  <Sparkles className="h-3 w-3 text-[#F59768]" />
-                </div>
-                <span className="text-xs font-semibold text-[#F59768] font-mono uppercase">AI Insight</span>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-am-ai-glow/20 blur-[50px] rounded-full pointer-events-none"></div>
+
+              <div className="mb-3 flex items-center gap-2 relative z-10">
+                <Badge variant="ai" className="shadow-[0_0_8px_var(--color-am-ai-glow)]"><Sparkles className="h-3 w-3 mr-1" /> Copilot Focus</Badge>
               </div>
+
               {loading ? (
-                <div className="space-y-1.5">
-                  <div className="h-3 w-full rounded shimmer" />
-                  <div className="h-3 w-3/4 rounded shimmer" />
+                <div className="space-y-2 relative z-10">
+                  <div className="h-4 w-full rounded bg-am-surface-deep animate-pulse" />
+                  <div className="h-4 w-3/4 rounded bg-am-surface-deep animate-pulse" />
                 </div>
               ) : recentSessions.length > 0 ? (
-                <p className="text-xs text-[#666] leading-relaxed">
+                <p className="text-am-body-sm text-am-text-secondary leading-relaxed relative z-10">
                   {consistency && consistency.weeklyProgressPercent >= 80
-                    ? `Excelente ritmo! Você está em ${consistency.weeklyProgressPercent}% da meta semanal. Continue focado.`
+                    ? `Excelente ritmo! Você já garantiu ${consistency.weeklyProgressPercent}% da carga horária. O algoritmo prediz alta retenção de base estrutural.`
                     : consistency && consistency.weeklyProgressPercent > 0
-                      ? `Você está em ${consistency.weeklyProgressPercent}% da meta. Sessões mais longas hoje podem fazer a diferença.`
-                      : 'Inicie uma sessão para receber insights personalizados sobre sua performance.'}
+                      ? `Ponto de controle: a precisão otimizada da semana atual depende da execução de mais ${Math.max(0, parseFloat((consistency.weeklyGoalHours - weeklyHours).toFixed(1)))} horas líquidas.`
+                      : 'O cronômetro calibra sua inteligência analítica. Inicie uma sessão para receber tracking de performance.'}
                 </p>
               ) : (
-                <p className="text-xs text-[#666]">
-                  Inicie sua primeira sessão para ativar o diagnóstico de IA.
+                <p className="text-am-body-sm text-am-text-secondary relative z-10">
+                  Inicie sua primeira sessão cronometrada para ativar as inferências do motor de performance inteligente.
                 </p>
               )}
+            </motion.div>
+
+            {/* Execution log (recent sessions) */}
+            <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
+              <Card padding="md" variant="default">
+                <div className="mb-4 flex items-center justify-between border-b border-am-border-subtle pb-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-am-text-tertiary" />
+                    <h3 className="text-am-body-sm font-bold text-am-text-primary tracking-wide">Log de Sessões Realizadas</h3>
+                  </div>
+                  <Link href="/history" className="text-am-caption font-bold text-am-brand-primary hover:text-am-brand-primary/80 transition-colors flex items-center gap-1">
+                    Ver Detalhes <ChevronRight className="h-3 w-3" />
+                  </Link>
+                </div>
+
+                {loading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-10 rounded border border-am-border-subtle bg-am-surface-deep animate-pulse" />)}
+                  </div>
+                ) : recentSessions.length === 0 ? (
+                  <div className="py-8 text-center bg-am-surface-deep rounded-am-md border border-am-border-subtle">
+                    <div className="mx-auto w-12 h-12 bg-am-surface-elevated rounded-full flex items-center justify-center mb-3">
+                      <BookOpen className="h-5 w-5 text-am-text-tertiary" />
+                    </div>
+                    <p className="text-am-body-sm text-am-text-secondary">Abra o cronômetro para injetar dados.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    <AnimatePresence>
+                      {recentSessions.slice(0, 7).map((session, i) => {
+                        const mins = Math.floor(session.duration / 60);
+                        const isRecent = i === 0 && lastSavedSession?.subject === session.subject;
+                        return (
+                          <motion.div
+                            key={session.id || i}
+                            initial={isRecent ? { opacity: 0, x: 10 } : false}
+                            animate={{ opacity: 1, x: 0 }}
+                            className={`flex items-center gap-3 rounded-am-md px-3 py-2.5 transition-colors border ${isRecent ? 'bg-am-brand-primary/5 border-am-brand-primary/20' : 'bg-am-surface-elevated border-am-border-default hover:bg-am-surface-subtle'}`}
+                          >
+                            <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-am-full ${isRecent ? 'bg-am-brand-primary/20' : 'bg-am-surface-deep'}`}>
+                              {isRecent
+                                ? <CheckCircle2 className="h-3.5 w-3.5 text-am-brand-primary" />
+                                : <div className="h-2 w-2 rounded-full bg-am-text-tertiary" />
+                              }
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-am-body-sm font-medium text-am-text-primary leading-tight">{session.subject}</p>
+                              <p className="text-[10px] text-am-text-tertiary font-mono mt-0.5">{session.date}</p>
+                            </div>
+                            <span className="flex-shrink-0 text-am-caption font-bold text-am-text-secondary">{mins}m</span>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </Card>
             </motion.div>
 
             {/* Planner link */}
             {plans.length === 0 && (
               <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show"
-                className="rounded-xl border border-dashed border-white/[0.10] p-4 text-center"
+                className="rounded-am-md border border-dashed border-am-border-strong bg-am-surface-subtle p-5 text-center"
               >
-                <Plus className="mx-auto mb-2 h-5 w-5 text-[#666]" />
-                <p className="text-xs font-medium text-[#666]">Nenhum edital configurado</p>
-                <Link href="/planner" className="mt-2 inline-flex items-center gap-1 text-xs text-[#F59768] hover:text-[#F59768]/80 transition-colors font-mono">
-                  Criar plano de estudos <ChevronRight className="h-3 w-3" />
-                </Link>
+                <div className="mx-auto w-10 h-10 bg-am-surface-elevated rounded-full flex items-center justify-center mb-3">
+                  <Plus className="h-4 w-4 text-am-text-tertiary" />
+                </div>
+                <p className="text-am-body-sm font-bold text-am-text-primary mb-1">Sem contexto estrutural</p>
+                <p className="text-am-caption text-am-text-secondary mb-4 max-w-[200px] mx-auto">Vincule um edital para liberar o track de consistência.</p>
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <Link href="/planner">
+                    Configurar Edital
+                  </Link>
+                </Button>
               </motion.div>
             )}
           </div>

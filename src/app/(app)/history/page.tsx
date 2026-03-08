@@ -6,12 +6,9 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { usePlanContext } from '@/contexts/PlanContext';
 import SessionHistory from '@/components/SessionHistory';
 import ActivityHeatmap from '@/components/ActivityHeatmap';
-import { History, Calendar } from 'lucide-react';
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.3, delay: i * 0.05, ease: 'easeOut' as const } }),
-};
+import { History } from 'lucide-react';
+import { fadeUp } from '@/design-system/tokens';
+import { Badge } from '@/components';
 
 export default function HistoryPage() {
   const { user } = useAuthContext();
@@ -26,25 +23,30 @@ export default function HistoryPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
-      {/* Header */}
-      <div className="border-b border-white/[0.05] bg-[#0E111B]/60 px-6 py-5 backdrop-blur-sm">
+    <div className="flex flex-col gap-8 pb-10">
+      {/* Topbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 px-6 border-b border-am-border-default bg-am-surface/30 backdrop-blur-md">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <History className="h-3.5 w-3.5 text-[#F59768]" />
-            <span className="text-xs text-[#666] uppercase tracking-wider">Session History</span>
+            <Badge variant="outline"><History className="h-3 w-3 mr-1" /> Log Geral</Badge>
           </div>
-          <h1 className="text-2xl font-bold text-white">Histórico de Sessões</h1>
-          <p className="mt-0.5 text-sm text-[#666]">
-            Registro completo de todas as sessões de estudo
-            {activePlanObj && <> — <span style={{ color: activePlanObj.color }}>{activePlanObj.name}</span></>}
+          <h1 className="font-brand text-am-h3 font-bold text-am-text-primary tracking-tight mt-2">
+            Histórico de Sessões
+          </h1>
+          <p className="text-am-caption text-am-text-secondary mt-1">
+            Registro cronológico e volumétrico de todas as execuções de estudo
+            {activePlanObj && <> — <span className="font-medium text-am-text-primary">{activePlanObj.name}</span></>}
           </p>
         </div>
       </div>
 
-      <div className="px-6 py-6 space-y-6">
+      <div className="px-6 space-y-6">
         {/* Heatmap */}
-        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show" className="rounded-am-xl border border-am-border-default bg-am-surface shadow-am-sm overflow-hidden p-6">
+          <h3 className="font-brand text-am-body font-bold text-am-text-primary mb-4 flex items-center gap-2">
+            <span className="w-2 h-6 bg-am-brand-primary rounded-full"></span>
+            Mapa de Consistência
+          </h3>
           <ActivityHeatmap
             userId={user.uid}
             planId={filterPlanId}
@@ -53,7 +55,11 @@ export default function HistoryPage() {
         </motion.div>
 
         {/* Full history */}
-        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show">
+        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show" className="rounded-am-xl border border-am-border-default bg-am-surface shadow-am-sm overflow-hidden p-6">
+          <h3 className="font-brand text-am-body font-bold text-am-text-primary mb-4 flex items-center gap-2">
+            <span className="w-2 h-6 bg-am-ai-default rounded-full"></span>
+            Listagem Bruta
+          </h3>
           <SessionHistory
             userId={user.uid}
             planId={filterPlanId}

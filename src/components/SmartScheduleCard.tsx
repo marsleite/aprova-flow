@@ -99,35 +99,33 @@ export default function SmartScheduleCard({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/40 via-gray-900 to-gray-950 p-6 shadow-2xl relative overflow-hidden"
+            className="rounded-am-xl border border-am-border-default border-t border-t-am-ai-default/30 bg-am-surface p-8 shadow-am-md relative overflow-hidden h-full flex flex-col"
         >
-            {/* Glow de fundo AI */}
-            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" />
 
-            <div className="relative mb-6 flex items-start justify-between gap-3">
+            <div className="relative mb-8 flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <div className="rounded-xl bg-indigo-500/20 p-2.5">
-                        <Brain className="h-6 w-6 text-indigo-300" />
+                    <div className="rounded-am-md border border-am-border-default bg-am-surface-deep p-2">
+                        <CalendarDays className="h-4 w-4 text-am-text-tertiary" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-white tracking-tight">GPS do Estudo</h2>
-                        <p className="text-sm text-indigo-200/70">Cronograma da semana gerado por IA</p>
+                        <h2 className="font-brand text-am-body-lg font-bold text-am-text-primary tracking-tight">Cronograma de Foco</h2>
+                        <p className="text-am-caption text-am-text-secondary mt-0.5 font-mono uppercase tracking-widest">Alocação Semanal AI</p>
                     </div>
                 </div>
 
                 <button
                     onClick={generateSchedule}
                     disabled={loading || !hasContext}
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 hover:shadow-indigo-500/40 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-am-md border border-am-border-default bg-am-surface-elevated px-4 py-2 text-am-caption font-medium text-am-text-primary shadow-am-sm transition-colors hover:bg-am-surface-subtle hover:border-am-border-strong disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {loading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                     ) : schedule ? (
                         <RefreshCw className="h-4 w-4" />
                     ) : (
-                        <Sparkles className="h-4 w-4" />
+                        <Sparkles className="h-4 w-4 text-am-ai-default" />
                     )}
-                    {schedule ? 'Recalcular Rota' : 'Gerar Rota'}
+                    {schedule ? 'Recalcular' : 'Gerar'}
                 </button>
             </div>
 
@@ -150,13 +148,13 @@ export default function SmartScheduleCard({
                     {schedule.map((dayItem, idx) => {
                         const isExpanded = expandedDay === dayItem.day;
                         return (
-                            <div key={idx} className="rounded-xl border border-white/10 bg-gray-900/60 overflow-hidden transition-all hover:border-white/20">
+                            <div key={idx} className="rounded-xl border border-am-border-default bg-gray-900/60 overflow-hidden transition-all hover:border-am-border-default">
                                 <button
                                     onClick={() => setExpandedDay(isExpanded ? null : dayItem.day)}
                                     className="w-full flex items-center justify-between p-4 text-left focus:outline-none"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg ${isExpanded ? 'bg-indigo-500/20 text-indigo-300' : 'bg-white/5 text-gray-400'}`}>
+                                        <div className={`p-2 rounded-lg ${isExpanded ? 'bg-indigo-500/20 text-indigo-300' : 'bg-am-surface-subtle text-gray-400'}`}>
                                             <CalendarDays className="h-5 w-5" />
                                         </div>
                                         <div>
@@ -174,11 +172,11 @@ export default function SmartScheduleCard({
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
                                             transition={{ duration: 0.2 }}
-                                            className="px-4 pb-4 pt-1 border-t border-white/5"
+                                            className="px-4 pb-4 pt-1 border-t border-am-border-default"
                                         >
                                             <div className="space-y-3">
                                                 {dayItem.subjects.map((sub, sIdx) => (
-                                                    <div key={sIdx} className="bg-white/[0.03] rounded-lg p-3 border border-white/[0.05]">
+                                                    <div key={sIdx} className="bg-am-surface-subtle rounded-lg p-3 border border-am-border-default">
                                                         <div className="flex justify-between items-center mb-1.5">
                                                             <span className="text-sm font-medium text-gray-200 flex items-center gap-2">
                                                                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>

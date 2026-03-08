@@ -88,7 +88,7 @@ function SubjectInput({
           onFocus={() => setFocused(true)}
           onKeyDown={handleKeyDown}
           placeholder="Buscar ou digitar matéria..."
-          className="w-full rounded-lg border border-white/10 bg-gray-800/60 py-2 pl-9 pr-4 text-sm text-gray-300 outline-none transition-all placeholder:text-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
+          className="w-full rounded-lg border border-am-border-default bg-gray-800/60 py-2 pl-9 pr-4 text-sm text-gray-300 outline-none transition-all placeholder:text-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
         />
       </div>
 
@@ -99,12 +99,12 @@ function SubjectInput({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[160px] overflow-y-auto rounded-xl border border-white/10 bg-gray-800 shadow-xl"
+            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[160px] overflow-y-auto rounded-xl border border-am-border-default bg-gray-800 shadow-xl"
           >
             {canAddCustom && (
               <button
                 onClick={() => handleAdd(trimmed)}
-                className="flex w-full items-center gap-2 border-b border-white/5 px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
+                className="flex w-full items-center gap-2 border-b border-am-border-default px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Adicionar &quot;{trimmed}&quot;</span>
@@ -114,7 +114,7 @@ function SubjectInput({
               <button
                 key={s}
                 onClick={() => handleAdd(s)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-white/5 hover:text-white"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-am-surface-subtle hover:text-am-text-primary"
               >
                 <span className="flex-1">{s}</span>
               </button>
@@ -207,7 +207,7 @@ export default function StudyPlanCard({
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
+      <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
         <div className="mb-4 h-5 w-40 rounded shimmer" />
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
@@ -223,7 +223,7 @@ export default function StudyPlanCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
+      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
@@ -232,14 +232,14 @@ export default function StudyPlanCard({
             <BookOpen className="h-4 w-4 text-pink-400" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Plano de Estudo</h3>
-            <p className="text-xs text-[#666]">Planejado vs Real</p>
+            <h3 className="text-sm font-semibold text-am-text-primary">Plano de Estudo</h3>
+            <p className="text-xs text-am-text-secondary">Planejado vs Real</p>
           </div>
         </div>
         {!editing && (
           <button
             onClick={handleStartEdit}
-            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-[#666] transition hover:border-[#3150AA]/30 hover:text-[#F59768]/80"
+            className="flex items-center gap-1.5 rounded-lg border border-am-border-strong px-3 py-1.5 text-xs text-am-text-secondary transition hover:border-[#3150AA]/30 hover:text-[#F59768]/80"
           >
             <Settings className="h-3.5 w-3.5" />
             {hasPlan ? 'Editar' : 'Configurar'}
@@ -261,7 +261,7 @@ export default function StudyPlanCard({
               {weights.map((w) => (
                 <div
                   key={w.subject}
-                  className="flex items-center gap-2 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2"
+                  className="flex items-center gap-2 rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2"
                 >
                   <span className="flex-1 truncate text-sm text-gray-300">
                     {w.subject}
@@ -274,7 +274,7 @@ export default function StudyPlanCard({
                     onChange={(e) =>
                       handleWeightChange(w.subject, Math.max(0, Math.min(100, Number(e.target.value))))
                     }
-                    className="w-16 rounded-lg border border-white/10 bg-gray-800/60 px-2 py-1 text-center text-sm text-white outline-none focus:border-violet-500"
+                    className="w-16 rounded-lg border border-am-border-default bg-gray-800/60 px-2 py-1 text-center text-sm text-am-text-primary outline-none focus:border-violet-500"
                   />
                   <span className="text-xs text-gray-500">%</span>
                   <button
@@ -294,7 +294,7 @@ export default function StudyPlanCard({
             />
 
             {/* Total e ações */}
-            <div className="flex items-center justify-between border-t border-white/5 pt-3">
+            <div className="flex items-center justify-between border-t border-am-border-default pt-3">
               <span
                 className={`text-sm font-medium ${
                   isValid ? 'text-emerald-400' : 'text-red-400'
@@ -310,14 +310,14 @@ export default function StudyPlanCard({
               <div className="flex gap-2">
                 <button
                   onClick={() => setEditing(false)}
-                  className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-400 hover:text-white"
+                  className="rounded-lg border border-am-border-default px-3 py-1.5 text-xs text-gray-400 hover:text-am-text-primary"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={!isValid || saving}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-500 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-medium text-am-text-primary hover:bg-violet-500 disabled:opacity-50"
                 >
                   <Save className={`h-3.5 w-3.5 ${saving ? 'animate-spin' : ''}`} />
                   Salvar
@@ -345,10 +345,10 @@ export default function StudyPlanCard({
               {(expanded ? planVsActual : planVsActual.slice(0, 4)).map((item) => (
                 <div
                   key={item.subject}
-                  className="rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2"
+                  className="rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2"
                 >
                   <div className="mb-1.5 flex items-center justify-between">
-                    <span className="truncate text-sm text-white">{item.subject}</span>
+                    <span className="truncate text-sm text-am-text-primary">{item.subject}</span>
                     <StatusBadge status={item.status} />
                   </div>
                   <div className="flex items-center gap-3">

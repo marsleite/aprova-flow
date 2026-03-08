@@ -119,7 +119,7 @@ function SubjectAutocomplete({
           onFocus={() => setFocused(true)}
           onKeyDown={handleKeyDown}
           placeholder="Buscar ou digitar matéria..."
-          className="w-full rounded-xl border border-dashed border-white/10 bg-transparent py-2.5 pl-9 pr-4 text-sm text-gray-300 outline-none transition-all placeholder:text-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
+          className="w-full rounded-xl border border-dashed border-am-border-default bg-transparent py-2.5 pl-9 pr-4 text-sm text-gray-300 outline-none transition-all placeholder:text-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
         />
       </div>
 
@@ -130,13 +130,13 @@ function SubjectAutocomplete({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[180px] overflow-y-auto rounded-xl border border-white/10 bg-gray-800 shadow-xl"
+            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[180px] overflow-y-auto rounded-xl border border-am-border-default bg-gray-800 shadow-xl"
           >
             {/* Opção de adicionar matéria personalizada */}
             {canAddCustom && (
               <button
                 onClick={() => handleAdd(trimmed)}
-                className="flex w-full items-center gap-2 border-b border-white/5 px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
+                className="flex w-full items-center gap-2 border-b border-am-border-default px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Adicionar &quot;{trimmed}&quot;</span>
@@ -148,7 +148,7 @@ function SubjectAutocomplete({
               <button
                 key={s}
                 onClick={() => handleAdd(s)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-white/5 hover:text-white"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-am-surface-subtle hover:text-am-text-primary"
               >
                 <span className="flex-1">{s}</span>
               </button>
@@ -422,11 +422,11 @@ export default function PlanManager({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="mx-4 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-white/10 bg-gray-900 shadow-2xl"
+            className="mx-4 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-am-border-default bg-gray-900 shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-white/5 px-6 py-4">
-              <h2 className="text-lg font-semibold text-white">
+            <div className="flex items-center justify-between border-b border-am-border-default px-6 py-4">
+              <h2 className="text-lg font-semibold text-am-text-primary">
                 {isEditing ? 'Editar Edital' : 'Novo Edital'}
               </h2>
               <button
@@ -449,7 +449,7 @@ export default function PlanManager({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: PGE-SP, Magistratura Federal..."
-                  className="w-full rounded-xl border border-white/10 bg-gray-800/50 px-4 py-2.5 text-sm text-white outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                  className="w-full rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
                 />
               </div>
 
@@ -488,7 +488,7 @@ export default function PlanManager({
                   max={80}
                   value={weeklyGoalHours}
                   onChange={(e) => setWeeklyGoalHours(Math.max(1, Math.min(80, Number(e.target.value))))}
-                  className="w-24 rounded-xl border border-white/10 bg-gray-800/50 px-4 py-2.5 text-center text-sm text-white outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                  className="w-24 rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-center text-sm text-am-text-primary outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
                 />
               </div>
 
@@ -588,7 +588,7 @@ export default function PlanManager({
                   {subjects.map((sw) => (
                     <div
                       key={sw.subject}
-                      className="flex items-center gap-2 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2"
+                      className="flex items-center gap-2 rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2"
                     >
                       <span className="flex-1 truncate text-sm text-gray-300">
                         {sw.subject}
@@ -599,7 +599,7 @@ export default function PlanManager({
                         max={100}
                         value={sw.weight}
                         onChange={(e) => updateWeight(sw.subject, Number(e.target.value))}
-                        className="w-16 rounded-lg border border-white/10 bg-gray-800/60 px-2 py-1 text-center text-sm text-white outline-none focus:border-violet-500"
+                        className="w-16 rounded-lg border border-am-border-default bg-gray-800/60 px-2 py-1 text-center text-sm text-am-text-primary outline-none focus:border-violet-500"
                       />
                       <span className="text-xs text-gray-500">%</span>
                       <button
@@ -633,7 +633,7 @@ export default function PlanManager({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between border-t border-white/5 px-6 py-4">
+            <div className="flex items-center justify-between border-t border-am-border-default px-6 py-4">
               <div>
                 {isEditing && !editPlan?.isDefault && (
                   <>
@@ -643,7 +643,7 @@ export default function PlanManager({
                         <button
                           onClick={handleDelete}
                           disabled={deleting}
-                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-white transition hover:bg-red-500 disabled:opacity-50"
+                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-am-text-primary transition hover:bg-red-500 disabled:opacity-50"
                         >
                           {deleting ? 'Deletando...' : 'Sim, deletar'}
                         </button>
@@ -670,14 +670,14 @@ export default function PlanManager({
               <div className="flex items-center gap-3">
                 <button
                   onClick={onClose}
-                  className="rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-800"
+                  className="rounded-xl border border-am-border-default px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-800"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={!isValid || saving}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[#3150AA]/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-5 py-2 text-sm font-medium text-am-text-primary shadow-lg shadow-[#3150AA]/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
                 >
                   {saving ? (
                     <>

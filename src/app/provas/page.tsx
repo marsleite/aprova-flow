@@ -77,8 +77,8 @@ export default function ProvasPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-        <p className="text-[#666] font-mono">Faça login para acessar as provas</p>
+      <div className="min-h-screen flex items-center justify-center bg-am-canvas">
+        <p className="text-am-text-secondary font-mono">Faça login para acessar as provas</p>
       </div>
     );
   }
@@ -90,11 +90,11 @@ export default function ProvasPage() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#0A0A0A]">
+    <div className="relative min-h-screen bg-am-canvas">
       {/* Atmospheric depth */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 right-1/4 h-[400px] w-[400px] rounded-full bg-[#3150AA]/8 blur-[140px]" />
-        <div className="absolute bottom-1/3 -left-40 h-[350px] w-[350px] rounded-full bg-[#F59768]/5 blur-[120px]" />
+        <div className="absolute -top-40 right-1/4 h-[400px] w-[400px] rounded-full bg-am-brand-secondary/8 blur-[140px]" />
+        <div className="absolute bottom-1/3 -left-40 h-[350px] w-[350px] rounded-full bg-am-brand-primary/5 blur-[120px]" />
       </div>
 
       {/* Hero Header */}
@@ -107,17 +107,17 @@ export default function ProvasPage() {
             <div>
               <div className="flex items-center gap-2.5 mb-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#F59768] opacity-40" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#F59768]" style={{ boxShadow: '0 0 10px rgba(245,151,104,0.6)' }} />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-am-brand-primary opacity-40" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-am-brand-primary" style={{ boxShadow: '0 0 10px rgba(245,151,104,0.6)' }} />
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#666] font-mono">Centro de Provas</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-am-text-secondary font-mono">Centro de Provas</span>
               </div>
               <h1 className="font-brand text-3xl font-bold tracking-tight text-white">Provas & Simulados</h1>
-              <p className="mt-1 text-sm text-[#666]">Pratique com provas oficiais e simulados personalizados</p>
+              <p className="mt-1 text-sm text-am-text-secondary">Pratique com provas oficiais e simulados personalizados</p>
             </div>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.03] px-4 py-2 text-sm text-[#666] transition-all hover:bg-white/[0.06] hover:text-slate-300 font-mono"
+              className="inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.03] px-4 py-2 text-sm text-am-text-secondary transition-all hover:bg-white/[0.06] hover:text-slate-300 font-mono"
             >
               <ArrowLeft className="h-4 w-4" />
               Dashboard
@@ -134,8 +134,8 @@ export default function ProvasPage() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`relative whitespace-nowrap px-5 py-3.5 text-sm font-medium transition-colors ${activeTab === tab.key
-                ? 'text-[#F59768]'
-                : 'text-[#666] hover:text-slate-300'
+                ? 'text-am-brand-primary'
+                : 'text-am-text-secondary hover:text-slate-300'
                 }`}
             >
               {tab.label}
@@ -160,7 +160,7 @@ export default function ProvasPage() {
               <div className="flex flex-col gap-2">
                 <h2 className="font-brand text-lg font-bold text-white">Provas Disponíveis</h2>
                 {!loading && exams.length > 0 && (
-                  <p className="text-xs text-[#666] font-mono">
+                  <p className="text-xs text-am-text-secondary font-mono">
                     Mostrando {filteredExams.length} de {exams.length} provas
                   </p>
                 )}
@@ -173,12 +173,12 @@ export default function ProvasPage() {
                   style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}
                 >
                   <div className="mb-3 flex items-center gap-2">
-                    <Filter className="h-3.5 w-3.5 text-[#F59768]" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#666] font-mono">Filtros</span>
+                    <Filter className="h-3.5 w-3.5 text-am-brand-primary" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-am-text-secondary font-mono">Filtros</span>
                   </div>
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#666]" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-am-text-secondary" />
                       <input
                         type="text"
                         value={searchTerm}
@@ -219,7 +219,7 @@ export default function ProvasPage() {
                       </select>
                       <button
                         onClick={() => { setSearchTerm(''); setSelectedBanca('todas'); setSelectedYear('todos'); setSelectedDuration('todas'); setSelectedQuestionCount('todas'); }}
-                        className="shrink-0 flex items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.04] px-3 py-2 text-[#666] transition-all hover:bg-white/[0.06] hover:text-slate-300"
+                        className="shrink-0 flex items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.04] px-3 py-2 text-am-text-secondary transition-all hover:bg-white/[0.06] hover:text-slate-300"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -236,18 +236,18 @@ export default function ProvasPage() {
                 </div>
               ) : exams.length === 0 ? (
                 <div className="rounded-2xl border border-white/[0.10] py-16 text-center" style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)' }}>
-                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#3150AA]/10">
-                    <BookOpen className="h-7 w-7 text-[#666]" />
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-am-brand-secondary/10">
+                    <BookOpen className="h-7 w-7 text-am-text-secondary" />
                   </div>
-                  <p className="font-brand text-sm text-[#666]">Nenhuma prova disponível ainda</p>
+                  <p className="font-brand text-sm text-am-text-secondary">Nenhuma prova disponível ainda</p>
                 </div>
               ) : filteredExams.length === 0 ? (
                 <div className="rounded-2xl border border-white/[0.10] py-16 text-center" style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)' }}>
-                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#3150AA]/10">
-                    <BookOpen className="h-7 w-7 text-[#666]" />
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-am-brand-secondary/10">
+                    <BookOpen className="h-7 w-7 text-am-text-secondary" />
                   </div>
                   <p className="font-brand text-sm text-white">Nenhuma prova encontrada</p>
-                  <p className="mt-1 text-xs text-[#666] font-mono">Ajuste os filtros para ver mais resultados</p>
+                  <p className="mt-1 text-xs text-am-text-secondary font-mono">Ajuste os filtros para ver mais resultados</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -271,7 +271,7 @@ export default function ProvasPage() {
                     Criar Simulado
                   </Link>
                 ) : (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[#F59768]/20 bg-[#F59768]/10 px-3 py-2 text-xs text-[#F59768] font-mono">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[#F59768]/20 bg-am-brand-primary/10 px-3 py-2 text-xs text-am-brand-primary font-mono">
                     <Lock className="h-3.5 w-3.5" />
                     Pro/Premium
                   </span>
@@ -283,7 +283,7 @@ export default function ProvasPage() {
                   <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: 'var(--identity-grad)', boxShadow: '0 0 24px rgba(245,151,104,0.15)' }}>
                     <Award className="h-7 w-7 text-white" />
                   </div>
-                  <p className="text-sm text-[#666] mb-4 max-w-md mx-auto">
+                  <p className="text-sm text-am-text-secondary mb-4 max-w-md mx-auto">
                     Crie simulados personalizados com filtros de matéria, banca e dificuldade
                   </p>
                   <Link href="/provas/criar-simulado" className="rds-btn-identity inline-flex items-center gap-2 px-6 py-3 text-sm">
@@ -293,11 +293,11 @@ export default function ProvasPage() {
                 </div>
               ) : (
                 <div className="rounded-2xl border border-[#F59768]/20 p-10 text-center" style={{ background: 'linear-gradient(135deg, rgba(245,151,104,0.05), rgba(49,80,170,0.05))' }}>
-                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F59768]/15">
-                    <Lock className="h-7 w-7 text-[#F59768]" />
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-am-brand-primary/15">
+                    <Lock className="h-7 w-7 text-am-brand-primary" />
                   </div>
                   <p className="font-brand text-sm font-semibold text-white mb-2">Simulados personalizados — Pro/Premium</p>
-                  <p className="text-xs text-[#666] max-w-md mx-auto">
+                  <p className="text-xs text-am-text-secondary max-w-md mx-auto">
                     Continue praticando nas provas oficiais e desbloqueie simulados para treinos direcionados.
                   </p>
                 </div>
@@ -310,8 +310,8 @@ export default function ProvasPage() {
               <TreinoRapidoTab />
             ) : (
               <div className="rounded-2xl border border-[#F59768]/20 p-10 text-center" style={{ background: 'linear-gradient(135deg, rgba(245,151,104,0.05), rgba(49,80,170,0.05))' }}>
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F59768]/15">
-                  <Lock className="h-7 w-7 text-[#F59768]" />
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-am-brand-primary/15">
+                  <Lock className="h-7 w-7 text-am-brand-primary" />
                 </div>
                 <p className="font-brand text-sm font-semibold text-white">Treino rápido — Pro/Premium</p>
               </div>
@@ -355,7 +355,7 @@ function TreinoRapidoTab() {
       <div className="rounded-2xl border border-white/[0.10] p-6"
         style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}
       >
-        <p className="text-sm text-[#666] mb-6">
+        <p className="text-sm text-am-text-secondary mb-6">
           Selecione os filtros e comece a resolver questões com correção imediata
         </p>
         {loading ? (
@@ -367,7 +367,7 @@ function TreinoRapidoTab() {
         ) : (
           <div className="space-y-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#666] font-mono mb-2">Matéria</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-secondary font-mono mb-2">Matéria</label>
               <select
                 value={selectedMateria}
                 onChange={(e) => setSelectedMateria(e.target.value)}
@@ -378,7 +378,7 @@ function TreinoRapidoTab() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#666] font-mono mb-2">Quantidade de questões</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-secondary font-mono mb-2">Quantidade de questões</label>
               <input
                 type="number"
                 value={questionCount}
@@ -407,21 +407,21 @@ function ExamCard({ exam }: { exam: ExamMetadata }) {
     <div className="group relative overflow-hidden rounded-2xl border border-white/[0.10] p-6 transition-all hover:border-[#F59768]/30 hover:bg-white/[0.02]"
       style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}
     >
-      <div className="pointer-events-none absolute -top-8 -right-8 h-20 w-20 rounded-full bg-[#3150AA]/5 blur-[30px] transition-all group-hover:bg-[#F59768]/8" />
+      <div className="pointer-events-none absolute -top-8 -right-8 h-20 w-20 rounded-full bg-am-brand-secondary/5 blur-[30px] transition-all group-hover:bg-am-brand-primary/8" />
       <h3 className="font-brand text-base font-bold text-white mb-3">{exam.name}</h3>
       <div className="space-y-2 mb-5">
         {exam.banca && (
-          <div className="flex items-center gap-2 text-sm text-[#666]">
+          <div className="flex items-center gap-2 text-sm text-am-text-secondary">
             <BookOpen className="h-3.5 w-3.5" />
             <span className="font-mono text-xs">{exam.banca}</span>
           </div>
         )}
-        <div className="flex items-center gap-2 text-sm text-[#666]">
+        <div className="flex items-center gap-2 text-sm text-am-text-secondary">
           <Award className="h-3.5 w-3.5" />
           <span className="font-mono text-xs">{exam.questions?.length || 0} questões</span>
         </div>
         {exam.durationMinutes && (
-          <div className="flex items-center gap-2 text-sm text-[#666]">
+          <div className="flex items-center gap-2 text-sm text-am-text-secondary">
             <Clock className="h-3.5 w-3.5" />
             <span className="font-mono text-xs">{exam.durationMinutes} minutos</span>
           </div>

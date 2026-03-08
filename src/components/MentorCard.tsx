@@ -355,7 +355,7 @@ export default function MentorCard({
   // ---- Skeleton ----
   if (parentLoading) {
     return (
-      <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
+      <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg shimmer" />
           <div className="h-4 w-40 rounded shimmer" />
@@ -376,25 +376,25 @@ export default function MentorCard({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-xl border border-amber-500/15 bg-gradient-to-b from-amber-900/10 to-[#0f1825] p-5"
+        className="relative overflow-hidden rounded-am-xl border border-am-border-default bg-am-surface p-6 shadow-am-md"
       >
         <div className="mb-4 flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
             <Shield className="h-4 w-4 text-amber-300" />
           </div>
           <div>
-            <span className="text-sm font-semibold text-white">Mentor AprovaMind</span>
-            <p className="text-[11px] text-[#666]">Análise estratégica dos seus estudos</p>
+            <span className="text-sm font-semibold text-am-text-primary">Mentor AprovaMind</span>
+            <p className="text-[11px] text-am-text-secondary">Análise estratégica dos seus estudos</p>
           </div>
         </div>
-        <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-3.5">
-          <p className="text-sm leading-relaxed text-slate-300">
+        <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3.5">
+          <p className="text-sm leading-relaxed text-am-text-secondary">
             Comece sua primeira sessão de estudo e eu vou analisar seu desempenho, identificar matérias que precisam de atenção e traçar a melhor estratégia para sua aprovação.
           </p>
         </div>
-        <div className="mt-3 flex items-start gap-2 rounded-xl bg-white/[0.03] px-3.5 py-3">
+        <div className="mt-3 flex items-start gap-2 rounded-xl bg-am-surface-subtle px-3.5 py-3">
           <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
-          <p className="text-xs text-[#666]">
+          <p className="text-xs text-am-text-secondary">
             Inicie o cronômetro acima para registrar sua primeira sessão. Sua jornada até a posse começa agora.
           </p>
         </div>
@@ -407,12 +407,8 @@ export default function MentorCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="relative overflow-hidden rounded-xl border border-amber-500/15 bg-gradient-to-b from-amber-900/10 to-[#0f1825] p-5"
+      className="relative overflow-hidden rounded-am-xl border border-am-border-default border-t border-t-am-ai-default/30 bg-am-surface p-6 shadow-am-md"
     >
-      {/* Decoração de fundo */}
-      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/5 blur-2xl" />
-      <div className="absolute -left-8 bottom-0 h-24 w-24 rounded-full bg-violet-500/5 blur-xl" />
-
       <div className="relative z-10">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
@@ -421,15 +417,15 @@ export default function MentorCard({
               <Shield className="h-4 w-4 text-amber-300" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-white">Mentor AprovaMind</span>
-              <p className="text-[11px] text-[#666]">Análise estratégica dos seus estudos</p>
+              <span className="text-sm font-semibold text-am-text-primary">Mentor AprovaMind</span>
+              <p className="text-[11px] text-am-text-secondary">Análise estratégica dos seus estudos</p>
             </div>
           </div>
 
           {/* Expand/Collapse */}
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="rounded-lg p-1.5 text-[#666] transition hover:bg-white/[0.05] hover:text-[#666]"
+            className="rounded-lg p-1.5 text-am-text-secondary transition hover:bg-am-surface-subtle hover:text-am-text-secondary"
           >
             {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </button>
@@ -445,8 +441,8 @@ export default function MentorCard({
               className="overflow-hidden"
             >
               {/* Análise Estratégica */}
-              <div className="mb-3 rounded-xl border border-white/5 bg-white/[0.02] p-3.5">
-                <p className="text-sm leading-relaxed text-slate-300">{data.analysis}</p>
+              <div className="mb-3 rounded-xl border border-am-border-default bg-am-surface-subtle p-3.5">
+                <p className="text-sm leading-relaxed text-am-text-secondary">{data.analysis}</p>
               </div>
 
               {/* Performance Insight — Constância × Precisão */}
@@ -495,9 +491,9 @@ export default function MentorCard({
               </div>
 
               {/* Frase Motivacional */}
-              <div className="flex items-start gap-2 rounded-xl bg-white/[0.03] px-3.5 py-3">
-                <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#666]" />
-                <p className="text-xs italic leading-relaxed text-[#666]">
+              <div className="flex items-start gap-2 rounded-xl bg-am-surface-subtle px-3.5 py-3">
+                <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-am-text-secondary" />
+                <p className="text-xs italic leading-relaxed text-am-text-secondary">
                   {data.motivationalQuote}
                 </p>
               </div>
@@ -510,7 +506,7 @@ export default function MentorCard({
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-xs italic text-[#666]"
+            className="text-xs italic text-am-text-secondary"
           >
             &ldquo;{data.motivationalQuote}&rdquo;
           </motion.p>

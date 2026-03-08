@@ -162,7 +162,7 @@ export default function ScheduleModal({
           <div className="flex items-center justify-between p-6 border-b border-gray-800">
             <div className="flex items-center gap-3">
               <Calendar className="h-5 w-5 text-[#F59768]" />
-              <h2 className="text-xl font-semibold text-white">
+              <h2 className="text-xl font-semibold text-am-text-primary">
                 Agendar Sessão
               </h2>
             </div>
@@ -200,7 +200,7 @@ export default function ScheduleModal({
                 type="text"
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-am-text-primary placeholder-gray-500 focus:outline-none focus:border-violet-500"
                 placeholder="Ex: Estudo de Direito Civil"
                 required
               />
@@ -215,7 +215,7 @@ export default function ScheduleModal({
               <select
                 value={formData.subject}
                 onChange={(e) => handleInputChange('subject', e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-am-text-primary focus:outline-none focus:border-violet-500"
                 required
               >
                 {subjects.map(subject => (
@@ -237,7 +237,7 @@ export default function ScheduleModal({
                   type="time"
                   value={formData.startTime}
                   onChange={(e) => handleInputChange('startTime', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-am-text-primary focus:outline-none focus:border-violet-500"
                   required
                 />
               </div>
@@ -249,7 +249,7 @@ export default function ScheduleModal({
                   type="time"
                   value={formData.endTime}
                   onChange={(e) => handleInputChange('endTime', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-am-text-primary focus:outline-none focus:border-violet-500"
                   required
                 />
               </div>
@@ -264,7 +264,7 @@ export default function ScheduleModal({
                 <select
                   value={formData.type}
                   onChange={(e) => handleInputChange('type', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-am-text-primary focus:outline-none focus:border-violet-500"
                 >
                   <option value="study">Estudo</option>
                   <option value="review">Revisão</option>
@@ -280,7 +280,7 @@ export default function ScheduleModal({
                 <select
                   value={formData.priority}
                   onChange={(e) => handleInputChange('priority', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-am-text-primary focus:outline-none focus:border-violet-500"
                 >
                   <option value="low">Baixa</option>
                   <option value="medium">Média</option>
@@ -297,7 +297,7 @@ export default function ScheduleModal({
               <select
                 value={formData.reminderMinutes}
                 onChange={(e) => handleInputChange('reminderMinutes', parseInt(e.target.value))}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-am-text-primary focus:outline-none focus:border-violet-500"
               >
                 <option value={0}>Sem lembrete</option>
                 <option value={5}>5 minutos</option>
@@ -315,7 +315,7 @@ export default function ScheduleModal({
               <textarea
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 resize-none"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-am-text-primary placeholder-gray-500 focus:outline-none focus:border-violet-500 resize-none"
                 rows={3}
                 placeholder="Tópicos a estudar, materiais necessários, etc."
               />
@@ -344,7 +344,7 @@ export default function ScheduleModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-am-text-primary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Agendando...' : 'Agendar'}
               </button>

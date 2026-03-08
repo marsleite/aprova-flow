@@ -52,7 +52,7 @@ export default function AiUsageSummaryCard({ userId }: AiUsageSummaryCardProps) 
             <Cpu className="h-5 w-5 text-cyan-300" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-white">Telemetria de IA</h3>
+            <h3 className="text-base font-semibold text-am-text-primary">Telemetria de IA</h3>
             <p className="text-xs text-gray-400">Uso e custo estimado (últimos 7 dias)</p>
           </div>
         </div>
@@ -79,45 +79,45 @@ export default function AiUsageSummaryCard({ userId }: AiUsageSummaryCardProps) 
       {!loading && !error && data && (
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
               <p className="text-[11px] text-gray-400">Chamadas 24h</p>
-              <p className="mt-1 text-lg font-semibold text-white">{data.events24h}</p>
+              <p className="mt-1 text-lg font-semibold text-am-text-primary">{data.events24h}</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
               <p className="text-[11px] text-gray-400">Chamadas 7d</p>
-              <p className="mt-1 text-lg font-semibold text-white">{data.events7d}</p>
+              <p className="mt-1 text-lg font-semibold text-am-text-primary">{data.events7d}</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
               <p className="text-[11px] text-gray-400">Custo 24h</p>
               <p className="mt-1 text-lg font-semibold text-emerald-300">{formatUsd(data.totalCost24hUsd)}</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
               <p className="text-[11px] text-gray-400">Custo 7d</p>
               <p className="mt-1 text-lg font-semibold text-emerald-300">{formatUsd(data.totalCost7dUsd)}</p>
             </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
               <div className="mb-1 flex items-center gap-1 text-xs text-gray-400">
                 <Gauge className="h-3.5 w-3.5" />
                 Tokens (7d)
               </div>
-              <p className="text-sm font-medium text-white">{data.totalTokens7d.toLocaleString('pt-BR')}</p>
+              <p className="text-sm font-medium text-am-text-primary">{data.totalTokens7d.toLocaleString('pt-BR')}</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
               <div className="mb-1 flex items-center gap-1 text-xs text-gray-400">
                 <DollarSign className="h-3.5 w-3.5" />
                 Taxa de erro (7d)
               </div>
-              <p className={`text-sm font-medium ${data.errorRate7dPercent > 10 ? 'text-amber-300' : 'text-white'}`}>
+              <p className={`text-sm font-medium ${data.errorRate7dPercent > 10 ? 'text-amber-300' : 'text-am-text-primary'}`}>
                 {data.errorRate7dPercent}%
               </p>
             </div>
           </div>
 
           {data.byTask7d.length > 0 && (
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
               <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">Uso por tarefa (7d)</p>
               <div className="space-y-1.5">
                 {data.byTask7d.slice(0, 4).map((item) => (

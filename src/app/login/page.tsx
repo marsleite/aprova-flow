@@ -53,7 +53,7 @@ export default function LoginPage() {
 
   if (loading || user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0A0A0A]">
+      <div className="flex min-h-screen items-center justify-center bg-am-canvas">
         <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
           <Zap className="h-6 w-6 text-white" />
         </div>
@@ -62,12 +62,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-[#0A0A0A]">
+    <div className="relative flex min-h-screen overflow-hidden bg-am-canvas">
       {/* Ambient background — RDS atmospheric depth */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-64 -top-64 h-[600px] w-[600px] rounded-full bg-[#3150AA]/10 blur-[120px]" />
-        <div className="absolute -bottom-64 -right-64 h-[600px] w-[600px] rounded-full bg-[#F59768]/8 blur-[120px]" />
-        <div className="absolute left-1/2 top-1/4 h-96 w-96 -translate-x-1/2 rounded-full bg-[#3150AA]/5 blur-[100px]" />
+        <div className="absolute -left-64 -top-64 h-[600px] w-[600px] rounded-full bg-am-brand-secondary/10 blur-[120px]" />
+        <div className="absolute -bottom-64 -right-64 h-[600px] w-[600px] rounded-full bg-am-brand-primary/8 blur-[120px]" />
+        <div className="absolute left-1/2 top-1/4 h-96 w-96 -translate-x-1/2 rounded-full bg-am-brand-secondary/5 blur-[100px]" />
         {/* Radial Mask Grid */}
         <div className="rds-grid-bg absolute inset-0" />
       </div>
@@ -86,9 +86,9 @@ export default function LoginPage() {
           </div>
           <div>
             <p className="font-brand text-lg font-bold text-white leading-none">
-              Aprova<span className="text-[#F59768]">Mind</span>
+              Aprova<span className="text-am-brand-primary">Mind</span>
             </p>
-            <p className="text-[10px] uppercase tracking-wider text-[#666] font-mono">
+            <p className="text-[10px] uppercase tracking-wider text-am-text-secondary font-mono">
               Strategic Engine
             </p>
           </div>
@@ -96,9 +96,9 @@ export default function LoginPage() {
 
         {/* Hero text */}
         <div className="max-w-md">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#3150AA]/30 bg-[#3150AA]/10 px-3 py-1">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#3150AA]/30 bg-am-brand-secondary/10 px-3 py-1">
             <div className="status-dot-blue h-1.5 w-1.5 rounded-full" />
-            <span className="text-xs text-[#F59768] font-mono uppercase tracking-wider">IA de Alta Performance para Concursos</span>
+            <span className="text-xs text-am-brand-primary font-mono uppercase tracking-wider">IA de Alta Performance para Concursos</span>
           </div>
           <h1 className="font-brand mb-4 text-4xl font-bold leading-tight text-white xl:text-5xl">
             Sua aprovação começa com{' '}
@@ -106,7 +106,7 @@ export default function LoginPage() {
               estratégia inteligente
             </span>
           </h1>
-          <p className="text-base text-[#666] leading-relaxed">
+          <p className="text-base text-am-text-secondary leading-relaxed">
             AprovaMind é o sistema de alta performance que combina IA diagnóstica, gestão
             multi-edital e análise de performance em tempo real para acelerar sua aprovação.
           </p>
@@ -124,17 +124,17 @@ export default function LoginPage() {
               key={label}
               className="rds-card p-4"
             >
-              <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#3150AA]/15">
-                <Icon className="h-4 w-4 text-[#F59768]" />
+              <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-am-brand-secondary/15">
+                <Icon className="h-4 w-4 text-am-brand-primary" />
               </div>
               <p className="font-brand text-sm font-semibold text-white">{label}</p>
-              <p className="text-xs text-[#666]">{desc}</p>
+              <p className="text-xs text-am-text-secondary">{desc}</p>
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-2 text-xs text-[#666] font-mono">
+        <div className="flex items-center gap-2 text-xs text-am-text-secondary font-mono">
           <Shield className="h-3.5 w-3.5" />
           <span>Dados armazenados com segurança no Firebase · SSL/TLS</span>
         </div>
@@ -154,7 +154,7 @@ export default function LoginPage() {
               <Zap className="h-5 w-5 text-white" />
             </div>
             <p className="font-brand text-xl font-bold text-white">
-              Aprova<span className="text-[#F59768]">Mind</span>
+              Aprova<span className="text-am-brand-primary">Mind</span>
             </p>
           </div>
 
@@ -165,7 +165,7 @@ export default function LoginPage() {
               <h2 className="font-brand text-xl font-bold text-white">
                 {mode === 'login' ? 'Acesse sua conta' : 'Criar conta gratuita'}
               </h2>
-              <p className="mt-1 text-sm text-[#666]">
+              <p className="mt-1 text-sm text-am-text-secondary">
                 {mode === 'login'
                   ? 'Continue de onde parou na sua jornada'
                   : 'Comece sua jornada rumo à aprovação'}
@@ -191,7 +191,7 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="my-5 flex items-center gap-3">
               <div className="h-px flex-1 bg-white/[0.10]" />
-              <span className="text-xs text-[#666] font-mono">ou acesse com email</span>
+              <span className="text-xs text-am-text-secondary font-mono">ou acesse com email</span>
               <div className="h-px flex-1 bg-white/[0.10]" />
             </div>
 
@@ -228,7 +228,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666] hover:text-slate-400 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-am-text-secondary hover:text-slate-400 transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -249,13 +249,13 @@ export default function LoginPage() {
             </form>
 
             {/* Toggle */}
-            <p className="mt-4 text-center text-sm text-[#666]">
+            <p className="mt-4 text-center text-sm text-am-text-secondary">
               {mode === 'login' ? (
                 <>
                   Não tem conta?{' '}
                   <button
                     onClick={() => setMode('register')}
-                    className="text-[#F59768] hover:text-[#F59768]/80 transition-colors"
+                    className="text-am-brand-primary hover:text-am-brand-primary/80 transition-colors"
                   >
                     Criar gratuitamente
                   </button>
@@ -265,7 +265,7 @@ export default function LoginPage() {
                   Já tem conta?{' '}
                   <button
                     onClick={() => setMode('login')}
-                    className="text-[#F59768] hover:text-[#F59768]/80 transition-colors"
+                    className="text-am-brand-primary hover:text-am-brand-primary/80 transition-colors"
                   >
                     Fazer login
                   </button>
