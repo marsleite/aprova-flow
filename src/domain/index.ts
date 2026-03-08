@@ -44,6 +44,27 @@ export type {
     PortfolioKPIs,
 } from './types';
 
+// ── Policies ──
+export {
+    DEFAULT_ENGINE_POLICY,
+    createEnginePolicy,
+    resolvePriorityBand,
+    resolveTierValue,
+    type DeepPartial,
+    type EnginePolicy,
+    type HealthScoreWeights,
+    type PriorityBandRule,
+    type PriorityPolicy,
+    type PriorityPhaseOverridePolicy,
+    type PriorityWeightsPolicy,
+    type RecommendationDueWindow,
+    type RecommendationPolicy,
+    type RecommendationRoutingRule,
+    type SubjectHealthPolicy,
+    type SubjectStatusThresholdPolicy,
+    type WeightTierValue,
+} from './policies/engine-policy';
+
 // ── Value Objects ──
 export {
     clampScore,
@@ -63,6 +84,10 @@ export {
     DEFAULT_PRIORITY_WEIGHTS,
     type PriorityWeights,
     generateRecommendationsForPlan,
+    generateRecommendationsForHealthEntries,
+    runPlanEngine,
+    type PlanEngineResult,
+    type RunPlanEngineOptions,
     computePortfolio,
     computeBonusFactor,
     computeCreditedMinutes,

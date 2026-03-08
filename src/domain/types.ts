@@ -91,6 +91,11 @@ export interface SubjectHealthMetrics {
 export interface AggregatedMetrics {
     weeklyActualHours: number;
     weeklyTargetHours: number;
+    weeklyTotalHours: number;
+    actualSharePercent: number;
+    targetSharePercent: number;
+    deviationPercent: number;
+    distinctStudyDays: number;
     daysSinceLastStudy: number;
     daysSinceLastQuestion: number | null;
     recentAccuracy: number | null;

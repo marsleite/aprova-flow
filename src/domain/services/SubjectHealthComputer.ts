@@ -1,18 +1,21 @@
 /**
  * SubjectHealthComputer — AprovaMind Decision Engine
  *
- * Determinisitc engine that computes SubjectHealth based on 5 sub-scores:
- * Volume, Frequency, Adherence, Recency, and Performance.
- *
- * Rules defined in: saude_da_materia_regras.md
+ * Computes SubjectHealth from policy-driven, deterministic rules.
+ * All thresholds and weighting come from engine-policy.ts.
  */
 
 import {
     SubjectHealthStatus,
     SubjectStrategicState,
-    AccuracyTrend,
     PriorityBand,
 } from '../enums';
+import {
+    DEFAULT_ENGINE_POLICY,
+    resolvePriorityBand,
+    resolveTierValue,
+    type EnginePolicy,
+} from '../policies/engine-policy';
 import type {
     SubjectHealth,
     SubjectHealthMetrics,
@@ -23,25 +26,76 @@ import type {
 } from '../types';
 import { clampScore, daysBetween } from '../value-objects';
 
-// ─────────────────────────────────────────────
-// Constants & Thresholds
-// ─────────────────────────────────────────────
+function shiftIsoDate(date: string, days: number): string {
+    const [year, month, day] = date.split('-').map(Number);
+    const utcDate = new Date(Date.UTC(year, month - 1, day));
+    utcDate.setUTCDate(utcDate.getUTCDate() + days);
+    return utcDate.toISOString().slice(0, 10);
+}
 
-const MIN_QUESTIONS_FOR_PERFORMANCE = 15;
-const FREQUENCY_WINDOW_DAYS = 14;
+function sumStudyHours(sessions: StudySessionInput[]): number {
+    return sessions.reduce((sum, session) => sum + session.durationSeconds / 3600, 0);
+}
 
-// ─────────────────────────────────────────────
-// Public API
-// ─────────────────────────────────────────────
+function countDistinctStudyDays(sessions: StudySessionInput[]): number {
+    return new Set(sessions.map((session) => session.date)).size;
+}
 
-/**
- * Computes SubjectHealth for every subject in the plan.
- */
-export function computeAllSubjectHealth(ctx: PlanEngineContext): SubjectHealth[] {
+function latestDate<T extends { date: string }>(items: T[]): string | null {
+    if (items.length === 0) return null;
+    return [...items].sort((a, b) => b.date.localeCompare(a.date))[0].date;
+}
+
+function filterStudySessions(
+    sessions: StudySessionInput[],
+    startDate: string,
+    endDate: string,
+    minDurationSeconds: number
+): StudySessionInput[] {
+    return sessions.filter((session) =>
+        session.durationSeconds >= minDurationSeconds &&
+        session.date >= startDate &&
+        session.date <= endDate
+    );
+}
+
+function filterQuestionSessions(
+    questions: QuestionSessionInput[],
+    startDate: string,
+    endDate: string,
+    minQuestions: number
+): QuestionSessionInput[] {
+    return questions.filter((session) =>
+        session.totalQuestions >= minQuestions &&
+        session.date >= startDate &&
+        session.date <= endDate
+    );
+}
+
+function strategicStateForStatus(status: SubjectHealthStatus): SubjectStrategicState {
+    if (
+        status === SubjectHealthStatus.Critical ||
+        status === SubjectHealthStatus.Neglected ||
+        status === SubjectHealthStatus.Inefficient
+    ) {
+        return SubjectStrategicState.Recovery;
+    }
+
+    if (status === SubjectHealthStatus.Mature) {
+        return SubjectStrategicState.Maintenance;
+    }
+
+    return SubjectStrategicState.ActiveGrowth;
+}
+
+export function computeAllSubjectHealth(
+    ctx: PlanEngineContext,
+    policy: EnginePolicy = DEFAULT_ENGINE_POLICY
+): SubjectHealth[] {
     const { plan, today } = ctx;
 
-    return plan.subjects.map((subjectPlan) => {
-        return calculateSubjectHealth(
+    return plan.subjects.map((subjectPlan) =>
+        calculateSubjectHealth(
             subjectPlan.subject,
             subjectPlan.weight,
             subjectPlan.priorityOverride,
@@ -52,14 +106,11 @@ export function computeAllSubjectHealth(ctx: PlanEngineContext): SubjectHealth[]
             ctx.allTimeSessions,
             ctx.allTimeQuestions,
             today,
-        );
-    });
+            policy,
+        )
+    );
 }
 
-/**
- * The core domain function to calculate subject health.
- * Pure and auditable.
- */
 export function calculateSubjectHealth(
     subject: string,
     weight: number,
@@ -71,35 +122,34 @@ export function calculateSubjectHealth(
     allTimeSessions: StudySessionInput[],
     allTimeQuestions: QuestionSessionInput[],
     today: string,
+    policy: EnginePolicy = DEFAULT_ENGINE_POLICY,
 ): SubjectHealth {
-    // 1. Filter data
-    const subjectSessions = recentSessions.filter((s) => s.subject === subject);
-    const subjectQuestions = recentQuestions.filter((q) => q.subject === subject);
-    const allSubjectSessions = allTimeSessions.filter((s) => s.subject === subject);
-    const allSubjectQuestions = allTimeQuestions.filter((q) => q.subject === subject);
+    const subjectRecentSessions = recentSessions.filter((session) => session.subject === subject);
+    const subjectRecentQuestions = recentQuestions.filter((question) => question.subject === subject);
+    const subjectAllTimeSessions = allTimeSessions.filter((session) => session.subject === subject);
+    const subjectAllTimeQuestions = allTimeQuestions.filter((question) => question.subject === subject);
 
-    // 2. Compute raw metrics
     const raw = computeAggregatedMetrics(
-        subject,
-        subjectSessions,
-        subjectQuestions,
-        allSubjectSessions,
-        allSubjectQuestions,
+        subjectRecentSessions,
+        subjectRecentQuestions,
+        recentSessions,
+        subjectAllTimeSessions,
+        subjectAllTimeQuestions,
         weeklyGoalHours,
         weight,
         today,
+        policy,
     );
 
-    // 3. Compute sub-scores (0-100/150)
-    const metrics = computeSubScores(raw, weight);
-
-    // 4. Determine Status & State
-    const { status, strategicState } = determineStatusAndState(metrics, raw, weight);
-
-    // 5. Compute Priority (simplified for now, refined by PriorityCalculator)
-    const priorityScore = priorityOverride !== null
-        ? clampScore((6 - priorityOverride) * 20)
-        : computeInitialPriority(metrics, weight);
+    const metrics = computeSubScores(raw, weight, policy);
+    const status = determineStatus(metrics, raw, weight, policy);
+    const strategicState = strategicStateForStatus(status);
+    const priorityScore =
+        priorityOverride !== null ? clampScore((6 - priorityOverride) * 20) : 0;
+    const priorityBand =
+        priorityOverride !== null
+            ? resolvePriorityBand(priorityScore, policy)
+            : PriorityBand.Optional;
 
     return {
         subject,
@@ -111,7 +161,7 @@ export function calculateSubjectHealth(
         raw,
         priority: {
             score: priorityScore,
-            band: scoreToBand(priorityScore),
+            band: priorityBand,
             influencingFactors: {
                 weight: 0,
                 deviation: 0,
@@ -122,97 +172,174 @@ export function calculateSubjectHealth(
             reasons: [],
         },
         priorityScore,
-        priorityBand: scoreToBand(priorityScore),
+        priorityBand,
     };
 }
 
-// ─────────────────────────────────────────────
-// Internal Helpers
-// ─────────────────────────────────────────────
-
 function computeAggregatedMetrics(
-    subject: string,
-    sessions: StudySessionInput[],
-    questions: QuestionSessionInput[],
-    allSessions: StudySessionInput[],
-    allQuestions: QuestionSessionInput[],
+    subjectSessions: StudySessionInput[],
+    subjectQuestions: QuestionSessionInput[],
+    allRecentSessions: StudySessionInput[],
+    allSubjectSessions: StudySessionInput[],
+    allSubjectQuestions: QuestionSessionInput[],
     weeklyGoalHours: number,
     weight: number,
     today: string,
+    policy: EnginePolicy,
 ): AggregatedMetrics {
+    const volumeWindowStart = shiftIsoDate(
+        today,
+        -(policy.health.windows.rollingVolumeDays - 1)
+    );
+    const frequencyWindowStart = shiftIsoDate(
+        today,
+        -(policy.health.windows.rollingFrequencyDays - 1)
+    );
+    const performanceWindowStart = shiftIsoDate(
+        today,
+        -(policy.health.windows.rollingPerformanceDays - 1)
+    );
+
+    const filteredRecentSessions = filterStudySessions(
+        allRecentSessions,
+        volumeWindowStart,
+        today,
+        policy.health.sample.minStudySessionSeconds,
+    );
+    const filteredSubjectRecentSessions = filterStudySessions(
+        subjectSessions,
+        volumeWindowStart,
+        today,
+        policy.health.sample.minStudySessionSeconds,
+    );
+    const filteredSubjectFrequencySessions = filterStudySessions(
+        subjectSessions,
+        frequencyWindowStart,
+        today,
+        policy.health.sample.minStudySessionSeconds,
+    );
+    const filteredSubjectRecentQuestions = filterQuestionSessions(
+        subjectQuestions,
+        performanceWindowStart,
+        today,
+        policy.health.sample.minQuestionSessionQuestions,
+    );
+    const filteredAllSubjectSessions = allSubjectSessions.filter(
+        (session) =>
+            session.durationSeconds >= policy.health.sample.minStudySessionSeconds
+    );
+    const filteredAllSubjectQuestions = allSubjectQuestions.filter(
+        (question) =>
+            question.totalQuestions >= policy.health.sample.minQuestionSessionQuestions
+    );
+
     const weeklyTargetHours = (weight / 100) * weeklyGoalHours;
-    const weeklyActualHours = computeWeeklyHours(sessions, today);
+    const weeklyActualHours = sumStudyHours(filteredSubjectRecentSessions);
+    const weeklyTotalHours = sumStudyHours(filteredRecentSessions);
+    const targetSharePercent = weight;
+    const actualSharePercent =
+        weeklyTotalHours > 0 ? (weeklyActualHours / weeklyTotalHours) * 100 : 0;
+    const deviationPercent =
+        weeklyTargetHours > 0
+            ? ((weeklyActualHours - weeklyTargetHours) / weeklyTargetHours) * 100
+            : 0;
 
-    const daysSinceLastStudy = sessions.length > 0
-        ? daysBetween([...sessions].sort((a, b) => b.date.localeCompare(a.date))[0].date, today)
-        : 999;
+    const recentQuestionsCount = filteredSubjectRecentQuestions.reduce(
+        (sum, question) => sum + question.totalQuestions,
+        0
+    );
+    const recentCorrectAnswers = filteredSubjectRecentQuestions.reduce(
+        (sum, question) => sum + question.correctAnswers,
+        0
+    );
+    const recentAccuracy =
+        recentQuestionsCount >= policy.health.sample.minQuestionsForPerformance
+            ? (recentCorrectAnswers / recentQuestionsCount) * 100
+            : null;
 
-    const daysSinceLastQuestion = questions.length > 0
-        ? daysBetween([...questions].sort((a, b) => b.date.localeCompare(a.date))[0].date, today)
-        : null;
-
-    const recentTotalQs = questions.reduce((sum, q) => sum + q.totalQuestions, 0);
-    const recentCorrects = questions.reduce((sum, q) => sum + q.correctAnswers, 0);
-    const recentAccuracy = recentTotalQs >= MIN_QUESTIONS_FOR_PERFORMANCE
-        ? (recentCorrects / recentTotalQs) * 100
-        : null;
+    const lastStudyDate = latestDate(filteredAllSubjectSessions);
+    const lastQuestionDate = latestDate(filteredAllSubjectQuestions);
 
     return {
         weeklyActualHours,
         weeklyTargetHours,
-        daysSinceLastStudy,
-        daysSinceLastQuestion,
+        weeklyTotalHours,
+        actualSharePercent,
+        targetSharePercent,
+        deviationPercent,
+        distinctStudyDays: countDistinctStudyDays(filteredSubjectFrequencySessions),
+        daysSinceLastStudy: lastStudyDate ? daysBetween(lastStudyDate, today) : 999,
+        daysSinceLastQuestion: lastQuestionDate
+            ? daysBetween(lastQuestionDate, today)
+            : null,
         recentAccuracy,
-        recentQuestionsCount: recentTotalQs,
-        totalHoursAllTime: allSessions.reduce((sum, s) => sum + s.durationSeconds / 3600, 0),
-        totalQuestionsAllTime: allQuestions.reduce((sum, q) => sum + q.totalQuestions, 0),
+        totalHoursAllTime: sumStudyHours(filteredAllSubjectSessions),
+        totalQuestionsAllTime: filteredAllSubjectQuestions.reduce(
+            (sum, question) => sum + question.totalQuestions,
+            0
+        ),
+        recentQuestionsCount,
     };
 }
 
-function computeSubScores(raw: AggregatedMetrics, weight: number): SubjectHealthMetrics {
-    // Volume: (Actual / Target) * 100. Cap at 150.
-    const volumeScore = raw.weeklyTargetHours > 0
-        ? Math.min(150, (raw.weeklyActualHours / raw.weeklyTargetHours) * 100)
-        : (raw.weeklyActualHours > 0 ? 100 : 0);
+function computeSubScores(
+    raw: AggregatedMetrics,
+    weight: number,
+    policy: EnginePolicy,
+): SubjectHealthMetrics {
+    const volumeScore =
+        raw.weeklyTargetHours > 0
+            ? Math.min(150, (raw.weeklyActualHours / raw.weeklyTargetHours) * 100)
+            : raw.weeklyActualHours > 0
+                ? 100
+                : 0;
 
-    // Frequency: Days with study in last 14 days / Ideal contacts
-    // Ideal contacts heuristic: weight > 15% -> 5 days, > 10% -> 4 days, > 5% -> 3 days, else 2 days.
-    const idealContacts = weight > 15 ? 5 : weight > 10 ? 4 : weight > 5 ? 3 : 2;
-    // This is a simplified frequency check based on daysSinceLastStudy and session count for brevity
-    const frequencyScore = clampScore((volumeScore / 100) * 100); // Simplified for MVP
+    const idealContacts = resolveTierValue(
+        weight,
+        policy.health.frequency.idealContactsByWeight
+    );
+    const frequencyScore = clampScore(
+        (raw.distinctStudyDays / idealContacts) * 100
+    );
 
-    // Adherence: Closeness to target weight share
-    const adherenceScore = clampScore(100 - Math.abs(volumeScore - 100));
+    const shareDelta = Math.abs(raw.actualSharePercent - raw.targetSharePercent);
+    const adherencePenalty =
+        raw.actualSharePercent < raw.targetSharePercent
+            ? policy.health.adherence.understudyPenaltyMultiplier
+            : policy.health.adherence.overstudyPenaltyMultiplier;
+    const adherenceScore = clampScore(100 - shareDelta * adherencePenalty);
 
-    // Recency: Decays after safety limit
-    const limit = weight > 10 ? 3 : weight > 5 ? 5 : 7;
-    const recencyScore = raw.daysSinceLastStudy <= limit
-        ? 100
-        : clampScore(100 - (raw.daysSinceLastStudy - limit) * 15);
+    const safetyLimit = resolveTierValue(
+        weight,
+        policy.health.recency.safetyLimitDaysByWeight
+    );
+    const recencyScore =
+        raw.daysSinceLastStudy <= safetyLimit
+            ? 100
+            : clampScore(
+                100 -
+                    (raw.daysSinceLastStudy - safetyLimit) *
+                        policy.health.recency.scoreDecayPerExtraDay
+            );
 
-    // Performance: Pure accuracy
     const performanceScore = raw.recentAccuracy;
 
-    // Overall: Weighted average
-    let overallScore = 0;
-    if (performanceScore !== null) {
-        // Scenario B: With performance data
-        overallScore = clampScore(
-            performanceScore * 0.35 +
-            Math.min(100, volumeScore) * 0.25 +
-            adherenceScore * 0.20 +
-            recencyScore * 0.10 +
-            frequencyScore * 0.10
-        );
-    } else {
-        // Scenario A: Effort based
-        overallScore = clampScore(
-            Math.min(100, volumeScore) * 0.40 +
-            adherenceScore * 0.30 +
-            recencyScore * 0.20 +
-            frequencyScore * 0.10
-        );
-    }
+    const cappedVolume = Math.min(100, volumeScore);
+    const overallScore =
+        performanceScore !== null
+            ? clampScore(
+                performanceScore * policy.health.scoreWeights.withPerformance.performance +
+                    cappedVolume * policy.health.scoreWeights.withPerformance.volume +
+                    adherenceScore * policy.health.scoreWeights.withPerformance.adherence +
+                    recencyScore * policy.health.scoreWeights.withPerformance.recency +
+                    frequencyScore * policy.health.scoreWeights.withPerformance.frequency
+            )
+            : clampScore(
+                cappedVolume * policy.health.scoreWeights.withoutPerformance.volume +
+                    adherenceScore * policy.health.scoreWeights.withoutPerformance.adherence +
+                    recencyScore * policy.health.scoreWeights.withoutPerformance.recency +
+                    frequencyScore * policy.health.scoreWeights.withoutPerformance.frequency
+            );
 
     return {
         volumeScore,
@@ -224,81 +351,74 @@ function computeSubScores(raw: AggregatedMetrics, weight: number): SubjectHealth
     };
 }
 
-function determineStatusAndState(
+function determineStatus(
     metrics: SubjectHealthMetrics,
     raw: AggregatedMetrics,
     weight: number,
-): { status: SubjectHealthStatus; strategicState: SubjectStrategicState } {
-    const { overallScore, volumeScore, performanceScore, recencyScore } = metrics;
+    policy: EnginePolicy,
+): SubjectHealthStatus {
+    const thresholds = policy.health.statusThresholds;
 
-    // 1. Neglected (by recency)
-    const neglectLimit = weight > 10 ? 7 : 10;
+    if (
+        raw.totalHoursAllTime === 0 &&
+        raw.totalQuestionsAllTime === 0
+    ) {
+        return SubjectHealthStatus.NoData;
+    }
+
+    if (raw.daysSinceLastStudy > thresholds.noDataMaxRecentStudyDays) {
+        return SubjectHealthStatus.NoData;
+    }
+
+    const neglectLimit =
+        weight >= thresholds.neglectedMinWeightForShortRecencyWindow
+            ? thresholds.neglectedMaxDaysSinceStudyHighWeight
+            : thresholds.neglectedMaxDaysSinceStudyDefault;
+
     if (raw.daysSinceLastStudy >= neglectLimit && raw.totalHoursAllTime > 0) {
-        return { status: SubjectHealthStatus.Neglected, strategicState: SubjectStrategicState.Recovery };
+        return SubjectHealthStatus.Neglected;
     }
 
-    // 2. Inefficient (High effort, low result)
-    if (volumeScore >= 100 && performanceScore !== null && performanceScore < 60) {
-        return { status: SubjectHealthStatus.Inefficient, strategicState: SubjectStrategicState.Recovery };
+    if (
+        metrics.volumeScore >= thresholds.inefficientMinVolume &&
+        metrics.performanceScore !== null &&
+        raw.recentQuestionsCount >= policy.health.sample.minQuestionsForInefficiency &&
+        metrics.performanceScore < thresholds.inefficientMaxPerformance
+    ) {
+        return SubjectHealthStatus.Inefficient;
     }
 
-    // 3. Blind Spot (Theory only)
-    if (volumeScore >= 80 && performanceScore === null) {
-        return { status: SubjectHealthStatus.BlindSpot, strategicState: SubjectStrategicState.ActiveGrowth };
+    if (
+        metrics.volumeScore >= thresholds.blindSpotMinVolume &&
+        metrics.performanceScore === null
+    ) {
+        return SubjectHealthStatus.BlindSpot;
     }
 
-    // 4. Mature
-    if (overallScore >= 80 && performanceScore !== null && performanceScore >= 80) {
-        return { status: SubjectHealthStatus.Mature, strategicState: SubjectStrategicState.Maintenance };
+    if (
+        metrics.overallScore >= thresholds.matureMinOverall &&
+        metrics.performanceScore !== null &&
+        metrics.performanceScore >= thresholds.matureMinPerformance
+    ) {
+        return SubjectHealthStatus.Mature;
     }
 
-    // 5. Healthy
-    if (overallScore >= 70) {
-        return { status: SubjectHealthStatus.Healthy, strategicState: SubjectStrategicState.ActiveGrowth };
+    if (metrics.overallScore >= thresholds.healthyMinOverall) {
+        return SubjectHealthStatus.Healthy;
     }
 
-    // 6. Warning
-    if (overallScore >= 50) {
-        return { status: SubjectHealthStatus.Warning, strategicState: SubjectStrategicState.ActiveGrowth };
+    if (
+        (metrics.overallScore <= thresholds.criticalMaxOverall &&
+            weight >= thresholds.criticalMinWeight) ||
+        raw.deviationPercent <= -thresholds.criticalMinNegativeDeviation ||
+        raw.daysSinceLastStudy >= thresholds.criticalMaxDaysSinceStudy
+    ) {
+        return SubjectHealthStatus.Critical;
     }
 
-    // 7. No Data
-    if (raw.totalHoursAllTime === 0) {
-        return { status: SubjectHealthStatus.NoData, strategicState: SubjectStrategicState.ActiveGrowth };
+    if (metrics.overallScore >= thresholds.warningMinOverall) {
+        return SubjectHealthStatus.Warning;
     }
 
-    // 8. Critical
-    return { status: SubjectHealthStatus.Critical, strategicState: SubjectStrategicState.Recovery };
-}
-
-function computeWeeklyHours(sessions: StudySessionInput[], today: string): number {
-    const todayDate = new Date(today);
-    const dayOfWeek = todayDate.getDay(); // 0=Sun
-    const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const monday = new Date(todayDate);
-    monday.setDate(todayDate.getDate() - mondayOffset);
-    const mondayStr = monday.toISOString().slice(0, 10);
-
-    return sessions
-        .filter((s) => s.date >= mondayStr && s.date <= today)
-        .reduce((sum, s) => sum + s.durationSeconds / 3600, 0);
-}
-
-function computeInitialPriority(metrics: SubjectHealthMetrics, weight: number): number {
-    const deficit = 100 - metrics.overallScore;
-    const recencyPenalty = 100 - metrics.recencyScore;
-
-    return clampScore(
-        deficit * 0.40 +
-        weight * 0.30 +
-        recencyPenalty * 0.20
-    );
-}
-
-function scoreToBand(score: number): PriorityBand {
-    if (score >= 80) return PriorityBand.Critical;
-    if (score >= 60) return PriorityBand.High;
-    if (score >= 40) return PriorityBand.Medium;
-    if (score >= 20) return PriorityBand.Low;
-    return PriorityBand.Optional;
+    return SubjectHealthStatus.Warning;
 }

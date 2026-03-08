@@ -12,6 +12,7 @@ import { StudySession, StudyConsistency } from '@/types';
 import StudyTimer from '@/components/StudyTimer';
 import QuestionTrackerCard from '@/components/QuestionTrackerCard';
 import DailyAiPlannerCard from '@/components/DailyAiPlannerCard';
+import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
 import { createStudyPlan, setActivePlan } from '@/lib/firebase/plans';
 import {
   CheckCircle2,
@@ -31,6 +32,8 @@ import { KPICard, Badge, Button, Card } from '@/components';
 import { fadeUp } from '@/design-system/tokens';
 
 export default function EnginePage() {
+  const showPlanEngineSnapshot =
+    process.env.NEXT_PUBLIC_ENGINE_SNAPSHOT_V1 === 'true';
   const { user } = useAuthContext();
   const { plans, activePlanId, activePlan: activePlanObj } = usePlanContext();
   const [recentSessions, setRecentSessions] = useState<StudySession[]>([]);
@@ -197,8 +200,20 @@ export default function EnginePage() {
 
           {/* Right: Execution Log + Stats */}
           <div className="space-y-6">
+            {showPlanEngineSnapshot && (
+              <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+                <PlanEngineSnapshotCard planId={activePlanId || null} />
+              </motion.div>
+            )}
+
             {/* Quick stats */}
-            <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-2 gap-4">
+            <motion.div
+              custom={showPlanEngineSnapshot ? 1 : 0}
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-2 gap-4"
+            >
               <KPICard
                 title="Sequência"
                 value={`${consistency?.currentStreak || 0}d`}
@@ -214,7 +229,11 @@ export default function EnginePage() {
             </motion.div>
 
             {/* AI Insight panel */}
-            <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show"
+            <motion.div
+              custom={showPlanEngineSnapshot ? 2 : 1}
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
               className="rounded-am-xl border border-am-ai-border/40 bg-am-surface p-5 shadow-am-sm relative overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(139, 92, 246, 0.04) 100%)' }}
             >
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-am-ai-glow/20 blur-[50px] rounded-full pointer-events-none"></div>
@@ -244,7 +263,12 @@ export default function EnginePage() {
             </motion.div>
 
             {/* Execution log (recent sessions) */}
-            <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
+            <motion.div
+              custom={showPlanEngineSnapshot ? 3 : 2}
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+            >
               <Card padding="md" variant="default">
                 <div className="mb-4 flex items-center justify-between border-b border-am-border-subtle pb-3">
                   <div className="flex items-center gap-2">
@@ -302,7 +326,11 @@ export default function EnginePage() {
 
             {/* Planner link */}
             {plans.length === 0 && (
-              <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show"
+              <motion.div
+                custom={showPlanEngineSnapshot ? 4 : 3}
+                variants={fadeUp}
+                initial="hidden"
+                animate="show"
                 className="rounded-am-md border border-dashed border-am-border-strong bg-am-surface-subtle p-5 text-center"
               >
                 <div className="mx-auto w-10 h-10 bg-am-surface-elevated rounded-full flex items-center justify-center mb-3">

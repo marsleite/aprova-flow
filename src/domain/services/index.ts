@@ -9,7 +9,15 @@ export {
     DEFAULT_PRIORITY_WEIGHTS,
     type PriorityWeights,
 } from './PriorityCalculator';
-export { generateRecommendationsForPlan } from './RecommendationEngine';
+export {
+    generateRecommendationsForPlan,
+    generateRecommendationsForHealthEntries,
+} from './RecommendationEngine';
+export {
+    runPlanEngine,
+    type PlanEngineResult,
+    type RunPlanEngineOptions,
+} from './PlanEngine';
 export {
     computePortfolio,
     computeBonusFactor,
