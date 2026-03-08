@@ -11,6 +11,8 @@ import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { LegacyEngineDataSource } from '@/infrastructure/legacy/LegacyEngineDataSource';
+import { GetPlanEngineSnapshot } from '@/application/use-cases/engine/GetPlanEngineSnapshot';
 
 // ============================================================
 // Tipos
@@ -47,17 +49,17 @@ interface ChatRequest {
 // System prompt — grounded, anti-alucinação
 // ============================================================
 
-function buildSystemPrompt(ctx: StudyContext): string {
+function buildSystemPrompt(ctx: StudyContext, engineAnalysis: string = ''): string {
   const subjectSummary = ctx.subjectHours.length > 0
     ? ctx.subjectHours
-        .map((s) => `  - ${s.subject}: ${s.hours}h`)
-        .join('\n')
+      .map((s) => `  - ${s.subject}: ${s.hours}h`)
+      .join('\n')
     : '  Nenhuma matéria registrada ainda.';
 
   const planSummary = ctx.planVsActual.length > 0
     ? ctx.planVsActual
-        .map((p) => `  - ${p.subject}: planejado ${p.plannedPercent}%, real ${p.actualPercent}% [${p.status}]`)
-        .join('\n')
+      .map((p) => `  - ${p.subject}: planejado ${p.plannedPercent}%, real ${p.actualPercent}% [${p.status}]`)
+      .join('\n')
     : '  Sem plano configurado.';
 
   return `Você é o Coach de Estudos do AprovaMind, assistente pessoal para concurseiros brasileiros.
@@ -81,6 +83,8 @@ ${ctx.activePlanName ? `- EDITAL EM FOCO: ${ctx.activePlanName}` : '- Visão GER
 - Dias estudados esta semana: ${ctx.daysStudiedThisWeek}/7
 - Hoje: ${ctx.todayTotalMinutes} min${ctx.todayDominantSubject ? ` (foco: ${ctx.todayDominantSubject})` : ''}
 
+${engineAnalysis}
+
 HORAS POR MATÉRIA (mês):
 ${subjectSummary}
 
@@ -89,17 +93,17 @@ ${planSummary}
 
 EVOLUÇÃO SEMANAL (Seg a Dom):
 ${ctx.weeklyBreakdown?.length > 0
-    ? ctx.weeklyBreakdown
+      ? ctx.weeklyBreakdown
         .map((d) => `  - ${d.day}: ${d.hours > 0 ? d.hours + 'h' : 'não estudou'}${d.isToday ? ' (HOJE)' : ''}`)
         .join('\n')
-    : '  Sem dados da semana.'}
+      : '  Sem dados da semana.'}
 
 ÚLTIMAS SESSÕES:
 ${ctx.recentSessions?.length > 0
-    ? ctx.recentSessions
+      ? ctx.recentSessions
         .map((s) => `  - ${s.date} | ${s.subject} | ${Math.round(s.duration / 60)} min`)
         .join('\n')
-    : '  Nenhuma sessão recente.'}
+      : '  Nenhuma sessão recente.'}
 
 CAPACIDADES:
 - Montar planos de estudo diários/semanais baseados nos dados
@@ -153,8 +157,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Mensagens inválidas.' }, { status: 400 });
     }
 
+    let engineContext = '';
+    try {
+      const useCase = new GetPlanEngineSnapshot(new LegacyEngineDataSource(auth.idToken));
+      const todayISO = new Date().toISOString().slice(0, 10);
+      const engineResult = await useCase.execute({
+        userId: auth.uid,
+        today: todayISO,
+        planId: null,
+      });
+
+      if (engineResult.found) {
+        engineContext = `
+[DIRETRIZES DO MOTOR DE DECISÃO DETERMINÍSTICO]
+Estas são as recomendações formais que o sistema gerou para o usuário. Use-as como base para guiar suas respostas quando o aluno pedir o que estudar em seguida:
+${engineResult.snapshot.recommendations.map(r => `- Recomendação top: Focar em ${r.targetSubject} (Tipo: ${r.type}, Urgência: ${r.urgency}). Motivo: ${r.reasons.join(', ')}`).join('\n')}
+
+- Status Críticos/Atenção identificados:
+${engineResult.snapshot.subjects.filter(s => ['critical', 'neglected', 'warning'].includes(s.status)).map(s => `  ${s.subject}: ${s.status}`).join('\n')}
+`;
+      }
+    } catch (e) {
+      console.warn('Motor indisponível para o chat', e);
+    }
+
     // Monta o histórico de conversa com system prompt embutido
-    const systemPrompt = buildSystemPrompt(context);
+    const systemPrompt = buildSystemPrompt(context, engineContext);
 
     // Constrói contents para a API: system + histórico + última mensagem
     const contents: string[] = [];

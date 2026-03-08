@@ -70,6 +70,7 @@ import PlanManager from '@/components/PlanManager';
 import BenchmarkCard from './BenchmarkCard';
 import Calendar from './Calendar';
 import ScheduleModal from './ScheduleModal';
+import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
 import { TrendingUp, MessageCircle, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { isAdminIdentity } from '@/lib/admin';
@@ -118,7 +119,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [creatingSessionPlan, setCreatingSessionPlan] = useState(false);
   const [planLimitNotice, setPlanLimitNotice] = useState<string | null>(null);
-  
+
   // ---- Estados do Calendário ----
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -261,7 +262,7 @@ export default function Dashboard() {
     setLastSavedSession(session);
     await fetchData();
     setSessionsRefreshKey((prev) => prev + 1);
-    
+
     // Atualiza benchmark do usuário
     if (user && consistency?.weeklyGoalHours && consistency.weeklyTotalSeconds) {
       try {
@@ -439,7 +440,18 @@ export default function Dashboard() {
           <SummaryCards summary={summary} loading={loading} />
         </motion.div>
 
-        {/* Linha 1: Cronômetro + Radar */}
+        {/* Linha 2.5: Núcleo Estratégico e Recomendações */}
+        <motion.div
+          custom={2.5}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mb-8"
+        >
+          <PlanEngineSnapshotCard planId={filterPlanId} />
+        </motion.div>
+
+        {/* Linha 3: Cronômetro + Radar */}
         <motion.div
           custom={3}
           variants={sectionVariants}

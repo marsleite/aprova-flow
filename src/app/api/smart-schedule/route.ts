@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
-import { logAiUsageEvent, runAiText } from '@/lib/ai';
+import { logAiUsageEvent, runAiText, parseJsonFromModelText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 
 export interface SmartScheduleRequest {
@@ -9,6 +9,12 @@ export interface SmartScheduleRequest {
     weeklyGoalHours: number;
     availableDays: string[]; // ["Segunda", "Terça", "Quarta"]
     planSubjects: { subject: string; weight: number; hoursStudied: number; accuracy: number }[];
+}
+
+interface SmartScheduleItem {
+    day: string;
+    totalHours: number;
+    subjects: { name: string; hours: number; reason: string }[];
 }
 
 export async function POST(request: NextRequest) {
@@ -50,9 +56,8 @@ export async function POST(request: NextRequest) {
         });
 
         const text = aiResponse.text?.trim() || '[]';
-
-        // Tenta limpar marcações Markdown de JSON se a IA tiver enviado.
         const jsonStr = text.replace(/^```json/g, '').replace(/```$/g, '').trim();
+        const parsedSchedule = parseJsonFromModelText<SmartScheduleItem[]>(jsonStr) || [];
 
         const usageEvent = {
             route: '/api/smart-schedule',
@@ -71,23 +76,22 @@ export async function POST(request: NextRequest) {
         logAiUsageEvent(usageEvent);
         void saveAiUsageEvent(usageEvent, auth.idToken);
 
-        try {
-            const parsedSchedule = JSON.parse(jsonStr);
-            return NextResponse.json(
-                { schedule: parsedSchedule },
-                {
-                    headers: {
-                        ...quota.headers,
-                        'x-ai-provider': aiResponse.provider,
-                        'x-ai-model': aiResponse.model,
-                        'x-ai-cost-usd': aiResponse.usage.estimatedCostUsd.toString(),
-                    },
-                }
-            );
-        } catch (parseError) {
-            console.error("Falha ao parsear JSON no smart-schedule", parseError, jsonStr);
+        if (!parsedSchedule || (Array.isArray(parsedSchedule) && parsedSchedule.length === 0)) {
+            console.error("Falha ao parsear JSON no smart-schedule", jsonStr);
             return NextResponse.json({ error: 'Erro gerando cronograma' }, { status: 500 });
         }
+
+        return NextResponse.json(
+            { schedule: parsedSchedule },
+            {
+                headers: {
+                    ...quota.headers,
+                    'x-ai-provider': aiResponse.provider,
+                    'x-ai-model': aiResponse.model,
+                    'x-ai-cost-usd': aiResponse.usage.estimatedCostUsd.toString(),
+                },
+            }
+        );
     } catch (error) {
         console.error('Erro na rota /smart-schedule:', error);
         return NextResponse.json(

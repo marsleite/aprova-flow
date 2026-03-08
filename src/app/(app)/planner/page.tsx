@@ -19,6 +19,7 @@ import { getAccuracyAnalytics } from '@/lib/firebase/questions';
 import { getTodayISO, formatDuration } from '@/lib/utils';
 import { StudyPlanEdital, PlanVsActual, StudyInsight, StudySession, StudyConsistency, SubjectAccuracy } from '@/types';
 import PlanManager from '@/components/PlanManager';
+import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { canCreateMorePlans } from '@/lib/entitlements';
 import {
@@ -257,36 +258,11 @@ export default function PlannerPage() {
           </motion.div>
         </div>
 
-        {/* ROW 2: Backlog & IA Suggestions */}
+        {/* ROW 2: Motor Determinístico & IA Suggestions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Backlog Recomendado */}
+          {/* Núcleo de Prioridade do Motor */}
           <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
-            <ChartCard title="Backlog Estratégico" subtitle="Matérias atrasadas em relação ao edital ativo" loading={loading}>
-              {neglectedSubjects.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-10">
-                  <div className="h-12 w-12 rounded-full bg-am-success/10 flex items-center justify-center mb-4">
-                    <CheckCircle2 className="h-6 w-6 text-am-success" />
-                  </div>
-                  <p className="text-am-body-sm text-am-text-secondary font-medium">Belo trabalho!</p>
-                  <p className="text-am-caption text-am-text-tertiary">Nenhuma matéria atrasada.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {neglectedSubjects.slice(0, 4).map((sub, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-am-md border border-am-warning/20 bg-am-warning/5 hover:border-am-warning/40 transition-colors">
-                      <AlertTriangle className="h-5 w-5 flex-shrink-0 text-am-warning" />
-                      <div className="flex-1">
-                        <p className="font-semibold text-am-body-sm text-am-text-primary">{sub.subject}</p>
-                        <p className="text-am-caption text-am-text-secondary">{Math.abs(sub.deviation).toFixed(0)}% abaixo da meta ideal</p>
-                      </div>
-                      <Button asChild variant="secondary" size="sm">
-                        <a href={`/engine?subject=${encodeURIComponent(sub.subject)}`}>Focar</a>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </ChartCard>
+            <PlanEngineSnapshotCard planId={activePlanId || null} />
           </motion.div>
 
           {/* AI Diagnóstico */}

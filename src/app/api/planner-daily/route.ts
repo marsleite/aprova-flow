@@ -4,6 +4,8 @@ import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, parseJsonFromModelText, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 import { saveDailyAiPlanSnapshot } from '@/lib/server/dailyAiPlanStore';
+import { LegacyEngineDataSource } from '@/infrastructure/legacy/LegacyEngineDataSource';
+import { GetPlanEngineSnapshot } from '@/application/use-cases/engine/GetPlanEngineSnapshot';
 
 interface PlannerDailyRequest {
   userName: string;
@@ -109,7 +111,7 @@ function buildFallbackPlan(ctx: PlannerDailyRequest, dateISO: string): PlannerDa
   };
 }
 
-function buildPlannerPrompt(ctx: PlannerDailyRequest): string {
+function buildPlannerPrompt(ctx: PlannerDailyRequest, engineAnalysis: string = ''): string {
   const subjectSummary =
     ctx.subjectHours.length > 0
       ? ctx.subjectHours.map((s) => `  - ${s.subject}: ${s.hours}h`).join('\n')
@@ -187,6 +189,8 @@ DADOS DO ALUNO:
 - Minutos já estudados hoje: ${ctx.todayTotalMinutes}
 - Janela disponível hoje (alvo): ${available} minutos
 - Tipo de solicitação: ${replanMode}
+
+${engineAnalysis}
 
 GAPS DIAGNÓSTICADOS (Alta Prioridade):
 ${gapSummary}
@@ -303,9 +307,39 @@ export async function POST(request: NextRequest) {
 
     const dateISO = body.dateISO || new Date().toISOString().slice(0, 10);
 
+    let engineAnalysis = '';
+    try {
+      const useCase = new GetPlanEngineSnapshot(new LegacyEngineDataSource(auth.idToken));
+      const engineResult = await useCase.execute({
+        userId: auth.uid,
+        today: dateISO,
+        planId: body.activePlanName ? undefined : null,
+        maxRecommendations: 3,
+      });
+
+      if (engineResult.found) {
+        engineAnalysis = `
+[INJETADO PELO DECISION ENGINE - PRIORIDADE MÁXIMA]
+O motor avaliou estruturalmente este plano de estudos e determinou o seguinte:
+
+Top Recomendações (Tente encampar na sua sugestão):
+${engineResult.snapshot.recommendations.map(r =>
+          `- Matéria: ${r.targetSubject} | Ação (Tipo): ${r.type.toUpperCase()} | Motivo: ${r.reasons.join(' ')}`
+        ).join('\n')}
+
+Ranking de Saúde (Priorize as piores ou Críticas/Negligenciadas):
+${engineResult.snapshot.subjects.slice(0, 5).map(s =>
+          `- ${s.subject}: Status [${s.status.toUpperCase()}] (Saúde global = ${s.metrics.overallScore}/100)`
+        ).join('\n')}
+`;
+      }
+    } catch (e) {
+      console.warn('Erro passivo ao carregar o motor:', e);
+    }
+
     const aiResponse = await runAiText({
       task: 'planner-daily',
-      prompt: buildPlannerPrompt(body),
+      prompt: buildPlannerPrompt(body, engineAnalysis),
       temperature: 0.35,
       maxOutputTokens: 2200,
       preferJson: true,
