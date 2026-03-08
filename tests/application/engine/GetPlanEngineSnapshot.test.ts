@@ -3,6 +3,8 @@ import type {
   EngineDataSource,
   LoadPlanEngineContextParams,
   LoadPlanEngineContextResult,
+  LoadAllPlanEngineContextsParams,
+  LoadAllPlanEngineContextsResult,
 } from '@/application/ports/EngineDataSource';
 import { GetPlanEngineSnapshot } from '@/application/use-cases/engine/GetPlanEngineSnapshot';
 import { getCanonicalScenario } from '../../domain/fixtures/canonical';
@@ -12,12 +14,18 @@ class StubEngineDataSource implements EngineDataSource {
     private readonly resolver: (
       params: LoadPlanEngineContextParams
     ) => Promise<LoadPlanEngineContextResult>
-  ) {}
+  ) { }
 
   loadPlanEngineContext(
     params: LoadPlanEngineContextParams
   ): Promise<LoadPlanEngineContextResult> {
     return this.resolver(params);
+  }
+
+  loadAllPlanEngineContexts(
+    params: LoadAllPlanEngineContextsParams
+  ): Promise<LoadAllPlanEngineContextsResult> {
+    return Promise.resolve({ found: true, contexts: [] });
   }
 }
 

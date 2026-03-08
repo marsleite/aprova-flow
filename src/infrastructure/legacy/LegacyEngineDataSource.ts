@@ -2,6 +2,8 @@ import type {
   EngineDataSource,
   LoadPlanEngineContextParams,
   LoadPlanEngineContextResult,
+  LoadAllPlanEngineContextsParams,
+  LoadAllPlanEngineContextsResult,
 } from '@/application/ports/EngineDataSource';
 import type {
   PlanEngineContext,
@@ -399,7 +401,7 @@ async function queryDocumentsByUser(
 }
 
 export class LegacyEngineDataSource implements EngineDataSource {
-  constructor(private readonly idToken: string) {}
+  constructor(private readonly idToken: string) { }
 
   async loadPlanEngineContext(
     params: LoadPlanEngineContextParams
@@ -502,5 +504,91 @@ export class LegacyEngineDataSource implements EngineDataSource {
       found: true,
       context,
     };
+  }
+
+  async loadAllPlanEngineContexts(
+    params: LoadAllPlanEngineContextsParams
+  ): Promise<LoadAllPlanEngineContextsResult> {
+    const plansQuery = await queryDocumentsByUser(
+      this.idToken,
+      STUDY_PLANS_COLLECTION,
+      params.userId
+    );
+
+    if (!plansQuery.ok || !plansQuery.documents) {
+      throw new Error(plansQuery.error || 'Falha ao carregar os planos.');
+    }
+
+    const plansData = plansQuery.documents.filter((doc) => {
+      // If we need to filter only active ones we could do it here, but generally 
+      // all returned are user plans. Let's include everything or add logic later.
+      return asString(doc.data.userId) === params.userId;
+    });
+
+    if (plansData.length === 0) {
+      return { found: true, contexts: [] };
+    }
+
+    const [sessionQuery, questionQuery] = await Promise.all([
+      queryDocumentsByUser(this.idToken, STUDY_SESSIONS_COLLECTION, params.userId),
+      queryDocumentsByUser(this.idToken, QUESTION_SESSIONS_COLLECTION, params.userId),
+    ]);
+
+    if (!sessionQuery.ok) {
+      throw new Error(
+        sessionQuery.error || 'Falha ao carregar sessões de estudo.'
+      );
+    }
+
+    if (!questionQuery.ok) {
+      throw new Error(
+        questionQuery.error || 'Falha ao carregar sessões de questões.'
+      );
+    }
+
+    const allTimeStudyFrom =
+      params.window.allTimeStudySessionsFrom ?? '1900-01-01';
+    const allTimeQuestionFrom =
+      params.window.allTimeQuestionSessionsFrom ?? '1900-01-01';
+
+    const contexts: PlanEngineContext[] = [];
+
+    for (const planDoc of plansData) {
+      const planId = planDoc.id;
+      const planInput = toPlanInput(planId, planDoc.data);
+
+      const allTimeSessions = (sessionQuery.documents ?? [])
+        .filter((item) => matchesStudyPlan(planId, item.data))
+        .map((item) => toStudySessionInput(item.data))
+        .filter((item): item is StudySessionInput => item !== null)
+        .filter((item) => item.date >= allTimeStudyFrom)
+        .sort(compareDateDesc);
+
+      const sessions = allTimeSessions.filter(
+        (item) => item.date >= params.window.studySessionsFrom
+      );
+
+      const allTimeQuestions = (questionQuery.documents ?? [])
+        .filter((item) => matchesQuestionPlan(planId, item.data))
+        .map((item) => toQuestionSessionInput(item.data))
+        .filter((item): item is QuestionSessionInput => item !== null)
+        .filter((item) => item.date >= allTimeQuestionFrom)
+        .sort(compareDateDesc);
+
+      const questions = allTimeQuestions.filter(
+        (item) => item.date >= params.window.questionSessionsFrom
+      );
+
+      contexts.push({
+        plan: planInput,
+        sessions,
+        questions,
+        allTimeSessions,
+        allTimeQuestions,
+        today: params.today,
+      });
+    }
+
+    return { found: true, contexts };
   }
 }

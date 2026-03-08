@@ -16,16 +16,31 @@ export interface LoadPlanEngineContextParams {
 
 export type LoadPlanEngineContextResult =
   | {
-      found: true;
-      context: PlanEngineContext;
-    }
+    found: true;
+    context: PlanEngineContext;
+  }
   | {
-      found: false;
-      reason: 'no_active_plan' | 'plan_not_found';
-    };
+    found: false;
+    reason: 'no_active_plan' | 'plan_not_found';
+  };
+
+export interface LoadAllPlanEngineContextsParams {
+  userId: string;
+  today: string;
+  window: EngineQueryWindow;
+}
+
+export interface LoadAllPlanEngineContextsResult {
+  found: boolean;
+  contexts: PlanEngineContext[];
+}
 
 export interface EngineDataSource {
   loadPlanEngineContext(
     params: LoadPlanEngineContextParams
   ): Promise<LoadPlanEngineContextResult>;
+
+  loadAllPlanEngineContexts(
+    params: LoadAllPlanEngineContextsParams
+  ): Promise<LoadAllPlanEngineContextsResult>;
 }

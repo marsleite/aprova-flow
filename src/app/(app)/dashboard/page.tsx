@@ -27,6 +27,7 @@ import ActivityHeatmap from '@/components/ActivityHeatmap';
 import SmartScheduleCard from '@/components/SmartScheduleCard';
 import InsightsPanel from '@/components/InsightsPanel';
 import PlanSelector from '@/components/PlanSelector';
+import PortfolioOverviewCard from '@/components/engine/PortfolioOverviewCard';
 import {
   TrendingUp,
   Zap,
@@ -145,8 +146,13 @@ export default function DashboardPage() {
       </div>
 
       <div className="px-8 space-y-6">
+        {/* Visão de Portfólio Multi-Edital */}
+        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+          <PortfolioOverviewCard />
+        </motion.div>
+
         {/* 2. KPIs principais */}
-        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <KPICard
             title="Focus Score"
             value={avgAccuracy !== null ? `${avgAccuracy}%` : '—'}
@@ -169,7 +175,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* 3. Gráfico de Tendência (Study Pulse) & 4. Radar por Matéria */}
-        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3">
             <ChartCard title="Study Pulse" subtitle="Evolução de horas líquidas na semana atual" loading={loading} height={320}>
               <ResponsiveContainer width="100%" height="100%">
@@ -200,14 +206,14 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* 5. Heatmap de consistência */}
-        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
+        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show">
           <ChartCard title="Consistência Anual" subtitle="Mapa de calor de horas diárias">
             <ActivityHeatmap userId={user.uid} planId={activePlanId ?? undefined} refreshKey={summary.totalToday} />
           </ChartCard>
         </motion.div>
 
         {/* 6. Ação Recomendada & Insights (AI Block) */}
-        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show">
+        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
           <h3 className="font-brand text-am-h5 font-bold tracking-tight text-am-text-primary mb-4 flex items-center gap-2">
             <Zap className="h-5 w-5 text-am-ai-default" /> Inteligência & Estratégia
           </h3>
