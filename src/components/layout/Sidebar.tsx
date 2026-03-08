@@ -25,6 +25,7 @@ import {
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AccountPlanModal from '@/components/AccountPlanModal';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const NAV_ITEMS = [
   {
@@ -280,14 +281,17 @@ export default function Sidebar({
             </span>
           </button>
 
-          {/* Settings */}
-          <Link
-            href="/settings"
-            className="flex items-center gap-3 rounded-full px-3 py-2 text-sm text-am-text-secondary hover:bg-am-surface-subtle hover:text-slate-200 transition-colors"
-          >
-            <Settings className="h-4 w-4 flex-shrink-0 text-am-text-secondary" />
-            <span>Configurações</span>
-          </Link>
+          {/* Settings & Theme */}
+          <div className="flex items-center gap-1">
+            <Link
+              href="/settings"
+              className="flex-1 flex items-center gap-3 rounded-full px-3 py-2 text-sm text-am-text-secondary hover:bg-am-surface-subtle hover:text-slate-200 transition-colors"
+            >
+              <Settings className="h-4 w-4 flex-shrink-0 text-am-text-secondary" />
+              <span>Configurações</span>
+            </Link>
+            <ThemeToggle />
+          </div>
 
           {/* User + logout */}
           {user && (

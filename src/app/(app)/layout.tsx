@@ -13,6 +13,7 @@ import {
 import { StudyPlanEdital } from '@/types';
 import { Zap } from 'lucide-react';
 import { PlanContext } from '@/contexts/PlanContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -95,16 +96,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Main area */}
         <div className="flex-1 w-full min-h-screen flex flex-col lg:pl-64">
           {/* Mobile top bar */}
-          <div className="flex items-center gap-3 border-b border-am-border-default bg-am-surface/80 px-4 py-3 backdrop-blur-xl lg:hidden">
-            <MobileMenuButton onClick={() => setMobileOpen(true)} />
-            <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
-                <Zap className="h-3.5 w-3.5 text-white" />
+          <div className="flex items-center justify-between border-b border-am-border-default bg-am-surface/80 px-4 py-3 backdrop-blur-xl lg:hidden">
+            <div className="flex items-center gap-3">
+              <MobileMenuButton onClick={() => setMobileOpen(true)} />
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
+                  <Zap className="h-3.5 w-3.5 text-white" />
+                </div>
+                <span className="font-brand text-sm font-bold text-am-text-primary">
+                  Aprova<span className="text-am-brand-primary">Mind</span>
+                </span>
               </div>
-              <span className="font-brand text-sm font-bold text-am-text-primary">
-                Aprova<span className="text-am-brand-primary">Mind</span>
-              </span>
             </div>
+            <ThemeToggle />
           </div>
 
           {/* Page content */}

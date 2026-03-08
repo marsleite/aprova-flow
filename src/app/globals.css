@@ -42,7 +42,6 @@
   --radius-am-xl: var(--am-radius-xl);
   --radius-am-pill: var(--am-radius-pill);
 
-  --font-inter: var(--font-inter);
   --font-manrope: var(--font-manrope);
 
   --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
@@ -55,7 +54,7 @@
 }
 
 html {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-manrope), sans-serif;
   scroll-behavior: smooth;
   /* Dark mode is handled via class 'dark' applied on <html> */
 }
@@ -69,7 +68,7 @@ body {
 }
 
 .font-brand {
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: var(--font-manrope), sans-serif;
   letter-spacing: -0.03em;
 }
 
