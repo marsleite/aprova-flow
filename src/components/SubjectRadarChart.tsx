@@ -82,8 +82,8 @@ function CustomTick(props: Record<string, unknown>) {
       x={x}
       y={y}
       textAnchor={textAnchor as 'start' | 'middle' | 'end'}
-      fill="#475569"
-      fontSize={10}
+      fill="var(--color-am-text-secondary)"
+      fontSize={11}
       dy={4}
     >
       {payload.value}
@@ -100,7 +100,7 @@ function CustomTooltip({ active, payload }: {
   return (
     <div className="rounded-lg border border-am-border-strong bg-am-surface-elevated px-3 py-2 shadow-xl backdrop-blur-sm">
       <p className="text-sm font-medium text-am-text-primary">{subject}</p>
-      <p className="text-sm text-[#F59768]">{formatHours(hours)}</p>
+      <p className="text-sm text-am-brand-primary">{formatHours(hours)}</p>
     </div>
   );
 }
@@ -159,9 +159,9 @@ function FewSubjectsView({ data }: { data: SubjectHours[] }) {
             <motion.div key={item.subject} variants={barItem}>
               <div className="mb-1.5 flex items-center justify-between">
                 <span className="text-sm font-medium text-am-text-primary">{item.subject}</span>
-                <span className="text-sm font-semibold text-gray-300">{formatHours(item.hours)}</span>
+                <span className="text-sm font-semibold text-am-text-tertiary">{formatHours(item.hours)}</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-am-surface-subtle">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-am-border-default">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${pct}%` }}
@@ -202,28 +202,28 @@ function FullRadarChart({ data }: { data: SubjectHours[] }) {
   }));
 
   return (
-    <div className="flex-1 min-h-[160px]">
+    <div className="flex-1 min-h-[160px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <RadarChart cx="50%" cy="52%" outerRadius="72%" data={chartData}>
-          <PolarGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
+          <PolarGrid stroke="var(--color-am-border-default)" strokeDasharray="3 3" />
           <PolarAngleAxis
             dataKey="abbr"
             tick={(props: Record<string, unknown>) => <CustomTick {...props} />}
           />
           <PolarRadiusAxis
-            tick={{ fill: '#334155', fontSize: 9 }}
+            tick={{ fill: 'var(--color-am-text-tertiary)', fontSize: 10 }}
             tickFormatter={(value: number) => `${value}h`}
             axisLine={false}
           />
           <Radar
             name="Horas"
             dataKey="hours"
-            stroke="#3b82f6"
-            fill="#3b82f6"
+            stroke="var(--color-am-brand-primary)"
+            fill="var(--color-am-brand-primary)"
             fillOpacity={0.15}
             strokeWidth={2}
-            dot={{ r: 3.5, fill: '#3b82f6', stroke: '#60a5fa', strokeWidth: 1 }}
-            activeDot={{ r: 5, fill: '#60a5fa', stroke: '#93c5fd', strokeWidth: 2 }}
+            dot={{ r: 3.5, fill: 'var(--color-am-brand-primary)', stroke: 'var(--color-am-bg-surface)', strokeWidth: 1 }}
+            activeDot={{ r: 5, fill: 'var(--color-am-bg-surface)', stroke: 'var(--color-am-brand-primary)', strokeWidth: 2 }}
           />
           <Tooltip content={<CustomTooltip />} />
         </RadarChart>
@@ -240,26 +240,7 @@ export default function SubjectRadarChart({ data, loading }: SubjectRadarChartPr
   const hasEnoughForRadar = data.length >= 2;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="flex h-full flex-col rounded-2xl border border-am-border-default bg-am-surface-elevated p-5"
-      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
-    >
-      {/* Header */}
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
-          <RadarIcon className="h-4 w-4 text-indigo-400" />
-        </div>
-        <div>
-          <h2 className="text-sm font-semibold text-am-text-primary">
-            {hasEnoughForRadar ? 'Radar por Matéria' : 'Progresso por Matéria'}
-          </h2>
-          <p className="text-xs text-am-text-secondary">Distribuição de horas no mês</p>
-        </div>
-      </div>
-
+    <div className="flex h-full w-full flex-col min-h-0">
       {/* Conteúdo */}
       {loading ? (
         <ChartSkeleton />
@@ -275,7 +256,7 @@ export default function SubjectRadarChart({ data, loading }: SubjectRadarChartPr
       {!loading && data.length > 0 && (
         <div className="mt-2 flex items-center justify-center gap-4 border-t border-am-border-default pt-3">
           <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-blue-500" />
+            <span className="h-2 w-2 rounded-full bg-am-brand-primary" />
             <span className="text-xs text-am-text-secondary">
               {data.length} {data.length === 1 ? 'matéria' : 'matérias'}
             </span>
@@ -286,6 +267,6 @@ export default function SubjectRadarChart({ data, loading }: SubjectRadarChartPr
           </span>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

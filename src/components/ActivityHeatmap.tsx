@@ -26,11 +26,11 @@ const DISPLAY_WEEKS = 25;
 const DAY_LABELS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
 const LEVEL_INLINE: Record<number, string> = {
-  0: 'var(--color-am-surface)',
-  1: 'rgba(var(--color-am-brand-primary-rgb), 0.2)',
-  2: 'rgba(var(--color-am-brand-primary-rgb), 0.4)',
-  3: 'rgba(var(--color-am-brand-primary-rgb), 0.7)',
-  4: 'rgba(var(--color-am-brand-primary-rgb), 1)',
+  0: 'var(--color-am-surface-subtle)',
+  1: '#8CB4FF', // aprovaBlue 300
+  2: '#5E93FF', // aprovaBlue 400
+  3: '#3D74F6', // aprovaBlue 500
+  4: '#2E5ED9', // aprovaBlue 600
 };
 
 interface DayCell {
@@ -155,9 +155,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
 
   if (loading) {
     return (
-      <div className="flex h-full flex-col rounded-2xl border border-am-border-default bg-am-surface-elevated p-5"
-        style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
-      >
+      <div className="flex h-full w-full flex-col min-h-0">
         <div className="mb-3 h-5 w-28 rounded-lg shimmer" />
         <div className="flex-1 rounded-xl shimmer" />
         <div className="mt-3 h-3 w-32 rounded shimmer" />
@@ -166,13 +164,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="flex h-full flex-col rounded-2xl border border-am-border-default bg-am-surface-elevated p-5"
-      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
-    >
+    <div className="flex h-full w-full flex-col min-h-0">
       {/* Header */}
       <div className="mb-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
@@ -312,6 +304,6 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

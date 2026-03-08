@@ -130,14 +130,14 @@ export default function SmartScheduleCard({
             </div>
 
             {!hasContext && (
-                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 flex items-center gap-2">
+                <div className="rounded-xl border border-am-warning/30 bg-am-warning/10 px-4 py-3 text-sm text-am-warning flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 flex-shrink-0" />
                     <p>Defina as matérias e seus pesos no 'Edital' para a IA poder calcular sua rota ideal.</p>
                 </div>
             )}
 
             {error && (
-                <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                <div className="mb-4 flex items-center gap-2 rounded-xl border border-am-error/30 bg-am-error/10 px-4 py-3 text-sm text-am-error">
                     <AlertTriangle className="h-5 w-5" />
                     {error}
                 </div>
@@ -148,21 +148,21 @@ export default function SmartScheduleCard({
                     {schedule.map((dayItem, idx) => {
                         const isExpanded = expandedDay === dayItem.day;
                         return (
-                            <div key={idx} className="rounded-xl border border-am-border-default bg-gray-900/60 overflow-hidden transition-all hover:border-am-border-default">
+                            <div key={idx} className="rounded-xl border border-am-border-default bg-am-surface-subtle overflow-hidden transition-all hover:border-am-border-strong">
                                 <button
                                     onClick={() => setExpandedDay(isExpanded ? null : dayItem.day)}
                                     className="w-full flex items-center justify-between p-4 text-left focus:outline-none"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg ${isExpanded ? 'bg-indigo-500/20 text-indigo-300' : 'bg-am-surface-subtle text-gray-400'}`}>
+                                        <div className={`p-2 rounded-lg ${isExpanded ? 'bg-am-brand-primary/10 text-am-brand-primary' : 'bg-am-surface-deep text-am-text-tertiary'}`}>
                                             <CalendarDays className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-100">{dayItem.day}</p>
-                                            <p className="text-xs text-indigo-300 font-medium">{dayItem.totalHours} horas sugeridas</p>
+                                            <p className="font-semibold text-am-text-primary">{dayItem.day}</p>
+                                            <p className="text-xs text-am-brand-primary font-medium">{dayItem.totalHours} horas sugeridas</p>
                                         </div>
                                     </div>
-                                    {isExpanded ? <ChevronUp className="text-gray-400 h-5 w-5" /> : <ChevronDown className="text-gray-400 h-5 w-5" />}
+                                    {isExpanded ? <ChevronUp className="text-am-text-tertiary h-5 w-5" /> : <ChevronDown className="text-am-text-tertiary h-5 w-5" />}
                                 </button>
 
                                 <AnimatePresence>
@@ -176,18 +176,18 @@ export default function SmartScheduleCard({
                                         >
                                             <div className="space-y-3">
                                                 {dayItem.subjects.map((sub, sIdx) => (
-                                                    <div key={sIdx} className="bg-am-surface-subtle rounded-lg p-3 border border-am-border-default">
+                                                    <div key={sIdx} className="bg-am-surface rounded-lg p-3 border border-am-border-default">
                                                         <div className="flex justify-between items-center mb-1.5">
-                                                            <span className="text-sm font-medium text-gray-200 flex items-center gap-2">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                                            <span className="text-sm font-medium text-am-text-primary flex items-center gap-2">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-am-brand-primary"></span>
                                                                 {sub.name}
                                                             </span>
-                                                            <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 font-mono border border-indigo-500/20">
+                                                            <span className="text-xs px-2 py-0.5 rounded-md bg-am-brand-primary/10 text-am-brand-primary font-mono border border-am-brand-primary/20">
                                                                 {sub.hours}h
                                                             </span>
                                                         </div>
-                                                        <p className="text-xs text-gray-400 ml-3.5 leading-relaxed">
-                                                            <strong className="text-gray-300/80 font-medium">Motivo:</strong> {sub.reason}
+                                                        <p className="text-xs text-am-text-secondary ml-3.5 leading-relaxed">
+                                                            <strong className="text-am-text-primary font-medium">Motivo:</strong> {sub.reason}
                                                         </p>
                                                     </div>
                                                 ))}

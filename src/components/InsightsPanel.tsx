@@ -52,10 +52,10 @@ function InsightItem({ insight }: { insight: StudyInsight }) {
   return (
     <motion.div
       variants={item}
-      className="flex gap-3 rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-3 transition-colors hover:bg-am-surface-subtle"
+      className="flex gap-3 rounded-lg border border-am-border-default bg-am-surface px-3 py-3 transition-colors hover:bg-am-surface-subtle"
     >
-      <div className="mt-0.5 shrink-0">
-        <Icon className={`h-5 w-5 ${insight.color}`} />
+      <div className="mt-0.5 shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-am-brand-primary/10">
+        <Icon className={`h-4 w-4 text-am-brand-primary`} />
       </div>
       <div className="min-w-0">
         <p className="text-sm font-medium text-am-text-primary">{insight.title}</p>
@@ -103,8 +103,8 @@ export default function InsightsPanel({ insights, loading }: InsightsPanelProps)
     >
       {/* Header */}
       <div className="mb-6 flex items-start gap-3">
-        <div className="rounded-am-md border border-am-border-default bg-am-surface-deep p-2">
-          <Sparkles className="h-4 w-4 text-am-text-tertiary" />
+        <div className="rounded-am-md border border-am-border-default bg-am-brand-primary/10 p-2">
+          <Sparkles className="h-4 w-4 text-am-brand-primary" />
         </div>
         <div>
           <h3 className="font-brand text-am-body-lg font-bold text-am-text-primary tracking-tight">Insights Estratégicos</h3>
