@@ -43,7 +43,7 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
             <div className="mb-6 flex items-start justify-between gap-3">
                 <div>
                     <div className="mb-2 flex items-center gap-2">
-                        <Badge variant="primary" className="bg-am-brand-primary/10 text-am-brand-primary border-am-brand-primary/20">
+                        <Badge variant="primary">
                             <Layers className="mr-1 h-3 w-3" />
                             Multi-Edital
                         </Badge>
@@ -86,8 +86,8 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
                         <div className="flex flex-col gap-2">
                             {portfolio.alerts.map((alert, idx) => (
                                 <div key={idx} className={`rounded-lg border px-4 py-3 text-sm flex gap-3 ${alert.severity === 'critical' ? 'bg-am-error/10 border-am-error/30 text-am-error' :
-                                        alert.severity === 'warning' ? 'bg-am-warning/10 border-am-warning/30 text-am-warning' :
-                                            'bg-am-info/10 border-am-info/30 text-am-info'
+                                    alert.severity === 'warning' ? 'bg-am-warning/10 border-am-warning/30 text-am-warning' :
+                                        'bg-am-info/10 border-am-info/30 text-am-info'
                                     }`}>
                                     <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
                                     <div>
@@ -105,7 +105,7 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
                     {/* Ranking Cards */}
                     <div className="space-y-3">
                         {portfolio.plans.map((plan, index) => (
-                            <div key={plan.planId} className="rounded-xl border border-am-border-default bg-am-surface-elevated p-4 overflow-hidden relative group hover:border-am-border-strong transition-colors">
+                            <Card key={plan.planId} variant="elevated" padding="none" className="p-4 overflow-hidden relative group transition-colors">
                                 {/* Progress Background */}
                                 <div
                                     className="absolute left-0 top-0 bottom-0 bg-am-brand-primary/5 transition-all duration-1000 ease-out"
@@ -116,7 +116,7 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-am-surface-deep text-am-text-secondary text-[10px] font-bold">
+                                                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-am-surface text-am-text-secondary text-[10px] font-bold ring-1 ring-white/5">
                                                     #{index + 1}
                                                 </span>
                                                 <h4 className="font-semibold text-am-text-primary truncate">{plan.planName}</h4>
@@ -156,7 +156,7 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Card>
                         ))}
                     </div>
 

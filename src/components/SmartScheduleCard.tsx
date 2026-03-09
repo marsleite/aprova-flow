@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Sparkles, Loader2, RefreshCw, AlertTriangle, CalendarDays, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from '@/components';
 import { StudyConsistency, SubjectWeight, SubjectAccuracy } from '@/types';
 import { auth } from '@/lib/firebase/config';
 
@@ -99,13 +100,13 @@ export default function SmartScheduleCard({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="rounded-am-xl border border-am-border-default border-t border-t-am-ai-default/30 bg-am-surface p-8 shadow-am-md relative overflow-hidden h-full flex flex-col"
+            className="rounded-am-xl border border-am-border-default/50 border-t-2 border-t-am-ai-border/40 bg-am-surface/40 backdrop-blur-2xl p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ring-1 ring-white/5 relative overflow-hidden h-full flex flex-col"
         >
 
             <div className="relative mb-8 flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <div className="rounded-am-md border border-am-border-default bg-am-surface-deep p-2">
-                        <CalendarDays className="h-4 w-4 text-am-text-tertiary" />
+                    <div className="rounded-am-md border border-am-border-default/50 bg-am-surface p-2 ring-1 ring-white/5 shadow-sm">
+                        <CalendarDays className="h-4 w-4 text-am-text-primary" />
                     </div>
                     <div>
                         <h2 className="font-brand text-am-body-lg font-bold text-am-text-primary tracking-tight">Cronograma de Foco</h2>
@@ -113,10 +114,11 @@ export default function SmartScheduleCard({
                     </div>
                 </div>
 
-                <button
+                <Button
                     onClick={generateSchedule}
                     disabled={loading || !hasContext}
-                    className="inline-flex items-center gap-2 rounded-am-md border border-am-border-default bg-am-surface-elevated px-4 py-2 text-am-caption font-medium text-am-text-primary shadow-am-sm transition-colors hover:bg-am-surface-subtle hover:border-am-border-strong disabled:cursor-not-allowed disabled:opacity-50"
+                    variant="outline"
+                    size="sm"
                 >
                     {loading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -126,7 +128,7 @@ export default function SmartScheduleCard({
                         <Sparkles className="h-4 w-4 text-am-ai-default" />
                     )}
                     {schedule ? 'Recalcular' : 'Gerar'}
-                </button>
+                </Button>
             </div>
 
             {!hasContext && (
@@ -148,18 +150,18 @@ export default function SmartScheduleCard({
                     {schedule.map((dayItem, idx) => {
                         const isExpanded = expandedDay === dayItem.day;
                         return (
-                            <div key={idx} className="rounded-xl border border-am-border-default bg-am-surface-subtle overflow-hidden transition-all hover:border-am-border-strong">
+                            <div key={idx} className="rounded-am-lg border border-am-border-default/50 bg-am-surface-subtle overflow-hidden transition-all hover:border-am-border-strong ring-1 ring-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
                                 <button
                                     onClick={() => setExpandedDay(isExpanded ? null : dayItem.day)}
                                     className="w-full flex items-center justify-between p-4 text-left focus:outline-none"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg ${isExpanded ? 'bg-am-brand-primary/10 text-am-brand-primary' : 'bg-am-surface-deep text-am-text-tertiary'}`}>
+                                        <div className={`p-2 rounded-am-md ring-1 ring-white/5 ${isExpanded ? 'bg-am-ai-subtle/40 text-am-ai-default' : 'bg-am-canvas text-am-text-tertiary'}`}>
                                             <CalendarDays className="h-5 w-5" />
                                         </div>
                                         <div>
                                             <p className="font-semibold text-am-text-primary">{dayItem.day}</p>
-                                            <p className="text-xs text-am-brand-primary font-medium">{dayItem.totalHours} horas sugeridas</p>
+                                            <p className="text-xs text-am-ai-default font-medium">{dayItem.totalHours} horas sugeridas</p>
                                         </div>
                                     </div>
                                     {isExpanded ? <ChevronUp className="text-am-text-tertiary h-5 w-5" /> : <ChevronDown className="text-am-text-tertiary h-5 w-5" />}
@@ -176,13 +178,13 @@ export default function SmartScheduleCard({
                                         >
                                             <div className="space-y-3">
                                                 {dayItem.subjects.map((sub, sIdx) => (
-                                                    <div key={sIdx} className="bg-am-surface rounded-lg p-3 border border-am-border-default">
+                                                    <div key={sIdx} className="bg-am-surface rounded-am-md p-3 border border-am-border-default/50 shadow-sm ring-1 ring-white/5">
                                                         <div className="flex justify-between items-center mb-1.5">
-                                                            <span className="text-sm font-medium text-am-text-primary flex items-center gap-2">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-am-brand-primary"></span>
+                                                            <span className="text-sm font-semibold text-am-text-primary flex items-center gap-2">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-am-ai-default"></span>
                                                                 {sub.name}
                                                             </span>
-                                                            <span className="text-xs px-2 py-0.5 rounded-md bg-am-brand-primary/10 text-am-brand-primary font-mono border border-am-brand-primary/20">
+                                                            <span className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-am-md bg-am-ai-subtle/50 text-am-ai-default font-mono border border-am-ai-border/30">
                                                                 {sub.hours}h
                                                             </span>
                                                         </div>

@@ -13,13 +13,13 @@ interface PlanEngineSnapshotCardProps {
 
 type EngineSnapshotApiResponse =
   | {
-      found: true;
-      snapshot: PlanEngineSnapshotV1;
-    }
+    found: true;
+    snapshot: PlanEngineSnapshotV1;
+  }
   | {
-      found: false;
-      reason: 'no_active_plan' | 'plan_not_found';
-    };
+    found: false;
+    reason: 'no_active_plan' | 'plan_not_found';
+  };
 
 function formatStatusLabel(status: string): string {
   const labels: Record<string, string> = {
@@ -200,7 +200,7 @@ export default function PlanEngineSnapshotCard({
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <div className="mb-2 flex items-center gap-2">
-            <Badge variant="primary">
+            <Badge variant="ai">
               <Brain className="mr-1 h-3 w-3" />
               Motor V1
             </Badge>
@@ -283,9 +283,9 @@ export default function PlanEngineSnapshotCard({
             </div>
 
             {topRecommendation ? (
-              <div className="rounded-am-md border border-am-brand-primary/20 bg-am-brand-primary/5 p-3">
+              <div className="rounded-am-md border border-am-ai-border/40 bg-am-ai-subtle/50 p-3">
                 <div className="mb-2 flex items-center gap-2">
-                  <Badge variant="primary">Prioridade do dia</Badge>
+                  <Badge variant="ai">Prioridade do dia</Badge>
                   <Badge variant="outline">
                     {formatRecommendationLabel(topRecommendation.type)}
                   </Badge>
@@ -308,9 +308,10 @@ export default function PlanEngineSnapshotCard({
 
           <div className="space-y-3">
             {snapshot.subjects.slice(0, 4).map((subject) => (
-              <div
+              <Card
                 key={subject.subject}
-                className="rounded-am-md border border-am-border-default bg-am-surface-elevated p-4"
+                variant="elevated" padding="none"
+                className="p-4"
               >
                 <div className="mb-2 flex items-start justify-between gap-3">
                   <div>
@@ -327,12 +328,12 @@ export default function PlanEngineSnapshotCard({
                     </div>
                   </div>
 
-                    <div className="text-right">
-                      <p className="text-am-caption uppercase tracking-wider text-am-text-tertiary">
-                        Pontuação
-                      </p>
-                      <p className="text-xl font-light tracking-tight text-am-text-primary">
-                        {subject.priorityScore}
+                  <div className="text-right">
+                    <p className="text-am-caption uppercase tracking-wider text-am-text-tertiary">
+                      Pontuação
+                    </p>
+                    <p className="text-xl font-light tracking-tight text-am-text-primary">
+                      {subject.priorityScore}
                     </p>
                   </div>
                 </div>
@@ -357,7 +358,7 @@ export default function PlanEngineSnapshotCard({
                     </p>
                   </div>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
 
