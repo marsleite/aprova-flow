@@ -174,7 +174,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <CalendarIcon className="h-5 w-5 text-[#F59768]" />
-          <h3 className="text-lg font-semibold text-white">
+          <h3 className="text-lg font-semibold text-am-text-primary">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h3>
         </div>
@@ -257,7 +257,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
                       className={`
                         text-xs px-1 py-0.5 rounded truncate
                         ${getEventColor(event)} ${getEventStatusColor(event)}
-                        text-white
+                        text-am-text-primary
                       `}
                       onClick={(e) => {
                         e.stopPropagation();

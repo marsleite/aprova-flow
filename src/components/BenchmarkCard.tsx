@@ -65,7 +65,7 @@ export default function BenchmarkCard({ weeklyGoalHours, weeklyHours, userId, lo
 
   if (cardLoading || loading) {
     return (
-      <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
+      <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
         <div className="mb-4 h-5 w-32 rounded shimmer" />
         <div className="space-y-3">
           <div className="h-3 w-full rounded shimmer" />
@@ -78,14 +78,14 @@ export default function BenchmarkCard({ weeklyGoalHours, weeklyHours, userId, lo
 
   if (!weeklyGoalHours || weeklyHours === 0) {
     return (
-      <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
+      <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3150AA]/10">
             <BarChart3 className="h-4 w-4 text-[#F59768]" />
           </div>
-          <h3 className="text-sm font-semibold text-white">Benchmark Anônimo</h3>
+          <h3 className="text-sm font-semibold text-am-text-primary">Benchmark Anônimo</h3>
         </div>
-        <p className="text-sm text-[#666]">Comece a estudar para comparar seu progresso com outros concurseiros.</p>
+        <p className="text-sm text-am-text-secondary">Comece a estudar para comparar seu progresso com outros concurseiros.</p>
       </div>
     );
   }
@@ -113,14 +113,14 @@ export default function BenchmarkCard({ weeklyGoalHours, weeklyHours, userId, lo
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
+      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
     >
       <div className="flex items-center gap-3 mb-5">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3150AA]/10">
           <BarChart3 className="h-4 w-4 text-[#F59768]" />
         </div>
-        <h3 className="text-sm font-semibold text-white">Benchmark Anônimo</h3>
-        <span className="text-xs text-[#666] ml-auto">
+        <h3 className="text-sm font-semibold text-am-text-primary">Benchmark Anônimo</h3>
+        <span className="text-xs text-am-text-secondary ml-auto">
           {totalUsers} concurseiros
         </span>
       </div>
@@ -128,12 +128,12 @@ export default function BenchmarkCard({ weeklyGoalHours, weeklyHours, userId, lo
       {/* Percentil do usuário */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-[#666]">Sua posição</span>
+          <span className="text-sm text-am-text-secondary">Sua posição</span>
           <span className={`text-2xl font-bold ${getPercentileColor(percentile)}`}>
             {percentile}º
           </span>
         </div>
-        <div className="w-full bg-white/[0.05] rounded-full h-2">
+        <div className="w-full bg-am-surface-subtle rounded-full h-2">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${percentile}%` }}
@@ -146,7 +146,7 @@ export default function BenchmarkCard({ weeklyGoalHours, weeklyHours, userId, lo
             }`}
           />
         </div>
-        <p className="text-xs text-[#666] mt-2">
+        <p className="text-xs text-am-text-secondary mt-2">
           {getPercentileMessage(percentile)}
         </p>
       </div>
@@ -154,26 +154,26 @@ export default function BenchmarkCard({ weeklyGoalHours, weeklyHours, userId, lo
       {/* Comparação com percentis */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-[#666]">Top 10%</span>
+          <span className="text-sm text-am-text-secondary">Top 10%</span>
           <span className="text-sm text-green-400">
             {benchmarkData?.percentiles.p90 || 0}h
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-[#666]">Top 25%</span>
+          <span className="text-sm text-am-text-secondary">Top 25%</span>
           <span className="text-sm text-[#F59768]">
             {benchmarkData?.percentiles.p75 || 0}h
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-[#666]">Mediana (50%)</span>
+          <span className="text-sm text-am-text-secondary">Mediana (50%)</span>
           <span className="text-sm text-yellow-400">
             {benchmarkData?.percentiles.p50 || 0}h
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-[#666]">Você</span>
-          <span className="text-sm text-white font-medium">
+          <span className="text-sm text-am-text-secondary">Você</span>
+          <span className="text-sm text-am-text-primary font-medium">
             {weeklyHours.toFixed(1)}h
           </span>
         </div>
@@ -194,7 +194,7 @@ export default function BenchmarkCard({ weeklyGoalHours, weeklyHours, userId, lo
         </motion.div>
       )}
 
-      <p className="text-xs text-slate-700 mt-4">
+      <p className="text-xs text-am-text-tertiary mt-4">
         Dados 100% anônimos • Comparado com usuários de meta similar
       </p>
     </motion.div>

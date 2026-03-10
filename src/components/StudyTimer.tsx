@@ -265,9 +265,9 @@ function SubjectDropdown({
           });
         }}
         disabled={disabled}
-        className="flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-left text-white outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-between rounded-xl border border-am-border-strong bg-am-surface-subtle px-4 py-2.5 text-left text-am-text-primary outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <span className={value ? 'text-white' : 'text-gray-400'}>
+        <span className={value ? 'text-am-text-primary' : 'text-gray-400'}>
           {value || 'Selecione uma matéria...'}
         </span>
         <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -280,9 +280,9 @@ function SubjectDropdown({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0E111B] shadow-xl"
+            className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border border-am-border-strong bg-am-surface-elevated shadow-xl"
           >
-            <div className="border-b border-white/5 p-2">
+            <div className="border-b border-am-border-default p-2">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
                 <input
@@ -292,7 +292,7 @@ function SubjectDropdown({
                   onChange={(event) => setQuery(event.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Buscar ou digitar matéria..."
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] py-2 pl-9 pr-3 text-sm text-slate-200 outline-none transition-all placeholder:text-[#666] focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-am-border-strong bg-am-surface-subtle py-2 pl-9 pr-3 text-sm text-slate-200 outline-none transition-all placeholder:text-am-text-secondary focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
                 />
               </div>
             </div>
@@ -302,7 +302,7 @@ function SubjectDropdown({
                 <button
                   type="button"
                   onClick={() => handleAdd(trimmed)}
-                  className="flex w-full items-center gap-2 border-b border-white/[0.05] px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
+                  className="flex w-full items-center gap-2 border-b border-am-border-default px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Adicionar &quot;{trimmed}&quot;</span>
@@ -312,7 +312,7 @@ function SubjectDropdown({
               <button
                 type="button"
                 onClick={() => handleSelect('')}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#666] transition hover:bg-white/[0.04] hover:text-white"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-am-text-secondary transition hover:bg-am-surface-subtle hover:text-am-text-primary"
               >
                 <span className="flex-1">Selecione uma matéria...</span>
               </button>
@@ -322,7 +322,7 @@ function SubjectDropdown({
                   key={item}
                   type="button"
                   onClick={() => handleSelect(item)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-300 transition hover:bg-white/[0.04] hover:text-white"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-am-text-secondary transition hover:bg-am-surface-subtle hover:text-am-text-primary"
                 >
                   <span className="flex-1">{item}</span>
                 </button>
@@ -524,7 +524,7 @@ export default function StudyTimer({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
+      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
     >
       {/* Header */}
       <div className="mb-5 flex items-center gap-3">
@@ -532,8 +532,8 @@ export default function StudyTimer({
           <Clock className="h-4 w-4 text-[#F59768]" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-white">Cronômetro de Estudo</h2>
-          <p className="text-xs text-[#666]">
+          <h2 className="text-sm font-semibold text-am-text-primary">Cronômetro de Estudo</h2>
+          <p className="text-xs text-am-text-secondary">
             {isPomodoro
               ? `Pomodoro ${pomodoroConfig?.label}`
               : 'Tempo corrido · Pausa manual'}
@@ -552,7 +552,7 @@ export default function StudyTimer({
 
       {/* Seletor de Modo */}
       <div className="mb-5">
-        <label className="mb-2 block text-xs font-medium text-[#666]">Modo</label>
+        <label className="mb-2 block text-xs font-medium text-am-text-secondary">Modo</label>
         <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
           {MODE_OPTIONS.map((opt) => (
             <button
@@ -561,8 +561,8 @@ export default function StudyTimer({
               disabled={!isIdle || !hasControl}
               className={`flex flex-col items-center gap-0.5 rounded-xl border px-2 py-2 text-center transition-all
                 ${mode === opt.value
-                  ? 'border-blue-500/40 bg-[#3150AA]/10 text-white'
-                  : 'border-white/[0.05] bg-white/[0.02] text-[#666] hover:border-white/10 hover:text-slate-300'
+                  ? 'border-blue-500/40 bg-[#3150AA]/10 text-am-text-primary'
+                  : 'border-am-border-default bg-am-surface-subtle text-am-text-secondary hover:border-am-border-default hover:text-am-text-secondary'
                 }
                 disabled:cursor-not-allowed disabled:opacity-40
               `}
@@ -578,7 +578,7 @@ export default function StudyTimer({
       {/* Seletor de Edital (só aparece se houver mais de 1 plano) */}
       {plans.length > 1 && (
         <div className="mb-4">
-          <label className="mb-2 flex items-center gap-2 text-xs font-medium text-[#666]">
+          <label className="mb-2 flex items-center gap-2 text-xs font-medium text-am-text-secondary">
             <BookOpen className="h-3.5 w-3.5" />
             Edital
           </label>
@@ -589,7 +589,7 @@ export default function StudyTimer({
               setSelectedSubject(''); // Reseta matéria ao trocar plano
             }}
             disabled={!isIdle || !hasControl}
-            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-white
+            className="w-full rounded-xl border border-am-border-strong bg-am-surface-subtle px-4 py-2.5 text-am-text-primary
                        outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
                        disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -604,7 +604,7 @@ export default function StudyTimer({
 
       {/* Seletor de Matéria */}
       <div className="mb-5">
-        <label className="mb-2 flex items-center gap-2 text-xs font-medium text-[#666]">
+        <label className="mb-2 flex items-center gap-2 text-xs font-medium text-am-text-secondary">
           <BookOpen className="h-3.5 w-3.5" />
           Matéria
         </label>
@@ -697,14 +697,14 @@ export default function StudyTimer({
                 ${isRunning && !isBreak ? 'text-[#F59768]' : ''}
                 ${isRunning && isBreak ? 'text-emerald-400' : ''}
                 ${isPaused ? 'text-amber-400' : ''}
-                ${isIdle ? 'text-[#666]' : ''}
+                ${isIdle ? 'text-am-text-secondary' : ''}
               `}
             >
               {formatTimerDisplay(displaySeconds)}
             </span>
             {/* Total de foco acumulado (em pomodoro, durante breaks) */}
             {isPomodoro && !isIdle && totalFocusSeconds > 0 && isBreak && (
-              <span className="mt-1 text-xs text-[#666]">
+              <span className="mt-1 text-xs text-am-text-secondary">
                 Foco total: {formatTimerDisplay(totalFocusSeconds)}
               </span>
             )}
@@ -777,7 +777,7 @@ export default function StudyTimer({
                     : 'Iniciar'
               }
             >
-              <Play className="h-6 w-6 text-white" />
+              <Play className="h-6 w-6 text-am-text-primary" />
             </motion.button>
           )}
 
@@ -797,7 +797,7 @@ export default function StudyTimer({
                          disabled:cursor-not-allowed disabled:opacity-40"
               title="Pausar"
             >
-              <Pause className="h-6 w-6 text-white" />
+              <Pause className="h-6 w-6 text-am-text-primary" />
             </motion.button>
           )}
         </AnimatePresence>
@@ -818,7 +818,7 @@ export default function StudyTimer({
                          shadow-lg transition-colors hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
               title="Pular pausa"
             >
-              <SkipForward className="h-5 w-5 text-white" />
+              <SkipForward className="h-5 w-5 text-am-text-primary" />
             </motion.button>
           )}
         </AnimatePresence>
@@ -840,7 +840,7 @@ export default function StudyTimer({
                          disabled:cursor-not-allowed disabled:opacity-50"
               title="Parar e salvar"
             >
-              <Square className="h-5 w-5 text-white" />
+              <Square className="h-5 w-5 text-am-text-primary" />
             </motion.button>
           )}
         </AnimatePresence>
@@ -848,13 +848,13 @@ export default function StudyTimer({
 
       {/* Dica */}
       {isIdle && !selectedSubject && (
-        <p className="mt-4 text-center text-xs text-[#666]">
+        <p className="mt-4 text-center text-xs text-am-text-secondary">
           Selecione uma matéria para começar a estudar
         </p>
       )}
 
       <p
-        className={`mt-3 text-center text-[11px] ${activeScreens > maxActiveScreens ? 'text-amber-300' : 'text-[#666]'
+        className={`mt-3 text-center text-[11px] ${activeScreens > maxActiveScreens ? 'text-amber-300' : 'text-am-text-secondary'
           }`}
       >
         Sincronizado em {activeScreens} tela{activeScreens === 1 ? '' : 's'}

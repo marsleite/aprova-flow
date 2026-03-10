@@ -170,7 +170,7 @@ export default function PostSessionToast({
             </div>
 
             {/* Info da sessão */}
-            <p className="text-sm text-white">
+            <p className="text-sm text-am-text-primary">
               <span className="font-semibold">{session.subject}</span>
               <span className="mx-1 text-gray-500">·</span>
               {formatDuration(session.duration)}

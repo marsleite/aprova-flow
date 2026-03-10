@@ -104,7 +104,7 @@ export default function GeminiCoachCard({
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
+      <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
         <div className="mb-3 h-4 w-32 rounded shimmer" />
         <div className="h-12 rounded shimmer" />
       </div>
@@ -127,7 +127,7 @@ export default function GeminiCoachCard({
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/15">
             <Brain className="h-3.5 w-3.5 text-violet-300" />
           </div>
-          <span className="text-sm font-semibold text-white">Coach IA</span>
+          <span className="text-sm font-semibold text-am-text-primary">Coach IA</span>
           <span className="rounded-md bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-300">
             Gemini
           </span>
@@ -136,13 +136,13 @@ export default function GeminiCoachCard({
         {/* Dica do dia */}
         <div className={`mb-4 flex items-start gap-2.5 rounded-xl border ${tip.color} px-3.5 py-3`}>
           <div className="mt-0.5 shrink-0">{tip.icon}</div>
-          <p className="text-sm leading-relaxed text-slate-300">{tip.text}</p>
+          <p className="text-sm leading-relaxed text-am-text-secondary">{tip.text}</p>
         </div>
 
         {/* Botão conversar */}
         <button
           onClick={onOpenChat}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-[#3150AA]/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-4 py-2.5 text-sm font-medium text-am-text-primary shadow-lg shadow-[#3150AA]/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110"
         >
           <MessageCircle className="h-4 w-4" />
           Conversar com o Coach

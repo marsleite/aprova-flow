@@ -56,7 +56,7 @@ export default function DailySummaryCard({
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
+      <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
         <div className="mb-3 h-4 w-36 rounded shimmer" />
         <div className="h-7 w-24 rounded shimmer" />
       </div>
@@ -70,15 +70,15 @@ export default function DailySummaryCard({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
+        className="relative overflow-hidden rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.04]">
-            <Sun className="h-4 w-4 text-[#666]" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-am-surface-subtle">
+            <Sun className="h-4 w-4 text-am-text-secondary" />
           </div>
           <div>
-            <p className="text-sm font-medium text-[#666]">Resumo de Hoje</p>
-            <p className="text-xs text-slate-700">Nenhuma sessão registrada ainda. Bora estudar?</p>
+            <p className="text-sm font-medium text-am-text-secondary">Resumo de Hoje</p>
+            <p className="text-xs text-am-text-tertiary">Nenhuma sessão registrada ainda. Bora estudar?</p>
           </div>
         </div>
       </motion.div>
@@ -99,13 +99,13 @@ export default function DailySummaryCard({
         {/* Header */}
         <div className="mb-3 flex items-center gap-2">
           <Sun className="h-4 w-4 text-amber-400" />
-          <span className="text-sm font-medium text-slate-300">Resumo de Hoje</span>
+          <span className="text-sm font-medium text-am-text-secondary">Resumo de Hoje</span>
         </div>
 
         {/* Total */}
-        <p className="mb-4 text-2xl font-bold text-white sm:text-3xl">
+        <p className="mb-4 text-2xl font-bold text-am-text-primary sm:text-3xl">
           {formatDuration(totalTodaySeconds)}
-          <span className="mt-1 block text-sm font-normal text-[#666] sm:ml-2 sm:mt-0 sm:inline">
+          <span className="mt-1 block text-sm font-normal text-am-text-secondary sm:ml-2 sm:mt-0 sm:inline">
             em {analysis.sessionCount} {analysis.sessionCount === 1 ? 'sessão' : 'sessões'}
           </span>
         </p>

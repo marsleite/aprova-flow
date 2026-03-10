@@ -1,0 +1,65 @@
+/**
+ * Web foundation variables matching the rebranding guide.
+ */
+:root {
+    --am-brand-primary: #3D74F6;
+    --am-brand-primary-hover: #2E5ED9;
+    --am-brand-secondary: #8B5CF6;
+    --am-brand-secondary-hover: #7C3AED;
+    --am-brand-gradient-start: #3D74F6;
+    --am-brand-gradient-end: #8B5CF6;
+
+    /* Basic Surfaces (Light) */
+    --am-bg-canvas: #F8FAFC;
+    --am-bg-surface: #FFFFFF;
+    --am-bg-surface-subtle: #F1F5F9;
+    --am-bg-elevated: #FFFFFF;
+    --am-border-default: #E2E8F0;
+    --am-border-strong: #CBD5E1;
+
+    /* Basic Text (Light) */
+    --am-text-primary: #0F172A;
+    --am-text-secondary: #475569;
+    --am-text-tertiary: #64748B;
+    --am-text-inverse: #F8FAFC;
+
+    /* Semantic */
+    --am-success: #16A34A;
+    --am-warning: #D97706;
+    --am-error: #DC2626;
+    --am-info: #2563EB;
+
+    /* AI */
+    --am-ai-default: #8B5CF6;
+    --am-ai-subtle: #F5F3FF;
+    --am-ai-border: #DDD6FE;
+
+    /* Radii */
+    --am-radius-sm: 8px;
+    --am-radius-md: 12px;
+    --am-radius-lg: 16px;
+    --am-radius-xl: 20px;
+    --am-radius-pill: 9999px;
+}
+
+.dark {
+    /* Surfaces (Dark) - OLED Black & Ultra-Deep Grays */
+    --am-bg-canvas: #000000;
+    --am-bg-surface: #0A0A0A;
+    --am-bg-surface-subtle: #111111;
+    --am-bg-elevated: #161616;
+
+    /* Subtle almost invisible borders */
+    --am-border-default: rgba(255, 255, 255, 0.06);
+    --am-border-strong: rgba(255, 255, 255, 0.12);
+
+    /* Text (Dark) - Softer Whites and Zincs */
+    --am-text-primary: #EDEDED;
+    --am-text-secondary: #A1A1AA;
+    --am-text-tertiary: #71717A;
+    --am-text-inverse: #000000;
+
+    /* AI (Dark) - No heavy purple backgrounds */
+    --am-ai-subtle: transparent;
+    --am-ai-border: rgba(139, 92, 246, 0.30);
+}

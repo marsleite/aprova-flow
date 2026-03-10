@@ -1,16 +1,25 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { usePlanContext } from '@/contexts/PlanContext';
 import {
   setActivePlan,
   deleteStudyPlan,
 } from '@/lib/firebase/plans';
-import { getStudySummary, getPlanVsActual, getStudyConsistency } from '@/lib/firebase/sessions';
-import { StudyPlanEdital, PlanVsActual } from '@/types';
+import {
+  getStudySummary,
+  getPlanVsActual,
+  getStudyConsistency,
+  getFilteredSessions,
+  generateInsights
+} from '@/lib/firebase/sessions';
+import { getAccuracyAnalytics } from '@/lib/firebase/questions';
+import { getTodayISO, formatDuration } from '@/lib/utils';
+import { StudyPlanEdital, PlanVsActual, StudyInsight, StudySession, StudyConsistency, SubjectAccuracy } from '@/types';
 import PlanManager from '@/components/PlanManager';
+import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { canCreateMorePlans } from '@/lib/entitlements';
 import {
@@ -20,30 +29,21 @@ import {
   Clock,
   AlertTriangle,
   CheckCircle2,
-  ChevronRight,
   Edit2,
   Trash2,
   MoreVertical,
   BarChart2,
+  Zap,
+  Play,
+  Calendar,
+  Sparkles,
   BookOpen,
-  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
-import CalendarSyncSection from '@/components/CalendarSyncSection';
-import {
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.3, delay: i * 0.05, ease: 'easeOut' as const } }),
-};
+// RDS Components
+import { KPICard, ChartCard, Skeleton, Button, Badge } from '@/components';
+import { fadeUp } from '@/design-system/tokens';
 
 interface PlanStats {
   planId: string;
@@ -56,15 +56,16 @@ interface PlanStats {
 }
 
 const URGENCY_CONFIG = {
-  critical: { label: 'CRÍTICO', bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' },
-  medium: { label: 'MÉDIO', bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
-  low: { label: 'BAIXO', bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  critical: { label: 'CRÍTICO', bg: 'bg-am-error/10', text: 'text-am-error', border: 'border-am-error/20' },
+  medium: { label: 'MÉDIO', bg: 'bg-am-warning/10', text: 'text-am-warning', border: 'border-am-warning/20' },
+  low: { label: 'BAIXO', bg: 'bg-am-success/10', text: 'text-am-success', border: 'border-am-success/20' },
 };
 
 export default function PlannerPage() {
   const { user } = useAuthContext();
   const { planTier, capabilities } = useEntitlements(user?.uid, user?.email);
-  const { plans, activePlanId, onPlanChange } = usePlanContext();
+  const { plans, activePlanId, activePlan, onPlanChange } = usePlanContext();
+
   const [planStats, setPlanStats] = useState<PlanStats[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [planManagerOpen, setPlanManagerOpen] = useState(false);
@@ -72,11 +73,14 @@ export default function PlannerPage() {
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  const canCreate = canCreateMorePlans(planTier, plans.length);
-  const selectedPlan = plans.find((p) => p.id === selectedPlanId) || null;
-  const selectedStats = planStats.find((s) => s.planId === selectedPlanId) || null;
+  // Daily Data
+  const [todaySessions, setTodaySessions] = useState<StudySession[]>([]);
+  const [insights, setInsights] = useState<StudyInsight[]>([]);
+  const [consistency, setConsistency] = useState<StudyConsistency | null>(null);
+  const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
 
-  // When context plans change, auto-select active or first plan
+  const canCreate = canCreateMorePlans(planTier, plans.length);
+
   useEffect(() => {
     if (!selectedPlanId && plans.length > 0) {
       setSelectedPlanId(activePlanId || plans[0].id || null);
@@ -85,7 +89,26 @@ export default function PlannerPage() {
 
   const loadData = useCallback(async () => {
     if (!user || plans.length === 0) return;
+    setLoading(true);
     try {
+      const today = getTodayISO();
+
+      // Load current plan's specific daily info
+      const [todayRes, consRes, pvaRes, accRes] = await Promise.all([
+        getFilteredSessions(user.uid, { dateFrom: today, dateTo: today, planId: activePlanId ?? undefined }),
+        getStudyConsistency(user.uid, activePlanId ?? undefined, activePlan?.weeklyGoalHours),
+        getPlanVsActual(user.uid, activePlanId ?? undefined, activePlan?.subjects),
+        getAccuracyAnalytics(user.uid, activePlanId ?? undefined).catch(() => ({ month: [] }))
+      ]);
+
+      setTodaySessions(todayRes);
+      setConsistency(consRes);
+      setAccuracyData(accRes.month || []);
+
+      const insightsRes = await generateInsights(user.uid, consRes, pvaRes);
+      setInsights(insightsRes);
+
+      // Load all plans stats for the manager
       const statsArr: PlanStats[] = await Promise.all(
         plans.map(async (plan) => {
           try {
@@ -98,8 +121,8 @@ export default function PlannerPage() {
             const neglectedCount = pva.filter((p) => p.status === 'neglected').length;
             const urgency: 'critical' | 'medium' | 'low' =
               cons.currentStreak === 0 && totalHours < 2 ? 'critical'
-              : neglectedCount > 1 ? 'medium'
-              : 'low';
+                : neglectedCount > 1 ? 'medium'
+                  : 'low';
             return {
               planId: plan.id || '',
               totalHoursMonth: totalHours,
@@ -118,7 +141,7 @@ export default function PlannerPage() {
     } catch { /* */ } finally {
       setLoading(false);
     }
-  }, [user, plans, selectedPlanId]);
+  }, [user, plans, activePlanId, activePlan]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -137,97 +160,162 @@ export default function PlannerPage() {
 
   if (!user) return null;
 
-  const totalHoursAll = planStats.reduce((a, b) => a + b.totalHoursMonth, 0);
-  const avgProgress = planStats.length > 0
-    ? Math.round(planStats.reduce((a, b) => a + b.progress, 0) / planStats.length)
-    : 0;
-  const criticalCount = planStats.filter((s) => s.urgency === 'critical').length;
+  // Compute Daily Recommendations
+  const activeStats = planStats.find(s => s.planId === activePlanId);
+  const neglectedSubjects = activeStats?.planVsActual.filter(p => p.status === 'neglected').sort((a, b) => a.deviation - b.deviation) || [];
+  const nextBestSubject = neglectedSubjects[0]?.subject || activePlan?.subjects?.[0]?.subject || 'Revisão Geral';
 
-  // Scatter data for selected plan
-  const scatterData = selectedStats?.planVsActual.map((pva) => ({
-    name: pva.subject,
-    x: pva.actualHours,
-    y: pva.plannedPercent,
-    status: pva.status,
-  })) || [];
+  const todayTotalHours = todaySessions.reduce((acc, s) => acc + s.duration, 0) / 3600;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
-      {/* Header */}
-      <div className="border-b border-white/[0.05] bg-[#0E111B]/60 px-6 py-5 backdrop-blur-sm">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <CalendarDays className="h-3.5 w-3.5 text-[#F59768]" />
-              <span className="text-xs text-[#666] uppercase tracking-wider">Strategic Exam Planner</span>
-            </div>
-            <h1 className="text-2xl font-bold text-white">Multi-Edital Planner</h1>
-            <p className="mt-0.5 text-sm text-[#666]">
-              Gerencie múltiplos concursos com estratégia baseada em dados
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => canCreate ? (setEditingPlan(null), setPlanManagerOpen(true)) : null}
-              disabled={!canCreate}
-              className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Plus className="h-4 w-4" />
-              Adicionar Edital
-            </button>
-          </div>
+    <div className="flex flex-col gap-8 pb-10">
+      {/* Flush Topbar */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-12 pb-6 px-8">
+        <div>
+          <h1 className="font-brand text-[40px] font-light text-am-text-primary tracking-tighter leading-none">
+            Agenda Estratégica
+          </h1>
+          <p className="text-[12px] text-am-text-tertiary mt-3 font-mono uppercase tracking-widest">
+            Centro de decisão imediata e planejamento
+          </p>
+        </div>
+        <div className="flex items-center gap-3 mt-2 sm:mt-0">
+          <Button onClick={() => canCreate ? (setEditingPlan(null), setPlanManagerOpen(true)) : null} disabled={!canCreate} variant="secondary" className="rounded-full">
+            <Plus className="h-4 w-4 mr-2" /> Novo Edital
+          </Button>
         </div>
       </div>
 
-      <div className="px-6 py-6">
-        {/* Summary stats */}
-        <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {[
-            { label: 'Horas Totais (Mês)', value: loading ? '—' : `${totalHoursAll.toFixed(0)}h`, icon: Clock, color: 'text-[#F59768]', bg: 'bg-[#3150AA]/10' },
-            { label: 'Progresso Médio', value: loading ? '—' : `${avgProgress}%`, icon: TrendingUp, color: 'text-[#F59768]', bg: 'bg-[#3150AA]/10' },
-            { label: 'Editais Ativos', value: loading ? '—' : `${plans.length}`, icon: BookOpen, color: 'text-teal-400', bg: 'bg-teal-500/10' },
-            { label: 'Prazos Críticos', value: loading ? '—' : `${criticalCount}`, icon: AlertTriangle, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-          ].map(({ label, value, icon: Icon, color, bg }, i) => (
-            <motion.div key={label} custom={i} variants={fadeUp} initial="hidden" animate="show"
-              className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
-            >
-              <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg ${bg}`}>
-                <Icon className={`h-4.5 w-4.5 ${color}`} />
+      <div className="px-8 space-y-6">
+        {/* ROW 1: Hero Próxima Sessão (AI) & Agenda do Dia */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Card Hero: Next Best Session */}
+          <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show" className="h-full">
+            <div className="h-full rounded-am-xl bg-am-surface border border-am-ai-border/40 shadow-am-md hover:shadow-am-lg transition-transform duration-300 hover:-translate-y-1 p-8 relative overflow-hidden flex flex-col justify-between" style={{ background: 'linear-gradient(145deg, var(--color-am-surface) 0%, rgba(139,92,246,0.05) 100%)' }}>
+              <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                <Zap className="h-32 w-32 text-am-ai-default" />
               </div>
-              <p className="text-2xl font-bold text-white">{value}</p>
-              <p className="mt-0.5 text-xs text-[#666]">{label}</p>
-            </motion.div>
-          ))}
+
+              <div>
+                <div className="flex items-center gap-3 mb-6">
+                  <Badge variant="ai" className="shadow-[0_0_12px_var(--color-am-ai-glow)]"><Sparkles className="h-3 w-3 mr-1" /> IA MATCH</Badge>
+                  <span className="text-am-caption font-semibold uppercase tracking-wider text-am-text-secondary font-mono">Próxima melhor sessão</span>
+                </div>
+
+                <h2 className="font-brand text-4xl font-bold tracking-tight text-am-text-primary mb-3">
+                  {loading ? <Skeleton className="h-10 w-48" /> : nextBestSubject}
+                </h2>
+
+                <p className="text-am-body-sm text-am-text-secondary max-w-md leading-relaxed">
+                  Baseado no seu mapa de calor e edital ativo, você está com um déficit nesta matéria. Uma sessão agora maximizará sua curva de retenção.
+                </p>
+              </div>
+
+              <div className="mt-8 flex items-center gap-4">
+                <Button asChild variant="premium" size="lg" className="shadow-[0_4px_24px_var(--color-am-ai-glow)]">
+                  <a href="/engine">
+                    <Play className="mr-2 h-5 w-5" /> Iniciar Otimização
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Agenda do Dia */}
+          <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show" className="h-full">
+            <ChartCard title="Agenda do Dia" subtitle={loading ? 'Carregando...' : `${todayTotalHours.toFixed(1)}h estudadas hoje`} loading={loading}>
+              <div className="flex flex-col h-full justify-between">
+                {todaySessions.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 flex-1">
+                    <Calendar className="h-10 w-10 text-am-border-strong mb-4" />
+                    <p className="text-am-body-sm text-am-text-secondary">Nenhuma sessão registrada hoje.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+                    {todaySessions.map((t, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 rounded-am-md bg-am-surface-subtle border border-am-border-default hover:bg-am-surface-elevated transition-colors cursor-default">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-am-sm bg-am-brand-primary/10 flex items-center justify-center">
+                            <CheckCircle2 className="h-4 w-4 text-am-brand-primary" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-am-body-sm text-am-text-primary">{t.subject}</p>
+                            <p className="text-am-caption text-am-text-tertiary">{new Date(t.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                          </div>
+                        </div>
+                        <span className="font-mono text-am-body-sm font-bold text-am-text-primary">{formatDuration(t.duration)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="pt-4 border-t border-am-border-default mt-4">
+                  <Button asChild variant="secondary" className="w-full">
+                    <Link href="/history">Ver Histórico Completo</Link>
+                  </Button>
+                </div>
+              </div>
+            </ChartCard>
+          </motion.div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-          {/* Plans table */}
-          <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show"
-            className="rounded-xl border border-white/[0.07] bg-[#0E111B] overflow-hidden"
-          >
-            <div className="flex items-center justify-between border-b border-white/[0.05] px-5 py-4">
-              <div className="flex items-center gap-2">
-                <BarChart2 className="h-4 w-4 text-[#666]" />
-                <h3 className="text-sm font-semibold text-white">Planos Estratégicos Ativos</h3>
+        {/* ROW 2: Motor Determinístico & IA Suggestions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Núcleo de Prioridade do Motor */}
+          <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
+            <PlanEngineSnapshotCard planId={activePlanId || null} />
+          </motion.div>
+
+          {/* AI Diagnóstico */}
+          <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show">
+            <ChartCard title="Insight de Otimização" subtitle="Análise em tempo real do seu desempenho" loading={loading}>
+              <div className="flex flex-col h-full justify-center">
+                {insights.length > 0 ? (
+                  <div className="space-y-4">
+                    {insights.slice(0, 2).map((insight, idx) => (
+                      <div key={idx} className="p-4 rounded-am-lg bg-am-surface border border-am-ai-border/40 relative overflow-hidden">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-am-ai-default" />
+                        <div className="flex items-start gap-3">
+                          <Zap className="h-4 w-4 mt-1 text-am-ai-default" />
+                          <div>
+                            <p className="text-am-body-sm text-am-text-primary font-medium mb-1">{insight.type === 'celebrate' ? 'Consistência' : 'Alerta de Retenção'}</p>
+                            <p className="text-am-body-sm text-am-text-secondary leading-relaxed">{insight.message}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-am-text-secondary">Conclua mais sessões para gerar insights robustos de IA.</p>
+                )}
               </div>
+            </ChartCard>
+          </motion.div>
+        </div>
+
+        {/* ROW 3: Planner Manager (Legacy Table) */}
+        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
+          <h3 className="font-brand text-am-h5 font-bold tracking-tight text-am-text-primary mb-4 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-am-brand-primary" /> Gerenciamento de Editais
+          </h3>
+          <div className="rounded-am-xl border border-am-border-default bg-am-surface overflow-hidden">
+            <div className="flex items-center justify-between border-b border-am-border-default px-5 py-4 bg-am-surface-subtle">
               <div className="flex gap-2">
-                <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">Em Dia</span>
-                <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-xs text-amber-400">Atenção</span>
+                <Badge variant="success">Em Dia</Badge>
+                <Badge variant="warning">Atenção</Badge>
               </div>
             </div>
 
             {loading ? (
               <div className="p-5 space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-16 rounded-lg shimmer" />)}
+                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-am-lg" />)}
               </div>
             ) : plans.length === 0 ? (
               <div className="py-12 text-center px-6">
-                <CalendarDays className="mx-auto mb-3 h-8 w-8 text-slate-700" />
-                <p className="text-sm font-medium text-[#666]">Nenhum edital configurado</p>
-                <p className="mt-1 text-xs text-[#666]">Adicione seus concursos para começar a planejar estrategicamente</p>
+                <CalendarDays className="mx-auto mb-3 h-8 w-8 text-am-text-tertiary" />
+                <p className="text-sm font-medium text-am-text-secondary">Nenhum edital configurado</p>
                 <button
                   onClick={() => canCreate ? (setEditingPlan(null), setPlanManagerOpen(true)) : null}
-                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-600/20 px-4 py-2 text-sm text-[#F59768]/80 hover:bg-blue-600/30 transition-colors"
+                  className="mt-4 inline-flex items-center gap-2 rounded-am-lg bg-am-brand-primary/10 px-4 py-2 text-sm text-am-brand-primary font-semibold transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   Criar primeiro edital
@@ -235,95 +323,71 @@ export default function PlannerPage() {
               </div>
             ) : (
               <>
-                {/* Table header */}
-                <div className="grid grid-cols-[1fr_80px_100px_80px_80px] gap-4 border-b border-white/[0.04] px-5 py-2.5">
-                  {['Edital / Concurso', 'Progresso', 'Última Sessão', 'Urgência', 'Precisão'].map((h) => (
-                    <p key={h} className="text-[10px] font-semibold uppercase tracking-wider text-[#666]">{h}</p>
+                <div className="grid grid-cols-[1fr_80px_100px_80px_80px] gap-4 border-b border-am-border-default px-5 py-2.5">
+                  {['Edital / Concurso', 'Progresso', 'Último Mês', 'Urgência', 'Visão'].map((h) => (
+                    <p key={h} className="text-[10px] font-semibold uppercase tracking-wider text-am-text-tertiary">{h}</p>
                   ))}
                 </div>
 
-                <div className="divide-y divide-white/[0.03]">
+                <div className="divide-y divide-am-border-default bg-am-surface">
                   {plans.map((plan, i) => {
                     const stats = planStats.find((s) => s.planId === plan.id);
                     const urgency = stats?.urgency || 'low';
                     const uc = URGENCY_CONFIG[urgency];
-                    const isSelected = plan.id === selectedPlanId;
                     const isActive = plan.id === activePlanId;
 
                     return (
                       <div
                         key={plan.id}
-                        onClick={() => setSelectedPlanId(plan.id || null)}
-                        className={`grid grid-cols-[1fr_80px_100px_80px_80px] gap-4 cursor-pointer items-center px-5 py-4 transition-colors ${isSelected ? 'bg-blue-500/[0.06]' : 'hover:bg-white/[0.02]'}`}
-                        style={isSelected ? { borderLeft: `2px solid ${plan.color}` } : {}}
+                        className={`grid grid-cols-[1fr_80px_100px_80px_80px] gap-4 items-center px-5 py-4 transition-colors hover:bg-am-surface-subtle/50`}
                       >
-                        {/* Name */}
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: plan.color, boxShadow: `0 0 6px ${plan.color}60` }} />
-                            <p className="truncate text-sm font-semibold text-white">{plan.name}</p>
+                            <div className="h-2 w-2 flex-shrink-0 rounded-full bg-am-brand-primary" />
+                            <p className="truncate text-sm font-semibold text-am-text-primary">{plan.name}</p>
                             {isActive && (
-                              <span className="flex-shrink-0 rounded-full bg-[#3150AA]/15 px-1.5 py-0.5 text-[10px] text-[#F59768]/80">ATIVO</span>
+                              <Badge variant="primary">ATIVO</Badge>
                             )}
                           </div>
-                          <p className="mt-0.5 pl-4 text-xs text-[#666]">
+                          <p className="mt-0.5 pl-4 text-xs text-am-text-secondary">
                             {plan.subjects.length > 0 ? `${plan.subjects.length} matérias` : 'Sem matérias'} · Meta {plan.weeklyGoalHours}h/sem
                           </p>
                         </div>
 
-                        {/* Progress — circular indicator */}
-                        <div className="flex items-center justify-center">
-                          <div className="relative h-10 w-10">
-                            <svg className="h-10 w-10 -rotate-90" viewBox="0 0 36 36">
-                              <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
-                              <circle
-                                cx="18" cy="18" r="15" fill="none"
-                                stroke={plan.color}
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeDasharray={`${(stats?.progress || 0) * 0.9425} 94.25`}
-                                className="transition-all duration-700"
-                              />
-                            </svg>
-                            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">
-                              {stats?.progress || 0}%
-                            </span>
-                          </div>
+                        <div className="text-center font-brand font-bold text-am-text-primary">
+                          {stats?.progress || 0}%
                         </div>
 
-                        {/* Last studied */}
-                        <p className="text-xs text-[#666]">
-                          {stats?.totalHoursMonth ? `${stats.totalHoursMonth.toFixed(1)}h este mês` : 'Sem dados'}
+                        <p className="text-xs text-am-text-secondary">
+                          {stats?.totalHoursMonth ? `${stats.totalHoursMonth.toFixed(1)}h` : '0h'}
                         </p>
 
-                        {/* Urgency */}
-                        <span className={`inline-flex items-center justify-center rounded-md px-2 py-0.5 text-[10px] font-bold ${uc.bg} ${uc.text}`}>
+                        <span className={`inline-flex items-center justify-center rounded-am-sm px-2 py-0.5 text-[10px] font-bold ${uc.bg} ${uc.text}`}>
                           {uc.label}
                         </span>
 
-                        {/* Actions */}
-                        <div className="relative flex items-center justify-end gap-1">
+                        <div className="flex items-center justify-end gap-1 relative">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleSelectActive(plan.id || ''); }}
-                            className={`rounded-md px-2 py-1 text-[10px] font-medium transition-colors ${isActive ? 'bg-[#3150AA]/20 text-[#F59768]/80' : 'bg-white/[0.05] text-[#666] hover:bg-white/[0.08] hover:text-slate-300'}`}
+                            className={`rounded-am-sm px-2 py-1 text-[10px] font-medium transition-colors ${isActive ? 'bg-am-brand-primary/10 text-am-brand-primary' : 'bg-am-surface-subtle text-am-text-secondary hover:text-am-text-primary'}`}
                           >
-                            {isActive ? 'Ativo' : 'Usar'}
+                            {isActive ? 'Ativo' : 'Ativar'}
                           </button>
                           <div className="relative">
                             <button
                               onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === plan.id ? null : (plan.id || null)); }}
-                              className="rounded-md p-1 text-[#666] hover:bg-white/[0.06] hover:text-[#666] transition-colors"
+                              className="rounded-am-sm p-1 text-am-text-tertiary hover:text-am-text-primary transition-colors"
                             >
                               <MoreVertical className="h-3.5 w-3.5" />
                             </button>
                             {openMenuId === plan.id && (
-                              <div className="absolute right-0 top-6 z-50 w-36 overflow-hidden rounded-lg border border-white/[0.08] bg-[#0E111B] shadow-xl">
+                              <div className="absolute right-0 top-6 z-50 w-36 overflow-hidden rounded-am-md border border-am-border-strong bg-am-surface-elevated shadow-am-xl">
                                 <button onClick={(e) => { e.stopPropagation(); setEditingPlan(plan); setPlanManagerOpen(true); setOpenMenuId(null); }}
-                                  className="flex w-full items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-white/[0.06] transition-colors">
+                                  className="flex w-full items-center gap-2 px-3 py-2 text-xs text-am-text-secondary hover:bg-am-surface-subtle transition-colors">
                                   <Edit2 className="h-3 w-3" /> Editar
                                 </button>
                                 <button onClick={(e) => { e.stopPropagation(); handleDelete(plan.id || ''); }}
-                                  className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-colors">
+                                  className="flex w-full items-center gap-2 px-3 py-2 text-xs text-am-error hover:bg-am-error/10 transition-colors">
                                   <Trash2 className="h-3 w-3" /> Excluir
                                 </button>
                               </div>
@@ -336,119 +400,10 @@ export default function PlannerPage() {
                 </div>
               </>
             )}
-          </motion.div>
-
-          {/* Right panel: selected plan details */}
-          <motion.div custom={5} variants={fadeUp} initial="hidden" animate="show" className="space-y-4">
-            {selectedPlan ? (
-              <>
-                {/* Plan header */}
-                <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full" style={{ background: selectedPlan.color, boxShadow: `0 0 8px ${selectedPlan.color}60` }} />
-                      <p className="text-sm font-bold text-white">{selectedPlan.name}</p>
-                    </div>
-                    <span className="text-xs text-[#666]">SELECIONADO</span>
-                  </div>
-
-                  {/* Weight vs Time scatter */}
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#666]">
-                    Peso Estratégico vs. Tempo
-                  </p>
-                  <div className="h-44">
-                    {scatterData.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <ScatterChart>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                          <XAxis dataKey="x" name="Horas" tick={{ fill: '#475569', fontSize: 9 }} axisLine={false} tickLine={false} label={{ value: 'Horas →', position: 'insideBottom', offset: -5, fill: '#475569', fontSize: 9 }} />
-                          <YAxis dataKey="y" name="Peso" tick={{ fill: '#475569', fontSize: 9 }} axisLine={false} tickLine={false} label={{ value: 'Peso ↑', angle: -90, position: 'insideLeft', offset: 10, fill: '#475569', fontSize: 9 }} />
-                          <Tooltip
-                            contentStyle={{ background: '#0f1825', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', fontSize: '11px' }}
-                            formatter={(val, name) => [`${val}${name === 'Peso' ? '%' : 'h'}`, name]}
-                          />
-                          <Scatter
-                            data={scatterData}
-                            fill={selectedPlan.color}
-                            fillOpacity={0.8}
-                          />
-                        </ScatterChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <p className="text-xs text-[#666]">Configure matérias para ver o gráfico</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Priority action items */}
-                <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-4">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#666]">
-                    Itens de Ação Prioritários
-                  </p>
-                  {selectedStats && selectedStats.planVsActual.length > 0 ? (
-                    <div className="space-y-2">
-                      {selectedStats.planVsActual
-                        .filter((pva) => pva.status !== 'ok')
-                        .slice(0, 3)
-                        .map((pva) => (
-                          <div key={pva.subject}
-                            className={`rounded-lg p-3 ${pva.status === 'neglected' ? 'border border-red-500/20 bg-red-500/[0.06]' : 'border border-emerald-500/20 bg-emerald-500/[0.06]'}`}
-                          >
-                            <div className="flex items-start gap-2">
-                              {pva.status === 'neglected'
-                                ? <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-red-400" />
-                                : <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-emerald-400" />
-                              }
-                              <div>
-                                <p className={`text-xs font-semibold ${pva.status === 'neglected' ? 'text-red-300' : 'text-emerald-300'}`}>
-                                  {pva.status === 'neglected' ? 'Abaixo do Planejado' : 'Dominada'}
-                                </p>
-                                <p className="text-xs text-[#666]">{pva.subject}</p>
-                                <p className="mt-0.5 text-[10px] text-[#666]">
-                                  {pva.status === 'neglected'
-                                    ? `${Math.abs(pva.deviation).toFixed(0)}% abaixo. Redistribua tempo.`
-                                    : `${pva.actualPercent.toFixed(0)}% de cobertura. Reduza intensidade.`}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      }
-                      {selectedStats.planVsActual.filter((p) => p.status !== 'ok').length === 0 && (
-                        <div className="flex items-center gap-2 rounded-lg bg-emerald-500/[0.06] p-3">
-                          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                          <p className="text-xs text-emerald-300">Todas as matérias estão equilibradas!</p>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-[#666]">Configure as matérias para ver recomendações</p>
-                  )}
-
-                  <Link href="/analytics"
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.02] py-2 text-xs text-[#666] transition-colors hover:bg-white/[0.05] hover:text-slate-200"
-                  >
-                    Abrir Análise Detalhada <ExternalLink className="h-3 w-3" />
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-white/[0.07]">
-                <p className="text-sm text-[#666]">Selecione um edital para ver detalhes</p>
-              </div>
-            )}
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
       </div>
 
-        {/* ── Calendar Sync Section ── */}
-        <div className="mt-6 px-6 pb-6">
-          <CalendarSyncSection userId={user.uid} subjects={[...new Set(plans.flatMap((p) => p.subjects.map((s) => s.subject)))]} />
-        </div>
-
-      {/* PlanManager modal */}
       <PlanManager
         isOpen={planManagerOpen}
         userId={user.uid}

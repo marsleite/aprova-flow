@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Sparkles, Loader2, RefreshCw, AlertTriangle, CalendarDays, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from '@/components';
 import { StudyConsistency, SubjectWeight, SubjectAccuracy } from '@/types';
 import { auth } from '@/lib/firebase/config';
 
@@ -99,47 +100,46 @@ export default function SmartScheduleCard({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/40 via-gray-900 to-gray-950 p-6 shadow-2xl relative overflow-hidden"
+            className="rounded-am-xl border border-am-border-default/50 border-t-2 border-t-am-ai-border/40 bg-am-surface/40 backdrop-blur-2xl p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ring-1 ring-white/5 relative overflow-hidden h-full flex flex-col"
         >
-            {/* Glow de fundo AI */}
-            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" />
 
-            <div className="relative mb-6 flex items-start justify-between gap-3">
+            <div className="relative mb-8 flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <div className="rounded-xl bg-indigo-500/20 p-2.5">
-                        <Brain className="h-6 w-6 text-indigo-300" />
+                    <div className="rounded-am-md border border-am-border-default/50 bg-am-surface p-2 ring-1 ring-white/5 shadow-sm">
+                        <CalendarDays className="h-4 w-4 text-am-text-primary" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-white tracking-tight">GPS do Estudo</h2>
-                        <p className="text-sm text-indigo-200/70">Cronograma da semana gerado por IA</p>
+                        <h2 className="font-brand text-am-body-lg font-bold text-am-text-primary tracking-tight">Cronograma de Foco</h2>
+                        <p className="text-am-caption text-am-text-secondary mt-0.5 font-mono uppercase tracking-widest">Alocação Semanal AI</p>
                     </div>
                 </div>
 
-                <button
+                <Button
                     onClick={generateSchedule}
                     disabled={loading || !hasContext}
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 hover:shadow-indigo-500/40 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
+                    variant="outline"
+                    size="sm"
                 >
                     {loading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                     ) : schedule ? (
                         <RefreshCw className="h-4 w-4" />
                     ) : (
-                        <Sparkles className="h-4 w-4" />
+                        <Sparkles className="h-4 w-4 text-am-ai-default" />
                     )}
-                    {schedule ? 'Recalcular Rota' : 'Gerar Rota'}
-                </button>
+                    {schedule ? 'Recalcular' : 'Gerar'}
+                </Button>
             </div>
 
             {!hasContext && (
-                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 flex items-center gap-2">
+                <div className="rounded-xl border border-am-warning/30 bg-am-warning/10 px-4 py-3 text-sm text-am-warning flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 flex-shrink-0" />
                     <p>Defina as matérias e seus pesos no 'Edital' para a IA poder calcular sua rota ideal.</p>
                 </div>
             )}
 
             {error && (
-                <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                <div className="mb-4 flex items-center gap-2 rounded-xl border border-am-error/30 bg-am-error/10 px-4 py-3 text-sm text-am-error">
                     <AlertTriangle className="h-5 w-5" />
                     {error}
                 </div>
@@ -150,21 +150,21 @@ export default function SmartScheduleCard({
                     {schedule.map((dayItem, idx) => {
                         const isExpanded = expandedDay === dayItem.day;
                         return (
-                            <div key={idx} className="rounded-xl border border-white/10 bg-gray-900/60 overflow-hidden transition-all hover:border-white/20">
+                            <div key={idx} className="rounded-am-lg border border-am-border-default/50 bg-am-surface-subtle overflow-hidden transition-all hover:border-am-border-strong ring-1 ring-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
                                 <button
                                     onClick={() => setExpandedDay(isExpanded ? null : dayItem.day)}
                                     className="w-full flex items-center justify-between p-4 text-left focus:outline-none"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg ${isExpanded ? 'bg-indigo-500/20 text-indigo-300' : 'bg-white/5 text-gray-400'}`}>
+                                        <div className={`p-2 rounded-am-md ring-1 ring-white/5 ${isExpanded ? 'bg-am-ai-subtle/40 text-am-ai-default' : 'bg-am-canvas text-am-text-tertiary'}`}>
                                             <CalendarDays className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-100">{dayItem.day}</p>
-                                            <p className="text-xs text-indigo-300 font-medium">{dayItem.totalHours} horas sugeridas</p>
+                                            <p className="font-semibold text-am-text-primary">{dayItem.day}</p>
+                                            <p className="text-xs text-am-ai-default font-medium">{dayItem.totalHours} horas sugeridas</p>
                                         </div>
                                     </div>
-                                    {isExpanded ? <ChevronUp className="text-gray-400 h-5 w-5" /> : <ChevronDown className="text-gray-400 h-5 w-5" />}
+                                    {isExpanded ? <ChevronUp className="text-am-text-tertiary h-5 w-5" /> : <ChevronDown className="text-am-text-tertiary h-5 w-5" />}
                                 </button>
 
                                 <AnimatePresence>
@@ -174,22 +174,22 @@ export default function SmartScheduleCard({
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
                                             transition={{ duration: 0.2 }}
-                                            className="px-4 pb-4 pt-1 border-t border-white/5"
+                                            className="px-4 pb-4 pt-1 border-t border-am-border-default"
                                         >
                                             <div className="space-y-3">
                                                 {dayItem.subjects.map((sub, sIdx) => (
-                                                    <div key={sIdx} className="bg-white/[0.03] rounded-lg p-3 border border-white/[0.05]">
+                                                    <div key={sIdx} className="bg-am-surface rounded-am-md p-3 border border-am-border-default/50 shadow-sm ring-1 ring-white/5">
                                                         <div className="flex justify-between items-center mb-1.5">
-                                                            <span className="text-sm font-medium text-gray-200 flex items-center gap-2">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                                            <span className="text-sm font-semibold text-am-text-primary flex items-center gap-2">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-am-ai-default"></span>
                                                                 {sub.name}
                                                             </span>
-                                                            <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 font-mono border border-indigo-500/20">
+                                                            <span className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-am-md bg-am-ai-subtle/50 text-am-ai-default font-mono border border-am-ai-border/30">
                                                                 {sub.hours}h
                                                             </span>
                                                         </div>
-                                                        <p className="text-xs text-gray-400 ml-3.5 leading-relaxed">
-                                                            <strong className="text-gray-300/80 font-medium">Motivo:</strong> {sub.reason}
+                                                        <p className="text-xs text-am-text-secondary ml-3.5 leading-relaxed">
+                                                            <strong className="text-am-text-primary font-medium">Motivo:</strong> {sub.reason}
                                                         </p>
                                                     </div>
                                                 ))}

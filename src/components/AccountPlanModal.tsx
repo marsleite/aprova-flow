@@ -38,7 +38,7 @@ const PLAN_CARDS: PlanCard[] = [
     priceLabel: 'R$ 0/mês',
     description: 'Para começar',
     accentClass: 'text-gray-200',
-    borderClass: 'border-white/10',
+    borderClass: 'border-am-border-default',
   },
   {
     tier: 'pro',
@@ -203,15 +203,15 @@ export default function AccountPlanModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-            className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-gray-900"
+            className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-am-border-default bg-gray-900"
           >
-            <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-violet-500/10 via-blue-500/5 to-transparent px-5 py-4">
+            <div className="flex items-center justify-between border-b border-am-border-default bg-gradient-to-r from-violet-500/10 via-blue-500/5 to-transparent px-5 py-4">
               <div>
                 <p className="inline-flex items-center gap-2 text-xs text-violet-300">
                   <Crown className="h-3.5 w-3.5" />
                   Conta e Plano
                 </p>
-                <h2 className="text-lg font-semibold text-white">Gerenciar assinatura</h2>
+                <h2 className="text-lg font-semibold text-am-text-primary">Gerenciar assinatura</h2>
               </div>
               <button
                 onClick={onClose}
@@ -229,15 +229,15 @@ export default function AccountPlanModal({
               )}
 
               <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-sm md:col-span-2">
+                <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3 text-sm md:col-span-2">
                   <p className="text-gray-300">
-                    Plano atual: <span className="font-semibold uppercase text-white">{currentTier}</span>
+                    Plano atual: <span className="font-semibold uppercase text-am-text-primary">{currentTier}</span>
                   </p>
                   <p className="mt-1 text-xs text-gray-400">
                     Editais usados: {currentPlansCount}
                   </p>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-sm">
+                <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3 text-sm">
                   <p className="text-gray-300">Acesso atual</p>
                   <p className="mt-1 text-xs text-gray-400">
                     {isUnlimited(getCapabilitiesForTier(currentTier).maxStudyPlans)
@@ -270,7 +270,7 @@ export default function AccountPlanModal({
                         <div>
                           <h3 className={`text-base font-semibold ${plan.accentClass}`}>{plan.label}</h3>
                           <p className="text-sm text-gray-400">{plan.description}</p>
-                          <p className="mt-0.5 whitespace-nowrap text-[28px] leading-none text-white">{plan.priceLabel}</p>
+                          <p className="mt-0.5 whitespace-nowrap text-[28px] leading-none text-am-text-primary">{plan.priceLabel}</p>
                         </div>
                         {plan.highlight && (
                           <span className="rounded-full bg-[#3150AA]/20 px-2 py-0.5 text-[10px] text-violet-200">
@@ -329,8 +329,8 @@ export default function AccountPlanModal({
                         disabled={isCurrent || Boolean(savingTier)}
                         className={`mt-auto flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
                           isCurrent
-                            ? 'bg-white/10 text-gray-300'
-                            : 'bg-gradient-to-r from-[#F59768] to-[#3150AA] text-white hover:brightness-110'
+                            ? 'bg-am-surface-subtle text-gray-300'
+                            : 'bg-gradient-to-r from-[#F59768] to-[#3150AA] text-am-text-primary hover:brightness-110'
                         } disabled:cursor-not-allowed disabled:opacity-70`}
                       >
                         {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -341,12 +341,12 @@ export default function AccountPlanModal({
                 })}
               </div>
 
-              <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+              <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
                 <button
                   onClick={() => setShowComparison((v) => !v)}
-                  className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-left transition hover:bg-white/5"
+                  className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-left transition hover:bg-am-surface-subtle"
                 >
-                  <span className="text-sm font-medium text-white">Comparativo lado a lado</span>
+                  <span className="text-sm font-medium text-am-text-primary">Comparativo lado a lado</span>
                   {showComparison ? (
                     <ChevronUp className="h-4 w-4 text-gray-400" />
                   ) : (
@@ -358,7 +358,7 @@ export default function AccountPlanModal({
                   <div className="mt-3 overflow-x-auto">
                     <table className="min-w-[680px] w-full text-left text-xs">
                       <thead>
-                        <tr className="border-b border-white/10">
+                        <tr className="border-b border-am-border-default">
                           <th className="px-3 py-2 text-gray-400">Recurso</th>
                           <th className="px-3 py-2 text-gray-200">Free</th>
                           <th className="px-3 py-2 text-[#F59768]/80">Pro</th>
@@ -367,7 +367,7 @@ export default function AccountPlanModal({
                       </thead>
                       <tbody>
                         {COMPARISON_ROWS.map((row) => (
-                          <tr key={row.label} className="border-b border-white/5 last:border-b-0">
+                          <tr key={row.label} className="border-b border-am-border-default last:border-b-0">
                             <td className="px-3 py-2 text-gray-300">{row.label}</td>
                             <td className="px-3 py-2 text-gray-300">{row.value('free')}</td>
                             <td className="px-3 py-2 text-blue-200">{row.value('pro')}</td>

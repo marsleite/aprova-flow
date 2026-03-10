@@ -82,7 +82,7 @@ function OverallGauge({ accuracy }: { accuracy: number }) {
       </RadialBarChart>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className={`text-2xl font-bold ${color.text}`}>{accuracy}%</span>
-        <span className="text-[10px] text-[#666]">geral</span>
+        <span className="text-[10px] text-am-text-secondary">geral</span>
       </div>
     </div>
   );
@@ -173,7 +173,7 @@ export default function AccuracyChart({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
+        className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
       >
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -181,12 +181,12 @@ export default function AccuracyChart({
               <Target className="h-4 w-4 text-cyan-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-white">Taxa de Acerto</h2>
-              <p className="text-xs text-[#666]">Desempenho por matéria no período</p>
+              <h2 className="text-sm font-semibold text-am-text-primary">Taxa de Acerto</h2>
+              <p className="text-xs text-am-text-secondary">Desempenho por matéria no período</p>
             </div>
           </div>
           {!loading && periodData.length > 0 && (
-            <div className="rounded-lg bg-white/[0.04] px-3 py-1.5 text-xs text-[#666]">
+            <div className="rounded-lg bg-am-surface-subtle px-3 py-1.5 text-xs text-am-text-secondary">
               {totalQuestions} Q
             </div>
           )}
@@ -205,7 +205,7 @@ export default function AccuracyChart({
                 className={`rounded-lg px-3 py-1.5 text-xs transition-colors ${
                   period === option.key
                     ? 'bg-[#3150AA]/20 text-[#F59768]/80'
-                    : 'bg-white/[0.04] text-[#666] hover:bg-white/[0.07] hover:text-slate-300'
+                    : 'bg-am-surface-subtle text-am-text-secondary hover:bg-am-surface-subtle hover:text-am-text-secondary'
                 }`}
               >
                 {option.label}
@@ -215,7 +215,7 @@ export default function AccuracyChart({
         )}
 
         {loading ? (
-          <div className="py-8 text-center text-sm text-[#666]">Carregando desempenho...</div>
+          <div className="py-8 text-center text-sm text-am-text-secondary">Carregando desempenho...</div>
         ) : periodData.length === 0 ? (
           <EmptyState />
         ) : (
@@ -238,9 +238,9 @@ export default function AccuracyChart({
                 return (
                   <div key={entry.subject}>
                     <div className="mb-1 flex items-center justify-between">
-                      <span className="truncate text-sm font-medium text-white">{entry.subject}</span>
+                      <span className="truncate text-sm font-medium text-am-text-primary">{entry.subject}</span>
                       <div className="flex shrink-0 items-center gap-2">
-                        <span className="text-[11px] text-[#666]">
+                        <span className="text-[11px] text-am-text-secondary">
                           {entry.correctAnswers}/{entry.totalQuestions}
                         </span>
                         {typeof delta === 'number' && (
@@ -251,7 +251,7 @@ export default function AccuracyChart({
                         <span className={`text-sm font-bold ${color.text}`}>{entry.accuracy}%</span>
                       </div>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.05]">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-am-surface-subtle">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${entry.accuracy}%` }}
@@ -259,7 +259,7 @@ export default function AccuracyChart({
                         className={`h-full rounded-full ${color.bar}`}
                       />
                     </div>
-                    <div className="mt-1 text-right text-[10px] text-[#666]">
+                    <div className="mt-1 text-right text-[10px] text-am-text-secondary">
                       {getSampleBadge(entry.totalQuestions)}
                     </div>
                   </div>
@@ -267,8 +267,8 @@ export default function AccuracyChart({
               })}
             </div>
 
-            <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
-              <span className="text-xs text-[#666]">Top {topSubjects.length} de {periodData.length} matérias</span>
+            <div className="mt-4 flex items-center justify-between border-t border-am-border-default pt-3">
+              <span className="text-xs text-am-text-secondary">Top {topSubjects.length} de {periodData.length} matérias</span>
               {periodData.length > topSubjects.length && (
                 <button
                   onClick={() => setShowAll(true)}
@@ -279,9 +279,9 @@ export default function AccuracyChart({
               )}
             </div>
 
-            <div className="mt-3 space-y-1.5 border-t border-white/5 pt-3">
+            <div className="mt-3 space-y-1.5 border-t border-am-border-default pt-3">
               {insights.map((insight) => (
-                <p key={insight} className="text-xs text-[#666]">{insight}</p>
+                <p key={insight} className="text-xs text-am-text-secondary">{insight}</p>
               ))}
             </div>
           </>
@@ -290,12 +290,12 @@ export default function AccuracyChart({
 
       {showAll && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-white/[0.08] bg-[#0E111B] p-5 shadow-2xl">
+          <div className="w-full max-w-2xl rounded-2xl border border-am-border-strong bg-am-surface-elevated p-5 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Todas as matérias</h3>
+              <h3 className="text-lg font-semibold text-am-text-primary">Todas as matérias</h3>
               <button
                 onClick={() => setShowAll(false)}
-                className="rounded-lg bg-white/[0.06] p-2 text-[#666] hover:bg-white/[0.1]"
+                className="rounded-lg bg-am-surface-subtle p-2 text-am-text-secondary hover:bg-am-surface-subtle"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -304,13 +304,13 @@ export default function AccuracyChart({
             <div className="mb-3 flex flex-wrap gap-2">
               <button
                 onClick={() => setSortMode('volume')}
-                className={`rounded-lg px-3 py-1.5 text-xs ${sortMode === 'volume' ? 'bg-[#3150AA]/20 text-[#F59768]/80' : 'bg-white/[0.04] text-[#666]'}`}
+                className={`rounded-lg px-3 py-1.5 text-xs ${sortMode === 'volume' ? 'bg-[#3150AA]/20 text-[#F59768]/80' : 'bg-am-surface-subtle text-am-text-secondary'}`}
               >
                 Ordenar por questões
               </button>
               <button
                 onClick={() => setSortMode('accuracy')}
-                className={`rounded-lg px-3 py-1.5 text-xs ${sortMode === 'accuracy' ? 'bg-[#3150AA]/20 text-[#F59768]/80' : 'bg-white/[0.04] text-[#666]'}`}
+                className={`rounded-lg px-3 py-1.5 text-xs ${sortMode === 'accuracy' ? 'bg-[#3150AA]/20 text-[#F59768]/80' : 'bg-am-surface-subtle text-am-text-secondary'}`}
               >
                 Ordenar por %
               </button>
@@ -318,7 +318,7 @@ export default function AccuracyChart({
                 onClick={() => setSortMode('delta')}
                 disabled={period !== 'month'}
                 className={`rounded-lg px-3 py-1.5 text-xs ${
-                  sortMode === 'delta' ? 'bg-[#3150AA]/20 text-[#F59768]/80' : 'bg-white/[0.04] text-[#666]'
+                  sortMode === 'delta' ? 'bg-[#3150AA]/20 text-[#F59768]/80' : 'bg-am-surface-subtle text-am-text-secondary'
                 } disabled:cursor-not-allowed disabled:opacity-40`}
               >
                 Ganho no mês
@@ -332,9 +332,9 @@ export default function AccuracyChart({
                 return (
                   <div key={`all-${entry.subject}`}>
                     <div className="mb-1 flex items-center justify-between">
-                      <span className="truncate text-sm font-medium text-white">{entry.subject}</span>
+                      <span className="truncate text-sm font-medium text-am-text-primary">{entry.subject}</span>
                       <div className="flex shrink-0 items-center gap-2">
-                        <span className="text-[11px] text-[#666]">
+                        <span className="text-[11px] text-am-text-secondary">
                           {entry.correctAnswers}/{entry.totalQuestions}
                         </span>
                         {typeof delta === 'number' && period === 'month' && (
@@ -345,7 +345,7 @@ export default function AccuracyChart({
                         <span className={`text-sm font-bold ${color.text}`}>{entry.accuracy}%</span>
                       </div>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.04]">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-am-surface-subtle">
                       <div className={`h-full rounded-full ${color.bar}`} style={{ width: `${entry.accuracy}%` }} />
                     </div>
                   </div>

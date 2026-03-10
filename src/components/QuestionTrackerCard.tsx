@@ -132,33 +132,33 @@ export default function QuestionTrackerCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
+      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
     >
       {/* Header */}
-      <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3150AA]/10">
-          <ClipboardCheck className="h-4 w-4 text-[#F59768]" />
+      <div className="mb-6 flex items-start gap-3">
+        <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-2">
+          <ClipboardCheck className="h-4 w-4 text-am-text-tertiary" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-white">Registro Manual de Questões</h2>
-          <p className="text-xs text-[#666]">Para questões feitas fora do AprovaMind</p>
+          <h2 className="font-brand text-am-body-lg font-bold text-am-text-primary tracking-tight">Registro Manual</h2>
+          <p className="text-am-caption text-am-text-secondary mt-0.5 font-mono uppercase tracking-widest">Banco Externo</p>
         </div>
       </div>
 
       {/* Formulário */}
       <div className="space-y-4">
-        <div className="rounded-lg border border-[#3150AA]/20 bg-[#3150AA]/10 px-3 py-2 text-xs text-[#F59768]/80">
+        <div className="rounded-am-md border border-am-brand-primary/20 bg-am-brand-primary/5 px-3 py-2 text-xs text-am-brand-primary">
           Provas e simulados do AprovaMind já entram automaticamente na taxa de acerto.
         </div>
 
         {/* Matéria */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-[#666]">Matéria</label>
+          <label className="mb-1.5 block text-xs font-medium text-am-text-secondary">Matéria</label>
           <select
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             disabled={saving}
-            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white
+            className="w-full rounded-xl border border-am-border-strong bg-am-surface-subtle px-4 py-2.5 text-sm text-am-text-primary
                        outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
                        disabled:opacity-50"
           >
@@ -185,7 +185,7 @@ export default function QuestionTrackerCard({
               onChange={(e) => setTotalQuestions(e.target.value)}
               disabled={saving}
               placeholder="0"
-              className="w-full rounded-xl border border-white/10 bg-gray-800/50 px-4 py-2.5 text-sm text-white
+              className="w-full rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary
                          outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
                          disabled:opacity-50"
             />
@@ -202,13 +202,13 @@ export default function QuestionTrackerCard({
               onChange={(e) => handleCorrectChange(e.target.value)}
               disabled={saving}
               placeholder="0"
-              className={`w-full rounded-xl border bg-gray-800/50 px-4 py-2.5 text-sm text-white
+              className={`w-full rounded-xl border bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary
                          outline-none transition-all focus:ring-2
                          disabled:opacity-50
                          ${hasOverflow
-                           ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20'
-                           : 'border-white/10 focus:border-blue-500 focus:ring-blue-500/20'
-                         }`}
+                  ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20'
+                  : 'border-am-border-default focus:border-blue-500 focus:ring-blue-500/20'
+                }`}
             />
           </div>
         </div>
@@ -242,7 +242,7 @@ export default function QuestionTrackerCard({
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-3">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
                     <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
@@ -304,8 +304,8 @@ export default function QuestionTrackerCard({
                   <span className="text-gray-600">·</span>
                   <span className={
                     savedAccuracy >= 80 ? 'font-semibold text-emerald-400' :
-                    savedAccuracy >= 60 ? 'font-semibold text-amber-400' :
-                    'font-semibold text-red-400'
+                      savedAccuracy >= 60 ? 'font-semibold text-amber-400' :
+                        'font-semibold text-red-400'
                   }>
                     Taxa de acerto: {savedAccuracy}%
                   </span>
@@ -320,9 +320,7 @@ export default function QuestionTrackerCard({
               exit={{ opacity: 0 }}
               onClick={handleSave}
               disabled={!isValid || saving || hasOverflow}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-4 py-2.5 text-sm font-medium text-white
-                         shadow-lg shadow-blue-500/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110
-                         disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+              className="flex w-full items-center justify-center gap-2 rounded-am-md border border-am-border-default bg-am-surface-elevated px-4 py-2.5 text-am-body-sm font-medium text-am-text-primary shadow-am-sm transition-colors hover:bg-am-surface-subtle hover:border-am-border-strong disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
             >
               {saving ? (
                 <>

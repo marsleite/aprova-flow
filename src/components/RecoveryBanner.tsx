@@ -48,7 +48,7 @@ export default function RecoveryBanner({ consistency, onActivateRecovery }: Reco
                             <AlertCircle className="h-5 w-5" />
                         </div>
                         <div>
-                            <h3 className="text-sm font-bold text-white">Semana em Risco!</h3>
+                            <h3 className="text-sm font-bold text-am-text-primary">Semana em Risco!</h3>
                             <p className="mt-0.5 text-xs text-red-200/80">
                                 Notamos uma queda no seu ritmo de estudo. Ative o modo recuperação para a IA recalcular uma
                                 rota cirúrgica focada apenas nos seus Gaps Críticos.
@@ -62,14 +62,14 @@ export default function RecoveryBanner({ consistency, onActivateRecovery }: Reco
                                 setDismissed(true);
                                 onActivateRecovery();
                             }}
-                            className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-red-500/25 transition-all hover:scale-105 hover:shadow-red-500/40 sm:flex-none active:scale-95"
+                            className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2 text-sm font-bold text-am-text-primary shadow-lg shadow-red-500/25 transition-all hover:scale-105 hover:shadow-red-500/40 sm:flex-none active:scale-95"
                         >
                             <Zap className="h-4 w-4" />
                             Modo Recuperação
                         </button>
                         <button
                             onClick={() => setDismissed(true)}
-                            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-[#666] transition-colors hover:bg-white/10 hover:text-white"
+                            className="flex h-9 w-9 items-center justify-center rounded-xl bg-am-surface-subtle text-am-text-secondary transition-colors hover:bg-am-surface-subtle hover:text-am-text-primary"
                         >
                             <X className="h-4 w-4" />
                         </button>

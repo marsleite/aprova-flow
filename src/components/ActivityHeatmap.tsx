@@ -26,11 +26,11 @@ const DISPLAY_WEEKS = 25;
 const DAY_LABELS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
 const LEVEL_INLINE: Record<number, string> = {
-  0: 'rgba(255,255,255,0.04)',
-  1: 'rgba(30,58,138,0.65)',
-  2: 'rgba(29,78,216,0.8)',
-  3: '#3b82f6',
-  4: '#60a5fa',
+  0: 'var(--color-am-surface-subtle)',
+  1: '#8CB4FF', // aprovaBlue 300
+  2: '#5E93FF', // aprovaBlue 400
+  3: '#3D74F6', // aprovaBlue 500
+  4: '#2E5ED9', // aprovaBlue 600
 };
 
 interface DayCell {
@@ -155,9 +155,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
 
   if (loading) {
     return (
-      <div className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0E111B] p-5"
-        style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
-      >
+      <div className="flex h-full w-full flex-col min-h-0">
         <div className="mb-3 h-5 w-28 rounded-lg shimmer" />
         <div className="flex-1 rounded-xl shimmer" />
         <div className="mt-3 h-3 w-32 rounded shimmer" />
@@ -166,22 +164,16 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0E111B] p-5"
-      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
-    >
+    <div className="flex h-full w-full flex-col min-h-0">
       {/* Header */}
       <div className="mb-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#3150AA]/10">
-            <CalendarDays className="h-3.5 w-3.5 text-[#F59768]" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-am-brand-primary/10">
+            <CalendarDays className="h-3.5 w-3.5 text-am-brand-primary" />
           </div>
           <div>
-            <p className="text-sm font-bold text-white">Activity</p>
-            <p className="text-[10px] text-[#666]">
+            <p className="text-sm font-bold text-am-text-primary">Activity</p>
+            <p className="text-[10px] text-am-text-secondary">
               {totalDays} {totalDays === 1 ? 'dia' : 'dias'} · últimas {DISPLAY_WEEKS} semanas
             </p>
           </div>
@@ -196,7 +188,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
           <div className="flex flex-col gap-0.5 shrink-0 pr-1.5">
             {DAY_LABELS.map((label, i) => (
               <div key={i} className="flex flex-1 items-center justify-end">
-                <span className="text-[9px] font-medium text-[#666]">{label}</span>
+                <span className="text-[9px] font-medium text-am-text-secondary">{label}</span>
               </div>
             ))}
           </div>
@@ -215,11 +207,9 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
                   <button
                     key={dayIdx}
                     onClick={() => setSelectedDay(isSelected ? null : cell)}
-                    className={`flex-1 rounded-[3px] transition-all duration-150 hover:brightness-150 ${
-                      isToday ? 'ring-1 ring-violet-400/70 ring-offset-1 ring-offset-[#0f1825]' : ''
-                    } ${
-                      isSelected ? 'ring-1 ring-white/60 ring-offset-1 ring-offset-[#0f1825]' : ''
-                    }`}
+                    className={`flex-1 rounded-[3px] transition-all duration-150 hover:brightness-150 ${isToday ? 'ring-1 ring-violet-400/70 ring-offset-1 ring-offset-[#0f1825]' : ''
+                      } ${isSelected ? 'ring-1 ring-white/60 ring-offset-1 ring-offset-[#0f1825]' : ''
+                      }`}
                     style={{ background: LEVEL_INLINE[cell.level], minHeight: 0 }}
                     title={
                       cell.totalSeconds > 0
@@ -239,7 +229,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
           {Array.from({ length: DISPLAY_WEEKS }).map((_, i) => (
             <div key={i} className="flex-1 min-w-0 text-center">
               {(i + 1) % 5 === 0 || i === 0 ? (
-                <span className="text-[8px] text-slate-700">{i + 1}</span>
+                <span className="text-[8px] text-am-text-tertiary">{i + 1}</span>
               ) : null}
             </div>
           ))}
@@ -248,11 +238,11 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
 
       {/* Footer — legend + total */}
       <div className="mt-2 flex items-center justify-between shrink-0">
-        <span className="text-[11px] font-medium text-[#666]">
+        <span className="text-[11px] font-medium text-am-text-secondary">
           {formatDuration(totalSeconds)}
         </span>
         <div className="flex items-center gap-1">
-          <span className="text-[8px] text-slate-700 mr-0.5">Menos</span>
+          <span className="text-[8px] text-am-text-tertiary mr-0.5">Menos</span>
           {[0, 1, 2, 3, 4].map((level) => (
             <div
               key={level}
@@ -260,7 +250,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
               style={{ background: LEVEL_INLINE[level] }}
             />
           ))}
-          <span className="text-[8px] text-slate-700 ml-0.5">Mais</span>
+          <span className="text-[8px] text-am-text-tertiary ml-0.5">Mais</span>
         </div>
       </div>
 
@@ -273,27 +263,27 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
             exit={{ opacity: 0, height: 0 }}
             className="mt-2 overflow-hidden shrink-0"
           >
-            <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3">
+            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold text-white">{selectedDay.date}</span>
-                <button onClick={() => setSelectedDay(null)} className="text-[#666] hover:text-[#666]">
+                <span className="text-xs font-semibold text-am-text-primary">{selectedDay.date}</span>
+                <button onClick={() => setSelectedDay(null)} className="text-am-text-secondary hover:text-am-text-secondary">
                   <X className="h-3 w-3" />
                 </button>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                <div className="flex items-center gap-1 rounded-lg bg-[#3150AA]/10 px-2 py-1">
-                  <Clock className="h-2.5 w-2.5 text-[#F59768]" />
-                  <span className="text-xs font-medium text-[#F59768]/80">{formatDuration(selectedDay.totalSeconds)}</span>
+                <div className="flex items-center gap-1 rounded-lg bg-am-brand-primary/10 px-2 py-1">
+                  <Clock className="h-2.5 w-2.5 text-am-brand-primary" />
+                  <span className="text-xs font-medium text-am-brand-primary">{formatDuration(selectedDay.totalSeconds)}</span>
                 </div>
-                <div className="flex items-center gap-1 rounded-lg bg-[#3150AA]/10 px-2 py-1">
-                  <span className="text-xs text-violet-300">
+                <div className="flex items-center gap-1 rounded-lg bg-am-brand-primary/10 px-2 py-1">
+                  <span className="text-xs text-am-brand-primary font-medium">
                     {selectedDay.sessionCount} {selectedDay.sessionCount === 1 ? 'sessão' : 'sessões'}
                   </span>
                 </div>
                 {selectedDay.subjects.map((s) => (
-                  <div key={s} className="flex items-center gap-1 rounded-lg bg-white/[0.04] px-2 py-1">
-                    <BookOpen className="h-2.5 w-2.5 text-[#666]" />
-                    <span className="text-xs text-[#666]">{s}</span>
+                  <div key={s} className="flex items-center gap-1 rounded-lg bg-am-surface-subtle border border-am-border-default px-2 py-1">
+                    <BookOpen className="h-2.5 w-2.5 text-am-text-secondary" />
+                    <span className="text-xs text-am-text-secondary">{s}</span>
                   </div>
                 ))}
               </div>
@@ -308,12 +298,12 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
             exit={{ opacity: 0, height: 0 }}
             className="mt-2 overflow-hidden shrink-0"
           >
-            <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-2 text-center">
-              <p className="text-xs text-[#666]">Nenhum estudo registrado neste dia</p>
+            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-2 text-center">
+              <p className="text-xs text-am-text-secondary">Nenhum estudo registrado neste dia</p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

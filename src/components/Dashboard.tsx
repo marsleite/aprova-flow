@@ -70,6 +70,7 @@ import PlanManager from '@/components/PlanManager';
 import BenchmarkCard from './BenchmarkCard';
 import Calendar from './Calendar';
 import ScheduleModal from './ScheduleModal';
+import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
 import { TrendingUp, MessageCircle, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { isAdminIdentity } from '@/lib/admin';
@@ -118,7 +119,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [creatingSessionPlan, setCreatingSessionPlan] = useState(false);
   const [planLimitNotice, setPlanLimitNotice] = useState<string | null>(null);
-  
+
   // ---- Estados do Calendário ----
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -261,7 +262,7 @@ export default function Dashboard() {
     setLastSavedSession(session);
     await fetchData();
     setSessionsRefreshKey((prev) => prev + 1);
-    
+
     // Atualiza benchmark do usuário
     if (user && consistency?.weeklyGoalHours && consistency.weeklyTotalSeconds) {
       try {
@@ -385,12 +386,12 @@ export default function Dashboard() {
           animate="show"
           className="mb-8"
         >
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">
+          <h2 className="text-2xl font-bold text-am-text-primary sm:text-3xl">
             Olá, {user.displayName?.split(' ')[0] || 'Estudante'} 👋
           </h2>
           <p className="mt-1 text-gray-400">
             {activePlanObj
-              ? <>Focando em <span className="font-medium text-white" style={{ color: activePlanObj.color }}>{activePlanObj.name}</span></>
+              ? <>Focando em <span className="font-medium text-am-text-primary" style={{ color: activePlanObj.color }}>{activePlanObj.name}</span></>
               : 'Acompanhe seu progresso e mantenha a consistência nos estudos.'}
           </p>
           <p className="mt-2 text-xs text-gray-500">
@@ -434,12 +435,23 @@ export default function Dashboard() {
         >
           <div className="mb-4 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-[#F59768]" />
-            <h3 className="text-lg font-semibold text-white">Visão Geral</h3>
+            <h3 className="text-lg font-semibold text-am-text-primary">Visão Geral</h3>
           </div>
           <SummaryCards summary={summary} loading={loading} />
         </motion.div>
 
-        {/* Linha 1: Cronômetro + Radar */}
+        {/* Linha 2.5: Núcleo Estratégico e Recomendações */}
+        <motion.div
+          custom={2.5}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="show"
+          className="mb-8"
+        >
+          <PlanEngineSnapshotCard planId={filterPlanId} />
+        </motion.div>
+
+        {/* Linha 3: Cronômetro + Radar */}
         <motion.div
           custom={3}
           variants={sectionVariants}
@@ -504,7 +516,7 @@ export default function Dashboard() {
                 <div className="flex-1">
                   <div className="mb-2 flex items-center gap-2">
                     <BookOpen className="h-6 w-6 text-[#F59768]" />
-                    <h3 className="text-xl font-semibold text-white">Provas & Simulados</h3>
+                    <h3 className="text-xl font-semibold text-am-text-primary">Provas & Simulados</h3>
                   </div>
                   <p className="mb-4 text-sm text-gray-400">
                     Pratique com provas oficiais, crie simulados personalizados e teste seus conhecimentos
@@ -724,7 +736,7 @@ export default function Dashboard() {
             />
           ) : (
             <div className="rounded-xl border border-[#3150AA]/30 bg-[#3150AA]/10 p-6">
-              <h3 className="text-lg font-semibold text-white">Calendário avançado</h3>
+              <h3 className="text-lg font-semibold text-am-text-primary">Calendário avançado</h3>
               <p className="mt-2 text-sm text-blue-100/90">
                 Disponível nos planos Pro e Premium para organizar sessões com agenda mensal.
               </p>
@@ -742,7 +754,7 @@ export default function Dashboard() {
         className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#F59768] to-[#3150AA] shadow-xl shadow-[#3150AA]/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 sm:bottom-6 sm:right-6"
         title="Conversar com o Coach IA"
       >
-        <MessageCircle className="h-6 w-6 text-white" />
+        <MessageCircle className="h-6 w-6 text-am-text-primary" />
       </motion.button>
 
       {/* Toast pós-sessão */}

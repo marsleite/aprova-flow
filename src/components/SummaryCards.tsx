@@ -52,10 +52,10 @@ function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: Car
       variants={item}
       whileHover={{ scale: 1.03, y: -2 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className={`relative overflow-hidden rounded-xl border border-white/[0.07] bg-[#0E111B] p-5`}
+      className={`relative overflow-hidden rounded-xl border border-am-border-default bg-am-surface-elevated p-5`}
     >
       {/* Decoração de fundo */}
-      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/[0.02]" />
+      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-am-surface-subtle" />
 
       <div className="relative z-10">
         <div className="mb-4 flex items-center justify-between">
@@ -63,12 +63,12 @@ function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: Car
             <div className={`rounded-xl ${iconBg} p-2.5 shadow-lg ${glowColor}`}>
               {icon}
             </div>
-            <span className="text-xs font-medium text-[#666]">{title}</span>
+            <span className="text-xs font-medium text-am-text-secondary">{title}</span>
           </div>
-          <TrendingUp className="h-3.5 w-3.5 text-slate-700" />
+          <TrendingUp className="h-3.5 w-3.5 text-am-text-tertiary" />
         </div>
-        <p className="text-2xl font-bold tracking-tight text-white">{value}</p>
-        <p className="mt-1 text-xs text-[#666]">{subtitle}</p>
+        <p className="text-2xl font-bold tracking-tight text-am-text-primary">{value}</p>
+        <p className="mt-1 text-xs text-am-text-secondary">{subtitle}</p>
       </div>
     </motion.div>
   );
@@ -76,7 +76,7 @@ function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: Car
 
 function CardSkeleton() {
   return (
-    <div className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5">
+    <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
       <div className="mb-3 flex items-center gap-3">
         <div className="h-8 w-8 rounded-lg shimmer" />
         <div className="h-3 w-24 rounded shimmer" />

@@ -60,14 +60,14 @@ function SessionItem({ session }: { session: StudySession }) {
   return (
     <motion.div
       variants={item}
-      className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 transition-colors hover:bg-white/[0.04]"
+      className="flex items-center gap-3 rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-3 transition-colors hover:bg-am-surface-subtle"
     >
       {/* Dot colorido */}
       <div className={`h-2 w-2 shrink-0 rounded-full ${color.dot}`} />
 
       {/* Info */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-white">{session.subject}</p>
+        <p className="truncate text-sm font-medium text-am-text-primary">{session.subject}</p>
         <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
@@ -123,7 +123,7 @@ export default function RecentSessions({ sessions, loading }: RecentSessionsProp
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
-      className="rounded-xl border border-white/[0.07] bg-[#0E111B] p-5"
+      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
@@ -131,8 +131,8 @@ export default function RecentSessions({ sessions, loading }: RecentSessionsProp
           <History className="h-4 w-4 text-amber-400" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-white">Sessões Recentes</h2>
-          <p className="text-xs text-[#666]">Últimas sessões de estudo</p>
+          <h2 className="text-sm font-semibold text-am-text-primary">Sessões Recentes</h2>
+          <p className="text-xs text-am-text-secondary">Últimas sessões de estudo</p>
         </div>
       </div>
 

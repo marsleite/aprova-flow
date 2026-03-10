@@ -71,7 +71,7 @@ export default function PlanSelector({
       {/* Botão principal */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-gray-800/50 px-3 py-2 text-sm text-gray-300 transition-all hover:border-white/20 hover:bg-gray-800 sm:w-auto sm:py-1.5"
+        className="flex w-full items-center gap-2 rounded-lg border border-am-border-default bg-gray-800/50 px-3 py-2 text-sm text-gray-300 transition-all hover:border-am-border-default hover:bg-gray-800 sm:w-auto sm:py-1.5"
       >
         {activePlan ? (
           <span
@@ -97,7 +97,7 @@ export default function PlanSelector({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -5, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute left-0 right-0 top-full z-50 mt-1.5 min-w-[200px] overflow-hidden rounded-xl border border-white/10 bg-gray-900 shadow-xl shadow-black/40 sm:left-auto sm:right-0 sm:w-[320px]"
+            className="absolute left-0 right-0 top-full z-50 mt-1.5 min-w-[200px] overflow-hidden rounded-xl border border-am-border-default bg-gray-900 shadow-xl shadow-black/40 sm:left-auto sm:right-0 sm:w-[320px]"
           >
             {/* Opção "Todos" */}
             <button
@@ -106,14 +106,14 @@ export default function PlanSelector({
                 setOpen(false);
               }}
               className={`flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm transition-colors
-                ${!activePlanId ? 'bg-white/5 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+                ${!activePlanId ? 'bg-am-surface-subtle text-am-text-primary' : 'text-gray-400 hover:bg-am-surface-subtle hover:text-am-text-primary'}`}
             >
               <Layers className="h-3.5 w-3.5 text-gray-500" />
               <span>Todos os Planos</span>
             </button>
 
             {/* Divider */}
-            <div className="border-t border-white/5" />
+            <div className="border-t border-am-border-default" />
 
             {/* Planos */}
             {plans.map((plan) => (
@@ -124,7 +124,7 @@ export default function PlanSelector({
                     setOpen(false);
                   }}
                   className={`flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm transition-colors
-                    ${activePlanId === plan.id ? 'bg-white/5 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+                    ${activePlanId === plan.id ? 'bg-am-surface-subtle text-am-text-primary' : 'text-gray-400 hover:bg-am-surface-subtle hover:text-am-text-primary'}`}
                 >
                   <span
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -167,7 +167,7 @@ export default function PlanSelector({
                       <button
                         onClick={() => handleDelete(plan.id!)}
                         disabled={deleting}
-                        className="rounded bg-red-600 px-2 py-0.5 text-xs text-white transition hover:bg-red-500 disabled:opacity-50"
+                        className="rounded bg-red-600 px-2 py-0.5 text-xs text-am-text-primary transition hover:bg-red-500 disabled:opacity-50"
                       >
                         {deleting ? '...' : 'Sim'}
                       </button>
@@ -184,7 +184,7 @@ export default function PlanSelector({
             ))}
 
             {/* Divider + Novo */}
-            <div className="border-t border-white/5" />
+            <div className="border-t border-am-border-default" />
             <button
               onClick={() => {
                 onCreatePlan();

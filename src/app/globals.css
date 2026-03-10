@@ -1,7 +1,9 @@
 @import "tailwindcss";
+@import "../design-system/foundations/theme.css";
 
+/* Maintain legacy custom properties so the current app doesnt break */
 @theme inline {
-  /* ── RDS: Refract Design System ── */
+  /* Legacy */
   --color-background: #0A0A0A;
   --color-foreground: #e2e8f0;
   --color-surface: #0E111B;
@@ -9,174 +11,146 @@
   --color-primary: #3150AA;
   --color-accent: #F59768;
   --color-muted: #666666;
-  --color-card-border: rgba(255, 255, 255, 0.10);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-brand: var(--font-inter-tight);
-  --animate-timer-glow: timer-glow 2s ease-in-out infinite;
+
+  /* New Semantic Tokens (Mapped into TW v4) */
+  --color-am-brand-primary: var(--am-brand-primary);
+  --color-am-brand-primary-hover: var(--am-brand-primary-hover);
+  --color-am-brand-secondary: var(--am-brand-secondary);
+  --color-am-brand-gradient-start: var(--am-brand-gradient-start);
+  --color-am-brand-gradient-end: var(--am-brand-gradient-end);
+
+  --color-am-canvas: var(--am-bg-canvas);
+  --color-am-surface: var(--am-bg-surface);
+  --color-am-surface-subtle: var(--am-bg-surface-subtle);
+  --color-am-surface-elevated: var(--am-bg-elevated);
+
+  --color-am-border-default: var(--am-border-default);
+  --color-am-border-strong: var(--am-border-strong);
+
+  --color-am-text-primary: var(--am-text-primary);
+  --color-am-text-secondary: var(--am-text-secondary);
+  --color-am-text-tertiary: var(--am-text-tertiary);
+  --color-am-text-inverse: var(--am-text-inverse);
+
+  --color-am-ai-default: var(--am-ai-default);
+  --color-am-ai-subtle: var(--am-ai-subtle);
+  --color-am-ai-border: var(--am-ai-border);
+
+  --radius-am-sm: var(--am-radius-sm);
+  --radius-am-md: var(--am-radius-md);
+  --radius-am-lg: var(--am-radius-lg);
+  --radius-am-xl: var(--am-radius-xl);
+  --radius-am-pill: var(--am-radius-pill);
+
+  --font-manrope: var(--font-manrope);
+
   --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
   --animate-shimmer: shimmer 2s linear infinite;
-  --animate-glow-pulse: glow-pulse 2.5s ease-in-out infinite;
 }
 
-/* ── RDS Global Theme ── */
+/* ━━━ Global Settings ━━━ */
 :root {
-  --background: #0A0A0A;
-  --foreground: #e2e8f0;
-  --surface: #0E111B;
-  --primary: #3150AA;
-  --accent: #F59768;
-  --muted: #666666;
-  --card-border: rgba(255, 255, 255, 0.10);
-  --identity-grad: radial-gradient(57.04% 86.47% at 50% 105%, #F59768 0%, #3150AA 100%);
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 html {
+  font-family: var(--font-manrope), sans-serif;
   scroll-behavior: smooth;
+  /* Dark mode is handled via class 'dark' applied on <html> */
+}
+
+@utility bg-am-brand-gradient {
+  background-image: linear-gradient(135deg, var(--am-brand-gradient-start) 0%, var(--am-brand-gradient-end) 100%);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* Using new tokens for global canvas and text */
+  background-color: var(--am-bg-canvas);
+  color: var(--am-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ===== RDS Typography: Brand Headings ===== */
 .font-brand {
-  font-family: var(--font-brand), var(--font-sans), sans-serif;
-  letter-spacing: -0.02em;
+  font-family: var(--font-manrope), sans-serif;
+  letter-spacing: -0.03em;
 }
 
-/* ===== Timer Glow (Refract Blue) ===== */
-@keyframes timer-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(49, 80, 170, 0.15),
-                0 0 40px rgba(49, 80, 170, 0.08);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(49, 80, 170, 0.35),
-                0 0 60px rgba(49, 80, 170, 0.18);
-  }
+.font-mono {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-/* ===== Glow Pulse (Amber) ===== */
-@keyframes glow-pulse {
-  0%, 100% {
-    box-shadow: 0 0 12px rgba(245, 151, 104, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 24px rgba(245, 151, 104, 0.25);
-  }
-}
-
-/* ===== Pulse slow ===== */
-@keyframes pulse-slow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-/* ===== Shimmer loading ===== */
+/* ===== Animations ===== */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.03) 25%,
-    rgba(255,255,255,0.07) 50%,
-    rgba(255,255,255,0.03) 75%
-  );
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.03) 25%,
+      rgba(255, 255, 255, 0.07) 50%,
+      rgba(255, 255, 255, 0.03) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s linear infinite;
 }
 
-/* ===== RDS: Identity Button ===== */
-.rds-btn-identity {
-  background: var(--identity-grad);
-  color: white;
-  border-radius: 9999px;
-  font-weight: 600;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transition: all 0.2s ease;
-}
-.rds-btn-identity:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
-}
-.rds-btn-identity:active {
-  transform: translateY(0);
+@keyframes timer-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(61, 116, 246, 0.15),
+      0 0 40px rgba(61, 116, 246, 0.08);
+    /* Updated to new blue */
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(61, 116, 246, 0.35),
+      0 0 60px rgba(61, 116, 246, 0.18);
+  }
 }
 
-/* ===== RDS: Glass Surface ===== */
-.rds-glass {
-  background: rgba(14, 17, 27, 0.6);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 0.6px solid rgba(255, 255, 255, 0.10);
+@keyframes glow-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 0 24px rgba(139, 92, 246, 0.25);
+  }
 }
 
-/* ===== RDS: Engineering Card ===== */
-.rds-card {
-  background: var(--surface);
-  border: 0.6px solid rgba(255, 255, 255, 0.10);
-  border-radius: 1rem;
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
 }
 
-/* ===== Gradient borders (Refract) ===== */
-.gradient-border {
-  position: relative;
-}
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(49,80,170,0.3), rgba(245,151,104,0.3), transparent);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* ===== Card glass effect (legacy compat) ===== */
-.card-glass {
-  background: rgba(14, 17, 27, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-}
-
-/* ===== Sidebar active indicator ===== */
-.nav-active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 60%;
-  border-radius: 0 2px 2px 0;
-  background: linear-gradient(to bottom, #3150AA, #F59768);
-}
-
-/* ===== Focus & selection ===== */
+/* ===== Utilities / Layout ===== */
 ::selection {
-  background: rgba(49, 80, 170, 0.3);
-  color: #e2e8f0;
+  background: var(--am-text-primary);
+  color: var(--am-bg-canvas);
 }
 
 *:focus-visible {
-  outline: 2px solid rgba(49, 80, 170, 0.5);
+  outline: 2px solid rgba(255, 255, 255, 0.2);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--am-radius-sm);
 }
 
-/* ===== Scrollbar ===== */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -187,94 +161,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--am-border-strong);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* ===== Select option ===== */
-option {
-  background: #0E111B;
-  color: #e2e8f0;
-}
-
-/* ===== Status indicator dot ===== */
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #F59768;
-  box-shadow: 0 0 6px rgba(245, 151, 104, 0.6);
-}
-
-.status-dot-blue {
-  background: #3150AA;
-  box-shadow: 0 0 6px rgba(49, 80, 170, 0.6);
-}
-
-/* ===== Chart tooltip ===== */
-.recharts-tooltip-wrapper .recharts-default-tooltip {
-  background: #0E111B !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  border-radius: 8px !important;
-  color: #e2e8f0 !important;
-}
-
-/* ===== App Layout ===== */
-.app-layout {
-  display: flex;
-  min-height: 100vh;
-  background: var(--background);
-}
-
-.app-sidebar {
-  width: 240px;
-  min-height: 100vh;
-  background: var(--surface);
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 40;
-}
-
-.app-main {
-  flex: 1;
-  margin-left: 240px;
-  min-height: 100vh;
-}
-
-@media (max-width: 1024px) {
-  .app-sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-  .app-sidebar.open {
-    transform: translateX(0);
-  }
-  .app-main {
-    margin-left: 0;
-  }
-}
-
-/* ===== RDS: Radial Mask Grid ===== */
-.rds-grid-bg {
-  position: relative;
-}
-.rds-grid-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 8px 8px;
-  mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 30%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 30%, transparent 70%);
+  background: var(--am-text-tertiary);
 }

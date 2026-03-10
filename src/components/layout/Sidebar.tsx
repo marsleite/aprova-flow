@@ -25,6 +25,7 @@ import {
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AccountPlanModal from '@/components/AccountPlanModal';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const NAV_ITEMS = [
   {
@@ -128,18 +129,18 @@ export default function Sidebar({
       </AnimatePresence>
 
       <aside
-        className={`app-sidebar ${mobileOpen ? 'open' : ''} flex flex-col`}
+        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-am-canvas border-r border-white/5 transition-transform duration-300 lg:translate-x-0 flex flex-col ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 border-b border-white/[0.07] px-5 py-5">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full shadow-lg" style={{ background: 'var(--identity-grad)', boxShadow: '0 0 16px rgba(245,151,104,0.2)' }}>
-            <Zap className="h-4.5 w-4.5 text-white" />
+        <div className="flex items-center gap-3 px-6 py-6 border-b border-white/5">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-am-surface-elevated ring-1 ring-white/10">
+            <Zap className="h-4 w-4 text-am-text-primary" />
           </div>
           <div className="min-w-0">
-            <p className="font-brand text-sm font-bold text-white leading-none">
-              Aprova<span className="text-[#F59768]">Mind</span>
+            <p className="font-brand text-[15px] font-medium tracking-tight text-am-text-primary leading-none mt-1">
+              AprovaMind
             </p>
-            <p className="mt-0.5 text-[10px] text-[#666] uppercase tracking-wider font-mono">
+            <p className="mt-1 text-[9px] text-am-text-tertiary uppercase tracking-[0.2em] font-mono">
               Strategic Engine
             </p>
           </div>
@@ -147,7 +148,7 @@ export default function Sidebar({
           {onToggleMobile && (
             <button
               onClick={onToggleMobile}
-              className="ml-auto text-[#666] hover:text-white lg:hidden"
+              className="ml-auto text-am-text-tertiary hover:text-am-text-primary lg:hidden"
             >
               <X className="h-4 w-4" />
             </button>
@@ -159,7 +160,7 @@ export default function Sidebar({
           <div className="relative mx-3 mt-3" ref={planPickerRef}>
             <button
               onClick={() => setPlanPickerOpen((v) => !v)}
-              className="flex w-full items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.03] px-3 py-2 text-left transition-colors hover:bg-white/[0.06]"
+              className="flex w-full items-center gap-2 rounded-full border border-am-border-default bg-am-surface-subtle px-3 py-2 text-left transition-colors hover:bg-am-surface-subtle"
             >
               <div
                 className="h-2 w-2 flex-shrink-0 rounded-full"
@@ -168,11 +169,11 @@ export default function Sidebar({
                   boxShadow: `0 0 6px ${activePlan?.color ?? '#666'}80`,
                 }}
               />
-              <span className="min-w-0 flex-1 truncate text-xs text-slate-300 font-mono">
+              <span className="min-w-0 flex-1 truncate text-xs text-am-text-secondary font-mono">
                 {activePlan?.name ?? 'Todos os Editais'}
               </span>
               <ChevronRight
-                className={`h-3 w-3 flex-shrink-0 text-[#666] transition-transform duration-150 ${planPickerOpen ? 'rotate-90' : ''
+                className={`h-3 w-3 flex-shrink-0 text-am-text-secondary transition-transform duration-150 ${planPickerOpen ? 'rotate-90' : ''
                   }`}
               />
             </button>
@@ -184,7 +185,7 @@ export default function Sidebar({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.97 }}
                   transition={{ duration: 0.12 }}
-                  className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-white/[0.10] bg-[#0E111B] shadow-xl"
+                  className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-am-border-default bg-[#0E111B] shadow-xl"
                 >
                   {/* Geral — aggregate all plans */}
                   <button
@@ -192,14 +193,14 @@ export default function Sidebar({
                       onPlanChange?.(null);
                       setPlanPickerOpen(false);
                     }}
-                    className={`flex w-full items-center gap-2.5 border-b border-white/[0.07] px-3 py-2.5 text-left text-xs transition-colors ${activePlanId === null
+                    className={`flex w-full items-center gap-2.5 border-b border-am-border-default px-3 py-2.5 text-left text-xs transition-colors ${activePlanId === null
                       ? 'bg-[#3150AA]/15 text-[#F59768]'
-                      : 'text-[#666] hover:bg-white/[0.05] hover:text-slate-200'
+                      : 'text-am-text-secondary hover:bg-am-surface-subtle hover:text-slate-200'
                       }`}
                   >
                     <div className="h-2 w-2 flex-shrink-0 rounded-full bg-[#666]" />
                     <span className="flex-1 truncate font-medium font-mono">Todos os Editais</span>
-                    <span className="text-[10px] text-[#666]">Agregado</span>
+                    <span className="text-[10px] text-am-text-secondary">Agregado</span>
                     {activePlanId === null && (
                       <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#F59768]" />
                     )}
@@ -216,7 +217,7 @@ export default function Sidebar({
                         }}
                         className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-xs transition-colors ${isActive
                           ? 'bg-[#3150AA]/15 text-[#F59768]'
-                          : 'text-[#666] hover:bg-white/[0.05] hover:text-slate-200'
+                          : 'text-am-text-secondary hover:bg-am-surface-subtle hover:text-slate-200'
                           }`}
                       >
                         <div
@@ -237,8 +238,8 @@ export default function Sidebar({
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-          <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-[#666] font-mono">
+        <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
+          <p className="mb-4 px-2 text-[10px] uppercase tracking-widest text-am-text-tertiary font-mono">
             Navegação
           </p>
           {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
@@ -249,17 +250,17 @@ export default function Sidebar({
                 href={href}
                 onClick={() => mobileOpen && onToggleMobile?.()}
                 className={`
-                  relative flex items-center gap-3 rounded-full px-3 py-2.5 text-sm transition-all duration-150
+                  relative flex items-center gap-3 rounded-lg px-2 py-2 text-[13px] font-medium transition-all duration-150
                   ${isActive
-                    ? 'bg-[#3150AA]/15 text-[#F59768] font-medium'
-                    : 'text-[#666] hover:bg-white/[0.04] hover:text-slate-200'
+                    ? 'bg-white/5 text-am-text-primary'
+                    : 'text-am-text-secondary hover:bg-white/5 hover:text-am-text-primary'
                   }
                 `}
               >
-                <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-[#F59768]' : 'text-[#666]'}`} />
+                <Icon className={`h-[18px] w-[18px] flex-shrink-0 ${isActive ? 'text-am-text-primary' : 'text-am-text-tertiary'}`} strokeWidth={isActive ? 2 : 1.5} />
                 <span className="truncate">{label}</span>
                 {isActive && (
-                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#F59768]" />
+                  <span className="absolute right-2 h-1 w-1 rounded-full bg-am-brand-primary" />
                 )}
               </Link>
             );
@@ -267,58 +268,61 @@ export default function Sidebar({
         </nav>
 
         {/* Bottom section */}
-        <div className="border-t border-white/[0.07] p-3 space-y-1">
+        <div className="border-t border-am-border-default p-3 space-y-1">
           {/* Plan tier badge */}
           <button
             onClick={() => setAccountModalOpen(true)}
-            className="flex w-full items-center gap-2 rounded-full px-3 py-2 text-xs text-[#666] hover:bg-white/[0.04] hover:text-slate-200 transition-colors"
+            className="flex w-full items-center gap-2 rounded-full px-3 py-2 text-xs text-am-text-secondary hover:bg-am-surface-subtle hover:text-slate-200 transition-colors"
           >
             <Crown className="h-3.5 w-3.5 text-[#F59768] flex-shrink-0" />
             <span className="uppercase font-medium tracking-wide font-mono">{planTier}</span>
-            <span className="ml-auto text-[10px] text-[#666] hover:text-slate-400 font-mono">
+            <span className="ml-auto text-[10px] text-am-text-secondary hover:text-am-text-secondary font-mono">
               Gerenciar
             </span>
           </button>
 
-          {/* Settings */}
-          <Link
-            href="/settings"
-            className="flex items-center gap-3 rounded-full px-3 py-2 text-sm text-[#666] hover:bg-white/[0.04] hover:text-slate-200 transition-colors"
-          >
-            <Settings className="h-4 w-4 flex-shrink-0 text-[#666]" />
-            <span>Configurações</span>
-          </Link>
+          {/* Settings & Theme */}
+          <div className="flex items-center gap-1">
+            <Link
+              href="/settings"
+              className="flex-1 flex items-center gap-3 rounded-full px-3 py-2 text-sm text-am-text-secondary hover:bg-am-surface-subtle hover:text-slate-200 transition-colors"
+            >
+              <Settings className="h-4 w-4 flex-shrink-0 text-am-text-secondary" />
+              <span>Configurações</span>
+            </Link>
+            <ThemeToggle />
+          </div>
 
           {/* User + logout */}
           {user && (
-            <div className="flex items-center gap-2 rounded-full px-3 py-2">
+            <div className="flex items-center gap-2 rounded-lg px-2 py-2">
               {user.photoURL ? (
                 <Image
                   src={user.photoURL}
                   alt={user.displayName || 'Avatar'}
-                  width={26}
-                  height={26}
-                  className="rounded-full ring-1 ring-white/10 flex-shrink-0"
+                  width={24}
+                  height={24}
+                  className="rounded-full ring-1 ring-white/10 flex-shrink-0 grayscale opacity-80"
                 />
               ) : (
-                <div className="flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-[#3150AA]/30 text-xs text-[#F59768]">
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-am-surface-elevated text-[10px] text-am-text-secondary font-mono ring-1 ring-white/10">
                   {(user.displayName || user.email || 'U')[0].toUpperCase()}
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium text-slate-300">
+                <p className="truncate text-xs text-am-text-primary">
                   {user.displayName?.split(' ')[0] || user.email}
                 </p>
-                <p className="truncate text-[10px] text-[#666] font-mono">
+                <p className="truncate text-[9px] text-am-text-tertiary font-mono">
                   {user.email}
                 </p>
               </div>
               <button
                 onClick={logout}
-                className="flex-shrink-0 text-[#666] hover:text-red-400 transition-colors"
+                className="flex-shrink-0 text-am-text-tertiary hover:text-am-error transition-colors p-1"
                 title="Sair"
               >
-                <LogOut className="h-3.5 w-3.5" />
+                <LogOut className="h-[14px] w-[14px]" />
               </button>
             </div>
           )}
@@ -326,7 +330,7 @@ export default function Sidebar({
           {/* System status */}
           <div className="flex items-center gap-2 px-3 py-1.5">
             <div className="status-dot flex-shrink-0" />
-            <span className="text-[10px] text-[#666] font-mono uppercase tracking-wide">AI Engine · Online</span>
+            <span className="text-[10px] text-am-text-secondary font-mono uppercase tracking-wide">AI Engine · Online</span>
           </div>
         </div>
       </aside>
@@ -354,7 +358,7 @@ export function MobileMenuButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-[#666] hover:bg-white/[0.04] hover:text-white transition-colors lg:hidden"
+      className="flex h-9 w-9 items-center justify-center rounded-full border border-am-border-default text-am-text-secondary hover:bg-am-surface-subtle hover:text-am-text-primary transition-colors lg:hidden"
     >
       <Menu className="h-4.5 w-4.5" />
     </button>

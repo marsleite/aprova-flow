@@ -82,8 +82,8 @@ function CustomTick(props: Record<string, unknown>) {
       x={x}
       y={y}
       textAnchor={textAnchor as 'start' | 'middle' | 'end'}
-      fill="#475569"
-      fontSize={10}
+      fill="var(--color-am-text-secondary)"
+      fontSize={11}
       dy={4}
     >
       {payload.value}
@@ -98,9 +98,9 @@ function CustomTooltip({ active, payload }: {
   if (!active || !payload || payload.length === 0) return null;
   const { subject, hours } = payload[0].payload;
   return (
-    <div className="rounded-lg border border-white/[0.08] bg-[#0E111B] px-3 py-2 shadow-xl backdrop-blur-sm">
-      <p className="text-sm font-medium text-white">{subject}</p>
-      <p className="text-sm text-[#F59768]">{formatHours(hours)}</p>
+    <div className="rounded-lg border border-am-border-strong bg-am-surface-elevated px-3 py-2 shadow-xl backdrop-blur-sm">
+      <p className="text-sm font-medium text-am-text-primary">{subject}</p>
+      <p className="text-sm text-am-brand-primary">{formatHours(hours)}</p>
     </div>
   );
 }
@@ -108,7 +108,7 @@ function CustomTooltip({ active, payload }: {
 function ChartSkeleton() {
   return (
     <div className="flex flex-1 items-center justify-center">
-      <div className="h-40 w-40 rounded-full border-2 border-dashed border-white/[0.07] shimmer" />
+      <div className="h-40 w-40 rounded-full border-2 border-dashed border-am-border-default shimmer" />
     </div>
   );
 }
@@ -116,11 +116,11 @@ function ChartSkeleton() {
 function EmptyState() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center">
-      <div className="mb-3 rounded-xl bg-white/[0.03] p-3">
-        <RadarIcon className="h-8 w-8 text-slate-700" />
+      <div className="mb-3 rounded-xl bg-am-surface-subtle p-3">
+        <RadarIcon className="h-8 w-8 text-am-text-tertiary" />
       </div>
-      <p className="text-center text-sm text-[#666]">Nenhuma sessão registrada ainda</p>
-      <p className="mt-1 text-center text-xs text-slate-700">Estude usando o cronômetro para ver seu radar</p>
+      <p className="text-center text-sm text-am-text-secondary">Nenhuma sessão registrada ainda</p>
+      <p className="mt-1 text-center text-xs text-am-text-tertiary">Estude usando o cronômetro para ver seu radar</p>
     </div>
   );
 }
@@ -158,10 +158,10 @@ function FewSubjectsView({ data }: { data: SubjectHours[] }) {
           return (
             <motion.div key={item.subject} variants={barItem}>
               <div className="mb-1.5 flex items-center justify-between">
-                <span className="text-sm font-medium text-white">{item.subject}</span>
-                <span className="text-sm font-semibold text-gray-300">{formatHours(item.hours)}</span>
+                <span className="text-sm font-medium text-am-text-primary">{item.subject}</span>
+                <span className="text-sm font-semibold text-am-text-tertiary">{formatHours(item.hours)}</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.05]">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-am-border-default">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${pct}%` }}
@@ -183,7 +183,7 @@ function FewSubjectsView({ data }: { data: SubjectHours[] }) {
         className="mt-4 flex items-center gap-3 rounded-xl border border-blue-500/15 bg-blue-500/[0.05] px-4 py-3"
       >
         <Lock className="h-4 w-4 shrink-0 text-[#F59768]" />
-        <p className="text-xs text-[#666]">
+        <p className="text-xs text-am-text-secondary">
           Estude mais <span className="font-semibold text-[#F59768]/80">{remaining} {remaining === 1 ? 'matéria' : 'matérias'}</span> para desbloquear o gráfico de radar completo
         </p>
       </motion.div>
@@ -202,28 +202,28 @@ function FullRadarChart({ data }: { data: SubjectHours[] }) {
   }));
 
   return (
-    <div className="flex-1 min-h-[160px]">
+    <div className="flex-1 min-h-[160px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <RadarChart cx="50%" cy="52%" outerRadius="72%" data={chartData}>
-          <PolarGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
+          <PolarGrid stroke="var(--color-am-border-default)" strokeDasharray="3 3" />
           <PolarAngleAxis
             dataKey="abbr"
             tick={(props: Record<string, unknown>) => <CustomTick {...props} />}
           />
           <PolarRadiusAxis
-            tick={{ fill: '#334155', fontSize: 9 }}
+            tick={{ fill: 'var(--color-am-text-tertiary)', fontSize: 10 }}
             tickFormatter={(value: number) => `${value}h`}
             axisLine={false}
           />
           <Radar
             name="Horas"
             dataKey="hours"
-            stroke="#3b82f6"
-            fill="#3b82f6"
+            stroke="var(--color-am-brand-primary)"
+            fill="var(--color-am-brand-primary)"
             fillOpacity={0.15}
             strokeWidth={2}
-            dot={{ r: 3.5, fill: '#3b82f6', stroke: '#60a5fa', strokeWidth: 1 }}
-            activeDot={{ r: 5, fill: '#60a5fa', stroke: '#93c5fd', strokeWidth: 2 }}
+            dot={{ r: 3.5, fill: 'var(--color-am-brand-primary)', stroke: 'var(--color-am-bg-surface)', strokeWidth: 1 }}
+            activeDot={{ r: 5, fill: 'var(--color-am-bg-surface)', stroke: 'var(--color-am-brand-primary)', strokeWidth: 2 }}
           />
           <Tooltip content={<CustomTooltip />} />
         </RadarChart>
@@ -240,26 +240,7 @@ export default function SubjectRadarChart({ data, loading }: SubjectRadarChartPr
   const hasEnoughForRadar = data.length >= 2;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="flex h-full flex-col rounded-2xl border border-white/[0.07] bg-[#0E111B] p-5"
-      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
-    >
-      {/* Header */}
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
-          <RadarIcon className="h-4 w-4 text-indigo-400" />
-        </div>
-        <div>
-          <h2 className="text-sm font-semibold text-white">
-            {hasEnoughForRadar ? 'Radar por Matéria' : 'Progresso por Matéria'}
-          </h2>
-          <p className="text-xs text-[#666]">Distribuição de horas no mês</p>
-        </div>
-      </div>
-
+    <div className="flex h-full w-full flex-col min-h-0">
       {/* Conteúdo */}
       {loading ? (
         <ChartSkeleton />
@@ -273,19 +254,19 @@ export default function SubjectRadarChart({ data, loading }: SubjectRadarChartPr
 
       {/* Legenda (só para o radar completo) */}
       {!loading && data.length > 0 && (
-        <div className="mt-2 flex items-center justify-center gap-4 border-t border-white/5 pt-3">
+        <div className="mt-2 flex items-center justify-center gap-4 border-t border-am-border-default pt-3">
           <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-blue-500" />
-            <span className="text-xs text-[#666]">
+            <span className="h-2 w-2 rounded-full bg-am-brand-primary" />
+            <span className="text-xs text-am-text-secondary">
               {data.length} {data.length === 1 ? 'matéria' : 'matérias'}
             </span>
           </div>
-          <span className="text-xs text-slate-700">|</span>
-          <span className="text-xs text-[#666]">
+          <span className="text-xs text-am-text-tertiary">|</span>
+          <span className="text-xs text-am-text-secondary">
             Total: {data.reduce((acc, d) => acc + d.hours, 0).toFixed(1)}h
           </span>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
