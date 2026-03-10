@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { usePlanContext } from '@/contexts/PlanContext';
 import { getAccuracyAnalytics } from '@/lib/firebase/questions';
 import { SubjectAccuracy } from '@/types';
 import { useEntitlements } from '@/hooks/useEntitlements';
@@ -27,17 +28,6 @@ import Link from 'next/link';
 import { KPICard, ChartCard, Skeleton, Button, Badge } from '@/components';
 import { fadeUp } from '@/design-system/tokens';
 
-const ACCURACY_WEIGHTS: Record<string, number> = {
-  'Direito Constitucional': 4.0,
-  'Direito Administrativo': 4.0,
-  'Português': 3.5,
-  'Raciocínio Lógico': 3.0,
-  'Informática': 2.5,
-  'Direito Penal': 3.0,
-  'Direito Civil': 3.0,
-  'Direito Tributário': 2.5,
-};
-
 function getAccuracyColor(acc: number) {
   if (acc >= 80) return { text: 'text-am-success', bar: 'bg-am-success', glow: 'var(--color-am-success)', label: 'Excelente' };
   if (acc >= 65) return { text: 'text-am-brand-primary', bar: 'bg-am-brand-primary', glow: 'var(--color-am-brand-primary)', label: 'Bom' };
@@ -47,10 +37,19 @@ function getAccuracyColor(acc: number) {
 
 export default function SimulationsPage() {
   const { user } = useAuthContext();
+  const { activePlan } = usePlanContext();
   const { capabilities } = useEntitlements(user?.uid, user?.email);
   const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDuration, setSelectedDuration] = useState<'1h' | '2h' | '4h'>('2h');
+
+  // Helper para buscar pesos das disciplinas do plano ativo
+  const getSubjectWeight = useCallback((subjectName: string) => {
+    if (!activePlan || !activePlan.subjects) return 1.0;
+    const s = activePlan.subjects.find((item) => item.subject.toLowerCase() === subjectName.toLowerCase());
+    // Normaliza o percentual (ex: 15 -> 1.5x) ou assume 1.0 de base
+    return s ? Math.max(1.0, s.weight / 10) : 1.0;
+  }, [activePlan]);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -77,7 +76,7 @@ export default function SimulationsPage() {
   let totalWeightedAccuracy = 0;
   let totalWeights = 0;
   accuracyData.forEach(item => {
-    const weight = ACCURACY_WEIGHTS[item.subject] || 1.0;
+    const weight = getSubjectWeight(item.subject);
     if (item.totalQuestions > 0) {
       totalWeightedAccuracy += item.accuracy * weight;
       totalWeights += weight;
@@ -254,16 +253,16 @@ export default function SimulationsPage() {
               ) : (
                 <div className="space-y-4">
                   {[...accuracyData]
-                    .sort((a, b) => (ACCURACY_WEIGHTS[b.subject] || 1) - (ACCURACY_WEIGHTS[a.subject] || 1))
+                    .sort((a, b) => getSubjectWeight(b.subject) - getSubjectWeight(a.subject))
                     .map((s) => {
-                      const weight = ACCURACY_WEIGHTS[s.subject] || 1;
+                      const weight = getSubjectWeight(s.subject);
                       const c = getAccuracyColor(s.accuracy);
                       return (
                         <div key={s.subject} className="group">
                           <div className="mb-2 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span className="text-am-body-sm text-am-text-primary font-medium">{s.subject}</span>
-                              <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-auto">Peso {weight}</Badge>
+                              <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-auto">Peso {weight.toFixed(1)}</Badge>
                             </div>
                             <span className={`text-am-body-sm font-bold font-mono ${c.text}`}>{s.accuracy}%</span>
                           </div>
