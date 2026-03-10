@@ -244,8 +244,8 @@ export default function EnginePage() {
 
               {loading ? (
                 <div className="space-y-2 relative z-10">
-                  <div className="h-4 w-full rounded bg-am-surface-deep animate-pulse" />
-                  <div className="h-4 w-3/4 rounded bg-am-surface-deep animate-pulse" />
+                  <div className="h-4 w-full rounded bg-am-surface-subtle animate-pulse" />
+                  <div className="h-4 w-3/4 rounded bg-am-surface-subtle animate-pulse" />
                 </div>
               ) : recentSessions.length > 0 ? (
                 <p className="text-am-body-sm text-am-text-secondary leading-relaxed relative z-10">
@@ -282,10 +282,10 @@ export default function EnginePage() {
 
                 {loading ? (
                   <div className="space-y-3">
-                    {Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-10 rounded border border-am-border-subtle bg-am-surface-deep animate-pulse" />)}
+                    {Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-10 rounded border border-am-border-subtle bg-am-surface-subtle animate-pulse" />)}
                   </div>
                 ) : recentSessions.length === 0 ? (
-                  <div className="py-8 text-center bg-am-surface-deep rounded-am-md border border-am-border-subtle">
+                  <div className="py-8 text-center bg-am-surface-subtle rounded-am-md border border-am-border-subtle">
                     <div className="mx-auto w-12 h-12 bg-am-surface-elevated rounded-full flex items-center justify-center mb-3">
                       <BookOpen className="h-5 w-5 text-am-text-tertiary" />
                     </div>
@@ -304,7 +304,7 @@ export default function EnginePage() {
                             animate={{ opacity: 1, x: 0 }}
                             className={`flex items-center gap-3 rounded-am-md px-3 py-2.5 transition-colors border ${isRecent ? 'bg-am-brand-primary/5 border-am-brand-primary/20' : 'bg-am-surface-elevated border-am-border-default hover:bg-am-surface-subtle'}`}
                           >
-                            <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-am-full ${isRecent ? 'bg-am-brand-primary/20' : 'bg-am-surface-deep'}`}>
+                            <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-am-full ${isRecent ? 'bg-am-brand-primary/20' : 'bg-am-surface-subtle'}`}>
                               {isRecent
                                 ? <CheckCircle2 className="h-3.5 w-3.5 text-am-brand-primary" />
                                 : <div className="h-2 w-2 rounded-full bg-am-text-tertiary" />

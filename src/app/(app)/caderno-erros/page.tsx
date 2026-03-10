@@ -70,7 +70,7 @@ function SeverityBar({ value }: { value: number }) {
     const color = value >= 8 ? 'bg-am-error' : value >= 5 ? 'bg-am-warning' : 'bg-am-success';
     return (
         <div className="flex items-center gap-2">
-            <div className="flex-1 h-2 bg-am-surface-deep/50 rounded-am-full overflow-hidden">
+            <div className="flex-1 h-2 bg-am-surface-subtle/50 rounded-am-full overflow-hidden">
                 <div className={`h-full rounded-am-full ${color} transition-all duration-500`} style={{ width: `${value * 10}%` }} />
             </div>
             <span className="text-[10px] text-am-text-tertiary w-6 text-right font-mono">{value}</span>
@@ -86,7 +86,7 @@ function ScoreBar({ label, emoji, value, color }: { label: string; emoji: string
                 <span className={`${color} font-medium`}>{emoji} {label}</span>
                 <span className="text-am-text-secondary font-mono">{value}%</span>
             </div>
-            <div className="h-1.5 bg-am-surface-deep/50 rounded-am-full overflow-hidden">
+            <div className="h-1.5 bg-am-surface-subtle/50 rounded-am-full overflow-hidden">
                 <div className={`h-full rounded-am-full ${barColor} transition-all duration-700`} style={{ width: `${value}%` }} />
             </div>
         </div>
@@ -297,7 +297,7 @@ export default function CadernoErrosPage() {
                         </div>
 
                         {/* Filters & Actions */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-am-surface-deep p-3 rounded-am-md border border-am-border-default">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-am-surface-subtle p-3 rounded-am-md border border-am-border-default">
                             <div className="flex items-center gap-2 flex-grow">
                                 <Filter className="h-4 w-4 text-am-text-tertiary ml-2" />
                                 <select
@@ -305,8 +305,8 @@ export default function CadernoErrosPage() {
                                     onChange={(e) => setFilterMateria(e.target.value)}
                                     className="bg-transparent border-none text-am-body-sm text-am-text-primary font-medium focus:outline-none w-full sm:w-auto min-w-[200px]"
                                 >
-                                    <option value="" className="bg-am-surface-deep">Todas as matérias</option>
-                                    {allMaterias.map(m => <option className="bg-am-surface-deep" key={m} value={m}>{m}</option>)}
+                                    <option value="" className="bg-am-surface-subtle">Todas as matérias</option>
+                                    {allMaterias.map(m => <option className="bg-am-surface-subtle" key={m} value={m}>{m}</option>)}
                                 </select>
                             </div>
 
@@ -359,7 +359,7 @@ export default function CadernoErrosPage() {
 
                                 {/* Summary */}
                                 {diagnosis.summary && (
-                                    <p className="text-am-body-sm text-am-text-secondary bg-am-surface-deep rounded-am-md p-4 border border-am-border-subtle relative z-10">
+                                    <p className="text-am-body-sm text-am-text-secondary bg-am-surface-subtle rounded-am-md p-4 border border-am-border-subtle relative z-10">
                                         {diagnosis.summary}
                                     </p>
                                 )}
@@ -476,7 +476,7 @@ export default function CadernoErrosPage() {
                                 {sortedGroups.map(([materia, entries]) => (
                                     <div key={materia} className="rounded-am-xl border border-am-border-default bg-am-surface shadow-am-sm overflow-hidden">
                                         {/* Group Header */}
-                                        <div className="flex items-center justify-between px-5 py-3 bg-am-surface-deep border-b border-am-border-default">
+                                        <div className="flex items-center justify-between px-5 py-3 bg-am-surface-subtle border-b border-am-border-default">
                                             <div className="flex items-center gap-3">
                                                 <Badge variant="error" className="h-7 w-7 p-0 flex items-center justify-center rounded-am-md">
                                                     {entries.length}
@@ -528,7 +528,7 @@ export default function CadernoErrosPage() {
                                                         {isExpanded && (
                                                             <div className="mt-5 space-y-4 border-t border-am-border-default pt-4">
                                                                 {/* Full Statement */}
-                                                                <div className="bg-am-surface-deep rounded-am-md p-4 border border-am-border-subtle">
+                                                                <div className="bg-am-surface-subtle rounded-am-md p-4 border border-am-border-subtle">
                                                                     <p className="text-am-body-sm text-am-text-primary whitespace-pre-wrap leading-relaxed">{question.statement}</p>
                                                                 </div>
 
@@ -540,7 +540,7 @@ export default function CadernoErrosPage() {
                                                                         const isWrongSelected = alt.key === attempt.selectedOption;
 
                                                                         let wrapperClass = "bg-am-surface-subtle border-am-border-subtle text-am-text-secondary";
-                                                                        let keyClass = "bg-am-surface-deep text-am-text-tertiary";
+                                                                        let keyClass = "bg-am-surface-subtle text-am-text-tertiary";
 
                                                                         if (isCorrect) {
                                                                             wrapperClass = "bg-am-success/10 border-am-success/30 text-am-success";

@@ -4,9 +4,9 @@ import { Sparkles, Brain, Target, TrendingUp, ChevronRight, CheckCircle2, Zap, F
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-am-surface-deep font-sans text-am-text-primary overflow-x-hidden selection:bg-am-brand-primary/30">
+    <div className="min-h-screen bg-am-surface-subtle font-sans text-am-text-primary overflow-x-hidden selection:bg-am-brand-primary/30">
       {/* Navigation */}
-      <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/[0.04] bg-am-surface-deep/80 backdrop-blur-xl">
+      <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/[0.04] bg-am-surface-subtle/80 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-6 flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-am-md bg-am-brand-gradient shadow-[0_0_12px_var(--color-am-brand-primary)]">
@@ -307,7 +307,7 @@ export default function LandingPage() {
                   {/* Component preview */}
                   <div className="space-y-4">
                     <div className="h-4 pl-1 text-[10px] font-mono text-am-text-tertiary uppercase tracking-wider">AprovaMind Copilot</div>
-                    <div className="p-4 rounded-lg bg-am-surface-deep border border-white/[0.05]">
+                    <div className="p-4 rounded-lg bg-am-surface-subtle border border-white/[0.05]">
                       <p className="text-am-text-secondary text-sm">"Notei que o seu Focus Score em <strong className="text-white">Direito Administrativo</strong> abaixou para 64% na última bateria. Como esta disciplina representa 18% do Edital 1, sugiro que a próxima sessão de 50min foque na re-leitura de Licitações."</p>
                     </div>
                     <Button variant="premium" className="w-full mt-2">Acionar Modo Resgate</Button>
@@ -329,7 +329,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-white/[0.05] bg-am-surface-deep py-12">
+      <footer className="border-t border-white/[0.05] bg-am-surface-subtle py-12">
         <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2 opacity-50">
             <Zap className="h-5 w-5" />

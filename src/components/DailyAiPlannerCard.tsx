@@ -45,9 +45,9 @@ function taskTypeLabel(taskType: DailyPlanBlock['taskType']): string {
 }
 
 function priorityClasses(priority: DailyPlanBlock['priority']): string {
-  if (priority === 'alta') return 'bg-red-500/15 text-red-300 border-red-500/30';
-  if (priority === 'media') return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
-  return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+  if (priority === 'alta') return 'bg-am-error/10 text-am-error border-am-error/30';
+  if (priority === 'media') return 'bg-am-warning/10 text-am-warning border-am-warning/30';
+  return 'bg-am-success/10 text-am-success border-am-success/30';
 }
 
 function arrayWithout(values: number[], target: number): number[] {
@@ -391,7 +391,7 @@ export default function DailyAiPlannerCard({
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="rounded-am-md border border-am-border-default bg-am-surface-deep p-2">
+          <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-2">
             <Brain className="h-4 w-4 text-am-text-tertiary" />
           </div>
           <div>
@@ -411,28 +411,28 @@ export default function DailyAiPlannerCard({
       </div>
 
       {!hasContext && !initialRecoveryMode && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+        <div className="rounded-xl border border-am-warning/30 bg-am-warning/10 px-3 py-2 text-xs text-am-warning">
           Registre sessões para a IA montar um plano diário personalizado.
         </div>
       )}
 
       {error && (
-        <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+        <div className="mb-3 flex items-center gap-2 rounded-xl border border-am-error/30 bg-am-error/10 px-3 py-2 text-xs text-am-error">
           <AlertTriangle className="h-3.5 w-3.5" />
           {error}
         </div>
       )}
 
       {loadingSavedPlan && !plan && (
-        <p className="mb-3 text-xs text-gray-500">Carregando plano salvo de hoje...</p>
+        <p className="mb-3 text-xs text-am-text-tertiary">Carregando plano salvo de hoje...</p>
       )}
 
       {autoReplanning && (
-        <p className="mb-3 text-xs text-cyan-300">Sessão detectada. Replanejando automaticamente os próximos blocos...</p>
+        <p className="mb-3 text-xs text-am-info">Sessão detectada. Replanejando automaticamente os próximos blocos...</p>
       )}
 
       {initialRecoveryMode && !plan && !loading && !loadingSavedPlan && (
-        <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+        <div className="mb-3 rounded-xl border border-am-error/30 bg-am-error/10 px-3 py-2 text-xs text-am-error">
           Você ativou o Modo Recuperação. Clique em "Gerar plano" para a IA montar seu resgate estratégico focado em Gaps.
         </div>
       )}
@@ -440,8 +440,8 @@ export default function DailyAiPlannerCard({
       {plan && (
         <div className="space-y-3">
           <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
-            <p className="text-sm text-gray-200">{plan.rationale}</p>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-400">
+            <p className="text-sm text-am-text-secondary">{plan.rationale}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-am-text-tertiary">
               <span className="inline-flex items-center gap-1">
                 <Clock3 className="h-3.5 w-3.5" />
                 {plan.estimatedTotalMinutes} min
@@ -451,10 +451,10 @@ export default function DailyAiPlannerCard({
                 {plan.blocks.length} blocos
               </span>
               <span>{completionPercent}% concluído</span>
-              {loadingProgress && <span className="text-[11px] text-gray-500">sincronizando...</span>}
+              {loadingProgress && <span className="text-[11px] text-am-text-tertiary">sincronizando...</span>}
             </div>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-800/70">
-              <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${completionPercent}%` }} />
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-am-surface-subtle">
+              <div className="h-full rounded-full bg-am-success transition-all" style={{ width: `${completionPercent}%` }} />
             </div>
           </div>
 
@@ -467,39 +467,39 @@ export default function DailyAiPlannerCard({
                 <div
                   key={`${block.subject}-${idx}`}
                   className={`rounded-xl border p-3 transition-colors ${done
-                    ? 'border-emerald-500/30 bg-emerald-500/10'
+                    ? 'border-am-success/30 bg-am-success/10'
                     : deferred
-                      ? 'border-amber-500/30 bg-amber-500/10'
-                      : 'border-am-border-default bg-gray-900/50'
+                      ? 'border-am-warning/30 bg-am-warning/10'
+                      : 'border-am-border-default bg-am-surface-elevated'
                     }`}
                 >
                   <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                    <p className={`text-sm font-medium ${done ? 'text-emerald-200' : 'text-am-text-primary'}`}>
+                    <p className={`text-sm font-medium ${done ? 'text-am-success' : 'text-am-text-primary'}`}>
                       {idx + 1}. {block.subject}
                     </p>
                     <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-[#3150AA]/15 px-2 py-0.5 text-[11px] text-[#F59768]/80">
+                      <span className="rounded-md bg-am-brand-primary/10 px-2 py-0.5 text-[11px] text-am-brand-primary">
                         {taskTypeLabel(block.taskType)}
                       </span>
                       <span className={`rounded-md border px-2 py-0.5 text-[11px] ${priorityClasses(block.priority)}`}>
                         {block.priority}
                       </span>
-                      <span className="text-xs text-gray-400">{block.durationMinutes} min</span>
+                      <span className="text-xs text-am-text-tertiary">{block.durationMinutes} min</span>
                     </div>
                   </div>
-                  <p className="mb-2 text-xs text-gray-300">{block.objective}</p>
+                  <p className="mb-2 text-xs text-am-text-secondary">{block.objective}</p>
 
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => dispatchStartSubject(block.subject)}
-                      className="inline-flex items-center gap-1 rounded-lg bg-violet-600/20 px-2.5 py-1.5 text-[11px] text-violet-200 transition hover:bg-violet-600/30"
+                      className="inline-flex items-center gap-1 rounded-lg bg-am-ai-default/10 px-2.5 py-1.5 text-[11px] text-am-ai-default transition hover:bg-am-ai-default/20"
                     >
                       <Play className="h-3 w-3" />
                       Iniciar no cronômetro
                     </button>
                     <button
                       onClick={() => toggleCompleted(idx)}
-                      className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] transition ${done ? 'bg-emerald-500/30 text-emerald-100' : 'bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25'
+                      className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] transition ${done ? 'bg-am-success/20 text-am-success' : 'bg-am-success/10 text-am-success hover:bg-am-success/20'
                         }`}
                     >
                       <CheckCircle2 className="h-3 w-3" />
@@ -507,7 +507,7 @@ export default function DailyAiPlannerCard({
                     </button>
                     <button
                       onClick={() => toggleDeferred(idx)}
-                      className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] transition ${deferred ? 'bg-amber-500/30 text-amber-100' : 'bg-amber-500/15 text-amber-200 hover:bg-amber-500/25'
+                      className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] transition ${deferred ? 'bg-am-warning/20 text-am-warning' : 'bg-am-warning/10 text-am-warning hover:bg-am-warning/20'
                         }`}
                     >
                       <Clock4 className="h-3 w-3" />
@@ -521,8 +521,8 @@ export default function DailyAiPlannerCard({
 
           {plan.contingencies?.length > 0 && (
             <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
-              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">Plano B</p>
-              <ul className="space-y-1 text-xs text-gray-300">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-am-text-tertiary">Plano B</p>
+              <ul className="space-y-1 text-xs text-am-text-secondary">
                 {plan.contingencies.map((item, idx) => (
                   <li key={`${item}-${idx}`}>- {item}</li>
                 ))}

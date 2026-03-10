@@ -136,7 +136,7 @@ export default function QuestionTrackerCard({
     >
       {/* Header */}
       <div className="mb-6 flex items-start gap-3">
-        <div className="rounded-am-md border border-am-border-default bg-am-surface-deep p-2">
+        <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-2">
           <ClipboardCheck className="h-4 w-4 text-am-text-tertiary" />
         </div>
         <div>

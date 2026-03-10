@@ -436,7 +436,9 @@ export class LegacyEngineDataSource implements EngineDataSource {
     );
 
     if (!planDocument.ok) {
-      throw new Error(planDocument.error || 'Falha ao carregar o plano.');
+      // If it's a permission denied or similar error, gracefully degrade
+      console.warn(`[EngineDataSource] Failed to fetch plan ${resolvedPlanId}:`, planDocument.error);
+      return { found: false, reason: 'plan_not_found' };
     }
 
     if (!planDocument.exists || !planDocument.data) {

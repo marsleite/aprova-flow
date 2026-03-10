@@ -189,10 +189,10 @@ export default function AnalyticsPage() {
             <ChartCard title="Carga Horária vs. Peso" loading={false} subtitle="Análise de desvio sobre pesos do edital">
               {loading ? (
                 <div className="space-y-3">
-                  {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-8 rounded-am-md border border-am-border-subtle bg-am-surface-deep animate-pulse" />)}
+                  {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-8 rounded-am-md border border-am-border-subtle bg-am-surface-subtle animate-pulse" />)}
                 </div>
               ) : planVsActual.length === 0 ? (
-                <div className="py-8 text-center bg-am-surface-deep rounded-am-md border border-am-border-subtle">
+                <div className="py-8 text-center bg-am-surface-subtle rounded-am-md border border-am-border-subtle">
                   <p className="text-am-caption text-am-text-secondary">Atribua pesos no painel de edital para acompanhar aderência.</p>
                 </div>
               ) : (
@@ -216,7 +216,7 @@ export default function AnalyticsPage() {
                             </span>
                           </div>
                         </div>
-                        <div className="relative h-1.5 overflow-hidden rounded-full bg-am-surface-deep">
+                        <div className="relative h-1.5 overflow-hidden rounded-full bg-am-surface-subtle">
                           <div className="absolute h-full rounded-full bg-am-border-strong" style={{ width: `${pva.plannedPercent}%` }} />
                           <div
                             className={`absolute h-full rounded-full transition-all ${isNeglected ? 'bg-am-warning' : 'bg-am-success'}`}
@@ -250,7 +250,7 @@ export default function AnalyticsPage() {
               <h3 className="font-brand text-am-body font-bold text-am-text-primary">Pilares Consistentes</h3>
             </div>
             {loading ? (
-              <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-8 rounded border border-am-border-subtle bg-am-surface-deep animate-pulse" />)}</div>
+              <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-8 rounded border border-am-border-subtle bg-am-surface-subtle animate-pulse" />)}</div>
             ) : strongSubjects.length > 0 ? (
               <div className="space-y-2">
                 {strongSubjects.slice(0, 3).map((s) => (
@@ -274,7 +274,7 @@ export default function AnalyticsPage() {
               <h3 className="font-brand text-am-body font-bold text-am-text-primary">Gargalos Preditivos</h3>
             </div>
             {loading ? (
-              <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-8 rounded border border-am-border-subtle bg-am-surface-deep animate-pulse" />)}</div>
+              <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-8 rounded border border-am-border-subtle bg-am-surface-subtle animate-pulse" />)}</div>
             ) : criticalSubjects.length > 0 ? (
               <div className="space-y-2">
                 {criticalSubjects.slice(0, 3).map((s) => (

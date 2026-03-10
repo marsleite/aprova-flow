@@ -98,7 +98,7 @@ export default function InsightsPanel({ insights, loading }: InsightsPanelProps)
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
       className="h-full rounded-am-xl border border-am-border-default border-t border-t-am-ai-default/30 bg-am-surface p-8 shadow-am-md relative overflow-hidden"
     >
       {/* Header */}

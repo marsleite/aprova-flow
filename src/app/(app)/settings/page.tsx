@@ -105,7 +105,7 @@ export default function SettingsPage() {
                   Seu plano atual desbloqueia ferramentas de IA preditiva para aprovação, analytics premium e mentoria ilimitada.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-am-surface-deep/50 p-4 rounded-am-md border border-am-border-subtle">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-am-surface-subtle/50 p-4 rounded-am-md border border-am-border-subtle">
                   {planFeatures.map(({ label, available }) => (
                     <div key={label} className="flex items-center gap-2.5">
                       {available
@@ -139,7 +139,7 @@ export default function SettingsPage() {
               <Shield className="h-4 w-4 text-am-text-tertiary" />
               <h2 className="font-brand text-am-body font-bold text-am-text-primary tracking-wide">Segurança Institucional</h2>
             </div>
-            <div className="space-y-3 bg-am-surface-deep p-4 rounded-am-md border border-am-border-subtle">
+            <div className="space-y-3 bg-am-surface-subtle p-4 rounded-am-md border border-am-border-subtle">
               <p className="text-am-body-sm text-am-text-secondary flex gap-2"><CheckCircle2 className="h-4 w-4 text-am-success flex-shrink-0" /> Dados armazenados com segurança em Data Centers da Google Cloud</p>
               <p className="text-am-body-sm text-am-text-secondary flex gap-2"><CheckCircle2 className="h-4 w-4 text-am-success flex-shrink-0" /> Autenticação 256-bit via protocolo robusto (Google OAuth)</p>
               <p className="text-am-body-sm text-am-text-secondary flex gap-2"><CheckCircle2 className="h-4 w-4 text-am-success flex-shrink-0" /> Conexão blindada TLS de ponta a ponta</p>

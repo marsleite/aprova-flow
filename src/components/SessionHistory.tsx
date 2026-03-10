@@ -310,11 +310,10 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
 
           <button
             onClick={() => setFiltersOpen((v) => !v)}
-            className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition ${
-              hasFilters
-                ? 'border-blue-500/40 text-[#F59768]/80'
-                : 'border-am-border-strong text-am-text-secondary hover:text-am-text-primary'
-            }`}
+            className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition ${hasFilters
+              ? 'border-blue-500/40 text-[#F59768]/80'
+              : 'border-am-border-strong text-am-text-secondary hover:text-am-text-primary'
+              }`}
           >
             <Filter className="h-3.5 w-3.5" />
             Filtros
@@ -427,8 +426,8 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
         </div>
       ) : sessions.length === 0 ? (
         <div className="flex flex-col items-center py-10 text-center">
-          <Search className="mb-2 h-8 w-8 text-gray-600" />
-          <p className="text-sm text-gray-500">
+          <Search className="mb-2 h-8 w-8 text-am-text-tertiary" />
+          <p className="text-sm text-am-text-secondary">
             {hasFilters ? 'Nenhuma sessão com esses filtros' : 'Nenhuma sessão registrada'}
           </p>
         </div>
@@ -445,20 +444,20 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                   <p className="truncate text-sm font-medium text-am-text-primary">{s.subject}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {s.source === 'manual' && (
-                      <span className="rounded-md bg-[#3150AA]/15 px-2 py-0.5 text-[10px] font-medium text-[#F59768]/80">
+                      <span className="rounded-md bg-am-brand-primary/15 px-2 py-0.5 text-[10px] font-medium text-am-brand-primary">
                         Manual
                       </span>
                     )}
                     {s.wasEdited && (
-                      <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-300">
+                      <span className="rounded-md bg-am-warning/15 px-2 py-0.5 text-[10px] font-medium text-am-warning">
                         Ajustado
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-am-text-secondary">
                     <Clock className="h-3 w-3" />
                     {formatDuration(s.duration)}
-                    <span className="text-gray-700">·</span>
+                    <span className="text-am-text-tertiary">·</span>
                     {s.startTime &&
                       new Date(s.startTime).toLocaleTimeString('pt-BR', {
                         hour: '2-digit',
@@ -473,12 +472,12 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                 </div>
 
                 <div className="flex items-center gap-2 self-start sm:self-auto">
-                  <span className="rounded-lg bg-[#3150AA]/10 px-2.5 py-1 text-xs font-medium text-violet-300">
+                  <span className="rounded-lg bg-am-ai-default/10 px-2.5 py-1 text-xs font-medium text-am-ai-default">
                     {formatRelativeDate(s.date)}
                   </span>
                   <button
                     onClick={() => openEditForm(s)}
-                    className="rounded-lg border border-am-border-default p-1.5 text-gray-400 transition hover:text-am-text-primary"
+                    className="rounded-lg border border-am-border-default p-1.5 text-am-text-secondary transition hover:text-am-text-primary"
                     title="Editar sessão"
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -493,24 +492,25 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="rounded-lg border border-am-border-default px-2.5 py-1.5 text-xs text-gray-400 hover:text-am-text-primary disabled:opacity-30 sm:px-3"
+                className="rounded-lg border border-am-border-default px-2.5 py-1.5 text-xs text-am-text-secondary hover:text-am-text-primary disabled:opacity-30 sm:px-3"
               >
                 Anterior
               </button>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-am-text-tertiary">
                 {page + 1} de {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="rounded-lg border border-am-border-default px-2.5 py-1.5 text-xs text-gray-400 hover:text-am-text-primary disabled:opacity-30 sm:px-3"
+                className="rounded-lg border border-am-border-default px-2.5 py-1.5 text-xs text-am-text-secondary hover:text-am-text-primary disabled:opacity-30 sm:px-3"
               >
                 Próxima
               </button>
             </div>
           )}
         </>
-      )}
+      )
+      }
 
       <AnimatePresence>
         {formOpen && (
@@ -527,21 +527,21 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
               exit={{ y: 16, opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg rounded-2xl border border-am-border-default bg-gray-900 p-5 shadow-2xl"
+              className="w-full max-w-lg rounded-2xl border border-am-border-default bg-am-surface-elevated p-5 shadow-2xl"
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div>
                   <h4 className="text-lg font-semibold text-am-text-primary">
                     {editingSession ? 'Editar sessão' : 'Adicionar sessão manual'}
                   </h4>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-am-text-secondary">
                     Ajuste o tempo real estudado quando o timer não refletir sua sessão.
                   </p>
                 </div>
                 <button
                   onClick={closeForm}
                   disabled={saving}
-                  className="rounded-lg border border-am-border-default p-1.5 text-gray-400 transition hover:text-am-text-primary disabled:opacity-50"
+                  className="rounded-lg border border-am-border-default p-1.5 text-am-text-secondary transition hover:text-am-text-primary disabled:opacity-50"
                   title="Fechar"
                 >
                   <X className="h-4 w-4" />
@@ -550,7 +550,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
 
               <form onSubmit={handleSubmitSession} className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs text-gray-400">Matéria</label>
+                  <label className="mb-1 block text-xs text-am-text-secondary">Matéria</label>
                   <input
                     value={formState.subject}
                     onChange={(e) => {
@@ -558,7 +558,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                       setSaveError('');
                     }}
                     list="session-subject-options"
-                    className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
+                    className="w-full rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2 text-sm text-am-text-primary outline-none focus:border-am-brand-primary"
                     placeholder="Ex: Direito Constitucional"
                     required
                   />
@@ -571,7 +571,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
 
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div>
-                    <label className="mb-1 block text-xs text-gray-400">Data</label>
+                    <label className="mb-1 block text-xs text-am-text-secondary">Data</label>
                     <input
                       type="date"
                       value={formState.date}
@@ -580,13 +580,13 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                         setFormState((prev) => ({ ...prev, date: e.target.value }));
                         setSaveError('');
                       }}
-                      className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
+                      className="w-full rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2 text-sm text-am-text-primary outline-none focus:border-am-brand-primary"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs text-gray-400">Início</label>
+                    <label className="mb-1 block text-xs text-am-text-secondary">Início</label>
                     <input
                       type="time"
                       value={formState.startTime}
@@ -594,13 +594,13 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                         setFormState((prev) => ({ ...prev, startTime: e.target.value }));
                         setSaveError('');
                       }}
-                      className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
+                      className="w-full rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2 text-sm text-am-text-primary outline-none focus:border-am-brand-primary"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs text-gray-400">Fim</label>
+                    <label className="mb-1 block text-xs text-am-text-secondary">Fim</label>
                     <input
                       type="time"
                       value={formState.endTime}
@@ -608,18 +608,18 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                         setFormState((prev) => ({ ...prev, endTime: e.target.value }));
                         setSaveError('');
                       }}
-                      className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
+                      className="w-full rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2 text-sm text-am-text-primary outline-none focus:border-am-brand-primary"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-am-border-default bg-gray-800/40 px-3 py-2 text-xs text-gray-300">
+                <div className="rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2 text-xs text-am-text-secondary">
                   Tempo calculado: <span className="font-medium text-am-text-primary">{durationPreview > 0 ? formatDuration(durationPreview) : '--'}</span>
                 </div>
 
                 {saveError && (
-                  <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+                  <p className="rounded-lg border border-am-error/30 bg-am-error/10 px-3 py-2 text-xs text-am-error">
                     {saveError}
                   </p>
                 )}
@@ -629,14 +629,14 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                     type="button"
                     onClick={closeForm}
                     disabled={saving}
-                    className="rounded-lg border border-am-border-default px-3 py-2 text-xs text-gray-300 transition hover:text-am-text-primary disabled:opacity-50"
+                    className="rounded-lg border border-am-border-default bg-am-surface px-3 py-2 text-xs text-am-text-secondary transition hover:text-am-text-primary hover:bg-am-surface-subtle disabled:opacity-50"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs text-am-text-primary transition hover:bg-violet-500 disabled:opacity-60"
+                    className="flex items-center gap-1.5 rounded-lg bg-am-brand-primary px-3 py-2 text-xs text-white transition hover:brightness-110 disabled:opacity-60"
                   >
                     {saving ? (
                       <>
@@ -656,6 +656,6 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </motion.div >
   );
 }

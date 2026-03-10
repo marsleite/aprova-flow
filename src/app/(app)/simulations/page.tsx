@@ -137,13 +137,13 @@ export default function SimulationsPage() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex rounded-am-full border border-am-border-default bg-am-surface-deep overflow-hidden">
+              <div className="flex rounded-am-full border border-am-border-default bg-am-surface-subtle overflow-hidden">
                 {(['1h', '2h', '4h'] as const).map((d) => (
                   <button
                     key={d}
                     onClick={() => setSelectedDuration(d)}
                     className={`px-4 py-2 text-am-caption font-semibold transition-all font-mono ${selectedDuration === d
-                      ? 'bg-am-text-primary text-am-surface-deep'
+                      ? 'bg-am-text-primary text-am-canvas'
                       : 'text-am-text-secondary hover:text-am-text-primary'
                       }`}
                   >
@@ -212,7 +212,7 @@ export default function SimulationsPage() {
                   <div className="mb-6 flex flex-wrap gap-2">
                     {accuracyData.map((s) => {
                       const errorRate = 100 - s.accuracy;
-                      let bgClass = 'bg-am-surface-deep text-am-text-secondary border-am-border-default';
+                      let bgClass = 'bg-am-surface-subtle text-am-text-secondary border-am-border-default';
                       if (errorRate >= 60) bgClass = 'bg-am-error/10 text-am-error border-am-error/30 shadow-[0_0_12px_var(--color-am-error)_inset]';
                       else if (errorRate >= 35) bgClass = 'bg-am-brand-primary/10 text-am-brand-primary border-am-brand-primary/30';
 
@@ -230,12 +230,12 @@ export default function SimulationsPage() {
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-am-border-default">
-                    <div className="bg-am-surface-deep p-4 rounded-am-md">
+                    <div className="bg-am-surface-subtle p-4 rounded-am-md">
                       <p className="text-am-caption font-mono text-am-text-tertiary uppercase tracking-wider mb-1">Ameaça Principal</p>
                       <p className="font-brand text-am-body font-bold text-am-text-primary">{worstSubject?.subject || '—'}</p>
                       {worstSubject && <p className="text-am-caption text-am-error mt-1">{worstSubject.accuracy}% retenção (Crítico)</p>}
                     </div>
-                    <div className="bg-am-surface-deep p-4 rounded-am-md">
+                    <div className="bg-am-surface-subtle p-4 rounded-am-md">
                       <p className="text-am-caption font-mono text-am-text-tertiary uppercase tracking-wider mb-1">Padrão Detectado</p>
                       <p className="text-am-body-sm text-am-text-secondary mt-1">
                         {worstSubject?.accuracy !== undefined && worstSubject.accuracy < 50 ? 'Viés consistente de erro conceitual. Demandando reestudo de teoria base.' : 'Em análise neural contínua.'}
@@ -266,7 +266,7 @@ export default function SimulationsPage() {
                             </div>
                             <span className={`text-am-body-sm font-bold font-mono ${c.text}`}>{s.accuracy}%</span>
                           </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-am-surface-deep">
+                          <div className="h-2 overflow-hidden rounded-full bg-am-surface-subtle">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${s.accuracy}%` }}

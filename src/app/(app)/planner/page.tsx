@@ -369,7 +369,7 @@ export default function PlannerPage() {
                         <div className="flex items-center justify-end gap-1 relative">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleSelectActive(plan.id || ''); }}
-                            className={`rounded-am-sm px-2 py-1 text-[10px] font-medium transition-colors ${isActive ? 'bg-am-brand-primary/10 text-am-brand-primary' : 'bg-am-surface-deep text-am-text-secondary hover:text-am-text-primary'}`}
+                            className={`rounded-am-sm px-2 py-1 text-[10px] font-medium transition-colors ${isActive ? 'bg-am-brand-primary/10 text-am-brand-primary' : 'bg-am-surface-subtle text-am-text-secondary hover:text-am-text-primary'}`}
                           >
                             {isActive ? 'Ativo' : 'Ativar'}
                           </button>
