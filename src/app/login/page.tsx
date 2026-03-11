@@ -53,68 +53,114 @@ export default function LoginPage() {
 
   if (loading || user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-am-canvas">
-        <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
-          <Zap className="h-6 w-6 text-white" />
+      <div
+        className="flex min-h-screen items-center justify-center"
+        style={{ background: 'var(--ds-color-canvas)' }}
+      >
+        <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-full bg-st-brand">
+          <Zap className="h-6 w-6 text-st-text-on-light" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="dark relative flex min-h-screen overflow-hidden bg-am-canvas">
-      {/* Ambient background — RDS atmospheric depth */}
+    <div
+      className="dark relative flex min-h-screen overflow-hidden"
+      style={{ background: 'var(--ds-color-canvas)' }}
+    >
+      {/* ── Ambient background ── Sitetrip warm glow palette ── */}
       <div className="pointer-events-none absolute inset-0">
-        {/* Core Glows */}
-        <div className="absolute -left-64 -top-64 h-[800px] w-[800px] rounded-full bg-am-brand-secondary/15 blur-[140px]" />
-        <div className="absolute top-1/2 left-0 h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-am-brand-primary/10 blur-[130px]" />
-        <div className="absolute -bottom-64 -right-64 h-[800px] w-[800px] rounded-full bg-am-brand-primary/15 blur-[150px]" />
-        {/* Radial Mask Grid */}
-        <div className="rds-grid-bg absolute inset-0 opacity-40 mix-blend-overlay" />
+        {/* Brand purple glow — top-left */}
+        <div
+          className="absolute -left-64 -top-64 h-[800px] w-[800px] rounded-full blur-[140px]"
+          style={{ background: 'rgba(218, 202, 255, 0.08)' }}
+        />
+        {/* Lime glow — center-left */}
+        <div
+          className="absolute top-1/2 left-0 h-[600px] w-[600px] -translate-y-1/2 rounded-full blur-[130px]"
+          style={{ background: 'rgba(230, 255, 91, 0.05)' }}
+        />
+        {/* Brand strong — bottom-right */}
+        <div
+          className="absolute -bottom-64 -right-64 h-[800px] w-[800px] rounded-full blur-[150px]"
+          style={{ background: 'rgba(154, 117, 240, 0.1)' }}
+        />
+        {/* Soft noise */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
+          backgroundSize: '128px 128px',
+        }} />
       </div>
 
-      {/* Left panel — branding */}
+      {/* ── Left panel — branding ── */}
       <motion.div
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="hidden flex-col justify-between p-12 lg:flex lg:w-[55%] relative z-10"
       >
-        {/* Logo */}
-        <div className="flex items-center gap-3 bg-am-surface-subtle/30 w-fit px-4 py-2 rounded-2xl border border-am-border-default/50 backdrop-blur-md">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-am-brand-gradient shadow-lg">
-            <Zap className="h-5 w-5 text-white" />
+        {/* Logo pill — Sitetrip glassmorphism */}
+        <div
+          className="flex items-center gap-3 w-fit px-5 py-2.5 rounded-full backdrop-blur-md"
+          style={{
+            background: 'var(--ds-color-glass)',
+            border: '1px solid rgba(218, 202, 255, 0.25)',
+          }}
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-st-brand">
+            <Zap className="h-4 w-4 text-st-text-on-light" />
           </div>
           <div className="flex flex-col">
-            <p className="font-brand text-xl font-extrabold text-white tracking-tight leading-none">
-              Aprova<span className="text-transparent bg-clip-text bg-am-brand-gradient">Mind</span>
+            <p
+              className="text-lg font-semibold tracking-tight leading-none"
+              style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--ds-color-text-on-dark)' }}
+            >
+              Aprova<span className="text-st-brand">Mind</span>
             </p>
-            <p className="text-[10px] uppercase tracking-widest text-am-text-secondary font-mono mt-0.5">
+            <p
+              className="text-[10px] uppercase tracking-widest mt-0.5"
+              style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--ds-color-text-muted)', letterSpacing: 'var(--ds-letter-kicker)' }}
+            >
               Strategic Engine
             </p>
           </div>
         </div>
 
-        {/* Hero text */}
+        {/* Hero text — DS typography */}
         <div className="max-w-xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-am-brand-primary/30 bg-am-brand-primary/10 px-4 py-1.5 shadow-[0_0_20px_rgba(61,116,246,0.15)]"
+            className="mb-8 inline-flex items-center gap-2 rounded-full px-4 py-1.5"
+            style={{
+              background: 'rgba(253, 252, 251, 0.08)',
+              border: '1px solid var(--ds-color-border-soft)',
+            }}
           >
-            <div className="h-2 w-2 rounded-full bg-am-brand-primary animate-pulse" />
-            <span className="text-xs font-semibold text-am-brand-primary font-mono uppercase tracking-widest">IA de Alta Performance</span>
+            <div className="h-2 w-2 rounded-full bg-st-lime animate-pulse" />
+            <span
+              className="text-xs font-medium uppercase"
+              style={{
+                fontFamily: 'var(--ds-font-display)',
+                letterSpacing: 'var(--ds-letter-kicker)',
+                color: 'var(--ds-color-accent-lime)',
+              }}
+            >
+              IA de Alta Performance
+            </span>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="font-brand mb-6 text-5xl font-bold leading-[1.1] text-white xl:text-[4rem] tracking-tight"
+            className="ds-display-1 mb-6"
+            style={{ color: 'var(--ds-color-text-on-dark)' }}
           >
             Sua jornada começa com{' '}
-            <span className="bg-am-brand-gradient bg-clip-text text-transparent inline-block pb-2">
+            <span className="text-st-brand">
               estratégia inteligente.
             </span>
           </motion.h1>
@@ -123,13 +169,14 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-lg text-am-text-secondary leading-relaxed max-w-lg"
+            className="ds-body-lg"
+            style={{ color: 'var(--ds-color-text-muted)' }}
           >
             O AprovaMind combina IA diagnóstica, gestão multi-edital e análise preditiva para acelerar o seu tempo até a aprovação.
           </motion.p>
         </div>
 
-        {/* Feature grid */}
+        {/* Feature grid — warm surface cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -137,34 +184,48 @@ export default function LoginPage() {
           className="grid grid-cols-2 gap-4 max-w-lg mt-8"
         >
           {[
-            { icon: Brain, label: 'IA Diagnóstica', desc: 'Mentoria personalizada diária' },
-            { icon: Target, label: 'Multi-Edital', desc: 'Foque no peso de cada matéria' },
-            { icon: TrendingUp, label: 'Simulados Avançados', desc: 'Gráficos de evolução' },
-            { icon: BarChart2, label: 'Performance Real', desc: 'Identifique seus gaps' },
-          ].map(({ icon: Icon, label, desc }, i) => (
+            { icon: Brain, label: 'IA Diagnóstica', desc: 'Mentoria personalizada diária', accent: 'var(--ds-color-brand)' },
+            { icon: Target, label: 'Multi-Edital', desc: 'Foque no peso de cada matéria', accent: 'var(--ds-color-accent-lime)' },
+            { icon: TrendingUp, label: 'Simulados Avançados', desc: 'Gráficos de evolução', accent: 'var(--ds-color-accent-cyan)' },
+            { icon: BarChart2, label: 'Performance Real', desc: 'Identifique seus gaps', accent: 'var(--ds-color-accent-yellow)' },
+          ].map(({ icon: Icon, label, desc, accent }) => (
             <div
               key={label}
-              className="flex items-start gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-4 transition-all hover:bg-white/[0.04]"
+              className="flex items-start gap-3 rounded-2xl p-4 transition-all duration-300 hover:translate-y-[-2px]"
+              style={{
+                background: 'rgba(253, 252, 251, 0.04)',
+                border: '1px solid var(--ds-color-border-soft)',
+              }}
             >
-              <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-am-brand-primary/10 border border-am-brand-primary/20">
-                <Icon className="h-5 w-5 text-am-brand-primary" />
+              <div
+                className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl"
+                style={{ background: `color-mix(in srgb, ${accent} 15%, transparent)`, border: `1px solid color-mix(in srgb, ${accent} 25%, transparent)` }}
+              >
+                <Icon className="h-5 w-5" style={{ color: accent }} />
               </div>
               <div>
-                <p className="font-brand text-sm font-semibold text-white mb-0.5">{label}</p>
-                <p className="text-[11px] text-am-text-secondary leading-tight">{desc}</p>
+                <p
+                  className="text-sm font-semibold mb-0.5"
+                  style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--ds-color-text-on-dark)' }}
+                >
+                  {label}
+                </p>
+                <p className="text-[11px] leading-tight" style={{ color: 'var(--ds-color-text-muted)' }}>
+                  {desc}
+                </p>
               </div>
             </div>
           ))}
         </motion.div>
 
         {/* Footer */}
-        <div className="flex items-center gap-2 text-xs text-am-text-tertiary font-mono pt-8">
+        <div className="flex items-center gap-2 text-xs pt-8" style={{ color: 'var(--ds-color-text-muted)' }}>
           <Shield className="h-4 w-4" />
-          <span>Dados criptografados · Google Cloud Firebase</span>
+          <span style={{ fontFamily: 'var(--ds-font-body)' }}>Dados criptografados · Google Cloud Firebase</span>
         </div>
       </motion.div>
 
-      {/* Right panel — auth form */}
+      {/* ── Right panel — auth form ── */}
       <motion.div
         initial={{ opacity: 0, x: 40 }}
         animate={{ opacity: 1, x: 0 }}
@@ -174,40 +235,65 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="mb-10 flex flex-col items-center justify-center gap-3 lg:hidden">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-am-brand-gradient shadow-xl">
-              <Zap className="h-7 w-7 text-white" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-st-brand shadow-xl">
+              <Zap className="h-7 w-7 text-st-text-on-light" />
             </div>
-            <p className="font-brand text-2xl font-bold text-white tracking-tight">
-              Aprova<span className="text-am-brand-primary">Mind</span>
+            <p
+              className="text-2xl font-semibold tracking-tight"
+              style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--ds-color-text-on-dark)' }}
+            >
+              Aprova<span className="text-st-brand">Mind</span>
             </p>
           </div>
 
-          {/* Card */}
+          {/* Card — Sitetrip glassmorphism */}
           <div className="relative group">
             {/* Outer Glow */}
-            <div className="absolute -inset-1 rounded-3xl bg-am-brand-gradient opacity-20 blur-xl transition duration-1000 group-hover:opacity-30"></div>
+            <div
+              className="absolute -inset-1 rounded-[32px] opacity-20 blur-xl transition duration-1000 group-hover:opacity-30"
+              style={{ background: 'linear-gradient(135deg, var(--ds-color-brand), var(--ds-color-brand-strong))' }}
+            />
 
-            <div className="rds-glass relative rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/10 overflow-hidden">
+            <div
+              className="relative rounded-[32px] p-8 sm:p-10 shadow-2xl overflow-hidden"
+              style={{
+                background: 'var(--ds-color-glass)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: '1px solid rgba(218, 202, 255, 0.25)',
+              }}
+            >
               {/* Inner top shine */}
-              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              <div
+                className="absolute top-0 left-0 w-full h-px"
+                style={{ background: 'linear-gradient(to right, transparent, rgba(253, 252, 251, 0.2), transparent)' }}
+              />
 
               {/* Header */}
               <div className="mb-8 text-center sm:text-left">
-                <h2 className="font-brand text-2xl font-bold text-white tracking-tight">
+                <h2
+                  className="ds-title-1"
+                  style={{ color: 'var(--ds-color-text-on-dark)' }}
+                >
                   {mode === 'login' ? 'Acesse sua conta' : 'Crie seu acesso'}
                 </h2>
-                <p className="mt-2 text-sm text-am-text-secondary leading-relaxed">
+                <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--ds-color-text-muted)' }}>
                   {mode === 'login'
                     ? 'Retome o controle da sua preparação.'
                     : 'A IA que entende o seu ritmo de estudo.'}
                 </p>
               </div>
 
-              {/* Google */}
+              {/* Google button */}
               <button
                 onClick={signInWithGoogle}
                 disabled={isDisabled}
-                className="group flex w-full items-center justify-center gap-3 rounded-2xl bg-white px-5 py-3.5 font-semibold text-gray-900 transition-all hover:bg-gray-100 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                className="group flex w-full items-center justify-center gap-3 rounded-full px-5 py-3.5 font-semibold transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  background: 'var(--ds-color-surface-0)',
+                  color: 'var(--ds-color-text-on-light)',
+                  minHeight: 'var(--ds-size-button-height)',
+                }}
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -216,48 +302,100 @@ export default function LoginPage() {
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
                 {isDisabled ? 'Conectando...' : 'Continuar com Google'}
-                <ArrowRight className="ml-auto h-4 w-4 text-gray-400 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="ml-auto h-4 w-4 opacity-40 transition-transform group-hover:translate-x-1" />
               </button>
 
               {/* Divider */}
               <div className="my-6 flex items-center gap-4">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-am-border-strong/50" />
-                <span className="text-[11px] text-am-text-tertiary font-mono uppercase tracking-widest">Ou com email</span>
-                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-am-border-strong/50" />
+                <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, transparent, var(--ds-color-border-soft))' }} />
+                <span
+                  className="text-[11px] uppercase"
+                  style={{
+                    fontFamily: 'var(--ds-font-display)',
+                    letterSpacing: 'var(--ds-letter-kicker)',
+                    color: 'var(--ds-color-text-muted)',
+                  }}
+                >
+                  Ou com email
+                </span>
+                <div className="h-px flex-1" style={{ background: 'linear-gradient(to left, transparent, var(--ds-color-border-soft))' }} />
               </div>
 
               {/* Form */}
               <form onSubmit={handleEmailSubmit} className="space-y-4">
                 {mode === 'register' && (
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-am-text-secondary uppercase tracking-wider ml-1">Nome</label>
+                    <label
+                      className="text-[11px] font-medium uppercase ml-1"
+                      style={{
+                        fontFamily: 'var(--ds-font-display)',
+                        letterSpacing: 'var(--ds-letter-kicker)',
+                        color: 'var(--ds-color-text-muted)',
+                      }}
+                    >
+                      Nome
+                    </label>
                     <input
                       type="text"
                       placeholder="Alan Turing"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
                       required
-                      className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder-am-text-tertiary outline-none transition-all placeholder:font-mono focus:border-am-brand-primary/50 focus:bg-black/60 focus:ring-2 focus:ring-am-brand-primary/20 backdrop-blur-md"
+                      className="w-full rounded-full px-5 py-3.5 text-sm outline-none transition-all"
+                      style={{
+                        background: 'rgba(23, 20, 18, 0.6)',
+                        border: '1px solid var(--ds-color-border-soft)',
+                        color: 'var(--ds-color-text-on-dark)',
+                        backdropFilter: 'blur(8px)',
+                      }}
                     />
                   </div>
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold text-am-text-secondary uppercase tracking-wider ml-1">Work Email</label>
+                  <label
+                    className="text-[11px] font-medium uppercase ml-1"
+                    style={{
+                      fontFamily: 'var(--ds-font-display)',
+                      letterSpacing: 'var(--ds-letter-kicker)',
+                      color: 'var(--ds-color-text-muted)',
+                    }}
+                  >
+                    Work Email
+                  </label>
                   <input
                     type="email"
                     placeholder="hey@aprova.mind"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder-am-text-tertiary outline-none transition-all placeholder:font-mono focus:border-am-brand-primary/50 focus:bg-black/60 focus:ring-2 focus:ring-am-brand-primary/20 backdrop-blur-md"
+                    className="w-full rounded-full px-5 py-3.5 text-sm outline-none transition-all"
+                    style={{
+                      background: 'rgba(23, 20, 18, 0.6)',
+                      border: '1px solid var(--ds-color-border-soft)',
+                      color: 'var(--ds-color-text-on-dark)',
+                      backdropFilter: 'blur(8px)',
+                    }}
                   />
                 </div>
 
                 <div className="space-y-1.5 relative">
                   <div className="flex justify-between items-center ml-1">
-                    <label className="text-[11px] font-semibold text-am-text-secondary uppercase tracking-wider">Senha Secreta</label>
-                    {mode === 'login' && <span className="text-[11px] text-am-brand-primary cursor-pointer hover:underline">Esqueceu?</span>}
+                    <label
+                      className="text-[11px] font-medium uppercase"
+                      style={{
+                        fontFamily: 'var(--ds-font-display)',
+                        letterSpacing: 'var(--ds-letter-kicker)',
+                        color: 'var(--ds-color-text-muted)',
+                      }}
+                    >
+                      Senha Secreta
+                    </label>
+                    {mode === 'login' && (
+                      <span className="text-[11px] cursor-pointer hover:underline" style={{ color: 'var(--ds-color-brand)' }}>
+                        Esqueceu?
+                      </span>
+                    )}
                   </div>
                   <div className="relative">
                     <input
@@ -267,12 +405,19 @@ export default function LoginPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       minLength={6}
-                      className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 pr-12 text-sm text-white placeholder-am-text-tertiary outline-none transition-all placeholder:font-mono focus:border-am-brand-primary/50 focus:bg-black/60 focus:ring-2 focus:ring-am-brand-primary/20 backdrop-blur-md"
+                      className="w-full rounded-full px-5 py-3.5 pr-12 text-sm outline-none transition-all"
+                      style={{
+                        background: 'rgba(23, 20, 18, 0.6)',
+                        border: '1px solid var(--ds-color-border-soft)',
+                        color: 'var(--ds-color-text-on-dark)',
+                        backdropFilter: 'blur(8px)',
+                      }}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-am-text-tertiary hover:bg-white/10 hover:text-white transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors"
+                      style={{ color: 'var(--ds-color-text-muted)' }}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -283,11 +428,13 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={isDisabled}
-                    className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-am-brand-gradient px-5 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="ds-button ds-button--primary w-full justify-center gap-2 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{
+                      minHeight: '48px',
+                      borderRadius: 'var(--ds-radius-pill)',
+                      fontSize: '0.875rem',
+                    }}
                   >
-                    <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-150%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(150%)]">
-                      <div className="relative h-full w-8 bg-white/20" />
-                    </div>
                     {submitting ? (
                       <Zap className="h-4 w-4 animate-bounce" />
                     ) : (
@@ -307,24 +454,38 @@ export default function LoginPage() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-5 rounded-2xl border border-am-error/20 bg-am-error/10 px-4 py-3.5 flex items-center gap-3 backdrop-blur-sm"
+                  className="mt-5 rounded-2xl px-4 py-3.5 flex items-center gap-3"
+                  style={{
+                    background: 'rgba(169, 68, 66, 0.15)',
+                    border: '1px solid rgba(169, 68, 66, 0.3)',
+                  }}
                 >
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-am-error/20">
-                    <Zap className="h-3 w-3 text-am-error" />
+                  <div
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(169, 68, 66, 0.25)' }}
+                  >
+                    <Zap className="h-3 w-3" style={{ color: 'var(--ds-color-danger)' }} />
                   </div>
-                  <p className="text-xs font-medium text-am-error leading-tight">{error}</p>
+                  <p className="text-xs font-medium leading-tight" style={{ color: '#e57373' }}>{error}</p>
                 </motion.div>
               )}
 
               {/* Toggle */}
-              <div className="mt-8 text-center bg-black/20 rounded-2xl p-4 border border-white/5">
-                <p className="text-xs text-am-text-secondary">
+              <div
+                className="mt-8 text-center rounded-2xl p-4"
+                style={{
+                  background: 'rgba(23, 20, 18, 0.4)',
+                  border: '1px solid var(--ds-color-border-soft)',
+                }}
+              >
+                <p className="text-xs" style={{ color: 'var(--ds-color-text-muted)' }}>
                   {mode === 'login' ? 'Novo por aqui? ' : 'Já é um estrategista? '}
                   <button
                     onClick={() => {
                       setMode(mode === 'login' ? 'register' : 'login');
                     }}
-                    className="font-semibold text-am-brand-secondary hover:text-white transition-colors"
+                    className="font-semibold transition-colors hover:underline"
+                    style={{ color: 'var(--ds-color-brand)' }}
                   >
                     {mode === 'login' ? 'Criar sua conta gratuita' : 'Faça seu login'}
                   </button>

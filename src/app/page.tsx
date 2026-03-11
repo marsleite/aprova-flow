@@ -240,7 +240,7 @@ export default function LandingPage() {
         <section className="py-24 bg-am-surface border-y border-white/[0.02]">
           <div className="mx-auto max-w-7xl px-6">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="font-brand text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">O Fim da "Força Bruta" e Ansiedade</h2>
+              <h2 className="font-brand text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">O Fim da &quot;Força Bruta&quot; e Ansiedade</h2>
               <p className="text-am-text-secondary">O cenário atual de concursos vende a ilusão de que 12h líquidas te aprovam. Nós provamos que 4h líquidas bem direcionadas ganham o jogo.</p>
             </div>
 
@@ -308,7 +308,7 @@ export default function LandingPage() {
                   <div className="space-y-4">
                     <div className="h-4 pl-1 text-[10px] font-mono text-am-text-tertiary uppercase tracking-wider">AprovaMind Copilot</div>
                     <div className="p-4 rounded-lg bg-am-surface-subtle border border-white/[0.05]">
-                      <p className="text-am-text-secondary text-sm">"Notei que o seu Focus Score em <strong className="text-white">Direito Administrativo</strong> abaixou para 64% na última bateria. Como esta disciplina representa 18% do Edital 1, sugiro que a próxima sessão de 50min foque na re-leitura de Licitações."</p>
+                      <p className="text-am-text-secondary text-sm">&quot;Notei que o seu Focus Score em <strong className="text-white">Direito Administrativo</strong> abaixou para 64% na última bateria. Como esta disciplina representa 18% do Edital 1, sugiro que a próxima sessão de 50min foque na re-leitura de Licitações.&quot;</p>
                     </div>
                     <Button variant="premium" className="w-full mt-2">Acionar Modo Resgate</Button>
                   </div>

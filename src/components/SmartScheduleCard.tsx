@@ -134,7 +134,7 @@ export default function SmartScheduleCard({
             {!hasContext && (
                 <div className="rounded-xl border border-am-warning/30 bg-am-warning/10 px-4 py-3 text-sm text-am-warning flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 flex-shrink-0" />
-                    <p>Defina as matérias e seus pesos no 'Edital' para a IA poder calcular sua rota ideal.</p>
+                    <p>Defina as matérias e seus pesos no &apos;Edital&apos; para a IA poder calcular sua rota ideal.</p>
                 </div>
             )}
 

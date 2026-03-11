@@ -1,0 +1,86 @@
+:root {
+  --ds-color-canvas: #171412;
+  --ds-color-canvas-2: #2c2826;
+  --ds-color-surface-0: #fdfcfb;
+  --ds-color-surface-1: #faf7f1;
+  --ds-color-surface-2: #efebe3;
+  --ds-color-surface-3: #e5dfd2;
+  --ds-color-text-on-dark: #fdfcfb;
+  --ds-color-text-on-light: #171412;
+  --ds-color-text-muted: rgba(253, 252, 251, 0.7);
+  --ds-color-border-soft: rgba(253, 252, 251, 0.12);
+  --ds-color-divider: rgba(73, 71, 69, 0.3);
+  --ds-color-brand: #dacaFF;
+  --ds-color-brand-mid: #c2abf8;
+  --ds-color-brand-strong: #9a75f0;
+  --ds-color-accent-lime: #e6ff5b;
+  --ds-color-accent-yellow: #ffd15b;
+  --ds-color-accent-cyan: #7feef8;
+  --ds-color-focus: #e6ff5b;
+  --ds-color-danger: #a94442;
+  --ds-color-glass: rgba(253, 252, 251, 0.2);
+
+  --ds-font-body: "Switzer", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --ds-font-display: "Clash Display", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+
+  --ds-font-weight-regular: 400;
+  --ds-font-weight-medium: 500;
+  --ds-font-weight-semibold: 600;
+  --ds-font-weight-bold: 700;
+
+  --ds-text-body-sm: 0.875rem;
+  --ds-text-body-md: 1rem;
+  --ds-text-body-lg: clamp(1.125rem, 1rem + 0.35vw, 1.5rem);
+  --ds-text-kicker: 0.875rem;
+  --ds-text-title-2: clamp(1.25rem, 1rem + 1vw, 2rem);
+  --ds-text-title-1: clamp(1.5rem, 1.2rem + 1.2vw, 2.5rem);
+  --ds-text-display-2: clamp(2rem, 1.5rem + 2vw, 3rem);
+  --ds-text-display-1: clamp(2.25rem, 1.5rem + 2.8vw, 4rem);
+  --ds-line-body: 1.4;
+  --ds-line-tight: 1.1;
+  --ds-line-title: 1.2;
+  --ds-letter-kicker: 0.06em;
+
+  --ds-radius-1: 8px;
+  --ds-radius-2: 16px;
+  --ds-radius-3: 32px;
+  --ds-radius-pill: 40px;
+  --ds-radius-capsule: 80px;
+  --ds-radius-full: 999px;
+
+  --ds-space-1: 0.5rem;
+  --ds-space-2: 0.75rem;
+  --ds-space-3: 1rem;
+  --ds-space-4: 1.5rem;
+  --ds-space-5: 2rem;
+  --ds-space-6: 3rem;
+  --ds-space-7: 4rem;
+  --ds-space-8: 5rem;
+  --ds-space-9: 7.5rem;
+  --ds-space-section-sm: clamp(5rem, 7vw, 8.75rem);
+  --ds-space-section-md: clamp(6.25rem, 10vw, 12.5rem);
+  --ds-space-section-lg: clamp(10rem, 12.5vw, 15rem);
+
+  --ds-size-button-height: 40px;
+  --ds-size-icon-xs: 8px;
+  --ds-size-icon-sm: 16px;
+  --ds-size-avatar: 56px;
+
+  --ds-motion-fast: 0.3s;
+  --ds-motion-base: 0.4s;
+  --ds-motion-slow: 0.8s;
+  --ds-motion-loop: 20s;
+  --ds-ease-standard: ease;
+  --ds-ease-out: ease-out;
+  --ds-ease-soft: ease-in-out;
+
+  --ds-grid-max: 160rem;
+  --ds-grid-columns: 26;
+  --ds-container-mobile: 24px;
+  --ds-breakpoint-sm: 480px;
+  --ds-breakpoint-md: 736px;
+  --ds-breakpoint-lg: 980px;
+  --ds-breakpoint-xl: 1440px;
+
+  color-scheme: dark;
+}
