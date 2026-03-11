@@ -1,65 +1,73 @@
 /**
- * Web foundation variables matching the rebranding guide.
+ * Foundation tokens — Sitetrip Design System integration.
+ * All --am-* semantic tokens now map to Sitetrip DS warm palette.
  */
 :root {
-    --am-brand-primary: #3D74F6;
-    --am-brand-primary-hover: #2E5ED9;
-    --am-brand-secondary: #8B5CF6;
-    --am-brand-secondary-hover: #7C3AED;
-    --am-brand-gradient-start: #3D74F6;
-    --am-brand-gradient-end: #8B5CF6;
+    /* Brand — Sitetrip purples */
+    --am-brand-primary: #9a75f0;
+    --am-brand-primary-hover: #8560e0;
+    --am-brand-secondary: #dacaFF;
+    --am-brand-secondary-hover: #c2abf8;
+    --am-brand-gradient-start: #9a75f0;
+    --am-brand-gradient-end: #dacaFF;
 
-    /* Basic Surfaces (Light) */
-    --am-bg-canvas: #F8FAFC;
-    --am-bg-surface: #FFFFFF;
-    --am-bg-surface-subtle: #F1F5F9;
-    --am-bg-elevated: #FFFFFF;
-    --am-border-default: #E2E8F0;
-    --am-border-strong: #CBD5E1;
+    /* Surfaces (Light) — Sitetrip warm creams */
+    --am-bg-canvas: #faf7f1;
+    --am-bg-surface: #fdfcfb;
+    --am-bg-surface-subtle: #efebe3;
+    --am-bg-elevated: #fdfcfb;
+    --am-border-default: #e5dfd2;
+    --am-border-strong: #d5cfc2;
 
-    /* Basic Text (Light) */
-    --am-text-primary: #0F172A;
-    --am-text-secondary: #475569;
-    --am-text-tertiary: #64748B;
-    --am-text-inverse: #F8FAFC;
+    /* Text (Light) — Sitetrip warm darks */
+    --am-text-primary: #171412;
+    --am-text-secondary: #534e47;
+    --am-text-tertiary: #7a746b;
+    --am-text-inverse: #fdfcfb;
 
     /* Semantic */
     --am-success: #16A34A;
     --am-warning: #D97706;
-    --am-error: #DC2626;
+    --am-error: #a94442;
     --am-info: #2563EB;
 
-    /* AI */
-    --am-ai-default: #8B5CF6;
-    --am-ai-subtle: #F5F3FF;
-    --am-ai-border: #DDD6FE;
+    /* AI — Sitetrip brand pastel */
+    --am-ai-default: #9a75f0;
+    --am-ai-subtle: rgba(218, 202, 255, 0.12);
+    --am-ai-border: rgba(218, 202, 255, 0.3);
+    --am-ai-glow: rgba(154, 117, 240, 0.2);
 
-    /* Radii */
+    /* Accents — from Sitetrip DS */
+    --am-accent-lime: #e6ff5b;
+    --am-accent-yellow: #ffd15b;
+    --am-accent-cyan: #7feef8;
+
+    /* Radii — slightly larger to match DS */
     --am-radius-sm: 8px;
-    --am-radius-md: 12px;
-    --am-radius-lg: 16px;
-    --am-radius-xl: 20px;
-    --am-radius-pill: 9999px;
+    --am-radius-md: 16px;
+    --am-radius-lg: 24px;
+    --am-radius-xl: 32px;
+    --am-radius-pill: 40px;
 }
 
 .dark {
-    /* Surfaces (Dark) - OLED Black & Ultra-Deep Grays */
-    --am-bg-canvas: #000000;
-    --am-bg-surface: #0A0A0A;
-    --am-bg-surface-subtle: #111111;
-    --am-bg-elevated: #161616;
+    /* Surfaces (Dark) — Sitetrip warm canvas */
+    --am-bg-canvas: #171412;
+    --am-bg-surface: #1e1b18;
+    --am-bg-surface-subtle: #2c2826;
+    --am-bg-elevated: #353130;
 
-    /* Subtle almost invisible borders */
-    --am-border-default: rgba(255, 255, 255, 0.06);
-    --am-border-strong: rgba(255, 255, 255, 0.12);
+    /* Borders — Sitetrip warm soft */
+    --am-border-default: rgba(253, 252, 251, 0.12);
+    --am-border-strong: rgba(253, 252, 251, 0.2);
 
-    /* Text (Dark) - Softer Whites and Zincs */
-    --am-text-primary: #EDEDED;
-    --am-text-secondary: #A1A1AA;
-    --am-text-tertiary: #71717A;
-    --am-text-inverse: #000000;
+    /* Text (Dark) — Sitetrip warm whites */
+    --am-text-primary: #fdfcfb;
+    --am-text-secondary: rgba(253, 252, 251, 0.7);
+    --am-text-tertiary: rgba(253, 252, 251, 0.45);
+    --am-text-inverse: #171412;
 
-    /* AI (Dark) - No heavy purple backgrounds */
-    --am-ai-subtle: transparent;
-    --am-ai-border: rgba(139, 92, 246, 0.30);
+    /* AI (Dark) */
+    --am-ai-subtle: rgba(218, 202, 255, 0.08);
+    --am-ai-border: rgba(218, 202, 255, 0.25);
 }

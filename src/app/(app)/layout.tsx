@@ -21,6 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [plans, setPlans] = useState<StudyPlanEdital[]>([]);
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
+  const [loadingPlans, setLoadingPlans] = useState(false);
   const migrated = useRef(false);
 
   const handlePlanChange = useCallback(async (planId: string | null) => {
@@ -30,7 +31,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   const loadPlans = useCallback(async () => {
-    if (!user) return;
+    if (!user || loadingPlans) return;
+    setLoadingPlans(true);
     try {
       if (!migrated.current) {
         await migrateToMultiPlan(user.uid);
@@ -42,8 +44,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       setActivePlanId(active || null);
     } catch {
       // silently fail
+    } finally {
+      setLoadingPlans(false);
     }
-  }, [user]);
+  }, [user, loadingPlans]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -52,8 +56,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user) loadPlans();
-  }, [user, loadPlans]);
+    if (user && !loadingPlans && plans.length === 0) {
+      loadPlans();
+    }
+  }, [user, loadPlans, loadingPlans, plans.length]);
 
   // Must be before any early returns — Rules of Hooks
   const planContextValue = useMemo(

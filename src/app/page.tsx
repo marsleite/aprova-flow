@@ -4,15 +4,15 @@ import { Sparkles, Brain, Target, TrendingUp, ChevronRight, CheckCircle2, Zap, F
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-am-surface-subtle font-sans text-am-text-primary overflow-x-hidden selection:bg-am-brand-primary/30">
+    <div className="dark min-h-screen font-sans text-am-text-primary overflow-x-hidden selection:bg-am-brand-primary/30" style={{ background: 'var(--am-bg-canvas)' }}>
       {/* Navigation */}
       <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/[0.04] bg-am-surface-subtle/80 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-6 flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-am-md bg-am-brand-gradient shadow-[0_0_12px_var(--color-am-brand-primary)]">
-              <Zap className="h-4 w-4 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: 'var(--am-brand-primary)' }}>
+              <Zap className="h-4 w-4" style={{ color: 'var(--ds-color-text-on-light, #171412)' }} />
             </div>
-            <span className="font-brand text-lg font-bold tracking-tight text-white">AprovaMind</span>
+            <span className="text-lg font-semibold tracking-tight" style={{ fontFamily: 'var(--ds-font-display, inherit)', color: 'var(--am-text-primary)' }}>AprovaMind</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-am-body-sm font-semibold text-am-text-secondary hover:text-white transition-colors">
@@ -38,8 +38,8 @@ export default function LandingPage() {
               <span className="text-sm font-medium text-am-text-primary tracking-wide">Inteligência Estratégica para Concursos</span>
             </div>
 
-            <h1 className="font-brand text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight max-w-4xl mx-auto">
-              Não estude mais.<br /> Estude <span className="text-transparent bg-clip-text bg-am-brand-gradient">cirurgicamente.</span>
+            <h1 className="ds-display-1 mb-6 max-w-4xl mx-auto" style={{ color: 'var(--am-text-primary)' }}>
+              Não estude mais.<br /> Estude <span style={{ color: 'var(--am-brand-primary)' }}>cirurgicamente.</span>
             </h1>
 
             <p className="text-lg md:text-xl text-am-text-secondary mb-10 max-w-2xl mx-auto leading-relaxed">
@@ -79,7 +79,7 @@ export default function LandingPage() {
                     {/* Fake Plan Badge */}
                     <div className="hidden lg:block mx-3 mt-3">
                       <div className="flex w-full items-center gap-2 rounded-full border border-am-border-default bg-am-surface-subtle px-3 py-2">
-                        <div className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: 'var(--color-am-brand-primary)', boxShadow: '0 0 6px rgba(61,116,246,0.5)' }} />
+                        <div className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: 'var(--am-brand-primary)', boxShadow: '0 0 6px rgba(154,117,240,0.5)' }} />
                         <span className="min-w-0 flex-1 truncate text-xs text-am-text-secondary font-mono">
                           Edital Master (RFB)
                         </span>
@@ -142,7 +142,7 @@ export default function LandingPage() {
                           </p>
                         </div>
                         <div className="hidden sm:flex items-center gap-3 mt-2">
-                          <div className="h-9 px-6 rounded-full bg-am-brand-primary flex items-center gap-2 text-white text-sm font-semibold shadow-[0_4px_12px_rgba(61,116,246,0.3)]">
+                          <div className="h-9 px-6 rounded-full flex items-center gap-2 text-sm font-semibold" style={{ background: 'var(--am-brand-primary)', color: 'var(--ds-color-text-on-light, #171412)', boxShadow: '0 4px 12px rgba(154,117,240,0.3)' }}>
                             <Play className="h-4 w-4 fill-current" /> Iniciar
                           </div>
                         </div>
@@ -240,7 +240,7 @@ export default function LandingPage() {
         <section className="py-24 bg-am-surface border-y border-white/[0.02]">
           <div className="mx-auto max-w-7xl px-6">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="font-brand text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">O Fim da "Força Bruta" e Ansiedade</h2>
+              <h2 className="font-brand text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">O Fim da &quot;Força Bruta&quot; e Ansiedade</h2>
               <p className="text-am-text-secondary">O cenário atual de concursos vende a ilusão de que 12h líquidas te aprovam. Nós provamos que 4h líquidas bem direcionadas ganham o jogo.</p>
             </div>
 
@@ -308,7 +308,7 @@ export default function LandingPage() {
                   <div className="space-y-4">
                     <div className="h-4 pl-1 text-[10px] font-mono text-am-text-tertiary uppercase tracking-wider">AprovaMind Copilot</div>
                     <div className="p-4 rounded-lg bg-am-surface-subtle border border-white/[0.05]">
-                      <p className="text-am-text-secondary text-sm">"Notei que o seu Focus Score em <strong className="text-white">Direito Administrativo</strong> abaixou para 64% na última bateria. Como esta disciplina representa 18% do Edital 1, sugiro que a próxima sessão de 50min foque na re-leitura de Licitações."</p>
+                      <p className="text-am-text-secondary text-sm">&quot;Notei que o seu Focus Score em <strong className="text-white">Direito Administrativo</strong> abaixou para 64% na última bateria. Como esta disciplina representa 18% do Edital 1, sugiro que a próxima sessão de 50min foque na re-leitura de Licitações.&quot;</p>
                     </div>
                     <Button variant="premium" className="w-full mt-2">Acionar Modo Resgate</Button>
                   </div>
@@ -318,7 +318,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-24 bg-[#0a0f18] border-t border-white/[0.05]">
+        <section className="py-24 border-t" style={{ background: 'var(--am-bg-surface)', borderColor: 'var(--am-border-default)' }}>
           <div className="mx-auto max-w-3xl px-6 text-center">
             <h2 className="font-brand text-3xl font-bold text-white mb-6">Preparado para jogar com Estratégia?</h2>
             <p className="text-am-text-secondary mb-10">Junte-se a candidatos que trocaram a ansiedade de cobrir 100% de materiais gigantescos por um planejamento cirúrgico e adaptativo.</p>

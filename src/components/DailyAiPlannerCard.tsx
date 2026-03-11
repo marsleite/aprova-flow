@@ -433,7 +433,7 @@ export default function DailyAiPlannerCard({
 
       {initialRecoveryMode && !plan && !loading && !loadingSavedPlan && (
         <div className="mb-3 rounded-xl border border-am-error/30 bg-am-error/10 px-3 py-2 text-xs text-am-error">
-          Você ativou o Modo Recuperação. Clique em "Gerar plano" para a IA montar seu resgate estratégico focado em Gaps.
+          Você ativou o Modo Recuperação. Clique em &quot;Gerar plano&quot; para a IA montar seu resgate estratégico focado em Gaps.
         </div>
       )}
 

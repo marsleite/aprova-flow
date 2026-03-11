@@ -17,8 +17,8 @@ export default function HistoryPage() {
 
   const filterPlanId = activePlanId || undefined;
 
-  // Re-render when activePlanId changes (no extra fetch needed — SessionHistory/ActivityHeatmap receive planId as prop)
-  useEffect(() => { setRefreshKey((k) => k + 1); }, [activePlanId]);
+  // The components below (SessionHistory/ActivityHeatmap) already receive filterPlanId as a prop.
+  // We only need refreshKey for manual triggers (like onSessionsChanged).
 
   if (!user) return null;
 

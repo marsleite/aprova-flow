@@ -7,19 +7,19 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
     ({ className = '', variant = 'default', size = 'sm', ...props }, ref) => {
-        let classes = 'inline-flex items-center font-semibold rounded-am-pill transition-colors ';
+        let classes = 'inline-flex items-center font-semibold rounded-full transition-colors ';
 
-        // Size
+        // Size — DS chip sizing
         switch (size) {
             case 'sm':
-                classes += 'px-2 py-0.5 text-[10px] uppercase tracking-wider ';
+                classes += 'px-2.5 py-0.5 text-[10px] uppercase tracking-wider gap-1.5 ';
                 break;
             case 'md':
-                classes += 'px-2.5 py-1 text-am-caption ';
+                classes += 'px-3 py-1 text-am-caption gap-2 ';
                 break;
         }
 
-        // Variant
+        // Variant — Sitetrip accent colors
         switch (variant) {
             case 'default':
                 classes += 'bg-am-surface-subtle text-am-text-secondary border border-am-border-default ';
@@ -37,7 +37,7 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
                 classes += 'bg-am-error/10 text-am-error border border-am-error/20 ';
                 break;
             case 'ai':
-                classes += 'bg-am-ai-subtle text-am-ai-default border border-am-ai-border ';
+                classes += 'bg-am-ai-subtle text-am-brand-secondary border border-am-ai-border ';
                 break;
             case 'outline':
                 classes += 'bg-transparent text-am-text-secondary border border-am-border-strong ';

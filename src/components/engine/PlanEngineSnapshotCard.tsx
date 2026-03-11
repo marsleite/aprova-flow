@@ -338,22 +338,22 @@ export default function PlanEngineSnapshotCard({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 text-am-caption text-am-text-secondary">
-                  <div className="rounded-am-md bg-am-surface px-3 py-2">
-                    <p className="uppercase tracking-wider text-am-text-tertiary">Saúde</p>
-                    <p className="mt-1 text-am-body-sm font-semibold text-am-text-primary">
+                <div className="grid grid-cols-3 gap-2 text-am-caption text-am-text-secondary">
+                  <div className="rounded-am-md bg-am-surface px-2 py-2 overflow-hidden min-w-0">
+                    <p className="uppercase tracking-wider text-am-text-tertiary truncate">Saúde</p>
+                    <p className="mt-1 text-am-body-sm font-semibold text-am-text-primary truncate">
                       {formatOverallMetric(subject)}
                     </p>
                   </div>
-                  <div className="rounded-am-md bg-am-surface px-3 py-2">
-                    <p className="uppercase tracking-wider text-am-text-tertiary">Recência</p>
-                    <p className="mt-1 text-am-body-sm font-semibold text-am-text-primary">
+                  <div className="rounded-am-md bg-am-surface px-2 py-2 overflow-hidden min-w-0">
+                    <p className="uppercase tracking-wider text-am-text-tertiary truncate">Recência</p>
+                    <p className="mt-1 text-am-body-sm font-semibold text-am-text-primary truncate">
                       {formatRecencyMetric(subject)}
                     </p>
                   </div>
-                  <div className="rounded-am-md bg-am-surface px-3 py-2">
-                    <p className="uppercase tracking-wider text-am-text-tertiary">Questões</p>
-                    <p className="mt-1 text-am-body-sm font-semibold text-am-text-primary">
+                  <div className="rounded-am-md bg-am-surface px-2 py-2 overflow-hidden min-w-0">
+                    <p className="uppercase tracking-wider text-am-text-tertiary truncate">Questões</p>
+                    <p className="mt-1 text-am-body-sm font-semibold text-am-text-primary truncate">
                       {formatPerformanceMetric(subject)}
                     </p>
                   </div>

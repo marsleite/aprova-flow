@@ -39,6 +39,7 @@ import {
   getCurrentWeekStart,
 } from '@/lib/firebase/sessions';
 import { auth } from '@/lib/firebase/config';
+import { Button } from '@/components/primitives/Button';
 
 // ============================================================
 // Tipos
@@ -259,13 +260,13 @@ export default function WeeklyMentoringCard({
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/15">
-              <Brain className="h-4 w-4 text-violet-300" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-am-ai-default/10">
+              <Brain className="h-4 w-4 text-am-ai-default" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-am-text-primary">Mentoria Semanal</span>
-                <span className="rounded-md bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-300">
+                <span className="rounded-md bg-am-ai-default/10 px-1.5 py-0.5 text-[10px] font-bold text-am-ai-default">
                   IA
                 </span>
               </div>
@@ -292,10 +293,11 @@ export default function WeeklyMentoringCard({
                 <p className="text-xs text-red-300">{error}</p>
               </div>
             )}
-            <button
+            <Button
               onClick={handleGenerate}
               disabled={generating}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-4 py-3 text-sm font-medium text-am-text-primary shadow-lg shadow-[#3150AA]/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              variant="primary"
+              className="w-full py-6 text-base shadow-am-md"
             >
               {generating ? (
                 <>
@@ -308,7 +310,7 @@ export default function WeeklyMentoringCard({
                   Gerar Mentoria Semanal
                 </>
               )}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -331,15 +333,15 @@ export default function WeeklyMentoringCard({
 
                   {/* Pontos fortes */}
                   {content.strengths.length > 0 && (
-                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3.5 py-3">
+                    <div className="rounded-xl border border-am-success/20 bg-am-success/5 px-3.5 py-3">
                       <div className="mb-2 flex items-center gap-2">
-                        <Trophy className="h-3.5 w-3.5 text-emerald-400" />
-                        <span className="text-xs font-semibold text-emerald-300">Pontos Fortes</span>
+                        <Trophy className="h-3.5 w-3.5 text-am-success" />
+                        <span className="text-xs font-bold text-am-success uppercase tracking-wider">Pontos Fortes</span>
                       </div>
                       <ul className="space-y-1">
                         {content.strengths.map((s, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-emerald-200/80">
-                            <CheckCircle className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500" />
+                          <li key={i} className="flex items-start gap-2 text-sm text-am-text-secondary">
+                            <CheckCircle className="mt-0.5 h-3 w-3 shrink-0 text-am-success" />
                             {s}
                           </li>
                         ))}
@@ -349,15 +351,15 @@ export default function WeeklyMentoringCard({
 
                   {/* Pontos de melhoria */}
                   {content.improvements.length > 0 && (
-                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-3.5 py-3">
+                    <div className="rounded-xl border border-am-warning/20 bg-am-warning/5 px-3.5 py-3">
                       <div className="mb-2 flex items-center gap-2">
-                        <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
-                        <span className="text-xs font-semibold text-amber-300">Pontos de Melhoria</span>
+                        <AlertTriangle className="h-3.5 w-3.5 text-am-warning" />
+                        <span className="text-xs font-bold text-am-warning uppercase tracking-wider">Pontos de Melhoria</span>
                       </div>
                       <ul className="space-y-1">
                         {content.improvements.map((s, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-amber-200/80">
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                          <li key={i} className="flex items-start gap-2 text-sm text-am-text-secondary">
+                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-am-warning" />
                             {s}
                           </li>
                         ))}
@@ -367,26 +369,28 @@ export default function WeeklyMentoringCard({
 
                   {/* Plano de recuperação */}
                   {content.recoveryPlan && (
-                    <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-3.5 py-3">
+                    <div className="rounded-xl border border-am-ai-default/20 bg-am-ai-default/5 px-3.5 py-3">
                       <div className="mb-2 flex items-center gap-2">
-                        <Target className="h-3.5 w-3.5 text-cyan-400" />
-                        <span className="text-xs font-semibold text-cyan-300">Plano para Próxima Semana</span>
+                        <Target className="h-3.5 w-3.5 text-am-ai-default" />
+                        <span className="text-xs font-bold text-am-ai-default uppercase tracking-wider">Próxima Semana</span>
                       </div>
-                      <p className="text-sm leading-relaxed text-cyan-200/80">{content.recoveryPlan}</p>
+                      <p className="text-sm leading-relaxed text-am-text-secondary">{content.recoveryPlan}</p>
                     </div>
                   )}
 
                   {/* Metas sugeridas */}
                   {content.suggestedGoals.length > 0 && (
-                    <div className="rounded-xl border border-[#3150AA]/20 bg-violet-500/5 px-3.5 py-3">
+                    <div className="rounded-xl border border-am-ai-default/20 bg-am-ai-default/10 px-3.5 py-3">
                       <div className="mb-2 flex items-center gap-2">
-                        <Sparkles className="h-3.5 w-3.5 text-[#F59768]" />
-                        <span className="text-xs font-semibold text-violet-300">Metas da Semana</span>
+                        <Sparkles className="h-3.5 w-3.5 text-am-ai-default" />
+                        <span className="text-xs font-bold text-am-ai-default uppercase tracking-wider">Metas Sugeridas</span>
                       </div>
                       <ul className="space-y-1">
                         {content.suggestedGoals.map((g, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-violet-200/80">
-                            <span className="mt-1.5 text-xs text-violet-500">{i + 1}.</span>
+                          <li key={i} className="flex items-start gap-2 text-sm text-am-text-secondary">
+                            <span className="mt-1 flex h-4 w-4 items-center justify-center rounded-full bg-am-ai-default/10 text-[10px] font-bold text-am-ai-default leading-none">
+                              {i + 1}
+                            </span>
                             {g}
                           </li>
                         ))}
@@ -396,7 +400,7 @@ export default function WeeklyMentoringCard({
 
                   {/* Fechamento motivacional */}
                   {content.motivationalClose && (
-                    <div className="rounded-xl bg-am-surface-subtle border border-am-border-default px-3.5 py-3">
+                    <div className="rounded-xl bg-am-surface-subtle/50 border border-am-border-default/50 px-3.5 py-3">
                       <p className="text-xs italic leading-relaxed text-am-text-secondary">
                         &ldquo;{content.motivationalClose}&rdquo;
                       </p>

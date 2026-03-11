@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "../design-system/foundations/theme.css";
+@import "../design-system/sitetrip/tokens.css";
+@import "../design-system/sitetrip/components.css";
 
 /* Maintain legacy custom properties so the current app doesnt break */
 @theme inline {
@@ -11,6 +13,34 @@
   --color-primary: #3150AA;
   --color-accent: #F59768;
   --color-muted: #666666;
+
+  /* Sitetrip DS Map (st- prefix) */
+  --color-st-canvas: var(--ds-color-canvas);
+  --color-st-canvas-2: var(--ds-color-canvas-2);
+  --color-st-surface-0: var(--ds-color-surface-0);
+  --color-st-surface-1: var(--ds-color-surface-1);
+  --color-st-surface-2: var(--ds-color-surface-2);
+  --color-st-surface-3: var(--ds-color-surface-3);
+
+  --color-st-text-on-dark: var(--ds-color-text-on-dark);
+  --color-st-text-on-light: var(--ds-color-text-on-light);
+  --color-st-text-muted: var(--ds-color-text-muted);
+  --color-st-border-soft: var(--ds-color-border-soft);
+  --color-st-divider: var(--ds-color-divider);
+  --color-st-glass: var(--ds-color-glass);
+
+  --color-st-brand: var(--ds-color-brand);
+  --color-st-brand-mid: var(--ds-color-brand-mid);
+  --color-st-brand-strong: var(--ds-color-brand-strong);
+
+  --color-st-lime: var(--ds-color-accent-lime);
+  --color-st-yellow: var(--ds-color-accent-yellow);
+  --color-st-cyan: var(--ds-color-accent-cyan);
+  --color-st-focus: var(--ds-color-focus);
+  --color-st-danger: var(--ds-color-danger);
+
+  --font-st-body: var(--ds-font-body);
+  --font-st-display: var(--ds-font-display);
 
   /* New Semantic Tokens (Mapped into TW v4) */
   --color-am-brand-primary: var(--am-brand-primary);
@@ -104,14 +134,13 @@ body {
 
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(61, 116, 246, 0.15),
-      0 0 40px rgba(61, 116, 246, 0.08);
-    /* Updated to new blue */
+    box-shadow: 0 0 20px rgba(154, 117, 240, 0.15),
+      0 0 40px rgba(154, 117, 240, 0.08);
   }
 
   50% {
-    box-shadow: 0 0 30px rgba(61, 116, 246, 0.35),
-      0 0 60px rgba(61, 116, 246, 0.18);
+    box-shadow: 0 0 30px rgba(154, 117, 240, 0.35),
+      0 0 60px rgba(154, 117, 240, 0.18);
   }
 }
 
@@ -119,11 +148,11 @@ body {
 
   0%,
   100% {
-    box-shadow: 0 0 12px rgba(139, 92, 246, 0.1);
+    box-shadow: 0 0 12px rgba(218, 202, 255, 0.1);
   }
 
   50% {
-    box-shadow: 0 0 24px rgba(139, 92, 246, 0.25);
+    box-shadow: 0 0 24px rgba(218, 202, 255, 0.25);
   }
 }
 
@@ -146,8 +175,8 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.2);
-  outline-offset: 2px;
+  outline: 2px solid var(--ds-color-focus, #e6ff5b);
+  outline-offset: 3px;
   border-radius: var(--am-radius-sm);
 }
 
