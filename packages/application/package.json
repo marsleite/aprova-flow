@@ -1,0 +1,14 @@
+{
+  "name": "@aprovamind/application",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@aprovamind/contracts": "*",
+    "@aprovamind/domain": "*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  }
+}
