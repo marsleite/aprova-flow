@@ -134,14 +134,13 @@ body {
 
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(61, 116, 246, 0.15),
-      0 0 40px rgba(61, 116, 246, 0.08);
-    /* Updated to new blue */
+    box-shadow: 0 0 20px rgba(154, 117, 240, 0.15),
+      0 0 40px rgba(154, 117, 240, 0.08);
   }
 
   50% {
-    box-shadow: 0 0 30px rgba(61, 116, 246, 0.35),
-      0 0 60px rgba(61, 116, 246, 0.18);
+    box-shadow: 0 0 30px rgba(154, 117, 240, 0.35),
+      0 0 60px rgba(154, 117, 240, 0.18);
   }
 }
 
@@ -149,11 +148,11 @@ body {
 
   0%,
   100% {
-    box-shadow: 0 0 12px rgba(139, 92, 246, 0.1);
+    box-shadow: 0 0 12px rgba(218, 202, 255, 0.1);
   }
 
   50% {
-    box-shadow: 0 0 24px rgba(139, 92, 246, 0.25);
+    box-shadow: 0 0 24px rgba(218, 202, 255, 0.25);
   }
 }
 
@@ -176,8 +175,8 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.2);
-  outline-offset: 2px;
+  outline: 2px solid var(--ds-color-focus, #e6ff5b);
+  outline-offset: 3px;
   border-radius: var(--am-radius-sm);
 }
 

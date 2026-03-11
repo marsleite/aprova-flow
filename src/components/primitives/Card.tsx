@@ -7,21 +7,21 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
     ({ className = '', variant = 'default', padding = 'md', ...props }, ref) => {
-        let classes = 'rounded-am-xl overflow-hidden ';
+        let classes = 'rounded-[24px] overflow-hidden ';
 
-        // Variant styles
+        // Variant styles — Sitetrip DS
         switch (variant) {
             case 'default':
-                classes += 'bg-am-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] border border-am-border-default/50 ring-1 ring-white/5 ';
+                classes += 'bg-am-surface border border-am-border-default ';
                 break;
             case 'elevated':
-                classes += 'bg-am-surface-elevated shadow-[0_8px_30px_rgb(0,0,0,0.4)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] border border-am-border-strong ring-1 ring-white/10 ';
+                classes += 'bg-am-surface-elevated shadow-xl border border-am-border-strong ';
                 break;
             case 'glass':
-                classes += 'bg-am-surface/40 backdrop-blur-2xl border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] ';
+                classes += 'backdrop-blur-2xl border border-am-border-default ';
                 break;
             case 'ai':
-                classes += 'bg-am-surface border border-am-ai-border/20 shadow-[inset_0_1px_0_rgba(139,92,246,0.1)] relative overflow-hidden ';
+                classes += 'bg-am-surface border border-am-ai-border/30 relative overflow-hidden ';
                 break;
         }
 
@@ -46,6 +46,13 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
                 {/* Adds the subtle top gradient line for AI cards */}
                 {variant === 'ai' && (
                     <div className="absolute top-0 left-0 right-0 h-[2px] bg-am-brand-gradient opacity-80" />
+                )}
+                {/* Glass background fill */}
+                {variant === 'glass' && (
+                    <div
+                        className="absolute inset-0 -z-10"
+                        style={{ background: 'rgba(253, 252, 251, 0.04)' }}
+                    />
                 )}
                 {props.children}
             </div>

@@ -37,7 +37,7 @@ const PLAN_CARDS: PlanCard[] = [
     label: 'Free',
     priceLabel: 'R$ 0/mês',
     description: 'Para começar',
-    accentClass: 'text-gray-200',
+    accentClass: 'text-am-text-primary',
     borderClass: 'border-am-border-default',
   },
   {
@@ -46,16 +46,16 @@ const PLAN_CARDS: PlanCard[] = [
     priceLabel: 'R$ 29/mês',
     description: 'Para constância diária',
     highlight: 'Mais escolhido',
-    accentClass: 'text-[#F59768]/80',
-    borderClass: 'border-[#3150AA]/30',
+    accentClass: 'text-am-brand-primary',
+    borderClass: 'border-am-brand-primary/30',
   },
   {
     tier: 'premium',
     label: 'Premium',
     priceLabel: 'R$ 59/mês',
     description: 'Para máxima performance',
-    accentClass: 'text-violet-300',
-    borderClass: 'border-violet-500/30',
+    accentClass: 'text-am-brand-secondary',
+    borderClass: 'border-am-brand-secondary/30',
   },
 ];
 
@@ -203,19 +203,19 @@ export default function AccountPlanModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-            className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-am-border-default bg-gray-900"
+            className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-am-xl border border-am-border-default bg-am-canvas shadow-2xl"
           >
-            <div className="flex items-center justify-between border-b border-am-border-default bg-gradient-to-r from-violet-500/10 via-blue-500/5 to-transparent px-5 py-4">
+            <div className="flex items-center justify-between border-b border-am-border-default bg-gradient-to-r from-am-brand-primary/10 via-am-brand-secondary/5 to-transparent px-5 py-4">
               <div>
-                <p className="inline-flex items-center gap-2 text-xs text-violet-300">
+                <p className="ds-kicker inline-flex items-center gap-2 text-am-brand-primary">
                   <Crown className="h-3.5 w-3.5" />
                   Conta e Plano
                 </p>
-                <h2 className="text-lg font-semibold text-am-text-primary">Gerenciar assinatura</h2>
+                <h2 className="font-brand text-lg font-bold tracking-tight text-am-text-primary">Gerenciar assinatura</h2>
               </div>
               <button
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-gray-500 transition hover:bg-gray-800 hover:text-gray-300"
+                className="rounded-lg p-1.5 text-am-text-tertiary transition hover:bg-am-surface-subtle hover:text-am-text-secondary"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -223,23 +223,23 @@ export default function AccountPlanModal({
 
             <div className="space-y-4 overflow-y-auto p-5">
               {currentTier === 'admin' && (
-                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+                <div className="rounded-am-md border border-am-success/30 bg-am-success/10 px-3 py-2 text-sm text-am-success">
                   Conta em modo <span className="font-semibold">ADMIN</span>. Escolha um plano abaixo para simular a experiência do usuário.
                 </div>
               )}
 
               <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3 text-sm md:col-span-2">
-                  <p className="text-gray-300">
+                <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-3 text-sm md:col-span-2">
+                  <p className="text-am-text-secondary">
                     Plano atual: <span className="font-semibold uppercase text-am-text-primary">{currentTier}</span>
                   </p>
-                  <p className="mt-1 text-xs text-gray-400">
+                  <p className="mt-1 text-xs text-am-text-tertiary">
                     Editais usados: {currentPlansCount}
                   </p>
                 </div>
-                <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3 text-sm">
-                  <p className="text-gray-300">Acesso atual</p>
-                  <p className="mt-1 text-xs text-gray-400">
+                <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-3 text-sm">
+                  <p className="text-am-text-secondary">Acesso atual</p>
+                  <p className="mt-1 text-xs text-am-text-tertiary">
                     {isUnlimited(getCapabilitiesForTier(currentTier).maxStudyPlans)
                       ? 'Editais ilimitados'
                       : `${getCapabilitiesForTier(currentTier).maxStudyPlans} edital(is)`}
@@ -248,7 +248,7 @@ export default function AccountPlanModal({
               </div>
 
               {error && (
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                <div className="rounded-am-md border border-am-error/30 bg-am-error/10 px-3 py-2 text-sm text-am-error">
                   {error}
                 </div>
               )}
@@ -262,64 +262,64 @@ export default function AccountPlanModal({
                   return (
                     <div
                       key={plan.tier}
-                      className={`flex min-h-[420px] flex-col rounded-xl border bg-gray-900/70 p-4 ${plan.borderClass} ${
-                        isCurrent ? 'ring-1 ring-violet-400/40' : ''
+                      className={`flex min-h-[420px] flex-col rounded-am-lg border bg-am-surface p-4 backdrop-blur-sm ${plan.borderClass} ${
+                        isCurrent ? 'ring-1 ring-am-brand-primary/40' : ''
                       }`}
                     >
                       <div className="mb-3 flex items-start justify-between gap-2">
                         <div>
-                          <h3 className={`text-base font-semibold ${plan.accentClass}`}>{plan.label}</h3>
-                          <p className="text-sm text-gray-400">{plan.description}</p>
-                          <p className="mt-0.5 whitespace-nowrap text-[28px] leading-none text-am-text-primary">{plan.priceLabel}</p>
+                          <h3 className={`font-brand text-base font-bold tracking-tight ${plan.accentClass}`}>{plan.label}</h3>
+                          <p className="text-sm text-am-text-tertiary">{plan.description}</p>
+                          <p className="mt-0.5 font-brand whitespace-nowrap text-[28px] font-bold leading-none text-am-text-primary">{plan.priceLabel}</p>
                         </div>
                         {plan.highlight && (
-                          <span className="rounded-full bg-[#3150AA]/20 px-2 py-0.5 text-[10px] text-violet-200">
+                          <span className="rounded-full bg-am-brand-primary/15 px-2 py-0.5 text-[10px] font-semibold text-am-brand-primary">
                             {plan.highlight}
                           </span>
                         )}
                       </div>
 
-                      <ul className="space-y-1.5 text-xs text-gray-300">
+                      <ul className="space-y-1.5 text-xs text-am-text-secondary">
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <Check className="h-3.5 w-3.5 text-am-success" />
                           Dashboard completo
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <Check className="h-3.5 w-3.5 text-am-success" />
                           Cronômetro e histórico
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <Check className="h-3.5 w-3.5 text-am-success" />
                           {isUnlimited(caps.maxStudyPlans)
                             ? 'Editais ilimitados'
                             : `${caps.maxStudyPlans} edital${caps.maxStudyPlans > 1 ? 'is' : ''}`}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className={`h-3.5 w-3.5 ${caps.canUseCalendar ? 'text-emerald-400' : 'text-gray-600'}`} />
+                          <Check className={`h-3.5 w-3.5 ${caps.canUseCalendar ? 'text-am-success' : 'text-am-text-tertiary/50'}`} />
                           Calendário avançado
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className={`h-3.5 w-3.5 ${caps.canCreateSimulados ? 'text-emerald-400' : 'text-gray-600'}`} />
+                          <Check className={`h-3.5 w-3.5 ${caps.canCreateSimulados ? 'text-am-success' : 'text-am-text-tertiary/50'}`} />
                           Simulados personalizados
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className={`h-3.5 w-3.5 ${caps.canUseTreinoRapido ? 'text-emerald-400' : 'text-gray-600'}`} />
+                          <Check className={`h-3.5 w-3.5 ${caps.canUseTreinoRapido ? 'text-am-success' : 'text-am-text-tertiary/50'}`} />
                           Treino rápido por matéria
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <Check className="h-3.5 w-3.5 text-am-success" />
                           Chat IA: {formatQuotaLabel(plan.tier, 'chat')}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <Check className="h-3.5 w-3.5 text-am-success" />
                           Planner diário IA: {formatQuotaLabel(plan.tier, 'planner-daily')}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <Check className="h-3.5 w-3.5 text-am-success" />
                           Mentoria semanal IA: {formatQuotaLabel(plan.tier, 'weekly-mentoring')}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <Check className="h-3.5 w-3.5 text-am-success" />
                           Parse de edital IA: {formatQuotaLabel(plan.tier, 'parse-edital')}
                         </li>
                       </ul>
@@ -327,10 +327,10 @@ export default function AccountPlanModal({
                       <button
                         onClick={() => void handleChangeTier(plan.tier)}
                         disabled={isCurrent || Boolean(savingTier)}
-                        className={`mt-auto flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                        className={`mt-auto flex w-full items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                           isCurrent
-                            ? 'bg-am-surface-subtle text-gray-300'
-                            : 'bg-gradient-to-r from-[#F59768] to-[#3150AA] text-am-text-primary hover:brightness-110'
+                            ? 'bg-am-surface-subtle text-am-text-secondary'
+                            : 'bg-am-brand-gradient text-white hover:brightness-110 shadow-[0_0_16px_rgba(154,117,240,0.2)]'
                         } disabled:cursor-not-allowed disabled:opacity-70`}
                       >
                         {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -341,16 +341,16 @@ export default function AccountPlanModal({
                 })}
               </div>
 
-              <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3">
+              <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-3">
                 <button
                   onClick={() => setShowComparison((v) => !v)}
                   className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-left transition hover:bg-am-surface-subtle"
                 >
                   <span className="text-sm font-medium text-am-text-primary">Comparativo lado a lado</span>
                   {showComparison ? (
-                    <ChevronUp className="h-4 w-4 text-gray-400" />
+                    <ChevronUp className="h-4 w-4 text-am-text-tertiary" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                    <ChevronDown className="h-4 w-4 text-am-text-tertiary" />
                   )}
                 </button>
 
@@ -359,19 +359,19 @@ export default function AccountPlanModal({
                     <table className="min-w-[680px] w-full text-left text-xs">
                       <thead>
                         <tr className="border-b border-am-border-default">
-                          <th className="px-3 py-2 text-gray-400">Recurso</th>
-                          <th className="px-3 py-2 text-gray-200">Free</th>
-                          <th className="px-3 py-2 text-[#F59768]/80">Pro</th>
-                          <th className="px-3 py-2 text-violet-300">Premium</th>
+                          <th className="px-3 py-2 text-am-text-tertiary">Recurso</th>
+                          <th className="px-3 py-2 text-am-text-primary">Free</th>
+                          <th className="px-3 py-2 text-am-brand-primary">Pro</th>
+                          <th className="px-3 py-2 text-am-brand-secondary">Premium</th>
                         </tr>
                       </thead>
                       <tbody>
                         {COMPARISON_ROWS.map((row) => (
                           <tr key={row.label} className="border-b border-am-border-default last:border-b-0">
-                            <td className="px-3 py-2 text-gray-300">{row.label}</td>
-                            <td className="px-3 py-2 text-gray-300">{row.value('free')}</td>
-                            <td className="px-3 py-2 text-blue-200">{row.value('pro')}</td>
-                            <td className="px-3 py-2 text-violet-200">{row.value('premium')}</td>
+                            <td className="px-3 py-2 text-am-text-secondary">{row.label}</td>
+                            <td className="px-3 py-2 text-am-text-secondary">{row.value('free')}</td>
+                            <td className="px-3 py-2 text-am-brand-primary">{row.value('pro')}</td>
+                            <td className="px-3 py-2 text-am-brand-secondary">{row.value('premium')}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -380,7 +380,7 @@ export default function AccountPlanModal({
                 )}
               </div>
 
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-am-text-tertiary">
                 Fluxo de cobrança pode ser conectado aqui na próxima fase com Stripe/Pagar.me.
               </p>
             </div>

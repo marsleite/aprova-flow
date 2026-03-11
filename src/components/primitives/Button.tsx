@@ -12,29 +12,29 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className = '', variant = 'primary', size = 'md', asChild = false, disabled, ...props }, ref) => {
         const Comp = asChild ? Slot : 'button';
 
-        // Base styles
-        let classes = 'inline-flex items-center justify-center rounded-am-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-am-canvas ';
+        // Base styles — Sitetrip DS pill shape
+        let classes = 'inline-flex items-center justify-center rounded-full font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-am-canvas ';
 
         // Size styles
         switch (size) {
             case 'sm':
-                classes += 'h-8 px-3 text-am-caption ';
+                classes += 'h-9 px-4 text-am-caption gap-1.5 ';
                 break;
             case 'md':
-                classes += 'h-10 px-4 text-am-body-sm ';
+                classes += 'h-11 px-5 text-am-body-sm gap-2 ';
                 break;
             case 'lg':
-                classes += 'h-12 px-6 text-am-body-md ';
+                classes += 'h-12 px-7 text-am-body-md gap-2.5 ';
                 break;
             case 'icon':
-                classes += 'h-10 w-10 ';
+                classes += 'h-11 w-11 ';
                 break;
         }
 
-        // Variant styles
+        // Variant styles — Sitetrip brand
         switch (variant) {
             case 'primary':
-                classes += 'bg-am-brand-primary text-white hover:bg-am-brand-primary-hover focus-visible:ring-am-brand-primary ';
+                classes += 'bg-am-brand-primary text-white hover:brightness-110 shadow-sm focus-visible:ring-am-brand-primary ';
                 break;
             case 'secondary':
                 classes += 'bg-am-surface-elevated text-am-text-primary border border-am-border-strong hover:bg-am-surface-subtle focus-visible:ring-am-border-strong ';
@@ -49,7 +49,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 classes += 'bg-am-error/10 text-am-error hover:bg-am-error/20 border border-am-error/20 focus-visible:ring-am-error ';
                 break;
             case 'premium':
-                classes += 'bg-am-brand-gradient text-white hover:brightness-110 shadow-sm focus-visible:ring-am-brand-secondary rds-btn-identity ';
+                classes += 'bg-am-brand-gradient text-white hover:brightness-110 shadow-[0_0_20px_rgba(154,117,240,0.25)] focus-visible:ring-am-brand-secondary ';
                 break;
         }
 

@@ -128,10 +128,16 @@ export default function DashboardPage() {
       {/* 1. Flush Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-12 pb-6 px-8">
         <div>
-          <h1 className="font-brand text-[40px] font-light text-am-text-primary tracking-tighter leading-none">
+          <h1
+            className="ds-display-2"
+            style={{ color: 'var(--am-text-primary)' }}
+          >
             Dashboard
           </h1>
-          <p className="text-[12px] text-am-text-tertiary mt-3 font-mono uppercase tracking-widest">
+          <p
+            className="ds-kicker mt-3"
+            style={{ color: 'var(--am-text-secondary)' }}
+          >
             Análise Estratégica
           </p>
         </div>
