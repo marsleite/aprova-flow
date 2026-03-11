@@ -97,28 +97,29 @@ export default function MentoringPage() {
   const strengths = planVsActual.filter((p) => p.status === 'ok' || p.status === 'over');
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
-      {/* Flush Topbar */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-12 pb-6 px-8">
+    <div className="flex flex-col gap-6 pb-12">
+      {/* ── Topbar ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 px-6 border-b border-am-border-default bg-am-surface/30 backdrop-blur-md">
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Badge variant="ai" className="border-white/10 text-am-ai-default bg-transparent"><Sparkles className="h-3 w-3 mr-1" /> AI Online</Badge>
-          </div>
-          <h1 className="font-brand text-[40px] font-light text-am-text-primary tracking-tighter leading-none">
-            Mentoria Analítica
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-am-ai-default mb-2 flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3" /> Mentoria Analítica
+          </p>
+          <h1 className="font-brand text-am-h2 md:text-[42px] font-bold text-am-text-primary tracking-tight leading-[1.1]">
+            Inteligência & <br className="sm:hidden" /> Decisão Implacável
           </h1>
-          <p className="text-[12px] text-am-text-tertiary mt-3 font-mono uppercase tracking-widest max-w-lg">
-            Diagnósticos gerados por inteligência artificial para otimização da curva de aprendizado
+          <p className="text-am-body-sm text-am-text-secondary mt-4 max-w-xl leading-relaxed">
+            Diagnósticos gerados por inteligência artificial para otimização da curva de aprendizado, 
+            identificando lacunas de retenção e sugerindo ajustes dinâmicos de carga.
           </p>
         </div>
-        <div className="flex items-center gap-3 mt-4 sm:mt-0">
-          <Button onClick={() => setChatOpen(true)} variant="premium" className="rounded-full px-6">
+        <div className="flex items-center gap-3">
+          <Button onClick={() => setChatOpen(true)} variant="primary" className="rounded-full px-6 shadow-am-md">
             <MessageCircle className="h-4 w-4 mr-2" /> Copilot
           </Button>
         </div>
       </div>
 
-      <div className="px-8 space-y-6">
+      <div className="px-6 space-y-8">
         {/* ROW 1: KPIs Rápidos */}
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KPICard

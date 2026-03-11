@@ -91,29 +91,35 @@ export default function SimulationsPage() {
 
   return (
     <div className="flex flex-col gap-8 pb-10">
-      {/* Topbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 px-6 border-b border-am-border-default bg-am-surface/30 backdrop-blur-md">
+      {/* ── Topbar ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 px-6 border-b border-am-border-default bg-am-surface/30 backdrop-blur-md">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="ai" className="shadow-[0_0_12px_var(--color-am-ai-glow)]"><Target className="h-3 w-3 mr-1" /> Centro de Simulação Avançada</Badge>
-          </div>
-          <h1 className="font-brand text-am-h3 font-bold text-am-text-primary tracking-tight mt-2">
-            Simulados
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-am-ai-default mb-2 flex items-center gap-1.5">
+            <Target className="h-3.5 w-3.5" /> Centro de Simulação Avançada
+          </p>
+          <h1 className="font-brand text-am-h2 md:text-[42px] font-bold text-am-text-primary tracking-tight leading-[1.1]">
+            Simulados <br className="sm:hidden" /> de Alta Fidelidade
           </h1>
-          <p className="text-am-caption text-am-text-secondary mt-1 max-w-lg">
+          <p className="text-am-body-sm text-am-text-secondary mt-4 max-w-xl leading-relaxed">
             Diagnóstico profundo com questões ranqueadas para calibrar seu nível de prontidão
+            e identificar lacunas antes da prova oficial.
           </p>
         </div>
 
         {/* Projected score card - Premium AI Feel */}
         {projectedScore && (
           <div className="hidden sm:flex flex-col items-end">
-            <span className="text-am-caption font-mono uppercase text-am-text-tertiary">Pontuação Preditiva</span>
-            <div className="flex items-baseline gap-2">
-              <span className="font-brand text-3xl font-bold text-transparent bg-clip-text bg-am-brand-gradient">{projectedScore}</span>
-              <span className="text-am-body-sm text-am-text-secondary">/1000</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-secondary mb-1">Pontuação Preditiva</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-brand text-4xl font-bold text-transparent bg-clip-text bg-am-brand-gradient tracking-tighter">
+                {projectedScore}
+              </span>
+              <span className="text-am-body-sm font-bold text-am-text-secondary">/1000</span>
             </div>
-            <span className="text-am-caption text-am-success flex items-center gap-1 font-mono mt-1"><CheckCircle2 className="h-3 w-3" /> Ranking {percentile}</span>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-am-success/10 border border-am-success/20 mt-2">
+              <Sparkles className="h-3 w-3 text-am-success" />
+              <span className="text-[10px] font-bold text-am-success uppercase tracking-wider">Ranking {percentile}</span>
+            </div>
           </div>
         )}
       </div>
@@ -121,15 +127,15 @@ export default function SimulationsPage() {
       <div className="px-6 space-y-6">
         {/* Launch Simulation Banner */}
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show"
-          className="relative overflow-hidden rounded-am-xl border border-am-brand-primary/30 p-6 shadow-am-md"
-          style={{ background: 'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(61, 116, 246, 0.05) 100%)' }}
+          className="relative overflow-hidden rounded-am-xl border border-am-brand-secondary/30 p-6 shadow-am-md"
+          style={{ background: 'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(218, 202, 255, 0.08) 100%)' }}
         >
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-am-brand-primary/10 blur-[80px] pointer-events-none" />
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-am-brand-secondary/10 blur-[80px] pointer-events-none" />
 
           <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6 z-10">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-am-full bg-am-brand-primary/10 border border-am-brand-primary/20">
-                <Play className="h-5 w-5 text-am-brand-primary ml-1" />
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-am-full bg-am-brand-secondary/10 border border-am-brand-secondary/20">
+                <Play className="h-5 w-5 text-am-brand-secondary ml-1" />
               </div>
               <div>
                 <h3 className="font-brand text-am-h5 font-bold text-am-text-primary">Iniciar Novo Simulado</h3>
@@ -137,13 +143,13 @@ export default function SimulationsPage() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex rounded-am-full border border-am-border-default bg-am-surface-subtle overflow-hidden">
+              <div className="flex rounded-am-full border border-am-border-default bg-am-surface-subtle p-1">
                 {(['1h', '2h', '4h'] as const).map((d) => (
                   <button
                     key={d}
                     onClick={() => setSelectedDuration(d)}
-                    className={`px-4 py-2 text-am-caption font-semibold transition-all font-mono ${selectedDuration === d
-                      ? 'bg-am-text-primary text-am-canvas'
+                    className={`px-4 py-1.5 text-xs font-bold transition-all rounded-am-full ${selectedDuration === d
+                      ? 'bg-am-text-primary text-am-canvas shadow-sm'
                       : 'text-am-text-secondary hover:text-am-text-primary'
                       }`}
                   >
@@ -221,7 +227,7 @@ export default function SimulationsPage() {
                           className={`flex items-center justify-center rounded-am-md border px-3 py-2 cursor-pointer transition-all hover:scale-[1.03] ${bgClass}`}
                           title={`${s.subject}: ${s.accuracy}% acerto`}
                         >
-                          <span className="text-am-caption font-bold font-mono tracking-wider">
+                          <span className="text-[10px] font-bold uppercase tracking-wider">
                             {s.subject.length > 16 ? s.subject.substring(0, 14) + '…' : s.subject}
                           </span>
                         </div>
@@ -231,12 +237,12 @@ export default function SimulationsPage() {
 
                   <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-am-border-default">
                     <div className="bg-am-surface-subtle p-4 rounded-am-md">
-                      <p className="text-am-caption font-mono text-am-text-tertiary uppercase tracking-wider mb-1">Ameaça Principal</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-tertiary mb-1">Ameaça Principal</p>
                       <p className="font-brand text-am-body font-bold text-am-text-primary">{worstSubject?.subject || '—'}</p>
-                      {worstSubject && <p className="text-am-caption text-am-error mt-1">{worstSubject.accuracy}% retenção (Crítico)</p>}
+                      {worstSubject && <p className="text-xs font-bold text-am-error mt-2">{worstSubject.accuracy}% Retenção (Crítico)</p>}
                     </div>
                     <div className="bg-am-surface-subtle p-4 rounded-am-md">
-                      <p className="text-am-caption font-mono text-am-text-tertiary uppercase tracking-wider mb-1">Padrão Detectado</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-tertiary mb-1">Padrão Detectado</p>
                       <p className="text-am-body-sm text-am-text-secondary mt-1">
                         {worstSubject?.accuracy !== undefined && worstSubject.accuracy < 50 ? 'Viés consistente de erro conceitual. Demandando reestudo de teoria base.' : 'Em análise neural contínua.'}
                       </p>
@@ -262,9 +268,9 @@ export default function SimulationsPage() {
                           <div className="mb-2 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span className="text-am-body-sm text-am-text-primary font-medium">{s.subject}</span>
-                              <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-auto">Peso {weight.toFixed(1)}</Badge>
+                              <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-tighter py-0 px-1.5 h-auto">Peso {weight.toFixed(1)}</Badge>
                             </div>
-                            <span className={`text-am-body-sm font-bold font-mono ${c.text}`}>{s.accuracy}%</span>
+                            <span className={`text-sm font-bold ${c.text}`}>{s.accuracy}%</span>
                           </div>
                           <div className="h-2 overflow-hidden rounded-full bg-am-surface-subtle">
                             <motion.div
@@ -327,12 +333,12 @@ export default function SimulationsPage() {
                           <Trophy className="h-3 w-3 text-am-text-secondary" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-am-body-sm font-medium text-am-text-primary truncate">{s.subject}</p>
-                          <p className="text-am-caption font-mono text-am-text-tertiary">{s.totalQuestions} qs</p>
+                          <p className="text-am-body-sm font-bold text-am-text-primary truncate">{s.subject}</p>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-am-text-tertiary">{s.totalQuestions} qs</p>
                         </div>
                       </div>
                       <div className="flex-shrink-0 text-right pl-2">
-                        <span className={`text-am-body-sm font-bold font-mono ${c.text}`}>{s.accuracy}%</span>
+                        <span className={`text-sm font-bold ${c.text}`}>{s.accuracy}%</span>
                       </div>
                     </div>
                   );

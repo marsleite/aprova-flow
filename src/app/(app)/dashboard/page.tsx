@@ -34,10 +34,11 @@ import {
   Target,
   Flame,
   Play,
+  LayoutDashboard,
 } from 'lucide-react';
 
 // New RDS Components
-import { KPICard, ChartCard, Skeleton, Button } from '@/components';
+import { KPICard, ChartCard, Skeleton, Button, Badge } from '@/components';
 import { fadeUp } from '@/design-system/tokens';
 
 import {
@@ -124,25 +125,23 @@ export default function DashboardPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
-      {/* 1. Flush Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-12 pb-6 px-8">
+    <div className="flex flex-col gap-6 pb-10">
+      {/* ── Topbar ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 px-6 border-b border-am-border-default bg-am-surface/30 backdrop-blur-md">
         <div>
-          <h1
-            className="ds-display-2"
-            style={{ color: 'var(--am-text-primary)' }}
-          >
+          <div className="flex items-center gap-2 mb-1">
+            <Badge variant="outline"><LayoutDashboard className="h-3 w-3 mr-1" /> Painel Geral</Badge>
+          </div>
+          <h1 className="font-brand text-am-h3 font-bold text-am-text-primary tracking-tight mt-2">
             Dashboard
           </h1>
-          <p
-            className="ds-kicker mt-3"
-            style={{ color: 'var(--am-text-secondary)' }}
-          >
-            Análise Estratégica
+          <p className="text-am-caption text-am-text-secondary mt-1">
+            Visão estratégica consolidada do seu desempenho
+            {activePlan && <> — <span className="font-medium text-am-text-primary">{activePlan.name}</span></>}
           </p>
         </div>
 
-        <div className="flex items-center gap-3 mt-2 sm:mt-0">
+        <div className="flex items-center gap-3">
           <Button asChild variant="primary" className="rounded-full px-6">
             <a href="/engine">
               <Play className="mr-2 h-4 w-4" fill="currentColor" /> Iniciar
@@ -151,14 +150,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="px-8 space-y-6">
-        {/* Visão de Portfólio Multi-Edital */}
-        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
-          <PortfolioOverviewCard />
-        </motion.div>
-
-        {/* 2. KPIs principais */}
-        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="px-6 space-y-6">
+        {/* ── KPIs ── */}
+        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <KPICard
             title="Focus Score"
             value={avgAccuracy !== null ? `${avgAccuracy}%` : '—'}
@@ -180,10 +174,11 @@ export default function DashboardPage() {
           />
         </motion.div>
 
-        {/* 3. Gráfico de Tendência (Study Pulse) & 4. Radar por Matéria */}
-        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-3">
-            <ChartCard title="Study Pulse" subtitle="Evolução de horas líquidas na semana atual" loading={loading} height={320}>
+        {/* ── Charts: Study Pulse (wide) + Radar & Heatmap (stacked right) ── */}
+        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Study Pulse — 3/5 width */}
+          <div className="lg:col-span-3 flex flex-col">
+            <ChartCard title="Study Pulse" subtitle="Evolução de horas líquidas na semana atual" loading={loading} height={680}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
@@ -204,25 +199,25 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </ChartCard>
           </div>
-          <div className="lg:col-span-2">
+
+          {/* Radar + Heatmap stacked — 2/5 width */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
             <ChartCard title="Mapa de Foco" subtitle="Distribuição atual por matéria" loading={loading} height={320}>
               <SubjectRadarChart data={subjectData} loading={loading} />
+            </ChartCard>
+            <ChartCard title="Consistência" subtitle="Mapa de calor de horas diárias">
+              <ActivityHeatmap userId={user.uid} planId={activePlanId ?? undefined} refreshKey={summary.totalToday} />
             </ChartCard>
           </div>
         </motion.div>
 
-        {/* 5. Heatmap de consistência */}
-        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show">
-          <ChartCard title="Consistência Anual" subtitle="Mapa de calor de horas diárias">
-            <ActivityHeatmap userId={user.uid} planId={activePlanId ?? undefined} refreshKey={summary.totalToday} />
-          </ChartCard>
-        </motion.div>
-
-        {/* 6. Ação Recomendada & Insights (AI Block) */}
-        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
-          <h3 className="font-brand text-am-h5 font-bold tracking-tight text-am-text-primary mb-4 flex items-center gap-2">
-            <Zap className="h-5 w-5 text-am-ai-default" /> Inteligência & Estratégia
-          </h3>
+        {/* ── AI Section ── */}
+        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="h-px flex-1 bg-am-border-default" />
+            <Badge variant="ai"><Zap className="h-3 w-3 mr-1" /> Inteligência & Estratégia</Badge>
+            <div className="h-px flex-1 bg-am-border-default" />
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="h-full">
               <SmartScheduleCard
@@ -237,6 +232,11 @@ export default function DashboardPage() {
               <InsightsPanel insights={insights} loading={loading} />
             </div>
           </div>
+        </motion.div>
+
+        {/* ── Portfólio Multi-Edital (detail section) ── */}
+        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show">
+          <PortfolioOverviewCard />
         </motion.div>
       </div>
     </div>

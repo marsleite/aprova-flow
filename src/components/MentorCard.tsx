@@ -413,8 +413,8 @@ export default function MentorCard({
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
-              <Shield className="h-4 w-4 text-amber-300" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-am-warning/10">
+              <Shield className="h-4 w-4 text-am-warning" />
             </div>
             <div>
               <span className="text-sm font-semibold text-am-text-primary">Mentor AprovaMind</span>
@@ -450,12 +450,12 @@ export default function MentorCard({
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mb-3 flex items-start gap-2.5 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-3.5 py-3"
+                  className="mb-3 flex items-start gap-2.5 rounded-xl border border-am-accent-cyan/20 bg-am-accent-cyan/5 px-3.5 py-3"
                 >
-                  <Target className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" />
+                  <Target className="mt-0.5 h-4 w-4 shrink-0 text-am-accent-cyan" />
                   <div>
-                    <span className="text-xs font-semibold text-cyan-300">Constância vs Precisão</span>
-                    <p className="mt-0.5 text-sm leading-relaxed text-cyan-200/80">
+                    <span className="text-xs font-bold text-am-accent-cyan uppercase tracking-wider">Constância vs Precisão</span>
+                    <p className="mt-1 text-am-body-sm leading-relaxed text-am-text-secondary">
                       {data.performanceInsight}
                     </p>
                   </div>
@@ -467,12 +467,12 @@ export default function MentorCard({
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mb-3 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3.5 py-3"
+                  className="mb-3 flex items-start gap-2.5 rounded-xl border border-am-warning/20 bg-am-warning/5 px-3.5 py-3"
                 >
-                  <Coffee className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                  <Coffee className="mt-0.5 h-4 w-4 shrink-0 text-am-warning" />
                   <div>
-                    <span className="text-xs font-semibold text-amber-300">Alerta de Fadiga</span>
-                    <p className="mt-0.5 text-sm leading-relaxed text-amber-200/80">
+                    <span className="text-xs font-bold text-am-warning uppercase tracking-wider">Alerta de Fadiga</span>
+                    <p className="mt-1 text-am-body-sm leading-relaxed text-am-text-secondary">
                       {data.fatigueAlert}
                     </p>
                   </div>
@@ -480,11 +480,11 @@ export default function MentorCard({
               )}
 
               {/* Ação Imediata */}
-              <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-[#3150AA]/20 bg-[#3150AA]/10 px-3.5 py-3">
-                <Zap className="mt-0.5 h-4 w-4 shrink-0 text-[#F59768]" />
+              <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-am-ai-default/20 bg-am-ai-default/10 px-3.5 py-3">
+                <Zap className="mt-0.5 h-4 w-4 shrink-0 text-am-ai-default" />
                 <div>
-                  <span className="text-xs font-semibold text-violet-300">Ação Imediata</span>
-                  <p className="mt-0.5 text-sm leading-relaxed text-violet-200/80">
+                  <span className="text-xs font-bold text-am-ai-default uppercase tracking-wider">Ação Imediata</span>
+                  <p className="mt-1 text-am-body-sm leading-relaxed text-am-text-secondary">
                     {data.immediateAction}
                   </p>
                 </div>

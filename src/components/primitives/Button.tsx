@@ -34,7 +34,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         // Variant styles — Sitetrip brand
         switch (variant) {
             case 'primary':
-                classes += 'bg-am-brand-primary text-white hover:brightness-110 shadow-sm focus-visible:ring-am-brand-primary ';
+                classes += 'bg-am-brand-secondary text-am-text-primary hover:bg-am-brand-secondary-hover shadow-sm focus-visible:ring-am-brand-secondary ';
                 break;
             case 'secondary':
                 classes += 'bg-am-surface-elevated text-am-text-primary border border-am-border-strong hover:bg-am-surface-subtle focus-visible:ring-am-border-strong ';
@@ -49,7 +49,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 classes += 'bg-am-error/10 text-am-error hover:bg-am-error/20 border border-am-error/20 focus-visible:ring-am-error ';
                 break;
             case 'premium':
-                classes += 'bg-am-brand-gradient text-white hover:brightness-110 shadow-[0_0_20px_rgba(154,117,240,0.25)] focus-visible:ring-am-brand-secondary ';
+                classes += 'bg-am-brand-gradient text-am-text-primary hover:brightness-105 shadow-[0_0_20px_rgba(218,202,255,0.2)] focus-visible:ring-am-brand-secondary ';
                 break;
         }
 
