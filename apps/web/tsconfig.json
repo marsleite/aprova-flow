@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@aprovamind/domain": ["../../packages/domain/src/index.ts"],
+      "@aprovamind/domain/*": ["../../packages/domain/src/*"],
+      "@aprovamind/application": ["../../packages/application/src/index.ts"],
+      "@aprovamind/application/*": ["../../packages/application/src/*"],
+      "@aprovamind/contracts": ["../../packages/contracts/src/index.ts"],
+      "@aprovamind/contracts/*": ["../../packages/contracts/src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules", "scripts"]
+}

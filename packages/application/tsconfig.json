@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@aprovamind/domain": ["../../packages/domain/src/index.ts"],
+      "@aprovamind/domain/*": ["../../packages/domain/src/*"],
+      "@aprovamind/contracts": ["../../packages/contracts/src/index.ts"],
+      "@aprovamind/contracts/*": ["../../packages/contracts/src/*"],
+      "@aprovamind/application": ["./src/index.ts"],
+      "@aprovamind/application/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
