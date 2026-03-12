@@ -1,7 +1,6 @@
-import { createApp } from './app';
+import app from './app';
 
 async function start() {
-  const app = createApp();
   const port = Number(process.env.PORT ?? 3001);
   const host = process.env.HOST ?? '0.0.0.0';
 
