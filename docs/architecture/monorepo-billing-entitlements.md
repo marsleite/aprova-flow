@@ -2,6 +2,14 @@
 
 Data de referência: 11/03/2026
 
+## Documentos Complementares
+
+Para a fotografia atual da implementação, consultar também:
+
+- `docs/architecture/current-architecture.md`
+- `docs/architecture/deploy-and-environments.md`
+- `docs/architecture/api-roadmap.md`
+
 ## 1. Objetivo
 
 Preparar o AprovaMind para crescer com segurança, sem quebrar a base atual, separando primeiro o que é mais sensível operacionalmente:
