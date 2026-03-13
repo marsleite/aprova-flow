@@ -1,5 +1,6 @@
 'use client';
 
+import { FeatureCode } from '@aprovamind/domain';
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -20,6 +21,7 @@ import { getTodayISO, formatDuration } from '@/lib/utils';
 import { StudyPlanEdital, PlanVsActual, StudyInsight, StudySession, StudyConsistency, SubjectAccuracy } from '@/types';
 import PlanManager from '@/components/PlanManager';
 import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
+import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { canCreateMorePlans } from '@/lib/entitlements';
 import {
@@ -63,7 +65,7 @@ const URGENCY_CONFIG = {
 
 export default function PlannerPage() {
   const { user } = useAuthContext();
-  const { planTier, capabilities } = useEntitlements(user?.uid, user?.email);
+  const { planTier, capabilities, hasFeature } = useEntitlements(user?.uid, user?.email);
   const { plans, activePlanId, activePlan, onPlanChange } = usePlanContext();
 
   const [planStats, setPlanStats] = useState<PlanStats[]>([]);
@@ -80,6 +82,7 @@ export default function PlannerPage() {
   const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
 
   const canCreate = canCreateMorePlans(planTier, plans.length);
+  const canUseMultiEdital = hasFeature(FeatureCode.MultiEdital);
 
   useEffect(() => {
     if (!selectedPlanId && plans.length > 0) {
@@ -187,6 +190,18 @@ export default function PlannerPage() {
       </div>
 
       <div className="px-8 space-y-6">
+        {!canUseMultiEdital && (
+          <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+            <EntitlementUpgradeCard
+              title="Multi-edital fica no Premium"
+              description="O Pro resolve muito bem o caso single-plan. O Premium entra quando voce quer coordenar varios editais, reequilibrar foco e ganhar uma camada adaptativa mais forte."
+              highlight="Mais editais ativos, recovery plan, adaptive daily plan e a experiencia completa do AprovaMind."
+              recommendedPlan="premium"
+              ctaLabel="Ver beneficios do Premium"
+            />
+          </motion.div>
+        )}
+
         {/* ROW 1: Hero Próxima Sessão (AI) & Agenda do Dia */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Card Hero: Next Best Session */}

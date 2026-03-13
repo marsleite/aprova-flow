@@ -1,6 +1,6 @@
 export type PlanTier = 'free' | 'pro' | 'premium' | 'admin';
 export type AiTaskKey = 'chat' | 'weekly-mentoring' | 'planner-daily' | 'parse-edital' | 'smart-schedule' | 'interrogation' | 'predictive-exam' | 'explain-answer' | 'error-diagnosis';
-export type QuotaWindow = 'hour' | 'day' | 'week';
+export type QuotaWindow = 'hour' | 'day' | 'week' | 'month';
 
 export interface PlanCapabilities {
   maxStudyPlans: number; // -1 = ilimitado
@@ -45,36 +45,36 @@ const CAPABILITIES_BY_TIER: Record<PlanTier, PlanCapabilities> = {
 
 const AI_QUOTAS_BY_TIER: Record<Exclude<PlanTier, 'admin'>, AiQuotaByTask> = {
   free: {
-    chat: { limit: 80, window: 'day' },
-    'weekly-mentoring': { limit: 3, window: 'week' },
+    chat: { limit: 5, window: 'month' },
+    'weekly-mentoring': { limit: 0, window: 'month' },
     'planner-daily': { limit: 8, window: 'day' },
     'parse-edital': { limit: 5, window: 'week' },
     'smart-schedule': { limit: 10, window: 'week' },
     'interrogation': { limit: 15, window: 'day' },
     'predictive-exam': { limit: 5, window: 'day' },
-    'explain-answer': { limit: 0, window: 'day' },
+    'explain-answer': { limit: 3, window: 'month' },
     'error-diagnosis': { limit: 0, window: 'day' },
   },
   pro: {
-    chat: { limit: 260, window: 'day' },
-    'weekly-mentoring': { limit: 10, window: 'week' },
+    chat: { limit: 60, window: 'month' },
+    'weekly-mentoring': { limit: 4, window: 'month' },
     'planner-daily': { limit: 30, window: 'day' },
     'parse-edital': { limit: 15, window: 'week' },
     'smart-schedule': { limit: 30, window: 'week' },
     'interrogation': { limit: 50, window: 'day' },
     'predictive-exam': { limit: 20, window: 'day' },
-    'explain-answer': { limit: 30, window: 'day' },
+    'explain-answer': { limit: 120, window: 'month' },
     'error-diagnosis': { limit: 5, window: 'day' },
   },
   premium: {
-    chat: { limit: 700, window: 'day' },
-    'weekly-mentoring': { limit: 30, window: 'week' },
+    chat: { limit: 150, window: 'month' },
+    'weekly-mentoring': { limit: 8, window: 'month' },
     'planner-daily': { limit: 80, window: 'day' },
     'parse-edital': { limit: 30, window: 'week' },
     'smart-schedule': { limit: 60, window: 'week' },
     'interrogation': { limit: 100, window: 'day' },
     'predictive-exam': { limit: 50, window: 'day' },
-    'explain-answer': { limit: 80, window: 'day' },
+    'explain-answer': { limit: 300, window: 'month' },
     'error-diagnosis': { limit: 15, window: 'day' },
   },
 };

@@ -66,6 +66,17 @@ function buildWindow(now: Date, window: QuotaWindow): {
     return { key, startMs, endMs, resetEpochSeconds: Math.floor(endMs / 1000) };
   }
 
+  if (window === 'month') {
+    d.setUTCDate(1);
+    d.setUTCHours(0, 0, 0, 0);
+    const startMs = d.getTime();
+    const nextMonth = new Date(d);
+    nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1, 1);
+    const endMs = nextMonth.getTime();
+    const key = `m-${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+    return { key, startMs, endMs, resetEpochSeconds: Math.floor(endMs / 1000) };
+  }
+
   d.setUTCHours(0, 0, 0, 0);
   const startMs = d.getTime();
   const endMs = startMs + 24 * 60 * 60 * 1000;
@@ -127,7 +138,7 @@ function buildBlockedResponse(params: {
   );
 }
 
-async function resolvePlanTier(params: {
+export async function resolvePlanTier(params: {
   uid: string;
   email?: string | null;
   idToken: string;

@@ -1,9 +1,11 @@
 'use client';
 
+import { FeatureCode } from '@aprovamind/domain';
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { usePlanContext } from '@/contexts/PlanContext';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import {
   getStudyConsistency,
   getHoursBySubject,
@@ -23,6 +25,7 @@ import {
 import WeeklyMentoringCard from '@/components/WeeklyMentoringCard';
 import MentorCard from '@/components/MentorCard';
 import ChatPanel from '@/components/ChatPanel';
+import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import {
   Brain,
   Sparkles,
@@ -43,6 +46,7 @@ import { fadeUp } from '@/design-system/tokens';
 export default function MentoringPage() {
   const { user } = useAuthContext();
   const { activePlanId, activePlan: activePlanObj } = usePlanContext();
+  const { hasFeature, planTier } = useEntitlements(user?.uid, user?.email);
 
   const [consistency, setConsistency] = useState<StudyConsistency | null>(null);
   const [subjectHours, setSubjectHours] = useState<SubjectHours[]>([]);
@@ -84,6 +88,11 @@ export default function MentoringPage() {
   useEffect(() => { if (user) fetchData(); }, [fetchData, user, activePlanId]);
 
   if (!user) return null;
+
+  const canUseWeeklyDiagnostic = hasFeature(FeatureCode.WeeklyDiagnostic);
+  const canUseWeeklyMentoring = hasFeature(FeatureCode.WeeklyMentoring);
+  const canUseContextualChat = hasFeature(FeatureCode.ContextualAiChat);
+  const recommendedPlanForMentoring = planTier === 'free' ? 'pro' : 'premium';
 
   const todayDominant = recentSessions.length > 0
     ? [...recentSessions].sort((a, b) => b.duration - a.duration)[0].subject
@@ -220,33 +229,45 @@ export default function MentoringPage() {
 
           {/* Col 2 & 3: Relatório Avançado e Mentor AI Card */}
           <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show" className="lg:col-span-2 space-y-6">
-            <WeeklyMentoringCard
-              userId={user.uid}
-              planId={filterPlanId}
-              userName={user.displayName?.split(' ')[0] || 'Estudante'}
-              consistency={consistency}
-              subjectHours={subjectHours}
-              planVsActual={planVsActual}
-              weeklyData={weeklyData}
-              recentSessions={recentSessions}
-              accuracyData={accuracyData}
-              activePlanName={activePlanObj?.name || null}
-              loading={loading}
-            />
+            {canUseWeeklyDiagnostic && canUseWeeklyMentoring ? (
+              <>
+                <WeeklyMentoringCard
+                  userId={user.uid}
+                  planId={filterPlanId}
+                  userName={user.displayName?.split(' ')[0] || 'Estudante'}
+                  consistency={consistency}
+                  subjectHours={subjectHours}
+                  planVsActual={planVsActual}
+                  weeklyData={weeklyData}
+                  recentSessions={recentSessions}
+                  accuracyData={accuracyData}
+                  activePlanName={activePlanObj?.name || null}
+                  loading={loading}
+                />
 
-            <MentorCard
-              userName={user.displayName?.split(' ')[0] || 'Estudante'}
-              consistency={consistency}
-              subjectHours={subjectHours}
-              planVsActual={planVsActual}
-              totalTodaySeconds={recentSessions.filter((s) => s.date === new Date().toISOString().split('T')[0]).reduce((a, b) => a + b.duration, 0)}
-              todayDominantSubject={todayDominant}
-              weeklyData={weeklyData}
-              recentSessions={recentSessions}
-              accuracyData={accuracyData}
-              activePlanName={activePlanObj?.name || null}
-              loading={loading}
-            />
+                <MentorCard
+                  userName={user.displayName?.split(' ')[0] || 'Estudante'}
+                  consistency={consistency}
+                  subjectHours={subjectHours}
+                  planVsActual={planVsActual}
+                  totalTodaySeconds={recentSessions.filter((s) => s.date === new Date().toISOString().split('T')[0]).reduce((a, b) => a + b.duration, 0)}
+                  todayDominantSubject={todayDominant}
+                  weeklyData={weeklyData}
+                  recentSessions={recentSessions}
+                  accuracyData={accuracyData}
+                  activePlanName={activePlanObj?.name || null}
+                  loading={loading}
+                />
+              </>
+            ) : (
+              <EntitlementUpgradeCard
+                title="Mentoria semanal fica do Pro para cima"
+                description="No free, voce sente o motor e acompanha a execucao. No Pro, entram o diagnostico semanal e a leitura orientada do seu plano."
+                highlight="Diagnostico semanal, leitura estrategica da semana, orientacoes acionaveis e acompanhamento mais profundo."
+                recommendedPlan={recommendedPlanForMentoring}
+                ctaLabel="Comparar planos"
+              />
+            )}
 
             {/* AI Action Block Extendido */}
             <div className="rounded-am-xl border border-am-ai-border/30 bg-am-surface p-6 relative overflow-hidden flex flex-col sm:flex-row gap-6 items-center justify-between" style={{ background: 'linear-gradient(145deg, var(--color-am-surface) 0%, rgba(139,92,246,0.05) 100%)' }}>
@@ -263,32 +284,42 @@ export default function MentoringPage() {
               </div>
 
               <div className="w-full sm:w-auto flex-shrink-0 relative z-10 space-y-2">
-                {neglected.length > 0 && (
+                {canUseContextualChat && neglected.length > 0 && (
                   <button onClick={() => setChatOpen(true)} className="block w-full text-left bg-am-surface-elevated hover:bg-am-ai-default/10 border border-am-border-default hover:border-am-ai-border text-am-body-sm text-am-text-primary transition-colors px-4 py-2.5 rounded-am-md shadow-am-sm">
                     Reorganizar {neglected[0].subject}?
                   </button>
                 )}
-                <Button onClick={() => setChatOpen(true)} variant="premium" className="w-full">
-                  <MessageCircle className="h-4 w-4 mr-2" /> Iniciar Conversa
-                </Button>
+                {canUseContextualChat ? (
+                  <Button onClick={() => setChatOpen(true)} variant="premium" className="w-full">
+                    <MessageCircle className="h-4 w-4 mr-2" /> Iniciar Conversa
+                  </Button>
+                ) : (
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/settings">
+                      <MessageCircle className="h-4 w-4 mr-2" /> Destravar Copilot
+                    </Link>
+                  </Button>
+                )}
               </div>
             </div>
           </motion.div>
         </div>
       </div>
 
-      <ChatPanel
-        isOpen={chatOpen}
-        onClose={() => setChatOpen(false)}
-        userName={user.displayName?.split(' ')[0] || 'Estudante'}
-        consistency={consistency}
-        subjectHours={subjectHours}
-        planVsActual={planVsActual}
-        todaySessions={recentSessions.filter((s) => s.date === new Date().toISOString().split('T')[0])}
-        totalTodaySeconds={recentSessions.filter((s) => s.date === new Date().toISOString().split('T')[0]).reduce((a, b) => a + b.duration, 0)}
-        weeklyData={weeklyData}
-        recentSessions={recentSessions}
-      />
+      {canUseContextualChat && (
+        <ChatPanel
+          isOpen={chatOpen}
+          onClose={() => setChatOpen(false)}
+          userName={user.displayName?.split(' ')[0] || 'Estudante'}
+          consistency={consistency}
+          subjectHours={subjectHours}
+          planVsActual={planVsActual}
+          todaySessions={recentSessions.filter((s) => s.date === new Date().toISOString().split('T')[0])}
+          totalTodaySeconds={recentSessions.filter((s) => s.date === new Date().toISOString().split('T')[0]).reduce((a, b) => a + b.duration, 0)}
+          weeklyData={weeklyData}
+          recentSessions={recentSessions}
+        />
+      )}
     </div>
   );
 }

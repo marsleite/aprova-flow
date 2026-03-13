@@ -1,9 +1,11 @@
 'use client';
 
+import { FeatureCode } from '@aprovamind/domain';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import AccountPlanModal from '@/components/AccountPlanModal';
+import EntitlementSandboxCard from '@/components/EntitlementSandboxCard';
 import { useState } from 'react';
 import Image from 'next/image';
 import {
@@ -22,17 +24,27 @@ import { Card, Badge, Button } from '@/components';
 
 export default function SettingsPage() {
   const { user, logout } = useAuthContext();
-  const { planTier, capabilities, refresh } = useEntitlements(user?.uid, user?.email);
+  const { planTier, refresh, sandboxScenarioUserId, hasFeature, getFeature } = useEntitlements(
+    user?.uid,
+    user?.email
+  );
   const [accountModalOpen, setAccountModalOpen] = useState(false);
 
   if (!user) return null;
 
+  const activePlansFeature = getFeature(FeatureCode.ActivePlans);
+  const activePlansLabel =
+    activePlansFeature?.mode === 'quota'
+      ? `${activePlansFeature.limit} plano${activePlansFeature.limit > 1 ? 's' : ''} ativo${activePlansFeature.limit > 1 ? 's' : ''}`
+      : 'Planos ativos';
+
   const planFeatures = [
-    { label: 'Editais ilimitados', available: capabilities.maxStudyPlans === Infinity },
-    { label: 'Calendário avançado', available: !!capabilities.canUseCalendar },
-    { label: 'Criar simulados', available: !!capabilities.canCreateSimulados },
-    { label: 'Mentoria IA', available: true },
-    { label: 'Dashboard executivo', available: true },
+    { label: activePlansLabel, available: true },
+    { label: 'Motor completo por matéria', available: hasFeature(FeatureCode.SubjectHealthFull) },
+    { label: 'Simulados customizados', available: hasFeature(FeatureCode.SimulationsCustom) },
+    { label: 'Diagnóstico semanal', available: hasFeature(FeatureCode.WeeklyDiagnostic) },
+    { label: 'Mentoria recorrente', available: hasFeature(FeatureCode.WeeklyMentoring) },
+    { label: 'Multi-edital', available: hasFeature(FeatureCode.MultiEdital) },
   ];
 
   return (
@@ -53,8 +65,12 @@ export default function SettingsPage() {
       </div>
 
       <div className="mx-auto w-full max-w-2xl px-6 space-y-6">
-        {/* Profile card */}
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+          <EntitlementSandboxCard currentScenarioUserId={sandboxScenarioUserId} />
+        </motion.div>
+
+        {/* Profile card */}
+        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show">
           <Card padding="lg" variant="default" className="w-full">
             <div className="mb-5 flex items-center gap-2 border-b border-am-border-subtle pb-3">
               <User className="h-4 w-4 text-am-text-tertiary" />
@@ -85,7 +101,7 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* Plan card */}
-        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show">
+        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
           <div className="rounded-am-xl border border-am-ai-border/40 p-6 shadow-am-lg overflow-hidden relative" style={{ background: 'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(139, 92, 246, 0.05) 100%)' }}>
             <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-am-ai-glow/20 blur-[60px] rounded-full pointer-events-none transition-transform duration-1000"></div>
 
@@ -102,7 +118,7 @@ export default function SettingsPage() {
                 </div>
 
                 <p className="text-am-body-sm text-am-text-secondary mb-4 leading-relaxed">
-                  Seu plano atual desbloqueia ferramentas de IA preditiva para aprovação, analytics premium e mentoria ilimitada.
+                  O AprovaMind sobe de valor em três camadas: Free para ativação, Pro para estudo sério no single-plan e Premium para coordenação avançada da rotina.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-am-surface-subtle/50 p-4 rounded-am-md border border-am-border-subtle">
@@ -133,7 +149,7 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* Security */}
-        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
+        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show">
           <Card padding="lg" variant="default" className="w-full">
             <div className="mb-5 flex items-center gap-2 border-b border-am-border-subtle pb-3">
               <Shield className="h-4 w-4 text-am-text-tertiary" />
@@ -149,7 +165,7 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* Danger zone */}
-        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show">
+        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
           <div className="rounded-am-xl border border-am-error/30 bg-am-error/5 p-6 space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <h2 className="font-brand text-am-body font-bold text-am-error tracking-wide">Zona de Risco</h2>

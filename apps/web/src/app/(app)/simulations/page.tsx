@@ -1,5 +1,6 @@
 'use client';
 
+import { FeatureCode } from '@aprovamind/domain';
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -7,6 +8,7 @@ import { usePlanContext } from '@/contexts/PlanContext';
 import { getAccuracyAnalytics } from '@/lib/firebase/questions';
 import { SubjectAccuracy } from '@/types';
 import { useEntitlements } from '@/hooks/useEntitlements';
+import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import {
   Target,
   Play,
@@ -38,7 +40,7 @@ function getAccuracyColor(acc: number) {
 export default function SimulationsPage() {
   const { user } = useAuthContext();
   const { activePlan } = usePlanContext();
-  const { capabilities } = useEntitlements(user?.uid, user?.email);
+  const { hasFeature } = useEntitlements(user?.uid, user?.email);
   const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDuration, setSelectedDuration] = useState<'1h' | '2h' | '4h'>('2h');
@@ -66,6 +68,10 @@ export default function SimulationsPage() {
   useEffect(() => { loadData(); }, [loadData]);
 
   if (!user) return null;
+
+  const canUseCustomSimulations = hasFeature(FeatureCode.SimulationsCustom);
+  const canUseSimulationAnalytics = hasFeature(FeatureCode.SimulationsAnalytics);
+  const canUsePostSimulado = hasFeature(FeatureCode.PostSimuladoInteligente);
 
   const totalQuestions = accuracyData.reduce((a, b) => a + b.totalQuestions, 0);
   const totalCorrect = accuracyData.reduce((a, b) => a + b.correctAnswers, 0);
@@ -157,7 +163,7 @@ export default function SimulationsPage() {
                   </button>
                 ))}
               </div>
-              {capabilities.canCreateSimulados ? (
+              {canUseCustomSimulations ? (
                 <Button asChild variant="primary">
                   <Link href="/provas/criar-simulado">Configurar e Iniciar</Link>
                 </Button>
@@ -169,6 +175,30 @@ export default function SimulationsPage() {
             </div>
           </div>
         </motion.div>
+
+        {!canUseSimulationAnalytics && (
+          <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+            <EntitlementUpgradeCard
+              title="Os simulados completos entram no Pro"
+              description="No Free voce ainda sente a proposta da experiencia, mas o Pro libera simulados customizados e leitura de desempenho com profundidade suficiente para treino serio."
+              highlight="Simulados personalizados, analytics de desempenho e rotina de prova mais consistente."
+              recommendedPlan="pro"
+              ctaLabel="Ver beneficios do Pro"
+            />
+          </motion.div>
+        )}
+
+        {canUseCustomSimulations && !canUsePostSimulado && (
+          <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+            <EntitlementUpgradeCard
+              title="O pos-simulado inteligente fica no Premium"
+              description="No Pro voce ja monta simulados e acompanha a sua performance. O Premium entra para analisar o resultado com mais profundidade e transformar prova em ajuste de rota."
+              highlight="Pos-simulado inteligente, leitura de padroes de erro e camada premium de correcao estrategica."
+              recommendedPlan="premium"
+              ctaLabel="Ver beneficios do Premium"
+            />
+          </motion.div>
+        )}
 
         {/* Stats Row */}
         <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -301,7 +331,7 @@ export default function SimulationsPage() {
                   </div>
                   <ChevronRight className="h-4 w-4 text-am-text-tertiary" />
                 </Link>
-                {capabilities.canCreateSimulados ? (
+                {canUseCustomSimulations ? (
                   <Link href="/provas/criar-simulado" className="flex items-center justify-between p-3 rounded-am-md bg-am-brand-primary/10 border border-am-brand-primary/30 hover:bg-am-brand-primary/20 transition-colors group">
                     <div className="flex items-center gap-3">
                       <Zap className="h-4 w-4 text-am-brand-primary" />

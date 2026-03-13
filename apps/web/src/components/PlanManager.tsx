@@ -10,6 +10,7 @@
 
 'use client';
 
+import { FeatureCode } from '@aprovamind/domain';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -31,12 +32,14 @@ import {
   DEFAULT_SUBJECTS,
   PLAN_COLORS,
 } from '@/types';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import {
   createStudyPlan,
   updateStudyPlan,
   deleteStudyPlan,
 } from '@/lib/firebase/plans';
 import { auth } from '@/lib/firebase/config';
+import Link from 'next/link';
 
 // ==========================================================
 // SubjectAutocomplete — input de texto com sugestões
@@ -178,6 +181,7 @@ export default function PlanManager({
   onClose,
 }: PlanManagerProps) {
   const isEditing = !!editPlan?.id;
+  const { hasFeature } = useEntitlements(userId);
 
   const [name, setName] = useState('');
   const [color, setColor] = useState<string>(PLAN_COLORS[0].hex);
@@ -212,6 +216,7 @@ export default function PlanManager({
   }, [editPlan, isOpen]);
 
   const [dragging, setDragging] = useState(false);
+  const canUseEditalParse = hasFeature(FeatureCode.EditalParse);
 
   // Processa um arquivo PDF (compartilhado entre input e drag-and-drop)
   const processFile = async (file: File) => {
@@ -493,7 +498,7 @@ export default function PlanManager({
               </div>
 
               {/* Importar Edital PDF — Drop Zone */}
-              {!isEditing && (
+              {!isEditing && canUseEditalParse && (
                 <div>
                   <input
                     ref={fileInputRef}
@@ -564,6 +569,26 @@ export default function PlanManager({
                       </motion.p>
                     )}
                   </AnimatePresence>
+                </div>
+              )}
+
+              {!isEditing && !canUseEditalParse && (
+                <div className="rounded-xl border border-am-ai-border/30 bg-am-surface-subtle px-4 py-5 text-center">
+                  <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-am-brand-primary/10">
+                    <FileUp className="h-4 w-4 text-[#F59768]" />
+                  </div>
+                  <p className="text-sm font-medium text-am-text-primary">
+                    Importacao de edital bloqueada neste plano
+                  </p>
+                  <p className="mt-1 text-xs text-am-text-secondary">
+                    O parse de edital por IA entra a partir do plano pago e ganha mais folga de uso nos niveis superiores.
+                  </p>
+                  <Link
+                    href="/settings"
+                    className="mt-3 inline-flex items-center gap-2 rounded-full border border-am-ai-border/30 bg-am-surface px-4 py-2 text-xs font-medium text-am-brand-primary transition hover:bg-am-brand-primary/10"
+                  >
+                    Ver planos
+                  </Link>
                 </div>
               )}
 
