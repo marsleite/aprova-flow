@@ -1,9 +1,11 @@
 'use client';
 
+import { FeatureCode } from '@aprovamind/domain';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { usePlanContext } from '@/contexts/PlanContext';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import {
   getStudyConsistency,
   getRecentSessions,
@@ -13,6 +15,7 @@ import StudyTimer from '@/components/StudyTimer';
 import QuestionTrackerCard from '@/components/QuestionTrackerCard';
 import DailyAiPlannerCard from '@/components/DailyAiPlannerCard';
 import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
+import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import { createStudyPlan, setActivePlan } from '@/lib/firebase/plans';
 import {
   CheckCircle2,
@@ -35,6 +38,7 @@ export default function EnginePage() {
   const showPlanEngineSnapshot =
     process.env.NEXT_PUBLIC_ENGINE_SNAPSHOT_V1 === 'true';
   const { user } = useAuthContext();
+  const { hasFeature, planTier } = useEntitlements(user?.uid, user?.email);
   const { plans, activePlanId, activePlan: activePlanObj } = usePlanContext();
   const [recentSessions, setRecentSessions] = useState<StudySession[]>([]);
   const [consistency, setConsistency] = useState<StudyConsistency | null>(null);
@@ -85,6 +89,10 @@ export default function EnginePage() {
   if (!user) return null;
 
   const weeklyHours = consistency ? consistency.weeklyTotalSeconds / 3600 : 0;
+  const canSeeFullEngine =
+    hasFeature(FeatureCode.SubjectHealthFull) &&
+    hasFeature(FeatureCode.PriorityScoreFull) &&
+    hasFeature(FeatureCode.RecommendationsFull);
 
   return (
     <div className="flex flex-col gap-8 pb-10">
@@ -202,7 +210,17 @@ export default function EnginePage() {
           <div className="space-y-6">
             {showPlanEngineSnapshot && (
               <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
-                <PlanEngineSnapshotCard planId={activePlanId || null} />
+                {canSeeFullEngine ? (
+                  <PlanEngineSnapshotCard planId={activePlanId || null} />
+                ) : (
+                  <EntitlementUpgradeCard
+                    title="Destrave a leitura completa do motor"
+                    description="O plano gratuito mostra a direcao do dia, mas o score completo, a saude detalhada e as recomendacoes estruturadas ficam no Pro."
+                    highlight="Saude completa da materia, priority score detalhado e recomendacoes completas para o plano ativo."
+                    recommendedPlan={planTier === 'free' ? 'pro' : 'premium'}
+                    ctaLabel="Comparar planos"
+                  />
+                )}
               </motion.div>
             )}
 

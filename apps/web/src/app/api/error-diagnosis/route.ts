@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
-import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
+import { enforceAiTaskQuota, resolvePlanTier } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 import { searchRelevantLaw } from '@/lib/firebase/legalKnowledge';
@@ -106,6 +106,24 @@ export async function POST(request: NextRequest) {
     try {
         const auth = await requireAuthenticatedUser(request);
         if ('response' in auth) return auth.response;
+
+        const planTier = await resolvePlanTier({
+            uid: auth.uid,
+            email: auth.email,
+            idToken: auth.idToken,
+        });
+
+        if (planTier !== 'premium' && planTier !== 'admin') {
+            return NextResponse.json(
+                {
+                    error: 'O Gap Analyzer Copilot faz parte do Premium.',
+                    code: 'FEATURE_REQUIRES_PREMIUM',
+                    requiredPlan: 'premium',
+                    currentPlan: planTier,
+                },
+                { status: 403, headers: { 'x-ai-plan-tier': planTier } }
+            );
+        }
 
         const quota = await enforceAiTaskQuota({
             uid: auth.uid,

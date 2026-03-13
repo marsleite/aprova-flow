@@ -44,6 +44,33 @@ export type {
     PortfolioKPIs,
 } from './types';
 
+// ── Billing & Entitlements ──
+export {
+    AccessState,
+    EntitlementMode,
+    EntitlementPeriod,
+    FeatureCode,
+    PlanCode,
+    SubscriptionStatus,
+    DEFAULT_ENTITLEMENT_POLICY,
+    createEntitlementPolicy,
+    resolveUserEntitlements,
+    type BooleanEntitlementRule,
+    type BooleanEntitlementValue,
+    type EntitlementPolicy,
+    type EntitlementRule,
+    type EntitlementRuleSet,
+    type EntitlementValue,
+    type EntitlementValueSet,
+    type FeatureUsageMap,
+    type PlanEntitlementTemplate,
+    type QuotaEntitlementRule,
+    type QuotaEntitlementValue,
+    type ResolveUserEntitlementsInput,
+    type StatusEntitlementBehavior,
+    type UserEntitlements,
+} from './billing';
+
 // ── Policies ──
 export {
     DEFAULT_ENGINE_POLICY,

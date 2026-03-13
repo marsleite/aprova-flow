@@ -6,9 +6,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronDown, ChevronUp, Crown, Loader2, X } from 'lucide-react';
 import {
   PlanTier,
-  getAiQuotasForTier,
-  getCapabilitiesForTier,
-  isUnlimited,
 } from '@/lib/entitlements';
 import { setUserPlanTier } from '@/lib/firebase/entitlements';
 
@@ -31,6 +28,21 @@ type PlanCard = {
   borderClass: string;
 };
 
+type DisplayPlanTier = Exclude<PlanTier, 'admin'>;
+
+type PlanDisplay = {
+  activePlansLabel: string;
+  simulationsLabel: string;
+  healthLabel: string;
+  weeklyDiagnosticLabel: string;
+  mentoringLabel: string;
+  editalParseLabel: string;
+  aiExplanationsLabel: string;
+  contextualChatLabel: string;
+  multiEditalLabel: string;
+  adaptivePlanLabel: string;
+};
+
 const PLAN_CARDS: PlanCard[] = [
   {
     tier: 'free',
@@ -43,7 +55,7 @@ const PLAN_CARDS: PlanCard[] = [
   {
     tier: 'pro',
     label: 'Pro',
-    priceLabel: 'R$ 29/mês',
+    priceLabel: 'R$ 34,90/mês',
     description: 'Para constância diária',
     highlight: 'Mais escolhido',
     accentClass: 'text-am-brand-primary',
@@ -52,26 +64,59 @@ const PLAN_CARDS: PlanCard[] = [
   {
     tier: 'premium',
     label: 'Premium',
-    priceLabel: 'R$ 59/mês',
+    priceLabel: 'R$ 64,90/mês',
     description: 'Para máxima performance',
     accentClass: 'text-am-brand-secondary',
     borderClass: 'border-am-brand-secondary/30',
   },
 ];
 
+const PLAN_DISPLAY: Record<DisplayPlanTier, PlanDisplay> = {
+  free: {
+    activePlansLabel: '1 plano ativo',
+    simulationsLabel: 'Simulados limitados',
+    healthLabel: 'Saude basica',
+    weeklyDiagnosticLabel: 'Nao',
+    mentoringLabel: 'Nao',
+    editalParseLabel: '1 credito inicial',
+    aiExplanationsLabel: '3/mês',
+    contextualChatLabel: '5/mês',
+    multiEditalLabel: 'Nao',
+    adaptivePlanLabel: 'Nao',
+  },
+  pro: {
+    activePlansLabel: '1 plano ativo',
+    simulationsLabel: 'Simulados completos',
+    healthLabel: 'Saude completa',
+    weeklyDiagnosticLabel: 'Incluido',
+    mentoringLabel: '4/mês',
+    editalParseLabel: '3/mês',
+    aiExplanationsLabel: '120/mês',
+    contextualChatLabel: '60/mês',
+    multiEditalLabel: 'Nao',
+    adaptivePlanLabel: 'Nao',
+  },
+  premium: {
+    activePlansLabel: '3 planos ativos',
+    simulationsLabel: 'Simulados completos',
+    healthLabel: 'Saude completa',
+    weeklyDiagnosticLabel: 'Incluido',
+    mentoringLabel: '8/mês',
+    editalParseLabel: '10/mês',
+    aiExplanationsLabel: '300/mês',
+    contextualChatLabel: '150/mês',
+    multiEditalLabel: 'Incluido',
+    adaptivePlanLabel: 'Incluido',
+  },
+};
+
 function dispatchEntitlementsUpdated() {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new Event('aprova:entitlements-updated'));
 }
 
-function formatQuotaLabel(planTier: PlanTier, task: 'chat' | 'weekly-mentoring' | 'planner-daily' | 'parse-edital'): string {
-  const quotas = getAiQuotasForTier(planTier);
-  if (!quotas) return 'Ilimitado';
-
-  const rule = quotas[task];
-  if (rule.window === 'day') return `${rule.limit}/dia`;
-  if (rule.window === 'week') return `${rule.limit}/semana`;
-  return `${rule.limit}/hora`;
+function toDisplayTier(tier: PlanTier): DisplayPlanTier {
+  return tier === 'admin' ? 'premium' : tier;
 }
 
 type ComparisonRow = {
@@ -81,39 +126,44 @@ type ComparisonRow = {
 
 const COMPARISON_ROWS: ComparisonRow[] = [
   {
-    label: 'Editais simultâneos',
-    value: (tier) => {
-      const caps = getCapabilitiesForTier(tier);
-      return isUnlimited(caps.maxStudyPlans) ? 'Ilimitado' : String(caps.maxStudyPlans);
-    },
+    label: 'Planos ativos',
+    value: (tier) => PLAN_DISPLAY[tier].activePlansLabel,
   },
   {
-    label: 'Calendário avançado',
-    value: (tier) => (getCapabilitiesForTier(tier).canUseCalendar ? 'Incluído' : 'Não'),
+    label: 'Simulados',
+    value: (tier) => PLAN_DISPLAY[tier].simulationsLabel,
   },
   {
-    label: 'Simulados personalizados',
-    value: (tier) => (getCapabilitiesForTier(tier).canCreateSimulados ? 'Incluído' : 'Não'),
+    label: 'Saúde por matéria',
+    value: (tier) => PLAN_DISPLAY[tier].healthLabel,
   },
   {
-    label: 'Treino rápido',
-    value: (tier) => (getCapabilitiesForTier(tier).canUseTreinoRapido ? 'Incluído' : 'Não'),
+    label: 'Diagnóstico semanal',
+    value: (tier) => PLAN_DISPLAY[tier].weeklyDiagnosticLabel,
   },
   {
-    label: 'Chat IA',
-    value: (tier) => formatQuotaLabel(tier, 'chat'),
+    label: 'Mentoria recorrente',
+    value: (tier) => PLAN_DISPLAY[tier].mentoringLabel,
   },
   {
-    label: 'Planner diário IA',
-    value: (tier) => formatQuotaLabel(tier, 'planner-daily'),
+    label: 'Parse de edital',
+    value: (tier) => PLAN_DISPLAY[tier].editalParseLabel,
   },
   {
-    label: 'Mentoria semanal IA',
-    value: (tier) => formatQuotaLabel(tier, 'weekly-mentoring'),
+    label: 'IA explicativa',
+    value: (tier) => PLAN_DISPLAY[tier].aiExplanationsLabel,
   },
   {
-    label: 'Parse de edital IA',
-    value: (tier) => formatQuotaLabel(tier, 'parse-edital'),
+    label: 'Chat contextual',
+    value: (tier) => PLAN_DISPLAY[tier].contextualChatLabel,
+  },
+  {
+    label: 'Multi-edital',
+    value: (tier) => PLAN_DISPLAY[tier].multiEditalLabel,
+  },
+  {
+    label: 'Plano adaptativo',
+    value: (tier) => PLAN_DISPLAY[tier].adaptivePlanLabel,
   },
 ];
 
@@ -131,6 +181,7 @@ export default function AccountPlanModal({
   const [showComparison, setShowComparison] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const visiblePlans = useMemo(() => PLAN_CARDS, []);
+  const currentDisplayTier = toDisplayTier(currentTier);
 
   useEffect(() => {
     setMounted(true);
@@ -240,9 +291,7 @@ export default function AccountPlanModal({
                 <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-3 text-sm">
                   <p className="text-am-text-secondary">Acesso atual</p>
                   <p className="mt-1 text-xs text-am-text-tertiary">
-                    {isUnlimited(getCapabilitiesForTier(currentTier).maxStudyPlans)
-                      ? 'Editais ilimitados'
-                      : `${getCapabilitiesForTier(currentTier).maxStudyPlans} edital(is)`}
+                    {PLAN_DISPLAY[currentDisplayTier].activePlansLabel}
                   </p>
                 </div>
               </div>
@@ -255,9 +304,9 @@ export default function AccountPlanModal({
 
               <div className="grid gap-3 md:grid-cols-3">
                 {visiblePlans.map((plan) => {
-                  const caps = getCapabilitiesForTier(plan.tier);
                   const isCurrent = plan.tier === currentTier;
                   const isSaving = savingTier === plan.tier;
+                  const display = PLAN_DISPLAY[toDisplayTier(plan.tier)];
 
                   return (
                     <div
@@ -290,37 +339,43 @@ export default function AccountPlanModal({
                         </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-am-success" />
-                          {isUnlimited(caps.maxStudyPlans)
-                            ? 'Editais ilimitados'
-                            : `${caps.maxStudyPlans} edital${caps.maxStudyPlans > 1 ? 'is' : ''}`}
-                        </li>
-                        <li className="inline-flex items-center gap-1.5">
-                          <Check className={`h-3.5 w-3.5 ${caps.canUseCalendar ? 'text-am-success' : 'text-am-text-tertiary/50'}`} />
-                          Calendário avançado
-                        </li>
-                        <li className="inline-flex items-center gap-1.5">
-                          <Check className={`h-3.5 w-3.5 ${caps.canCreateSimulados ? 'text-am-success' : 'text-am-text-tertiary/50'}`} />
-                          Simulados personalizados
-                        </li>
-                        <li className="inline-flex items-center gap-1.5">
-                          <Check className={`h-3.5 w-3.5 ${caps.canUseTreinoRapido ? 'text-am-success' : 'text-am-text-tertiary/50'}`} />
-                          Treino rápido por matéria
+                          {display.activePlansLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-am-success" />
-                          Chat IA: {formatQuotaLabel(plan.tier, 'chat')}
+                          {display.simulationsLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-am-success" />
-                          Planner diário IA: {formatQuotaLabel(plan.tier, 'planner-daily')}
+                          {display.healthLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-am-success" />
-                          Mentoria semanal IA: {formatQuotaLabel(plan.tier, 'weekly-mentoring')}
+                          Diagnóstico semanal: {display.weeklyDiagnosticLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-am-success" />
-                          Parse de edital IA: {formatQuotaLabel(plan.tier, 'parse-edital')}
+                          IA explicativa: {display.aiExplanationsLabel}
+                        </li>
+                        <li className="inline-flex items-center gap-1.5">
+                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          Chat contextual: {display.contextualChatLabel}
+                        </li>
+                        <li className="inline-flex items-center gap-1.5">
+                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          Mentoria recorrente: {display.mentoringLabel}
+                        </li>
+                        <li className="inline-flex items-center gap-1.5">
+                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          Parse de edital: {display.editalParseLabel}
+                        </li>
+                        <li className="inline-flex items-center gap-1.5">
+                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          Multi-edital: {display.multiEditalLabel}
+                        </li>
+                        <li className="inline-flex items-center gap-1.5">
+                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          Plano adaptativo: {display.adaptivePlanLabel}
                         </li>
                       </ul>
 

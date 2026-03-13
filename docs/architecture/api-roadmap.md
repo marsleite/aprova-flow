@@ -17,6 +17,7 @@ Hoje ela já entrega:
 - deploy próprio
 - bootstrap Fastify
 - rota `GET /health`
+- sandbox interno de entitlements para teste manual de planos
 
 Hoje ela ainda não entrega:
 
@@ -38,6 +39,7 @@ Responsabilidade atual:
 
 - provar que o runtime Fastify separado está saudável
 - servir como ponto de entrada para o backend dedicado
+- permitir teste manual da matriz `free / pro / premium` antes do gateway
 
 ## O que a API NÃO deve fazer agora
 
@@ -75,6 +77,11 @@ Entrega:
 
 - middleware de auth
 - rota protegida de teste
+
+Observação:
+
+- hoje o endpoint de entitlements ainda aceita identificação manual de teste
+- isso deve ser substituído por auth real antes de qualquer uso produtivo
 
 ### Fase 2 — Modelo de Assinatura Interna
 

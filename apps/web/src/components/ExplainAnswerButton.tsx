@@ -1,10 +1,13 @@
 'use client';
 
+import { FeatureCode } from '@aprovamind/domain';
+import Link from 'next/link';
 import { useState } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import { auth } from '@/lib/firebase/config';
 import { QuestionBankItem } from '@/types';
-import { Sparkles, BookOpen, Lightbulb, Scale } from 'lucide-react';
+import { Sparkles, BookOpen, Lightbulb, Scale, Lock, Crown } from 'lucide-react';
 
 interface ExplainAnswerButtonProps {
     question: QuestionBankItem;
@@ -19,12 +22,14 @@ interface ExplanationData {
 
 export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerButtonProps) {
     const { user } = useAuthContext();
+    const { hasFeature } = useEntitlements(user?.uid, user?.email);
     const [loading, setLoading] = useState(false);
     const [explanation, setExplanation] = useState<ExplanationData | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const canUseAiExplanations = hasFeature(FeatureCode.AiExplanations);
 
     const handleExplain = async () => {
-        if (!user) return;
+        if (!user || !canUseAiExplanations) return;
         try {
             setLoading(true);
             setError(null);
@@ -79,7 +84,31 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
 
     return (
         <div className="mt-4">
-            {!explanation && !loading && !error && (
+            {!canUseAiExplanations && !explanation && (
+                <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-3 text-sm">
+                    <div className="flex items-start gap-2">
+                        <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#F59768]" />
+                        <div className="space-y-2">
+                            <p className="text-[#F59768] font-medium">
+                                A explicação por IA de cada erro entra no Pro.
+                            </p>
+                            <p className="text-gray-300/80 text-xs leading-relaxed">
+                                No Free você continua praticando e revisando seus erros. No Pro,
+                                desbloqueia a explicação fundamentada, base legal e dica prática por questão.
+                            </p>
+                            <Link
+                                href="/settings"
+                                className="inline-flex items-center gap-1 text-xs font-medium text-[#F59768] underline underline-offset-4 hover:text-[#ffb18d]"
+                            >
+                                <Crown className="h-3.5 w-3.5" />
+                                Ver benefícios do Pro
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {canUseAiExplanations && !explanation && !loading && !error && (
                 <button
                     onClick={handleExplain}
                     className="flex items-center gap-2 px-4 py-2 bg-violet-600/20 hover:bg-violet-600/30 text-[#F59768] rounded-lg transition-colors border border-violet-500/30 text-sm font-medium"
@@ -89,7 +118,7 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                 </button>
             )}
 
-            {loading && (
+            {canUseAiExplanations && loading && (
                 <div className="flex items-center gap-3 text-[#F59768] text-sm p-3 bg-[#3150AA]/10 rounded-lg border border-[#3150AA]/20">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-500"></div>
                     <div>
@@ -99,7 +128,7 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                 </div>
             )}
 
-            {error && (
+            {canUseAiExplanations && error && (
                 <div className="mt-2 p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-sm text-red-400 flex flex-col gap-2">
                     <span>{error}</span>
                     <button
@@ -111,7 +140,7 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                 </div>
             )}
 
-            {explanation && (
+            {canUseAiExplanations && explanation && (
                 <div className="mt-4 p-5 bg-gray-900 border border-violet-500/30 rounded-xl relative overflow-hidden">
                     {/* Decorative background glow */}
                     <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-[#3150AA]/10 blur-3xl rounded-full pointer-events-none"></div>

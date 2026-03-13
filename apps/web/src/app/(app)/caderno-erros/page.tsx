@@ -1,10 +1,13 @@
 'use client';
 
+import { FeatureCode } from '@aprovamind/domain';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import { auth } from '@/lib/firebase/config';
 import { getWrongAttempts, getQuestionById, markAttemptAsMastered } from '@/lib/firebase/questions';
 import { QuestionAttempt, QuestionBankItem } from '@/types';
+import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import { ExplainAnswerButton } from '@/components/ExplainAnswerButton';
 import {
     BookX,
@@ -120,6 +123,7 @@ function FlashcardItem({ card }: { card: Flashcard }) {
 
 export default function CadernoErrosPage() {
     const { user } = useAuthContext();
+    const { hasFeature } = useEntitlements(user?.uid, user?.email);
     const [errors, setErrors] = useState<ErrorEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -188,7 +192,7 @@ export default function CadernoErrosPage() {
     };
 
     const handleDiagnosis = async () => {
-        if (!user || filteredErrors.length === 0) return;
+        if (!user || filteredErrors.length === 0 || !hasFeature(FeatureCode.ErrorGapAnalyzer)) return;
         try {
             setDiagnosisLoading(true);
             setDiagnosisError(null);
@@ -229,6 +233,8 @@ export default function CadernoErrosPage() {
     };
 
     if (!user) return null;
+
+    const canUseGapAnalyzer = hasFeature(FeatureCode.ErrorGapAnalyzer);
 
     const allMaterias = [...new Set(errors.map(e => e.question.materia))].sort();
     const filteredErrors = filterMateria
@@ -322,7 +328,7 @@ export default function CadernoErrosPage() {
 
                             <Button
                                 onClick={handleDiagnosis}
-                                disabled={diagnosisLoading || filteredErrors.length === 0}
+                                disabled={diagnosisLoading || filteredErrors.length === 0 || !canUseGapAnalyzer}
                                 variant="premium"
                                 size="sm"
                                 className="w-full sm:w-auto shadow-[0_0_12px_var(--color-am-ai-glow)]"
@@ -339,6 +345,16 @@ export default function CadernoErrosPage() {
                             </Button>
                         </div>
 
+                        {!canUseGapAnalyzer && (
+                            <EntitlementUpgradeCard
+                                title="O Gap Analyzer Copilot fica no Premium"
+                                description="O caderno de erros continua disponivel, mas a leitura estrategica dos padroes de erro, gaps ocultos e flashcards gerados por IA faz parte da camada premium."
+                                highlight="Diagnostico profundo, gaps por dimensao e transformacao do erro em recuperacao estrategica."
+                                recommendedPlan="premium"
+                                ctaLabel="Ver beneficios do Premium"
+                            />
+                        )}
+
                         {/* Diagnosis Result */}
                         {diagnosisError && (
                             <div className="p-4 bg-am-error/10 border border-am-error/30 rounded-am-md text-am-body-sm text-am-error">
@@ -346,7 +362,7 @@ export default function CadernoErrosPage() {
                             </div>
                         )}
 
-                        {diagnosis && (
+                        {canUseGapAnalyzer && diagnosis && (
                             <div className="rounded-am-xl border border-am-ai-border/40 bg-am-surface p-6 space-y-6 relative overflow-hidden shadow-am-lg" style={{ background: 'linear-gradient(145deg, var(--color-am-surface) 0%, rgba(139,92,246,0.05) 100%)' }}>
                                 <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-am-ai-glow/20 blur-[80px] rounded-full pointer-events-none"></div>
 

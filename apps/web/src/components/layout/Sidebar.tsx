@@ -95,7 +95,10 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuthContext();
-  const { planTier, refresh } = useEntitlements(user?.uid, user?.email);
+  const { planTier, refresh, usingSandbox, sandboxScenarioUserId } = useEntitlements(
+    user?.uid,
+    user?.email
+  );
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [planPickerOpen, setPlanPickerOpen] = useState(false);
   const planPickerRef = useRef<HTMLDivElement>(null);
@@ -327,6 +330,19 @@ export default function Sidebar({
               Gerenciar
             </span>
           </button>
+
+          {usingSandbox && sandboxScenarioUserId && (
+            <div
+              className="mx-2 rounded-full px-3 py-1.5 text-[10px] font-mono uppercase tracking-wide"
+              style={{
+                background: 'rgba(245, 151, 104, 0.08)',
+                border: '1px solid rgba(245, 151, 104, 0.18)',
+                color: 'var(--am-warning)',
+              }}
+            >
+              Sandbox · {sandboxScenarioUserId}
+            </div>
+          )}
 
           {/* Settings & Theme */}
           <div className="flex items-center gap-1">
