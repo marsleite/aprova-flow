@@ -7,6 +7,7 @@ import {
   getUserEntitlements as getLegacyUserEntitlements,
   type UserEntitlements,
 } from '@/lib/firebase/entitlements';
+import { auth } from '@/lib/firebase/config';
 import { getCapabilitiesForTier } from '@/lib/entitlements';
 import { isAdminIdentity } from '@/lib/admin';
 import {
@@ -68,7 +69,12 @@ export function useEntitlements(userId?: string | null, email?: string | null) {
 
     setLoading(true);
     try {
-      const apiSnapshot = await fetchUserEntitlementsSnapshot(requestedUserId);
+      const apiSnapshot = await fetchUserEntitlementsSnapshot({
+        sandboxUserId: sandboxScenarioUserId,
+        idToken: sandboxScenarioUserId
+          ? null
+          : await auth.currentUser?.getIdToken().catch(() => null),
+      });
       setEntitlements(mapSnapshotToLegacyEntitlements(apiSnapshot));
       setSnapshot(apiSnapshot);
       setSource('api');

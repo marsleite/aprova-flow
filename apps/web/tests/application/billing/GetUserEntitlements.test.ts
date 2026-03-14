@@ -41,7 +41,7 @@ describe('GetUserEntitlements', () => {
     }));
 
     const useCase = new GetUserEntitlements(dataSource);
-    const result = await useCase.execute({ userId: 'user-1' });
+    const result = await useCase.execute({ userId: 'user-1', email: 'user-1@example.com' });
 
     expect(result.found).toBe(true);
     if (!result.found) return;
@@ -69,7 +69,7 @@ describe('GetUserEntitlements', () => {
     }));
 
     const useCase = new GetUserEntitlements(dataSource);
-    const result = await useCase.execute({ userId: 'user-1' });
+    const result = await useCase.execute({ userId: 'user-1', email: 'user-1@example.com' });
 
     expect(result).toEqual({
       found: false,
@@ -88,7 +88,7 @@ describe('GetUserEntitlements', () => {
     }));
 
     const useCase = new GetUserEntitlements(dataSource);
-    const result = await useCase.execute({ userId: 'user-1' });
+    const result = await useCase.execute({ userId: 'user-1', email: 'user-1@example.com' });
 
     expect(result.found).toBe(true);
     if (!result.found) return;

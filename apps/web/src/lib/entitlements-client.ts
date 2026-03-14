@@ -19,6 +19,11 @@ export interface EntitlementScenarioSummary {
   description: string;
 }
 
+interface FetchUserEntitlementsSnapshotParams {
+  sandboxUserId?: string | null;
+  idToken?: string | null;
+}
+
 export function resolveEntitlementsApiBaseUrl(): string {
   const configured = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
   if (configured) {
@@ -36,7 +41,7 @@ export function resolveEntitlementsApiBaseUrl(): string {
 }
 
 export async function fetchUserEntitlementsSnapshot(
-  userId: string
+  params: FetchUserEntitlementsSnapshotParams
 ): Promise<UserEntitlementsSnapshotV1> {
   const baseUrl = resolveEntitlementsApiBaseUrl();
 
@@ -44,16 +49,26 @@ export async function fetchUserEntitlementsSnapshot(
     throw new Error('missing_api_base_url');
   }
 
-  const response = await fetch(
-    `${baseUrl}/entitlements/me?userId=${encodeURIComponent(userId)}`,
-    {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-      cache: 'no-store',
+  const url = params.sandboxUserId
+    ? `${baseUrl}/entitlements/me?userId=${encodeURIComponent(params.sandboxUserId)}`
+    : `${baseUrl}/entitlements/me`;
+
+  const headers: HeadersInit = {
+    Accept: 'application/json',
+  };
+
+  if (!params.sandboxUserId) {
+    if (!params.idToken) {
+      throw new Error('missing_id_token');
     }
-  );
+    headers.Authorization = `Bearer ${params.idToken}`;
+  }
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers,
+    cache: 'no-store',
+  });
 
   if (!response.ok) {
     const error = new Error(`entitlements_request_failed:${response.status}`);

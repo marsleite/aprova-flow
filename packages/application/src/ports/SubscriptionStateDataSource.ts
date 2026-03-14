@@ -13,6 +13,7 @@ export interface UserSubscriptionState {
 
 export interface GetUserSubscriptionStateParams {
   userId: string;
+  email?: string | null;
 }
 
 export type GetUserSubscriptionStateResult =

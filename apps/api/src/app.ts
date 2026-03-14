@@ -1,18 +1,31 @@
 import Fastify from 'fastify';
-import { registerEntitlementRoutes } from './modules/entitlements/routes';
+import {
+  registerEntitlementRoutes,
+  type EntitlementRouteOptions,
+} from './modules/entitlements/routes';
 
-export function createApp() {
+export interface CreateAppOptions {
+  entitlements?: EntitlementRouteOptions;
+}
+
+export function createApp(options: CreateAppOptions = {}) {
   const app = Fastify({
     logger: true,
+  });
+
+  app.addHook('onRequest', async (request, reply) => {
+    if (request.method === 'OPTIONS') {
+      return reply.code(204).send();
+    }
   });
 
   app.addHook('onSend', async (request, reply, payload) => {
     const origin = request.headers.origin;
     reply.header('access-control-allow-origin', origin ?? '*');
-    reply.header('access-control-allow-methods', 'GET,OPTIONS');
+    reply.header('access-control-allow-methods', 'GET,POST,OPTIONS');
     reply.header(
       'access-control-allow-headers',
-      'Content-Type, x-aprovamind-user-id'
+      'Content-Type, Authorization, x-aprovamind-user-id'
     );
     reply.header('vary', 'Origin');
     return payload;
@@ -22,7 +35,8 @@ export function createApp() {
     return {
       service: 'aprovamind-api',
       status: 'ok',
-      message: 'Use /health ou /entitlements/me?userId=free-user para testar.',
+      message:
+        'Use /health, /entitlements/me?userId=free-user, /billing/subscription/me ou /billing/admin/subscription.',
     };
   });
 
@@ -33,7 +47,7 @@ export function createApp() {
     };
   });
 
-  void registerEntitlementRoutes(app);
+  void registerEntitlementRoutes(app, options.entitlements);
 
   return app;
 }
