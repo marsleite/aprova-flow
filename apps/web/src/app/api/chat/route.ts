@@ -13,6 +13,8 @@ import { logAiUsageEvent, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 import { LegacyEngineDataSource } from '@/infrastructure/legacy/LegacyEngineDataSource';
 import { GetPlanEngineSnapshot } from '@aprovamind/application/use-cases/engine/GetPlanEngineSnapshot';
+import { FeatureCode } from '@aprovamind/domain';
+import { requireEntitlementFeature } from '@/lib/server/userEntitlements';
 
 // ============================================================
 // Tipos
@@ -123,6 +125,16 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await requireAuthenticatedUser(request);
     if ('response' in auth) return auth.response;
+
+    const entitlement = await requireEntitlementFeature({
+      identity: {
+        uid: auth.uid,
+        email: auth.email,
+        idToken: auth.idToken,
+      },
+      featureCode: FeatureCode.ContextualAiChat,
+    });
+    if (!entitlement.allowed) return entitlement.response;
 
     const quota = await enforceAiTaskQuota({
       uid: auth.uid,

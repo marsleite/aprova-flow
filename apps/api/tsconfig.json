@@ -13,7 +13,9 @@
       "@aprovamind/contracts": ["../../packages/contracts/src/index.ts"],
       "@aprovamind/contracts/*": ["../../packages/contracts/src/*"],
       "@aprovamind/domain": ["../../packages/domain/src/index.ts"],
-      "@aprovamind/domain/*": ["../../packages/domain/src/*"]
+      "@aprovamind/domain/*": ["../../packages/domain/src/*"],
+      "@aprovamind/infrastructure-firebase": ["../../packages/infrastructure-firebase/src/index.ts"],
+      "@aprovamind/infrastructure-firebase/*": ["../../packages/infrastructure-firebase/src/*"]
     }
   },
   "include": ["src/**/*.ts"]

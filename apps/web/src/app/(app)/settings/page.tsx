@@ -6,6 +6,7 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import AccountPlanModal from '@/components/AccountPlanModal';
 import EntitlementSandboxCard from '@/components/EntitlementSandboxCard';
+import TesterSubscriptionManagerCard from '@/components/TesterSubscriptionManagerCard';
 import { useState } from 'react';
 import Image from 'next/image';
 import {
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 import { fadeUp } from '@/design-system/tokens';
 import { Card, Badge, Button } from '@/components';
+import { isAdminIdentity } from '@/lib/admin';
 
 export default function SettingsPage() {
   const { user, logout } = useAuthContext();
@@ -31,6 +33,11 @@ export default function SettingsPage() {
   const [accountModalOpen, setAccountModalOpen] = useState(false);
 
   if (!user) return null;
+
+  const canManageTesters = isAdminIdentity({
+    uid: user.uid,
+    email: user.email,
+  });
 
   const activePlansFeature = getFeature(FeatureCode.ActivePlans);
   const activePlansLabel =
@@ -68,6 +75,12 @@ export default function SettingsPage() {
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
           <EntitlementSandboxCard currentScenarioUserId={sandboxScenarioUserId} />
         </motion.div>
+
+        {canManageTesters && (
+          <motion.div custom={0.5} variants={fadeUp} initial="hidden" animate="show">
+            <TesterSubscriptionManagerCard />
+          </motion.div>
+        )}
 
         {/* Profile card */}
         <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show">

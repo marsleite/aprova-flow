@@ -31,3 +31,9 @@ export {
 } from './entitlement-policy';
 
 export { resolveUserEntitlements } from './resolve-user-entitlements';
+export {
+    buildFeatureUsagePeriods,
+    materializeCurrentFeatureUsage,
+    resolveEntitlementUsagePeriodBucket,
+    type FeatureUsagePeriodMap,
+} from './usage-periods';

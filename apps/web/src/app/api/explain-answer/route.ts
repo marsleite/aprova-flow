@@ -4,6 +4,8 @@ import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
 import { searchRelevantLaw } from '@/lib/firebase/legalKnowledge';
+import { FeatureCode } from '@aprovamind/domain';
+import { requireEntitlementFeature } from '@/lib/server/userEntitlements';
 
 const SYSTEM_INSTRUCTION = [
     'Você é um professor de Direito para concursos públicos com nível de doutorado.',
@@ -35,6 +37,16 @@ export async function POST(request: NextRequest) {
     try {
         const auth = await requireAuthenticatedUser(request);
         if ('response' in auth) return auth.response;
+
+        const entitlement = await requireEntitlementFeature({
+            identity: {
+                uid: auth.uid,
+                email: auth.email,
+                idToken: auth.idToken,
+            },
+            featureCode: FeatureCode.AiExplanations,
+        });
+        if (!entitlement.allowed) return entitlement.response;
 
         const quota = await enforceAiTaskQuota({
             uid: auth.uid,

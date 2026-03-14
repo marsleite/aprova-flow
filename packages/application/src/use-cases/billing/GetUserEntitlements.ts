@@ -12,6 +12,7 @@ import { toUserEntitlementsSnapshot } from '@aprovamind/application/mappers/toUs
 
 export interface GetUserEntitlementsInput {
   userId: string;
+  email?: string | null;
 }
 
 export type GetUserEntitlementsResult =
@@ -32,6 +33,7 @@ export class GetUserEntitlements {
   ): Promise<GetUserEntitlementsResult> {
     const loaded = await this.dataSource.getUserSubscriptionState({
       userId: input.userId,
+      email: input.email,
     });
 
     if (!loaded.found) {

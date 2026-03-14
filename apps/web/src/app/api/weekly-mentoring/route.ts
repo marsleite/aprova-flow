@@ -16,6 +16,8 @@ import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { logAiUsageEvent, parseJsonFromModelText, runAiText } from '@/lib/ai';
 import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { FeatureCode } from '@aprovamind/domain';
+import { requireEntitlementFeature } from '@/lib/server/userEntitlements';
 
 // ============================================================
 // Tipos
@@ -143,6 +145,16 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await requireAuthenticatedUser(request);
     if ('response' in auth) return auth.response;
+
+    const entitlement = await requireEntitlementFeature({
+      identity: {
+        uid: auth.uid,
+        email: auth.email,
+        idToken: auth.idToken,
+      },
+      featureCode: FeatureCode.WeeklyMentoring,
+    });
+    if (!entitlement.allowed) return entitlement.response;
 
     const quota = await enforceAiTaskQuota({
       uid: auth.uid,

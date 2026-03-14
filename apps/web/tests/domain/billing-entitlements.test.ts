@@ -7,6 +7,10 @@ import {
   SubscriptionStatus,
   resolveUserEntitlements,
 } from '@aprovamind/domain';
+import {
+  buildFeatureUsagePeriods,
+  materializeCurrentFeatureUsage,
+} from '@aprovamind/domain/billing/usage-periods';
 
 describe('Billing entitlements', () => {
   it('keeps free focused on activation and blocks premium-only features', () => {
@@ -185,6 +189,41 @@ describe('Billing entitlements', () => {
       used: limit,
       remaining: 0,
       enabled: false,
+    });
+  });
+
+  it('drops stale monthly usage when the stored bucket is from another month', () => {
+    const usage = materializeCurrentFeatureUsage({
+      plan: PlanCode.Pro,
+      status: SubscriptionStatus.Active,
+      usage: {
+        [FeatureCode.AiExplanations]: 11,
+        [FeatureCode.EditalParse]: 2,
+      },
+      usagePeriods: {
+        [FeatureCode.AiExplanations]: '2026-02',
+        [FeatureCode.EditalParse]: '2026-02',
+      },
+      now: new Date('2026-03-14T12:00:00.000Z'),
+    });
+
+    expect(usage).toBeUndefined();
+  });
+
+  it('builds usage periods with lifetime for free edital parse and month for monthly quotas', () => {
+    const periods = buildFeatureUsagePeriods({
+      plan: PlanCode.Free,
+      status: SubscriptionStatus.Active,
+      usage: {
+        [FeatureCode.EditalParse]: 1,
+        [FeatureCode.AiExplanations]: 2,
+      },
+      now: new Date('2026-03-14T12:00:00.000Z'),
+    });
+
+    expect(periods).toEqual({
+      [FeatureCode.EditalParse]: 'lifetime',
+      [FeatureCode.AiExplanations]: '2026-03',
     });
   });
 });
