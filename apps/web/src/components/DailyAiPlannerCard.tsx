@@ -34,6 +34,7 @@ interface DailyAiPlannerCardProps {
   planVsActual: PlanVsActual[];
   accuracyData?: SubjectAccuracy[];
   totalTodaySeconds: number;
+  availableMinutesToday?: number;
   initialRecoveryMode?: boolean;
 }
 
@@ -71,6 +72,7 @@ export default function DailyAiPlannerCard({
   planVsActual,
   accuracyData,
   totalTodaySeconds,
+  availableMinutesToday,
   initialRecoveryMode,
 }: DailyAiPlannerCardProps) {
   const [loading, setLoading] = useState(false);
@@ -273,7 +275,7 @@ export default function DailyAiPlannerCard({
             weeklyProgressPercent: consistency?.weeklyProgressPercent ?? 0,
             currentStreak: consistency?.currentStreak ?? 0,
             daysStudiedThisWeek: consistency?.daysStudiedThisWeek ?? 0,
-            availableMinutesToday: 180,
+            availableMinutesToday: availableMinutesToday ?? 180,
             todayTotalMinutes: Math.round(totalTodaySeconds / 60),
             subjectHours: subjectHours.map((s) => ({ subject: s.subject, hours: s.hours })),
             planVsActual: planVsActual.map((p) => ({
@@ -346,6 +348,7 @@ export default function DailyAiPlannerCard({
       todayISO,
       consistency,
       totalTodaySeconds,
+      availableMinutesToday,
       subjectHours,
       planVsActual,
       accuracyData,
@@ -445,6 +448,10 @@ export default function DailyAiPlannerCard({
               <span className="inline-flex items-center gap-1">
                 <Clock3 className="h-3.5 w-3.5" />
                 {plan.estimatedTotalMinutes} min
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Clock4 className="h-3.5 w-3.5" />
+                janela {availableMinutesToday ?? 180} min
               </span>
               <span className="inline-flex items-center gap-1">
                 <Target className="h-3.5 w-3.5" />

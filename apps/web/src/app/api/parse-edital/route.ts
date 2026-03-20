@@ -34,6 +34,7 @@ interface ParsedSubject {
 
 interface ParseEditalResponse {
   planName: string;
+  examDate?: string | null;
   subjects: ParsedSubject[];
   suggestedWeeklyGoalHours: number;
   totalSubjectsFound: number;
@@ -55,12 +56,14 @@ REGRAS ABSOLUTAS:
 5. Sugira uma meta semanal realista em horas (entre 8 e 30h) baseada no volume de conteúdo
 6. Extraia o nome oficial do concurso/órgão do edital
 7. Se o PDF não contiver um edital de concurso ou não tiver matérias identificáveis, retorne subjects vazio
+8. Se conseguir identificar a data principal da prova objetiva, retorne em examDate no formato YYYY-MM-DD. Se não conseguir, retorne null.
 
 RESPONDA EXCLUSIVAMENTE em JSON válido, sem markdown, sem código, sem explicação.
 Use exatamente este schema:
 
 {
   "planName": "Nome do Concurso/Órgão + Ano",
+  "examDate": "2026-09-13",
   "subjects": [
     { "subject": "Nome da Matéria", "weight": 20 }
   ],
@@ -230,6 +233,10 @@ export async function POST(req: NextRequest) {
       5,
       Math.min(40, parsed.suggestedWeeklyGoalHours || 15)
     );
+    parsed.examDate =
+      typeof parsed.examDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(parsed.examDate)
+        ? parsed.examDate
+        : null;
     parsed.totalSubjectsFound = parsed.subjects.length;
 
     const usageEvent = {

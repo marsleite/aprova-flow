@@ -76,6 +76,7 @@ import Link from 'next/link';
 import { isAdminIdentity } from '@/lib/admin';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { canCreateMorePlans, isUnlimited } from '@/lib/entitlements';
+import { getStudyCapacityHoursForDate } from '@/lib/plans/studyCapacity';
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -558,6 +559,9 @@ export default function Dashboard() {
             planVsActual={planVsActual}
             accuracyData={accuracyData}
             totalTodaySeconds={summary.totalToday}
+            availableMinutesToday={Math.round(
+              getStudyCapacityHoursForDate(activePlanObj?.studyCapacityHours) * 60
+            )}
           />
         </motion.div>
 

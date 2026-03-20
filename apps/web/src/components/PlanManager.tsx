@@ -21,6 +21,7 @@ import {
   Loader2,
   BookOpen,
   Target,
+  Clock,
   Palette,
   FileUp,
   Check,
@@ -28,6 +29,8 @@ import {
 } from 'lucide-react';
 import {
   StudyPlanEdital,
+  StudyCapacityDay,
+  StudyCapacityHours,
   SubjectWeight,
   DEFAULT_SUBJECTS,
   PLAN_COLORS,
@@ -40,6 +43,13 @@ import {
 } from '@/lib/firebase/plans';
 import { auth } from '@/lib/firebase/config';
 import Link from 'next/link';
+import {
+  buildDefaultStudyCapacityHours,
+  normalizeStudyCapacityHours,
+  STUDY_CAPACITY_DAY_LABELS,
+  STUDY_CAPACITY_DAY_ORDER,
+  sumStudyCapacityHours,
+} from '@/lib/plans/studyCapacity';
 
 // ==========================================================
 // SubjectAutocomplete — input de texto com sugestões
@@ -174,6 +184,14 @@ interface PlanManagerProps {
   onClose: () => void;
 }
 
+function sanitizeMaterialWorkloadHours(value: string): number | null {
+  const normalized = value.replace(',', '.').trim();
+  if (!normalized) return null;
+  const parsed = Number(normalized);
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  return Math.max(1, Math.min(5000, Math.round(parsed)));
+}
+
 export default function PlanManager({
   isOpen,
   userId,
@@ -186,6 +204,12 @@ export default function PlanManager({
   const [name, setName] = useState('');
   const [color, setColor] = useState<string>(PLAN_COLORS[0].hex);
   const [weeklyGoalHours, setWeeklyGoalHours] = useState(10);
+  const [examDate, setExamDate] = useState('');
+  const [materialWorkloadHours, setMaterialWorkloadHours] = useState('');
+  const [studyCapacityHours, setStudyCapacityHours] = useState<StudyCapacityHours>(
+    buildDefaultStudyCapacityHours(10)
+  );
+  const [capacityTouched, setCapacityTouched] = useState(false);
   const [subjects, setSubjects] = useState<SubjectWeight[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -203,17 +227,40 @@ export default function PlanManager({
       setName(editPlan.name);
       setColor(editPlan.color);
       setWeeklyGoalHours(editPlan.weeklyGoalHours);
+      setExamDate(editPlan.examDate ?? '');
+      setMaterialWorkloadHours(
+        editPlan.materialWorkloadHours != null
+          ? String(editPlan.materialWorkloadHours)
+          : ''
+      );
+      setStudyCapacityHours(
+        normalizeStudyCapacityHours(
+          editPlan.studyCapacityHours,
+          editPlan.weeklyGoalHours
+        )
+      );
+      setCapacityTouched(Boolean(editPlan.studyCapacityHours));
       setSubjects([...editPlan.subjects]);
     } else {
       setName('');
       setColor(PLAN_COLORS[Math.floor(Math.random() * PLAN_COLORS.length)].hex);
       setWeeklyGoalHours(10);
+      setExamDate('');
+      setMaterialWorkloadHours('');
+      setStudyCapacityHours(buildDefaultStudyCapacityHours(10));
+      setCapacityTouched(false);
       setSubjects([]);
     }
     setConfirmDelete(false);
     setImportError(null);
     setImportSuccess(null);
   }, [editPlan, isOpen]);
+
+  useEffect(() => {
+    if (!capacityTouched) {
+      setStudyCapacityHours(buildDefaultStudyCapacityHours(weeklyGoalHours));
+    }
+  }, [weeklyGoalHours, capacityTouched]);
 
   const [dragging, setDragging] = useState(false);
   const canUseEditalParse = hasFeature(FeatureCode.EditalParse);
@@ -287,6 +334,9 @@ export default function PlanManager({
       if (data.suggestedWeeklyGoalHours) {
         setWeeklyGoalHours(data.suggestedWeeklyGoalHours);
       }
+      if (data.examDate && !examDate) {
+        setExamDate(data.examDate);
+      }
 
       setImportSuccess(
         `${data.totalSubjectsFound} matéria${data.totalSubjectsFound !== 1 ? 's' : ''} encontrada${data.totalSubjectsFound !== 1 ? 's' : ''} no edital`
@@ -335,7 +385,25 @@ export default function PlanManager({
 
   // Validação
   const totalWeight = subjects.reduce((acc, s) => acc + s.weight, 0);
+  const weeklyCapacityHours = sumStudyCapacityHours(studyCapacityHours);
   const isValid = name.trim() !== '' && subjects.length > 0 && totalWeight === 100;
+
+  const updateStudyCapacityHour = (day: StudyCapacityDay, value: string) => {
+    const normalized = value.replace(',', '.').trim();
+    const parsed = normalized === '' ? 0 : Number(normalized);
+    if (!Number.isFinite(parsed)) return;
+
+    setCapacityTouched(true);
+    setStudyCapacityHours((current) => ({
+      ...current,
+      [day]: Math.max(0, Math.min(16, Math.round(parsed * 10) / 10)),
+    }));
+  };
+
+  const resetStudyCapacityFromGoal = () => {
+    setCapacityTouched(false);
+    setStudyCapacityHours(buildDefaultStudyCapacityHours(weeklyGoalHours));
+  };
 
   // Handlers de matérias
   const addSubject = (subjectName: string) => {
@@ -375,6 +443,9 @@ export default function PlanManager({
           name: name.trim(),
           color,
           weeklyGoalHours,
+          examDate: examDate || null,
+          materialWorkloadHours: sanitizeMaterialWorkloadHours(materialWorkloadHours),
+          studyCapacityHours,
           subjects,
         });
       } else {
@@ -382,6 +453,9 @@ export default function PlanManager({
           name: name.trim(),
           color,
           weeklyGoalHours,
+          examDate: examDate || null,
+          materialWorkloadHours: sanitizeMaterialWorkloadHours(materialWorkloadHours),
+          studyCapacityHours,
           subjects,
           isDefault: false,
         });
@@ -427,7 +501,7 @@ export default function PlanManager({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="mx-4 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-am-border-default bg-gray-900 shadow-2xl"
+            className="mx-4 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-am-border-default bg-gray-900 shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-am-border-default px-6 py-4">
@@ -481,20 +555,122 @@ export default function PlanManager({
                 </div>
               </div>
 
-              {/* Meta Semanal */}
-              <div>
-                <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-300">
-                  <Target className="h-4 w-4" />
-                  Meta Semanal (horas)
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={80}
-                  value={weeklyGoalHours}
-                  onChange={(e) => setWeeklyGoalHours(Math.max(1, Math.min(80, Number(e.target.value))))}
-                  className="w-24 rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-center text-sm text-am-text-primary outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
-                />
+              <div className="grid gap-4 md:grid-cols-3">
+                {/* Meta Semanal */}
+                <div>
+                  <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-300">
+                    <Target className="h-4 w-4" />
+                    Meta Semanal (horas)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={80}
+                    value={weeklyGoalHours}
+                    onChange={(e) => setWeeklyGoalHours(Math.max(1, Math.min(80, Number(e.target.value))))}
+                    className="w-full rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                  />
+                </div>
+
+                {/* Data da prova */}
+                <div>
+                  <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-300">
+                    <Target className="h-4 w-4" />
+                    Data da Prova
+                  </label>
+                  <input
+                    type="date"
+                    value={examDate}
+                    onChange={(e) => setExamDate(e.target.value)}
+                    className="w-full rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                  />
+                </div>
+
+                {/* Carga estimada */}
+                <div>
+                  <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-300">
+                    <Clock className="h-4 w-4" />
+                    Carga do material (horas)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={5000}
+                    value={materialWorkloadHours}
+                    onChange={(e) => setMaterialWorkloadHours(e.target.value)}
+                    placeholder="Ex: 180"
+                    className="w-full rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary outline-none transition-all placeholder:text-gray-500 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                  />
+                  <p className="mt-1 text-[11px] text-am-text-tertiary">
+                    Preencha manualmente por enquanto. Depois podemos estimar pelo PDF do material.
+                  </p>
+                </div>
+              </div>
+
+              {/* Disponibilidade semanal real */}
+              <div className="rounded-2xl border border-am-border-default bg-am-surface-subtle/60 p-4">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-am-text-primary">
+                      Disponibilidade real por dia
+                    </p>
+                    <p className="text-xs text-am-text-secondary">
+                      O plano macro e o plano diário passam a usar essa janela real, em vez de assumir 3h fixas.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={resetStudyCapacityFromGoal}
+                    className="rounded-full border border-am-border-default px-3 py-1.5 text-[11px] font-medium text-am-text-secondary transition hover:border-violet-500/40 hover:text-violet-300"
+                  >
+                    Recalcular pela meta
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+                  {STUDY_CAPACITY_DAY_ORDER.map((day) => (
+                    <label
+                      key={day}
+                      className="rounded-xl border border-am-border-default bg-gray-800/40 px-3 py-2"
+                    >
+                      <span className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-am-text-tertiary">
+                        {STUDY_CAPACITY_DAY_LABELS[day]}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={0}
+                          max={16}
+                          step={0.5}
+                          value={studyCapacityHours[day]}
+                          onChange={(e) => updateStudyCapacityHour(day, e.target.value)}
+                          className="w-full rounded-lg border border-am-border-default bg-gray-900/70 px-2 py-1.5 text-center text-sm text-am-text-primary outline-none focus:border-violet-500"
+                        />
+                        <span className="text-[11px] text-am-text-tertiary">h</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                  <span className="rounded-full bg-am-surface px-3 py-1 text-am-text-secondary">
+                    Capacidade semanal: <strong className="text-am-text-primary">{weeklyCapacityHours.toFixed(1)}h</strong>
+                  </span>
+                  <span className="rounded-full bg-am-surface px-3 py-1 text-am-text-secondary">
+                    Meta atual: <strong className="text-am-text-primary">{weeklyGoalHours}h</strong>
+                  </span>
+                  <span
+                    className={`rounded-full px-3 py-1 ${
+                      weeklyCapacityHours + 0.1 >= weeklyGoalHours
+                        ? 'bg-emerald-500/10 text-emerald-300'
+                        : 'bg-amber-500/10 text-amber-300'
+                    }`}
+                  >
+                    {weeklyCapacityHours + 0.1 >= weeklyGoalHours
+                      ? 'Capacidade cobre a meta atual'
+                      : 'Sua disponibilidade está abaixo da meta atual'}
+                  </span>
+                </div>
               </div>
 
               {/* Importar Edital PDF — Drop Zone */}
