@@ -17,6 +17,7 @@ import DailyAiPlannerCard from '@/components/DailyAiPlannerCard';
 import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
 import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import { createStudyPlan, setActivePlan } from '@/lib/firebase/plans';
+import { getStudyCapacityHoursForDate } from '@/lib/plans/studyCapacity';
 import {
   CheckCircle2,
   Sparkles,
@@ -55,14 +56,14 @@ export default function EnginePage() {
     try {
       const [recent, cons] = await Promise.all([
         getRecentSessions(user.uid, 8, filterPlanId),
-        getStudyConsistency(user.uid, filterPlanId).catch(() => null),
+        getStudyConsistency(user.uid, filterPlanId, activePlanObj?.weeklyGoalHours).catch(() => null),
       ]);
       setRecentSessions(recent);
       setConsistency(cons);
     } catch { /* */ } finally {
       setLoading(false);
     }
-  }, [user, filterPlanId]);
+  }, [user, filterPlanId, activePlanObj?.weeklyGoalHours]);
 
   useEffect(() => { if (user) fetchData(); }, [fetchData, user, activePlanId]);
 
@@ -201,6 +202,9 @@ export default function EnginePage() {
                 planVsActual={[]}
                 accuracyData={[]}
                 totalTodaySeconds={0}
+                availableMinutesToday={Math.round(
+                  getStudyCapacityHoursForDate(activePlanObj?.studyCapacityHours) * 60
+                )}
                 initialRecoveryMode={initialRecoveryMode}
               />
             </motion.div>

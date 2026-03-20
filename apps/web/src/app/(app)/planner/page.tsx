@@ -20,6 +20,7 @@ import { getAccuracyAnalytics } from '@/lib/firebase/questions';
 import { getTodayISO, formatDuration } from '@/lib/utils';
 import { StudyPlanEdital, PlanVsActual, StudyInsight, StudySession, StudyConsistency, SubjectAccuracy } from '@/types';
 import PlanManager from '@/components/PlanManager';
+import PlanCoverageProjectionCard from '@/components/PlanCoverageProjectionCard';
 import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
 import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import { useEntitlements } from '@/hooks/useEntitlements';
@@ -307,6 +308,20 @@ export default function PlannerPage() {
           </motion.div>
         </div>
 
+        <motion.div custom={3.5} variants={fadeUp} initial="hidden" animate="show">
+          <PlanCoverageProjectionCard
+            plan={activePlan}
+            onEdit={
+              activePlan
+                ? () => {
+                    setEditingPlan(activePlan);
+                    setPlanManagerOpen(true);
+                  }
+                : undefined
+            }
+          />
+        </motion.div>
+
         {/* ROW 3: Planner Manager (Legacy Table) */}
         <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
           <h3 className="font-brand text-am-h5 font-bold tracking-tight text-am-text-primary mb-4 flex items-center gap-2">
@@ -366,6 +381,7 @@ export default function PlannerPage() {
                           </div>
                           <p className="mt-0.5 pl-4 text-xs text-am-text-secondary">
                             {plan.subjects.length > 0 ? `${plan.subjects.length} matérias` : 'Sem matérias'} · Meta {plan.weeklyGoalHours}h/sem
+                            {plan.examDate ? ` · Prova ${plan.examDate}` : ''}
                           </p>
                         </div>
 

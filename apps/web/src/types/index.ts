@@ -133,6 +133,17 @@ export interface SubjectWeight {
   weight: number; // percentual planejado (0-100)
 }
 
+export type StudyCapacityDay =
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+  | 'sunday';
+
+export type StudyCapacityHours = Record<StudyCapacityDay, number>;
+
 /** Plano de estudo salvo no Firestore */
 export interface StudyPlan {
   subjects: SubjectWeight[];
@@ -200,6 +211,9 @@ export interface StudyPlanEdital {
   name: string;                // "PGE-SP", "Magistratura Federal"
   subjects: SubjectWeight[];   // Matérias com pesos
   weeklyGoalHours: number;     // Meta semanal deste plano
+  examDate?: string | null;    // Data da prova em YYYY-MM-DD
+  materialWorkloadHours?: number | null; // Carga total estimada do material/edital
+  studyCapacityHours?: StudyCapacityHours | null; // Disponibilidade real por dia
   color: string;               // Hex para badges: "#8b5cf6"
   isDefault: boolean;          // true para o plano "Geral" auto-criado
   createdAt: string;

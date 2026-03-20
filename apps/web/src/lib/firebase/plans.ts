@@ -23,12 +23,99 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from './config';
-import { StudyPlanEdital, SubjectWeight } from '@/types';
+import { StudyCapacityHours, StudyPlanEdital, SubjectWeight } from '@/types';
+import { normalizeStudyCapacityHours } from '@/lib/plans/studyCapacity';
 
 const PLANS_COLLECTION = 'study_plans';
 const SESSIONS_COLLECTION = 'sessions';
 const QUESTIONS_COLLECTION = 'questions_stats';
 const USER_STATS_COLLECTION = 'user_stats';
+
+function normalizeDateOnly(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? trimmed : null;
+}
+
+function normalizeMaterialWorkloadHours(value: unknown): number | null {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  return Math.max(1, Math.min(5000, Math.round(parsed)));
+}
+
+function normalizePlanSubjects(raw: unknown): SubjectWeight[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((subject) => {
+      if (!subject || typeof subject !== 'object') return null;
+      const subjectName = typeof (subject as { subject?: unknown }).subject === 'string'
+        ? (subject as { subject: string }).subject.trim()
+        : '';
+      const weight = Number((subject as { weight?: unknown }).weight);
+      if (!subjectName || !Number.isFinite(weight)) return null;
+      return {
+        subject: subjectName,
+        weight: Math.max(0, Math.min(100, Math.round(weight))),
+      };
+    })
+    .filter((item): item is SubjectWeight => item !== null);
+}
+
+function normalizeStudyPlan(
+  planId: string,
+  raw: Record<string, unknown>
+): StudyPlanEdital {
+  const weeklyGoalHours = Number.isFinite(Number(raw.weeklyGoalHours))
+    ? Math.max(1, Math.min(80, Math.round(Number(raw.weeklyGoalHours))))
+    : 10;
+
+  return {
+    id: planId,
+    userId: typeof raw.userId === 'string' ? raw.userId : '',
+    name:
+      typeof raw.name === 'string' && raw.name.trim() !== ''
+        ? raw.name.trim()
+        : 'Plano sem nome',
+    subjects: normalizePlanSubjects(raw.subjects),
+    weeklyGoalHours,
+    examDate: normalizeDateOnly(raw.examDate),
+    materialWorkloadHours: normalizeMaterialWorkloadHours(raw.materialWorkloadHours),
+    studyCapacityHours: normalizeStudyCapacityHours(raw.studyCapacityHours, weeklyGoalHours),
+    color: typeof raw.color === 'string' && raw.color ? raw.color : '#8b5cf6',
+    isDefault: Boolean(raw.isDefault),
+    createdAt:
+      typeof raw.createdAt === 'string' ? raw.createdAt : new Date().toISOString(),
+    updatedAt:
+      typeof raw.updatedAt === 'string' ? raw.updatedAt : new Date().toISOString(),
+  };
+}
+
+function buildStudyPlanPayload(
+  data: Partial<Omit<StudyPlanEdital, 'id' | 'userId' | 'createdAt' | 'updatedAt'>> & {
+    name?: string;
+    subjects?: SubjectWeight[];
+    weeklyGoalHours?: number;
+    color?: string;
+    isDefault?: boolean;
+  }
+) {
+  const weeklyGoalHours = Number.isFinite(Number(data.weeklyGoalHours))
+    ? Math.max(1, Math.min(80, Math.round(Number(data.weeklyGoalHours))))
+    : 10;
+
+  const payload: Record<string, unknown> = {
+    name: typeof data.name === 'string' ? data.name.trim() : 'Plano sem nome',
+    subjects: normalizePlanSubjects(data.subjects),
+    weeklyGoalHours,
+    examDate: normalizeDateOnly(data.examDate),
+    materialWorkloadHours: normalizeMaterialWorkloadHours(data.materialWorkloadHours),
+    studyCapacityHours: normalizeStudyCapacityHours(data.studyCapacityHours, weeklyGoalHours),
+    color: typeof data.color === 'string' && data.color ? data.color : '#8b5cf6',
+    isDefault: Boolean(data.isDefault),
+  };
+
+  return payload;
+}
 
 // Lock para evitar race condition em StrictMode / chamadas concorrentes
 let migrationInProgress: Promise<string> | null = null;
@@ -47,7 +134,7 @@ export async function createStudyPlan(
   const now = new Date().toISOString();
   const docRef = await addDoc(collection(db, PLANS_COLLECTION), {
     userId,
-    ...data,
+    ...buildStudyPlanPayload(data),
     createdAt: now,
     updatedAt: now,
   });
@@ -64,7 +151,7 @@ export async function getStudyPlans(userId: string): Promise<StudyPlanEdital[]> 
   );
   const snapshot = await getDocs(q);
   return snapshot.docs
-    .map((d) => ({ id: d.id, ...d.data() } as StudyPlanEdital))
+    .map((d) => normalizeStudyPlan(d.id, d.data() as Record<string, unknown>))
     .sort((a, b) => {
       // Default sempre primeiro
       if (a.isDefault && !b.isDefault) return -1;
@@ -79,7 +166,7 @@ export async function getStudyPlans(userId: string): Promise<StudyPlanEdital[]> 
 export async function getStudyPlanById(planId: string): Promise<StudyPlanEdital | null> {
   const snap = await getDoc(doc(db, PLANS_COLLECTION, planId));
   if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() } as StudyPlanEdital;
+  return normalizeStudyPlan(snap.id, snap.data() as Record<string, unknown>);
 }
 
 /**
@@ -87,11 +174,39 @@ export async function getStudyPlanById(planId: string): Promise<StudyPlanEdital 
  */
 export async function updateStudyPlan(
   planId: string,
-  updates: Partial<Pick<StudyPlanEdital, 'name' | 'subjects' | 'weeklyGoalHours' | 'color'>>
+  updates: Partial<
+    Pick<
+      StudyPlanEdital,
+      | 'name'
+      | 'subjects'
+      | 'weeklyGoalHours'
+      | 'color'
+      | 'examDate'
+      | 'materialWorkloadHours'
+      | 'studyCapacityHours'
+    >
+  >
 ): Promise<void> {
   const ref = doc(db, PLANS_COLLECTION, planId);
+  const current = await getStudyPlanById(planId);
+  const merged = {
+    name: updates.name ?? current?.name ?? 'Plano sem nome',
+    subjects: updates.subjects ?? current?.subjects ?? [],
+    weeklyGoalHours: updates.weeklyGoalHours ?? current?.weeklyGoalHours ?? 10,
+    color: updates.color ?? current?.color ?? '#8b5cf6',
+    examDate: Object.prototype.hasOwnProperty.call(updates, 'examDate')
+      ? updates.examDate
+      : current?.examDate ?? null,
+    materialWorkloadHours: Object.prototype.hasOwnProperty.call(updates, 'materialWorkloadHours')
+      ? updates.materialWorkloadHours
+      : current?.materialWorkloadHours ?? null,
+    studyCapacityHours: Object.prototype.hasOwnProperty.call(updates, 'studyCapacityHours')
+      ? updates.studyCapacityHours
+      : current?.studyCapacityHours ?? null,
+    isDefault: current?.isDefault ?? false,
+  };
   await updateDoc(ref, {
-    ...updates,
+    ...buildStudyPlanPayload(merged),
     updatedAt: new Date().toISOString(),
   });
 }
