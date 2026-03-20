@@ -223,9 +223,13 @@ export default function DashboardPage() {
               <SmartScheduleCard
                 userId={user.uid}
                 userName={user.displayName?.split(' ')[0] || 'Estudante'}
+                activePlanName={activePlan?.name || null}
                 consistency={consistency}
                 planWeights={activePlan?.subjects || []}
                 accuracyData={accuracyData}
+                examDate={activePlan?.examDate || null}
+                materialWorkloadHours={activePlan?.materialWorkloadHours || null}
+                studyCapacityHours={activePlan?.studyCapacityHours || null}
               />
             </div>
             <div className="h-full">

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildAvailableStudyDays,
   buildDefaultStudyCapacityHours,
   getStudyPlanCoverageProjection,
   sumStudyCapacityHours,
@@ -12,6 +13,24 @@ describe('study capacity planning', () => {
     expect(sumStudyCapacityHours(capacity)).toBe(14);
     expect(capacity.monday).toBeGreaterThan(0);
     expect(capacity.sunday).toBeGreaterThan(0);
+  });
+
+  it('builds weekly availability only for days with declared study time', () => {
+    const availableDays = buildAvailableStudyDays({
+      monday: 2,
+      tuesday: 0,
+      wednesday: 1.5,
+      thursday: 0,
+      friday: 3,
+      saturday: 0,
+      sunday: 0,
+    }, 10);
+
+    expect(availableDays).toEqual([
+      expect.objectContaining({ key: 'monday', fullLabel: 'Segunda', availableHours: 2 }),
+      expect.objectContaining({ key: 'wednesday', fullLabel: 'Quarta', availableHours: 1.5 }),
+      expect.objectContaining({ key: 'friday', fullLabel: 'Sexta', availableHours: 3 }),
+    ]);
   });
 
   it('marks the plan as attention when the student has capacity but the weekly goal is below the needed pace', () => {

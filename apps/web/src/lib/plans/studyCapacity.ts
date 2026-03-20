@@ -30,6 +30,16 @@ export const STUDY_CAPACITY_DAY_LABELS: Record<StudyCapacityDay, string> = {
   sunday: 'Dom',
 };
 
+export const STUDY_CAPACITY_DAY_FULL_LABELS: Record<StudyCapacityDay, string> = {
+  monday: 'Segunda',
+  tuesday: 'Terca',
+  wednesday: 'Quarta',
+  thursday: 'Quinta',
+  friday: 'Sexta',
+  saturday: 'Sabado',
+  sunday: 'Domingo',
+};
+
 const MAX_DAILY_HOURS = 16;
 
 function roundHours(value: number): number {
@@ -111,6 +121,27 @@ export function getStudyCapacityHoursForDate(
   if (!capacity) return 0;
   const day = DAY_INDEX_TO_CAPACITY_DAY[date.getDay()];
   return clampHours(capacity[day], 0);
+}
+
+export interface AvailableStudyDay {
+  key: StudyCapacityDay;
+  shortLabel: string;
+  fullLabel: string;
+  availableHours: number;
+}
+
+export function buildAvailableStudyDays(
+  capacity?: StudyCapacityHours | null,
+  weeklyGoalHours = 0
+): AvailableStudyDay[] {
+  const normalized = normalizeStudyCapacityHours(capacity, weeklyGoalHours);
+
+  return STUDY_CAPACITY_DAY_ORDER.map((day) => ({
+    key: day,
+    shortLabel: STUDY_CAPACITY_DAY_LABELS[day],
+    fullLabel: STUDY_CAPACITY_DAY_FULL_LABELS[day],
+    availableHours: normalized[day],
+  })).filter((item) => item.availableHours > 0);
 }
 
 function parseDateOnly(value: string): Date | null {
