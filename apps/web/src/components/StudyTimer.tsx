@@ -26,6 +26,8 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useStudyTimer } from '@/hooks/useStudyTimer';
+import { useUserCustomSubjects } from '@/hooks/useUserCustomSubjects';
+import { mergeSubjectOptions } from '@/lib/firebase/subjects';
 import { formatTimerDisplay } from '@/lib/utils';
 import InterrogationModal from '@/components/InterrogationModal';
 import { DEFAULT_SUBJECTS, TimerMode, PomodoroPhase, StudyPlanEdital } from '@/types';
@@ -349,8 +351,8 @@ export default function StudyTimer({
 }: StudyTimerProps) {
   // Plano selecionado para esta sessão (herda do header, mas pode ser trocado)
   const [selectedPlanId, setSelectedPlanId] = useState(activePlanId || '');
-  const [customSubjectsByPlan, setCustomSubjectsByPlan] = useState<Record<string, string[]>>({});
   const timer = useStudyTimer({ userId, planId: selectedPlanId || undefined });
+  const { customSubjects, persistSubject } = useUserCustomSubjects(userId);
   const {
     displaySeconds,
     totalFocusSeconds,
@@ -386,26 +388,17 @@ export default function StudyTimer({
   const activePlan = plans.find((p) => p.id === selectedPlanId);
   const isGeneralSelected = !!activePlan?.isDefault;
   const canStart = !!selectedSubject && !isGeneralSelected && hasControl;
-  const currentPlanKey = selectedPlanId || '__global__';
-  const availableSubjects = useMemo(() => {
-    const baseSubjects = activePlan && activePlan.subjects.length > 0
-      ? activePlan.subjects.map((s) => s.subject)
-      : [...DEFAULT_SUBJECTS] as unknown as string[];
-    const customSubjects = customSubjectsByPlan[currentPlanKey] || [];
-    const merged = [...baseSubjects, ...customSubjects];
-
-    if (selectedSubject && !merged.some((item) => item.toLowerCase() === selectedSubject.toLowerCase())) {
-      merged.push(selectedSubject);
+  const baseSubjects = useMemo(() => {
+    if (activePlan && activePlan.subjects.length > 0) {
+      return activePlan.subjects.map((s) => s.subject);
     }
 
-    const seen = new Set<string>();
-    return merged.filter((item) => {
-      const key = item.trim().toLowerCase();
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [activePlan, customSubjectsByPlan, currentPlanKey, selectedSubject]);
+    return [...DEFAULT_SUBJECTS] as unknown as string[];
+  }, [activePlan]);
+
+  const availableSubjects = useMemo(() => {
+    return mergeSubjectOptions(baseSubjects, customSubjects, selectedSubject ? [selectedSubject] : []);
+  }, [baseSubjects, customSubjects, selectedSubject]);
 
   // Calcula total de segundos da fase (para o anel de progresso)
   const phaseTotalSeconds = (() => {
@@ -496,28 +489,21 @@ export default function StudyTimer({
     }
   };
 
-  const handleAddSubject = (subjectName: string) => {
+  const handleAddSubject = useCallback((subjectName: string) => {
     const trimmed = subjectName.trim();
     if (!trimmed) return;
 
-    const existing = availableSubjects.find((item) => item.toLowerCase() === trimmed.toLowerCase());
-    const finalSubject = existing || trimmed;
-
-    if (!existing) {
-      setCustomSubjectsByPlan((prev) => {
-        const current = prev[currentPlanKey] || [];
-        if (current.some((item) => item.toLowerCase() === finalSubject.toLowerCase())) {
-          return prev;
+    setSelectedSubject(trimmed);
+    void persistSubject(trimmed, availableSubjects)
+      .then((savedSubject) => {
+        if (savedSubject !== trimmed) {
+          setSelectedSubject(savedSubject);
         }
-        return {
-          ...prev,
-          [currentPlanKey]: [...current, finalSubject],
-        };
+      })
+      .catch((error) => {
+        console.error('Erro ao persistir matéria customizada do timer:', error);
       });
-    }
-
-    setSelectedSubject(finalSubject);
-  };
+  }, [availableSubjects, persistSubject, setSelectedSubject]);
 
   return (
     <motion.div

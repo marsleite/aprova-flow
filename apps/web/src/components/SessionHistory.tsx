@@ -24,6 +24,8 @@ import {
   Loader2,
 } from 'lucide-react';
 import { StudySession, SessionFilters, DEFAULT_SUBJECTS } from '@/types';
+import { useUserCustomSubjects } from '@/hooks/useUserCustomSubjects';
+import { mergeSubjectOptions } from '@/lib/firebase/subjects';
 import { getFilteredSessions, saveSession, updateSession } from '@/lib/firebase/sessions';
 import { formatDuration, formatRelativeDate, exportSessionsCSV, getTodayISO } from '@/lib/utils';
 
@@ -154,13 +156,14 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
   );
   const [saveError, setSaveError] = useState('');
   const [saving, setSaving] = useState(false);
+  const { customSubjects, persistSubject } = useUserCustomSubjects(userId);
 
   const subjectOptions = useMemo(
     () =>
-      Array.from(new Set([...DEFAULT_SUBJECTS, ...sessions.map((s) => s.subject)])).sort((a, b) =>
+      mergeSubjectOptions(DEFAULT_SUBJECTS, customSubjects, sessions.map((s) => s.subject)).sort((a, b) =>
         a.localeCompare(b, 'pt-BR')
       ),
-    [sessions]
+    [customSubjects, sessions]
   );
 
   const durationPreview = useMemo(() => {
@@ -210,7 +213,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
 
   const openCreateForm = () => {
     setEditingSession(null);
-    setFormState(createDefaultForm(subject || DEFAULT_SUBJECTS[0]));
+    setFormState(createDefaultForm(subject || subjectOptions[0] || DEFAULT_SUBJECTS[0]));
     setSaveError('');
     setFormOpen(true);
   };
@@ -246,13 +249,19 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
     setSaveError('');
 
     try {
+      const finalSubject = await persistSubject(parsed.data.subject, subjectOptions);
+      const sessionData = {
+        ...parsed.data,
+        subject: finalSubject,
+      };
+
       if (editingSession?.id) {
-        await updateSession(editingSession.id, parsed.data);
+        await updateSession(editingSession.id, sessionData);
       } else {
         await saveSession({
           userId,
           planId: planId || undefined,
-          ...parsed.data,
+          ...sessionData,
           source: 'manual',
           wasEdited: false,
         });

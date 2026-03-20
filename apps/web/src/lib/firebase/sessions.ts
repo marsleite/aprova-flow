@@ -422,8 +422,11 @@ export async function getPlanVsActual(
 
   const totalHours = subjectHours.reduce((acc, s) => acc + s.hours, 0);
   const hoursMap = new Map(subjectHours.map((s) => [s.subject, s.hours]));
+  const plannedKeys = new Set(
+    plan.subjects.map((pw) => pw.subject.trim().toLocaleLowerCase('pt-BR'))
+  );
 
-  return plan.subjects.map((pw) => {
+  const plannedSubjects = plan.subjects.map((pw) => {
     const actualHours = hoursMap.get(pw.subject) || 0;
     const actualPercent = totalHours > 0
       ? Math.round((actualHours / totalHours) * 100)
@@ -441,6 +444,26 @@ export async function getPlanVsActual(
       status,
     };
   });
+
+  const extraSubjects = subjectHours
+    .filter((item) => !plannedKeys.has(item.subject.trim().toLocaleLowerCase('pt-BR')))
+    .map((item) => {
+      const actualPercent = totalHours > 0
+        ? Math.round((item.hours / totalHours) * 100)
+        : 0;
+
+      return {
+        subject: item.subject,
+        plannedPercent: 0,
+        actualPercent,
+        actualHours: item.hours,
+        deviation: actualPercent,
+        status: 'ok' as const,
+      };
+    })
+    .sort((a, b) => b.actualHours - a.actualHours);
+
+  return [...plannedSubjects, ...extraSubjects];
 }
 
 // ==========================================================

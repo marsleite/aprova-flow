@@ -24,6 +24,8 @@ import {
   Loader2,
 } from 'lucide-react';
 import { DEFAULT_SUBJECTS, SubjectWeight } from '@/types';
+import { useUserCustomSubjects } from '@/hooks/useUserCustomSubjects';
+import { mergeSubjectOptions } from '@/lib/firebase/subjects';
 import { saveQuestionSession } from '@/lib/firebase/questions';
 
 interface QuestionTrackerCardProps {
@@ -51,14 +53,17 @@ export default function QuestionTrackerCard({
   const [savedAccuracy, setSavedAccuracy] = useState<number | null>(null);
   const [savedSubject, setSavedSubject] = useState('');
   const hasAutoSelected = useRef(false);
+  const { customSubjects, persistSubject } = useUserCustomSubjects(userId);
 
   // Matérias: usa as do plano ativo, senão DEFAULT_SUBJECTS
   const subjectList = useMemo(() => {
-    if (planSubjects && planSubjects.length > 0) {
-      return planSubjects.map((s) => s.subject);
-    }
-    return DEFAULT_SUBJECTS;
-  }, [planSubjects]);
+    const baseSubjects =
+      planSubjects && planSubjects.length > 0
+        ? planSubjects.map((s) => s.subject)
+        : [...DEFAULT_SUBJECTS];
+
+    return mergeSubjectOptions(baseSubjects, customSubjects, lastSessionSubject ? [lastSessionSubject] : []);
+  }, [customSubjects, lastSessionSubject, planSubjects]);
 
   // Auto-seleção: pré-seleciona matéria da última sessão (só 1x)
   useEffect(() => {
@@ -71,7 +76,8 @@ export default function QuestionTrackerCard({
   const total = parseInt(totalQuestions) || 0;
   const correct = parseInt(correctAnswers) || 0;
   const hasOverflow = correctAnswers !== '' && correct > total && total > 0;
-  const isValid = subject !== '' && total > 0 && correct >= 0 && correct <= total;
+  const normalizedSubject = subject.trim();
+  const isValid = normalizedSubject !== '' && total > 0 && correct >= 0 && correct <= total;
 
   const accuracy = useMemo(() => {
     if (total === 0) return null;
@@ -95,13 +101,14 @@ export default function QuestionTrackerCard({
     if (!isValid || saving) return;
     setSaving(true);
     try {
+      const finalSubject = await persistSubject(normalizedSubject, subjectList);
       const today = new Date();
       const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
       await saveQuestionSession({
         userId,
         planId: planId || undefined,
-        subject,
+        subject: finalSubject,
         totalQuestions: total,
         correctAnswers: correct,
         date,
@@ -109,7 +116,7 @@ export default function QuestionTrackerCard({
 
       const pct = Math.round((correct / total) * 100);
       setSavedAccuracy(pct);
-      setSavedSubject(subject);
+      setSavedSubject(finalSubject);
       setSaved(true);
       setTimeout(() => {
         setSaved(false);
@@ -154,21 +161,24 @@ export default function QuestionTrackerCard({
         {/* Matéria */}
         <div>
           <label className="mb-1.5 block text-xs font-medium text-am-text-secondary">Matéria</label>
-          <select
+          <input
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
+            list="question-tracker-subjects"
             disabled={saving}
+            placeholder="Selecione ou digite uma matéria..."
             className="w-full rounded-xl border border-am-border-strong bg-am-surface-subtle px-4 py-2.5 text-sm text-am-text-primary
                        outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
                        disabled:opacity-50"
-          >
-            <option value="">Selecione...</option>
+          />
+          <datalist id="question-tracker-subjects">
             {subjectList.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
+              <option key={s} value={s} />
             ))}
-          </select>
+          </datalist>
+          <p className="mt-1.5 text-[11px] text-am-text-secondary">
+            Se a matéria não existir ainda, é só digitar que a gente salva para as próximas sessões.
+          </p>
         </div>
 
         {/* Questões + Acertos em grid */}

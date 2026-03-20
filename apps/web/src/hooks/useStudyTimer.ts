@@ -602,7 +602,7 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
   const setSelectedSubject = useCallback(
     (subject: string) => {
       if (!hasControl) return;
-      const normalized = subject.trim();
+      const normalized = subject.trim().replace(/\s+/g, ' ');
       setRemoteState((prev) => ({ ...prev, selectedSubject: normalized }));
       void mutateTimerState((current) => ({ ...current, selectedSubject: normalized })).catch((error) => {
         console.error('Erro ao definir matéria do timer:', error);
@@ -652,8 +652,9 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
 
   const play = useCallback(() => {
     if (!hasControl) return;
+    const optimisticSubject = remoteState.selectedSubject.trim();
     void mutateTimerState((current, nowIso) => {
-      const subject = current.selectedSubject.trim();
+      const subject = (current.selectedSubject || optimisticSubject).trim();
       if (!subject) return null;
       if (current.status === 'running') return null;
 
@@ -701,7 +702,7 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
     }).catch((error) => {
       console.error('Erro ao iniciar/retomar timer:', error);
     });
-  }, [hasControl, mutateTimerState, planId]);
+  }, [hasControl, mutateTimerState, planId, remoteState.selectedSubject]);
 
   const pause = useCallback(() => {
     if (!hasControl) return;
