@@ -12,7 +12,6 @@ import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import {
   Target,
   Play,
-  Clock,
   BookOpen,
   Zap,
   ChevronRight,
@@ -76,6 +75,8 @@ export default function SimulationsPage() {
   const totalQuestions = accuracyData.reduce((a, b) => a + b.totalQuestions, 0);
   const totalCorrect = accuracyData.reduce((a, b) => a + b.correctAnswers, 0);
   const avgAccuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+  const trackedSubjects = accuracyData.filter((item) => item.totalQuestions > 0);
+  const criticalSubjects = accuracyData.filter((item) => item.totalQuestions >= 5 && item.accuracy < 50);
 
   const worstSubject = [...accuracyData].sort((a, b) => a.accuracy - b.accuracy)[0] || null;
 
@@ -104,18 +105,18 @@ export default function SimulationsPage() {
             <Target className="h-3.5 w-3.5" /> Centro de Simulação Avançada
           </p>
           <h1 className="font-brand text-am-h2 md:text-[42px] font-bold text-am-text-primary tracking-tight leading-[1.1]">
-            Simulados <br className="sm:hidden" /> de Alta Fidelidade
+            Provas & <br className="sm:hidden" /> Simulados
           </h1>
           <p className="text-am-body-sm text-am-text-secondary mt-4 max-w-xl leading-relaxed">
-            Diagnóstico profundo com questões ranqueadas para calibrar seu nível de prontidão
-            e identificar lacunas antes da prova oficial.
+            Treine com banco oficial, simulados personalizados e leitura de desempenho
+            para calibrar seu nível de prontidão antes da prova real.
           </p>
         </div>
 
         {/* Projected score card - Premium AI Feel */}
         {projectedScore && (
           <div className="hidden sm:flex flex-col items-end">
-            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-secondary mb-1">Pontuação Preditiva</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-secondary mb-1">Índice Estimado</span>
             <div className="flex items-baseline gap-1.5">
               <span className="font-brand text-4xl font-bold text-transparent bg-clip-text bg-am-brand-gradient tracking-tighter">
                 {projectedScore}
@@ -124,7 +125,7 @@ export default function SimulationsPage() {
             </div>
             <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-am-success/10 border border-am-success/20 mt-2">
               <Sparkles className="h-3 w-3 text-am-success" />
-              <span className="text-[10px] font-bold text-am-success uppercase tracking-wider">Ranking {percentile}</span>
+              <span className="text-[10px] font-bold text-am-success uppercase tracking-wider">Faixa estimada {percentile}</span>
             </div>
           </div>
         )}
@@ -163,6 +164,9 @@ export default function SimulationsPage() {
                   </button>
                 ))}
               </div>
+              <Button asChild variant="outline">
+                <Link href="/provas">Banco Oficial</Link>
+              </Button>
               {canUseCustomSimulations ? (
                 <Button asChild variant="primary">
                   <Link href="/provas/criar-simulado">Configurar e Iniciar</Link>
@@ -207,26 +211,23 @@ export default function SimulationsPage() {
             value={`${avgAccuracy}%`}
             icon={Target}
             loading={loading}
-            delta={{ value: accuracyData.length, label: 'matérias avl.', trend: 'up' }}
           />
           <KPICard
-            title="Tempo Médio"
-            value="—"
-            icon={Clock}
-            loading={loading}
-            delta={{ value: 0, label: 'Não Disp.', trend: 'down' }}
-          />
-          <KPICard
-            title="Volume (Mês)"
-            value={totalQuestions.toLocaleString()}
+            title="Matérias Mapeadas"
+            value={trackedSubjects.length}
             icon={BookOpen}
             loading={loading}
-            delta={{ value: totalCorrect, label: 'acertos', trend: 'up' }}
           />
           <KPICard
-            title="Provas Executadas"
-            value="—"
+            title="Questões no Mês"
+            value={totalQuestions.toLocaleString()}
             icon={BarChart2}
+            loading={loading}
+          />
+          <KPICard
+            title="Alertas Críticos"
+            value={criticalSubjects.length}
+            icon={AlertTriangle}
             loading={loading}
           />
         </motion.div>
@@ -351,8 +352,8 @@ export default function SimulationsPage() {
               </div>
             </ChartCard>
 
-            {/* History Snapshot */}
-            <ChartCard title="Recentes" subtitle="Performance em baterias" loading={loading}>
+            {/* Volume Snapshot */}
+            <ChartCard title="Disciplinas Mais Exercitadas" subtitle="Volume recente por matéria" loading={loading}>
               <div className="space-y-3">
                 {accuracyData.slice(0, 5).map((s, i) => {
                   const c = getAccuracyColor(s.accuracy);

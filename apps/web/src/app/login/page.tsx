@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { getBetaAccessMessage, isBetaAccessRestricted } from '@/lib/beta-access';
 import {
   Zap,
   Mail,
@@ -28,6 +29,8 @@ export default function LoginPage() {
   const [displayName, setDisplayName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const betaRestricted = isBetaAccessRestricted();
+  const betaMessage = getBetaAccessMessage(email);
 
   useEffect(() => {
     if (user && !loading) {
@@ -263,6 +266,30 @@ export default function LoginPage() {
                 border: '1px solid rgba(218, 202, 255, 0.25)',
               }}
             >
+              {betaRestricted && (
+                <div
+                  className="mb-6 rounded-2xl px-4 py-3.5"
+                  style={{
+                    background: 'rgba(245, 151, 104, 0.08)',
+                    border: '1px solid rgba(245, 151, 104, 0.22)',
+                  }}
+                >
+                  <p
+                    className="text-[10px] font-medium uppercase"
+                    style={{
+                      fontFamily: 'var(--ds-font-display)',
+                      letterSpacing: 'var(--ds-letter-kicker)',
+                      color: 'var(--ds-color-accent-yellow)',
+                    }}
+                  >
+                    Beta por convite
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--ds-color-text-muted)' }}>
+                    {betaMessage}
+                  </p>
+                </div>
+              )}
+
               {/* Inner top shine */}
               <div
                 className="absolute top-0 left-0 w-full h-px"
@@ -490,6 +517,11 @@ export default function LoginPage() {
                     {mode === 'login' ? 'Criar sua conta gratuita' : 'Faça seu login'}
                   </button>
                 </p>
+                {betaRestricted && (
+                  <p className="mt-2 text-[11px]" style={{ color: 'var(--ds-color-text-muted)' }}>
+                    Cadastro e login por email funcionam normalmente para emails já liberados no beta.
+                  </p>
+                )}
               </div>
 
             </div>

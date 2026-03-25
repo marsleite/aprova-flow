@@ -22,6 +22,7 @@ import { StudyPlanEdital, PlanVsActual, StudyInsight, StudySession, StudyConsist
 import PlanManager from '@/components/PlanManager';
 import PlanCoverageProjectionCard from '@/components/PlanCoverageProjectionCard';
 import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
+import StudyJourneyCard from '@/components/StudyJourneyCard';
 import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { canCreateMorePlans } from '@/lib/entitlements';
@@ -191,8 +192,12 @@ export default function PlannerPage() {
       </div>
 
       <div className="px-8 space-y-6">
+        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+          <StudyJourneyCard current="planner" />
+        </motion.div>
+
         {!canUseMultiEdital && (
-          <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+          <motion.div custom={0.2} variants={fadeUp} initial="hidden" animate="show">
             <EntitlementUpgradeCard
               title="Multi-edital fica no Premium"
               description="O Pro resolve muito bem o caso single-plan. O Premium entra quando voce quer coordenar varios editais, reequilibrar foco e ganhar uma camada adaptativa mais forte."

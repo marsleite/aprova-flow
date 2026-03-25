@@ -18,24 +18,8 @@ import {
   User,
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase/config';
+import { getBetaAccessMessage, isBetaAllowed } from '@/lib/beta-access';
 import { UserProfile } from '@/types';
-
-// ============================================================
-// BETA ALLOWLIST — Remover este bloco ao lançar publicamente
-// ============================================================
-const BETA_ALLOWLIST: string[] = [
-  'marsleite@gmail.com',
-  'graceandradeleite@gmail.com',
-  'lidiaseixas@gmail.com',
-  'marcelop3251@gmail.com',
-];
-
-const isBetaAllowed = (email: string | null): boolean => {
-  if (BETA_ALLOWLIST.length === 0) return true; // lista vazia = aberto para todos
-  return !!email && BETA_ALLOWLIST.includes(email.toLowerCase());
-};
-// ============================================================
-
 export function useAuth() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,7 +33,7 @@ export function useAuth() {
         if (!isBetaAllowed(firebaseUser.email)) {
           await signOut(auth);
           setUser(null);
-          setError('Acesso restrito ao período de beta. Em breve abriremos para todos!');
+          setError(getBetaAccessMessage(firebaseUser.email));
           setLoading(false);
           return;
         }
@@ -84,6 +68,10 @@ export function useAuth() {
   const signInWithEmail = async (email: string, password: string) => {
     try {
       setError(null);
+      if (!isBetaAllowed(email)) {
+        setError(getBetaAccessMessage(email));
+        return;
+      }
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
       const code = (err as { code?: string }).code;
@@ -103,6 +91,10 @@ export function useAuth() {
   const signUpWithEmail = async (email: string, password: string, displayName: string) => {
     try {
       setError(null);
+      if (!isBetaAllowed(email)) {
+        setError(getBetaAccessMessage(email));
+        return;
+      }
       const result = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(result.user, { displayName });
       // Força refresh do user state com displayName

@@ -63,6 +63,8 @@ export default function HistoryPage() {
           <SessionHistory
             userId={user.uid}
             planId={filterPlanId}
+            planSubjects={activePlanObj?.subjects}
+            activePlanName={activePlanObj?.name || null}
             onSessionsChanged={() => setRefreshKey((k) => k + 1)}
           />
         </motion.div>

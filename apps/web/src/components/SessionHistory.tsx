@@ -22,8 +22,9 @@ import {
   Pencil,
   Save,
   Loader2,
+  BookOpen,
 } from 'lucide-react';
-import { StudySession, SessionFilters, DEFAULT_SUBJECTS } from '@/types';
+import { StudySession, SessionFilters, DEFAULT_SUBJECTS, SubjectWeight } from '@/types';
 import { useUserCustomSubjects } from '@/hooks/useUserCustomSubjects';
 import { mergeSubjectOptions } from '@/lib/firebase/subjects';
 import { getFilteredSessions, saveSession, updateSession } from '@/lib/firebase/sessions';
@@ -32,6 +33,8 @@ import { formatDuration, formatRelativeDate, exportSessionsCSV, getTodayISO } fr
 interface SessionHistoryProps {
   userId: string;
   planId?: string;
+  planSubjects?: SubjectWeight[];
+  activePlanName?: string | null;
   onSessionsChanged?: () => Promise<void> | void;
 }
 
@@ -136,7 +139,13 @@ function parseFormToSession(form: SessionFormState): {
   };
 }
 
-export default function SessionHistory({ userId, planId, onSessionsChanged }: SessionHistoryProps) {
+export default function SessionHistory({
+  userId,
+  planId,
+  planSubjects,
+  activePlanName,
+  onSessionsChanged,
+}: SessionHistoryProps) {
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -158,12 +167,35 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
   const [saving, setSaving] = useState(false);
   const { customSubjects, persistSubject } = useUserCustomSubjects(userId);
 
-  const subjectOptions = useMemo(
+  const planSubjectNames = useMemo(
     () =>
-      mergeSubjectOptions(DEFAULT_SUBJECTS, customSubjects, sessions.map((s) => s.subject)).sort((a, b) =>
-        a.localeCompare(b, 'pt-BR')
+      mergeSubjectOptions(
+        planSubjects?.map((item) => item.subject).filter(Boolean) ?? []
       ),
-    [customSubjects, sessions]
+    [planSubjects]
+  );
+
+  const subjectOptions = useMemo(
+    () => {
+      const prioritized = planSubjectNames;
+      const fallbackBase = prioritized.length > 0 ? [] : [...DEFAULT_SUBJECTS];
+      const remaining = mergeSubjectOptions(
+        fallbackBase,
+        customSubjects,
+        sessions.map((s) => s.subject)
+      )
+        .filter(
+          (item) =>
+            !prioritized.some(
+              (subjectName) =>
+                subjectName.localeCompare(item, 'pt-BR', { sensitivity: 'accent' }) === 0
+            )
+        )
+        .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+      return [...prioritized, ...remaining];
+    },
+    [customSubjects, planSubjectNames, sessions]
   );
 
   const durationPreview = useMemo(() => {
@@ -213,7 +245,9 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
 
   const openCreateForm = () => {
     setEditingSession(null);
-    setFormState(createDefaultForm(subject || subjectOptions[0] || DEFAULT_SUBJECTS[0]));
+    setFormState(
+      createDefaultForm(subject || planSubjectNames[0] || subjectOptions[0] || DEFAULT_SUBJECTS[0])
+    );
     setSaveError('');
     setFormOpen(true);
   };
@@ -357,7 +391,7 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
             exit={{ height: 0, opacity: 0 }}
             className="mb-4 overflow-hidden"
           >
-            <div className="grid gap-3 rounded-xl border border-am-border-default bg-am-surface-subtle p-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-3 rounded-xl border border-am-border-default bg-am-surface-subtle p-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label className="mb-1 block text-xs text-gray-400">Matéria</label>
                 <select
@@ -415,6 +449,15 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
                 <X className="h-3 w-3" />
                 Limpar filtros
               </button>
+            )}
+
+            {activePlanName && planSubjectNames.length > 0 && (
+              <div className="mt-3 flex items-start gap-2 rounded-xl border border-am-brand-primary/20 bg-am-brand-primary/5 px-3 py-2 text-xs text-am-brand-primary">
+                <BookOpen className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>
+                  Filtro e formulário priorizam as matérias do plano ativo <strong>{activePlanName}</strong>.
+                </span>
+              </div>
             )}
           </motion.div>
         )}
@@ -558,6 +601,12 @@ export default function SessionHistory({ userId, planId, onSessionsChanged }: Se
               </div>
 
               <form onSubmit={handleSubmitSession} className="space-y-3">
+                {activePlanName && planSubjectNames.length > 0 && (
+                  <div className="rounded-lg border border-am-brand-primary/20 bg-am-brand-primary/5 px-3 py-2 text-xs text-am-brand-primary">
+                    As sugestões abaixo seguem primeiro as matérias do plano ativo <strong>{activePlanName}</strong>.
+                  </div>
+                )}
+
                 <div>
                   <label className="mb-1 block text-xs text-am-text-secondary">Matéria</label>
                   <input

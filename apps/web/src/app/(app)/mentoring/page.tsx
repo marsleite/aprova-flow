@@ -114,16 +114,16 @@ export default function MentoringPage() {
             <Sparkles className="h-3 w-3" /> Mentoria Analítica
           </p>
           <h1 className="font-brand text-am-h2 md:text-[42px] font-bold text-am-text-primary tracking-tight leading-[1.1]">
-            Inteligência & <br className="sm:hidden" /> Decisão Implacável
+            Mentoria & <br className="sm:hidden" /> Diagnóstico
           </h1>
           <p className="text-am-body-sm text-am-text-secondary mt-4 max-w-xl leading-relaxed">
-            Diagnósticos gerados por inteligência artificial para otimização da curva de aprendizado, 
-            identificando lacunas de retenção e sugerindo ajustes dinâmicos de carga.
+            Leituras orientadas da sua semana para identificar lacunas de retenção,
+            redistribuir esforço e decidir o próximo ajuste com mais clareza.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button onClick={() => setChatOpen(true)} variant="primary" className="rounded-full px-6 shadow-am-md">
-            <MessageCircle className="h-4 w-4 mr-2" /> Copilot
+            <MessageCircle className="h-4 w-4 mr-2" /> Abrir Mentor IA
           </Button>
         </div>
       </div>
@@ -152,7 +152,7 @@ export default function MentoringPage() {
             delta={consistency ? { value: consistency.bestStreak, trend: 'up', label: 'recorde' } : undefined}
           />
           <KPICard
-            title="Focus Score"
+            title="Precisão Média"
             value={avgAccuracy !== null ? `${avgAccuracy}%` : '—'}
             icon={Target}
             loading={loading}
@@ -278,7 +278,7 @@ export default function MentoringPage() {
               <div className="flex-1 relative z-10">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="h-5 w-5 text-am-ai-default" />
-                  <h3 className="font-brand text-am-h5 font-bold text-am-text-primary">Pergunte ao Copilot</h3>
+                  <h3 className="font-brand text-am-h5 font-bold text-am-text-primary">Pergunte ao Mentor IA</h3>
                 </div>
                 <p className="text-am-body-sm text-am-text-secondary">A IA do AprovaMind compilou essa base de dados gerencial. Abra o chat contextual para simular cenários de tempo real ou pedir novos roteiros de distribuição.</p>
               </div>
@@ -296,7 +296,7 @@ export default function MentoringPage() {
                 ) : (
                   <Button asChild variant="outline" className="w-full">
                     <Link href="/settings">
-                      <MessageCircle className="h-4 w-4 mr-2" /> Destravar Copilot
+                      <MessageCircle className="h-4 w-4 mr-2" /> Destravar Mentor IA
                     </Link>
                   </Button>
                 )}

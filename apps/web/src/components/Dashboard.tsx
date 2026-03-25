@@ -712,6 +712,8 @@ export default function Dashboard() {
           <SessionHistory
             userId={user.uid}
             planId={filterPlanId}
+            planSubjects={activePlanObj?.subjects}
+            activePlanName={activePlanObj?.name || null}
             onSessionsChanged={handleSessionsChanged}
           />
         </motion.div>

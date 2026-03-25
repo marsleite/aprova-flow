@@ -132,6 +132,10 @@ export default function CadernoErrosPage() {
     const [diagnosis, setDiagnosis] = useState<DiagnosisResult | null>(null);
     const [diagnosisLoading, setDiagnosisLoading] = useState(false);
     const [diagnosisError, setDiagnosisError] = useState<string | null>(null);
+    const [diagnosisSample, setDiagnosisSample] = useState<{
+        analyzedCount: number;
+        availableCount: number;
+    } | null>(null);
 
     const loadErrors = useCallback(async () => {
         if (!user) return;
@@ -201,6 +205,10 @@ export default function CadernoErrosPage() {
             if (!token) throw new Error('Sessão expirada.');
 
             const errorsToAnalyze = filteredErrors.slice(0, 15);
+            setDiagnosisSample({
+                analyzedCount: errorsToAnalyze.length,
+                availableCount: filteredErrors.length,
+            });
 
             const errorPayload = errorsToAnalyze.map(e => ({
                 materia: e.question.materia,
@@ -285,7 +293,6 @@ export default function CadernoErrosPage() {
                                 value={totalErrors.toString()}
                                 icon={AlertTriangle}
                                 loading={false}
-                                delta={{ value: showMastered ? 1 : 0, label: showMastered ? 'c/ dominadas' : 'apenas pendentes', trend: 'down' }}
                             />
                             <KPICard
                                 title="Matérias Afetadas"
@@ -298,7 +305,6 @@ export default function CadernoErrosPage() {
                                 value={worstMateria}
                                 icon={TrendingDown}
                                 loading={false}
-                                delta={{ value: sortedGroups[0]?.[1]?.length || 0, label: 'erros', trend: 'down' }}
                             />
                         </div>
 
@@ -345,6 +351,17 @@ export default function CadernoErrosPage() {
                             </Button>
                         </div>
 
+                        {canUseGapAnalyzer && filteredErrors.length > 0 && (
+                            <p className="text-am-caption text-am-text-secondary">
+                                O Gap Analyzer usa uma amostra de até 15 erros filtrados por leitura para manter o diagnóstico rápido e comparável.
+                                {diagnosisSample && (
+                                    <span className="ml-1">
+                                        Última análise: {diagnosisSample.analyzedCount} de {diagnosisSample.availableCount} erros filtrados.
+                                    </span>
+                                )}
+                            </p>
+                        )}
+
                         {!canUseGapAnalyzer && (
                             <EntitlementUpgradeCard
                                 title="O Gap Analyzer Copilot fica no Premium"
@@ -372,6 +389,15 @@ export default function CadernoErrosPage() {
                                         Gap Analyzer Copilot
                                     </h3>
                                 </div>
+
+                                {diagnosisSample && (
+                                    <div className="relative z-10 rounded-am-md border border-am-ai-border/30 bg-am-surface-subtle px-4 py-3">
+                                        <p className="text-am-caption text-am-text-secondary">
+                                            Base desta leitura: <span className="font-medium text-am-text-primary">{diagnosisSample.analyzedCount}</span> de{' '}
+                                            <span className="font-medium text-am-text-primary">{diagnosisSample.availableCount}</span> erros filtrados.
+                                        </p>
+                                    </div>
+                                )}
 
                                 {/* Summary */}
                                 {diagnosis.summary && (
