@@ -1,7 +1,16 @@
 'use client';
 
-import { FeatureCode, type FeatureCode as FeatureCodeValue } from '@aprovamind/domain';
-import type { UserEntitlementsSnapshotV1 } from '@aprovamind/contracts';
+import {
+  DEFAULT_ENTITLEMENT_POLICY,
+  EntitlementMode,
+  FeatureCode,
+  PlanCode,
+  type FeatureCode as FeatureCodeValue,
+} from '@aprovamind/domain';
+import type {
+  EntitlementSnapshotValueV1,
+  UserEntitlementsSnapshotV1,
+} from '@aprovamind/contracts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   getUserEntitlements as getLegacyUserEntitlements,
@@ -27,6 +36,42 @@ const DEFAULT_ENTITLEMENTS: UserEntitlements = {
   planTier: 'free',
   capabilities: getCapabilitiesForTier('free'),
 };
+
+const ADMIN_ACTIVE_PLANS_LIMIT = 9999;
+
+function buildAdminFeatureSnapshot(
+  featureCode: FeatureCodeValue
+): EntitlementSnapshotValueV1 {
+  if (featureCode === FeatureCode.ActivePlans) {
+    return {
+      mode: 'quota',
+      enabled: true,
+      limit: ADMIN_ACTIVE_PLANS_LIMIT,
+      used: 0,
+      remaining: ADMIN_ACTIVE_PLANS_LIMIT,
+      period: 'month',
+    };
+  }
+
+  const premiumRule =
+    DEFAULT_ENTITLEMENT_POLICY.plans[PlanCode.Premium].features[featureCode];
+
+  if (premiumRule.mode === EntitlementMode.Quota) {
+    return {
+      mode: 'quota',
+      enabled: true,
+      limit: premiumRule.limit,
+      used: 0,
+      remaining: premiumRule.limit,
+      period: premiumRule.period,
+    };
+  }
+
+  return {
+    mode: 'boolean',
+    enabled: true,
+  };
+}
 
 type EntitlementSource = 'api' | 'legacy' | 'default';
 
@@ -117,13 +162,19 @@ export function useEntitlements(userId?: string | null, email?: string | null) {
   const helpers = useMemo(
     () => ({
       hasFeature(featureCode: FeatureCodeValue) {
+        if (entitlements.planTier === 'admin') {
+          return true;
+        }
         return isEntitlementFeatureEnabled(snapshot, featureCode);
       },
       getFeature(featureCode: FeatureCodeValue) {
+        if (entitlements.planTier === 'admin') {
+          return buildAdminFeatureSnapshot(featureCode);
+        }
         return getEntitlementFeature(snapshot, featureCode);
       },
     }),
-    [snapshot]
+    [snapshot, entitlements.planTier]
   );
 
   return {

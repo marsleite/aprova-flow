@@ -30,6 +30,13 @@ export function resolveEntitlementsApiBaseUrl(): string {
     return configured.replace(/\/$/, '');
   }
 
+  if (typeof window === 'undefined') {
+    if (process.env.NODE_ENV !== 'production') {
+      return 'http://127.0.0.1:3001';
+    }
+    return '';
+  }
+
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {

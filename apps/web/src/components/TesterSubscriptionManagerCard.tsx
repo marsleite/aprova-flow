@@ -29,6 +29,42 @@ function stringifyUsage(usage?: FeatureUsageMap): string {
   return JSON.stringify(usage, null, 2);
 }
 
+function formatAdminPanelError(err: unknown, fallback: string): string {
+  if (!(err instanceof Error)) {
+    return fallback;
+  }
+
+  const [code, rawStatus, rawMessage] = err.message.split(':');
+  const status = Number(rawStatus);
+  const message = rawMessage?.trim();
+
+  if (code === 'missing_id_token') {
+    return 'Sua sessão expirou. Faça login novamente e tente de novo.';
+  }
+
+  if (code === 'billing_admin_unavailable') {
+    return 'A API de billing não respondeu. No ambiente local, confirme se a API está rodando na porta 3001.';
+  }
+
+  if (code === 'missing_api_base_url') {
+    return 'A URL da API de billing não está configurada neste ambiente.';
+  }
+
+  if (status === 401) {
+    return 'Sua sessão admin não foi reconhecida. Faça login novamente e tente de novo.';
+  }
+
+  if (status === 403) {
+    return 'Sua conta não tem permissão para operar testers neste ambiente.';
+  }
+
+  if (status === 404) {
+    return message || 'Não encontramos esse usuário no Firebase deste ambiente.';
+  }
+
+  return message || err.message || fallback;
+}
+
 export default function TesterSubscriptionManagerCard() {
   const [userIdentifier, setUserIdentifier] = useState('');
   const [plan, setPlan] = useState<PlanCode>(PlanCode.Free);
@@ -70,11 +106,7 @@ export default function TesterSubscriptionManagerCard() {
       setUsageJson(stringifyUsage(payload.subscription.usage));
       setResetUsage(false);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? `Nao foi possivel carregar a assinatura (${err.message}).`
-          : 'Nao foi possivel carregar a assinatura.'
-      );
+      setError(formatAdminPanelError(err, 'Não foi possível carregar a assinatura.'));
     } finally {
       setLoading(false);
     }
@@ -117,11 +149,7 @@ export default function TesterSubscriptionManagerCard() {
       setResetUsage(false);
       setSuccess('Assinatura do tester atualizada com sucesso.');
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? `Nao foi possivel salvar a assinatura (${err.message}).`
-          : 'Nao foi possivel salvar a assinatura.'
-      );
+      setError(formatAdminPanelError(err, 'Não foi possível salvar a assinatura.'));
     } finally {
       setLoading(false);
     }

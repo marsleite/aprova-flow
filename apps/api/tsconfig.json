@@ -18,5 +18,5 @@
       "@aprovamind/infrastructure-firebase/*": ["../../packages/infrastructure-firebase/src/*"]
     }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "api/**/*.ts"]
 }

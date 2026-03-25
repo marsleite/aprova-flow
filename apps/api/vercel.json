@@ -1,0 +1,22 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/api/root" },
+    { "source": "/health", "destination": "/api/health" },
+    {
+      "source": "/entitlements/me",
+      "destination": "/api/entitlements/me"
+    },
+    {
+      "source": "/entitlements/scenarios",
+      "destination": "/api/entitlements/scenarios"
+    },
+    {
+      "source": "/billing/subscription/me",
+      "destination": "/api/billing/subscription/me"
+    },
+    {
+      "source": "/billing/admin/subscription",
+      "destination": "/api/billing/admin/subscription"
+    }
+  ]
+}

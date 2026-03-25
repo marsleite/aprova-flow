@@ -42,6 +42,7 @@ const USAGE_PERIOD_CANDIDATE_FIELDS = [
 const BOOTSTRAP_ADMIN_EMAILS = [
   'marsleite@gmail.com',
   'graceandradeleite@gmail.com',
+  'marcelop3251@gmail.com',
 ];
 
 export interface AdminIdentity {
