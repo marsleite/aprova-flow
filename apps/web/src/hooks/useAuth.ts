@@ -27,6 +27,7 @@ const BETA_ALLOWLIST: string[] = [
   'marsleite@gmail.com',
   'graceandradeleite@gmail.com',
   'lidiaseixas@gmail.com',
+  'marcelop3251@gmail.com',
 ];
 
 const isBetaAllowed = (email: string | null): boolean => {

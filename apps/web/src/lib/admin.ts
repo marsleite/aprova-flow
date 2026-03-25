@@ -6,6 +6,7 @@ interface AdminIdentity {
 const BOOTSTRAP_ADMIN_EMAILS = [
   'marsleite@gmail.com',
   'graceandradeleite@gmail.com',
+  'marcelop3251@gmail.com',
 ];
 
 function parseCsv(value: string | undefined): string[] {
