@@ -189,7 +189,7 @@ export default function LoginPage() {
           {[
             { icon: Brain, label: 'IA Diagnóstica', desc: 'Mentoria personalizada diária', accent: 'var(--ds-color-brand)' },
             { icon: Target, label: 'Multi-Edital', desc: 'Foque no peso de cada matéria', accent: 'var(--ds-color-accent-lime)' },
-            { icon: TrendingUp, label: 'Simulados Avançados', desc: 'Gráficos de evolução', accent: 'var(--ds-color-accent-cyan)' },
+            { icon: TrendingUp, label: 'Provas & Simulados', desc: 'Treino e evolução', accent: 'var(--ds-color-accent-cyan)' },
             { icon: BarChart2, label: 'Performance Real', desc: 'Identifique seus gaps', accent: 'var(--ds-color-accent-yellow)' },
           ].map(({ icon: Icon, label, desc, accent }) => (
             <div

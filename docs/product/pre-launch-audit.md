@@ -2,6 +2,22 @@
 
 Data: 2026-03-20
 
+## Atualização da Branch
+
+Status em 2026-03-25 nesta branch:
+- onboarding beta ajustado para refletir melhor o acesso por convite
+- entrada de `Provas & Simulados` harmonizada com a navegação principal
+- tela de simulados com métricas reais no lugar de placeholders frágeis
+- jornada `Planner -> Dashboard -> Engine` explicitada com contexto visual
+- histórico manual alinhado ao plano ativo
+- Gap Analyzer com transparência de amostra
+- passada editorial inicial em labels e naming das telas centrais
+
+Pontos que ainda ficam como pós-merge ou próxima rodada:
+- reduzir dependência operacional de allowlist hardcoded
+- revisar performance do caderno de erros com volume maior
+- fazer uma passada editorial mais ampla em superfícies secundárias
+
 Contexto:
 - beta já em produção com testers reais
 - objetivo agora é reduzir fricção, aumentar clareza e fortalecer confiança antes de ampliar o beta e aproximar o lançamento

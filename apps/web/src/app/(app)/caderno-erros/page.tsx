@@ -364,7 +364,7 @@ export default function CadernoErrosPage() {
 
                         {!canUseGapAnalyzer && (
                             <EntitlementUpgradeCard
-                                title="O Gap Analyzer Copilot fica no Premium"
+                                title="O Gap Analyzer IA fica no Premium"
                                 description="O caderno de erros continua disponivel, mas a leitura estrategica dos padroes de erro, gaps ocultos e flashcards gerados por IA faz parte da camada premium."
                                 highlight="Diagnostico profundo, gaps por dimensao e transformacao do erro em recuperacao estrategica."
                                 recommendedPlan="premium"
@@ -386,7 +386,7 @@ export default function CadernoErrosPage() {
                                 <div className="flex items-center justify-between relative z-10">
                                     <h3 className="flex items-center gap-2 font-brand text-am-h5 font-bold text-am-text-primary">
                                         <Sparkles className="h-5 w-5 text-am-ai-default" />
-                                        Gap Analyzer Copilot
+                                        Gap Analyzer IA
                                     </h3>
                                 </div>
 
