@@ -15,6 +15,7 @@ import StudyTimer from '@/components/StudyTimer';
 import QuestionTrackerCard from '@/components/QuestionTrackerCard';
 import DailyAiPlannerCard from '@/components/DailyAiPlannerCard';
 import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
+import StudyJourneyCard from '@/components/StudyJourneyCard';
 import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import { createStudyPlan, setActivePlan } from '@/lib/firebase/plans';
 import { getStudyCapacityHoursForDate } from '@/lib/plans/studyCapacity';
@@ -101,7 +102,7 @@ export default function EnginePage() {
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-12 pb-6 px-8">
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <Badge variant="outline" className="border-white/10 text-am-text-secondary bg-transparent"><Zap className="h-3 w-3 mr-1" /> Precision Engine</Badge>
+            <Badge variant="outline" className="border-white/10 text-am-text-secondary bg-transparent"><Zap className="h-3 w-3 mr-1" /> Motor do Dia</Badge>
           </div>
           <h1 className="font-brand text-[40px] font-light text-am-text-primary tracking-tighter leading-none">
             Sessão
@@ -123,12 +124,17 @@ export default function EnginePage() {
       </div>
 
       <div className="px-8">
-        <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+        <div className="space-y-6">
+          <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+            <StudyJourneyCard current="engine" />
+          </motion.div>
+
+          <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
           {/* Left: Timer + Question Tracker */}
           <div className="space-y-6">
             {/* Context bar */}
             {activePlanObj && (
-              <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show"
+              <motion.div custom={0.5} variants={fadeUp} initial="hidden" animate="show"
                 className="flex items-center gap-4 rounded-am-md border border-am-border-default bg-am-surface px-5 py-3 shadow-am-sm"
               >
                 <div className="flex items-center gap-3 flex-1">
@@ -213,7 +219,7 @@ export default function EnginePage() {
           {/* Right: Execution Log + Stats */}
           <div className="space-y-6">
             {showPlanEngineSnapshot && (
-              <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+              <motion.div custom={0.5} variants={fadeUp} initial="hidden" animate="show">
                 {canSeeFullEngine ? (
                   <PlanEngineSnapshotCard planId={activePlanId || null} />
                 ) : (
@@ -261,7 +267,7 @@ export default function EnginePage() {
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-am-ai-glow/20 blur-[50px] rounded-full pointer-events-none"></div>
 
               <div className="mb-3 flex items-center gap-2 relative z-10">
-                <Badge variant="ai" className="shadow-[0_0_8px_var(--color-am-ai-glow)]"><Sparkles className="h-3 w-3 mr-1" /> Copilot Focus</Badge>
+                <Badge variant="ai" className="shadow-[0_0_8px_var(--color-am-ai-glow)]"><Sparkles className="h-3 w-3 mr-1" /> Mentor IA</Badge>
               </div>
 
               {loading ? (
@@ -368,6 +374,7 @@ export default function EnginePage() {
               </motion.div>
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>

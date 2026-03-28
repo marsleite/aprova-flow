@@ -28,6 +28,7 @@ import SmartScheduleCard from '@/components/SmartScheduleCard';
 import InsightsPanel from '@/components/InsightsPanel';
 import PlanSelector from '@/components/PlanSelector';
 import PortfolioOverviewCard from '@/components/engine/PortfolioOverviewCard';
+import StudyJourneyCard from '@/components/StudyJourneyCard';
 import {
   TrendingUp,
   Zap,
@@ -151,10 +152,14 @@ export default function DashboardPage() {
       </div>
 
       <div className="px-6 space-y-6">
+        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+          <StudyJourneyCard current="dashboard" />
+        </motion.div>
+
         {/* ── KPIs ── */}
-        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div custom={0.5} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <KPICard
-            title="Focus Score"
+            title="Precisão Média"
             value={avgAccuracy !== null ? `${avgAccuracy}%` : '—'}
             icon={Target}
             loading={loading}
@@ -166,7 +171,7 @@ export default function DashboardPage() {
             loading={loading}
           />
           <KPICard
-            title="Study Velocity"
+            title="Ritmo de Estudo"
             value={consistency ? `${consistency.currentStreak}d` : '—'}
             icon={Flame}
             loading={loading}
@@ -174,11 +179,11 @@ export default function DashboardPage() {
           />
         </motion.div>
 
-        {/* ── Charts: Study Pulse (wide) + Radar & Heatmap (stacked right) ── */}
+        {/* ── Charts: Pulso da Semana (wide) + Radar & Heatmap (stacked right) ── */}
         <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Study Pulse — 3/5 width */}
+          {/* Pulso da Semana — 3/5 width */}
           <div className="lg:col-span-3 flex flex-col">
-            <ChartCard title="Study Pulse" subtitle="Evolução de horas líquidas na semana atual" loading={loading} height={680}>
+            <ChartCard title="Pulso da Semana" subtitle="Evolução de horas líquidas na semana atual" loading={loading} height={680}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
@@ -223,9 +228,13 @@ export default function DashboardPage() {
               <SmartScheduleCard
                 userId={user.uid}
                 userName={user.displayName?.split(' ')[0] || 'Estudante'}
+                activePlanName={activePlan?.name || null}
                 consistency={consistency}
                 planWeights={activePlan?.subjects || []}
                 accuracyData={accuracyData}
+                examDate={activePlan?.examDate || null}
+                materialWorkloadHours={activePlan?.materialWorkloadHours || null}
+                studyCapacityHours={activePlan?.studyCapacityHours || null}
               />
             </div>
             <div className="h-full">

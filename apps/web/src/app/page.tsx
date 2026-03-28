@@ -105,7 +105,7 @@ export default function LandingPage() {
                       </div>
                       <div className="relative flex items-center justify-center lg:justify-start gap-3 rounded-lg px-2 py-2 text-[13px] font-medium text-am-text-secondary transition-all duration-150">
                         <Brain className="h-[18px] w-[18px] flex-shrink-0 text-am-text-tertiary" strokeWidth={1.5} />
-                        <span className="hidden lg:inline truncate">Mentoria IA</span>
+                        <span className="hidden lg:inline truncate">Mentoria</span>
                       </div>
                       <div className="relative flex items-center justify-center lg:justify-start gap-3 rounded-lg px-2 py-2 text-[13px] font-medium text-am-text-secondary transition-all duration-150">
                         <BarChart2 className="h-[18px] w-[18px] flex-shrink-0 text-am-text-tertiary" strokeWidth={1.5} />
@@ -152,7 +152,7 @@ export default function LandingPage() {
                       <div className="grid grid-cols-3 gap-4 sm:gap-6">
                         <div className="rounded-am-xl bg-am-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] border border-am-border-default/50 ring-1 ring-white/5 p-4 sm:p-6 flex flex-col justify-between min-h-[140px] sm:min-h-[160px]">
                           <div className="flex justify-between items-center mb-4">
-                            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-am-text-secondary font-mono">Focus Score</span>
+                            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-am-text-secondary font-mono">Precisão Média</span>
                             <Target className="h-4 w-4 text-am-text-tertiary opacity-50" />
                           </div>
                           <div className="mt-auto flex flex-col gap-1">
@@ -170,7 +170,7 @@ export default function LandingPage() {
                         </div>
                         <div className="rounded-am-xl bg-am-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] border border-am-border-default/50 ring-1 ring-white/5 p-4 sm:p-6 flex flex-col justify-between min-h-[140px] sm:min-h-[160px]">
                           <div className="flex justify-between items-center mb-4">
-                            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-am-text-secondary font-mono">Study Velocity</span>
+                            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-am-text-secondary font-mono">Ritmo de Estudo</span>
                             <Flame className="h-4 w-4 text-am-text-tertiary opacity-50" />
                           </div>
                           <div className="mt-auto flex flex-col gap-1">
@@ -185,7 +185,7 @@ export default function LandingPage() {
                         <div className="col-span-3 rounded-am-xl bg-am-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] border border-am-border-default/50 ring-1 ring-white/5 p-4 sm:p-6 flex flex-col">
                           <div className="mb-6 flex justify-between items-start">
                             <div>
-                              <h3 className="font-brand text-sm sm:text-base font-bold text-am-text-primary tracking-tight">Study Pulse</h3>
+                              <h3 className="font-brand text-sm sm:text-base font-bold text-am-text-primary tracking-tight">Pulso da Semana</h3>
                               <p className="text-[10px] sm:text-xs text-am-text-tertiary mt-0.5 font-mono uppercase tracking-widest">Evolução de horas líquidas</p>
                             </div>
                           </div>
@@ -224,7 +224,7 @@ export default function LandingPage() {
                             </div>
                           </div>
                           <div className="mt-auto h-9 w-full rounded-am-md bg-am-ai-default flex items-center justify-center text-[11px] font-bold text-white shadow-[0_4px_12px_var(--color-am-ai-glow)] cursor-pointer hover:bg-am-brand-secondary transition-colors">
-                            Aceitar Recomenção
+                            Aceitar Recomendação
                           </div>
                         </div>
                       </div>
@@ -306,9 +306,9 @@ export default function LandingPage() {
                 <div className="relative rounded-2xl border border-am-ai-border/40 bg-am-surface p-8 shadow-2xl backdrop-blur-md">
                   {/* Component preview */}
                   <div className="space-y-4">
-                    <div className="h-4 pl-1 text-[10px] font-mono text-am-text-tertiary uppercase tracking-wider">AprovaMind Copilot</div>
+                    <div className="h-4 pl-1 text-[10px] font-mono text-am-text-tertiary uppercase tracking-wider">Mentor IA</div>
                     <div className="p-4 rounded-lg bg-am-surface-subtle border border-white/[0.05]">
-                      <p className="text-am-text-secondary text-sm">&quot;Notei que o seu Focus Score em <strong className="text-white">Direito Administrativo</strong> abaixou para 64% na última bateria. Como esta disciplina representa 18% do Edital 1, sugiro que a próxima sessão de 50min foque na re-leitura de Licitações.&quot;</p>
+                      <p className="text-am-text-secondary text-sm">&quot;Notei que a sua precisão média em <strong className="text-white">Direito Administrativo</strong> caiu para 64% na última bateria. Como esta disciplina representa 18% do Edital 1, sugiro que a próxima sessão de 50min foque na re-leitura de Licitações.&quot;</p>
                     </div>
                     <Button variant="premium" className="w-full mt-2">Acionar Modo Resgate</Button>
                   </div>

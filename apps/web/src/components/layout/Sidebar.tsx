@@ -49,14 +49,14 @@ const NAV_ITEMS = [
   {
     href: '/mentoring',
     icon: Brain,
-    label: 'Mentoria IA',
-    description: 'Diagnóstico semanal',
+    label: 'Mentoria',
+    description: 'Diagnóstico e apoio',
   },
   {
     href: '/simulations',
     icon: Target,
-    label: 'Simulados',
-    description: 'Centro de provas',
+    label: 'Provas & Simulados',
+    description: 'Oficiais e personalizados',
   },
   {
     href: '/caderno-erros',

@@ -4,8 +4,12 @@ import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Sparkles, Loader2, RefreshCw, AlertTriangle, CalendarDays, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components';
-import { StudyConsistency, SubjectWeight, SubjectAccuracy } from '@/types';
+import { StudyConsistency, SubjectWeight, SubjectAccuracy, StudyCapacityHours } from '@/types';
 import { auth } from '@/lib/firebase/config';
+import {
+    buildAvailableStudyDays,
+    getStudyPlanCoverageProjection,
+} from '@/lib/plans/studyCapacity';
 
 interface SmartScheduleItem {
     day: string;
@@ -16,17 +20,25 @@ interface SmartScheduleItem {
 interface SmartScheduleCardProps {
     userId: string;
     userName: string;
+    activePlanName?: string | null;
     consistency: StudyConsistency | null;
     planWeights: SubjectWeight[];
     accuracyData?: SubjectAccuracy[];
+    examDate?: string | null;
+    materialWorkloadHours?: number | null;
+    studyCapacityHours?: StudyCapacityHours | null;
 }
 
 export default function SmartScheduleCard({
     userId,
     userName,
+    activePlanName,
     consistency,
     planWeights,
     accuracyData,
+    examDate,
+    materialWorkloadHours,
+    studyCapacityHours,
 }: SmartScheduleCardProps) {
     const [loading, setLoading] = useState(false);
     const [schedule, setSchedule] = useState<SmartScheduleItem[] | null>(null);
@@ -34,6 +46,16 @@ export default function SmartScheduleCard({
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
     const hasContext = (planWeights?.length || 0) > 0 && (consistency?.weeklyGoalHours || 0) > 0;
+    const availableSchedule = buildAvailableStudyDays(
+        studyCapacityHours,
+        consistency?.weeklyGoalHours ?? 10
+    );
+    const projection = getStudyPlanCoverageProjection({
+        weeklyGoalHours: consistency?.weeklyGoalHours ?? 10,
+        examDate: examDate ?? null,
+        materialWorkloadHours: materialWorkloadHours ?? null,
+        studyCapacityHours: studyCapacityHours ?? null,
+    });
 
     const generateSchedule = useCallback(async () => {
         if (loading) return;
@@ -47,13 +69,20 @@ export default function SmartScheduleCard({
                 return;
             }
 
-            // Prepara dados de entrada baseados no contexto atual do aluno
-            const availableDays = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
-
             const payload = {
                 userName,
+                activePlanName: activePlanName || null,
                 weeklyGoalHours: consistency?.weeklyGoalHours ?? 10,
-                availableDays,
+                examDate: examDate ?? null,
+                materialWorkloadHours: materialWorkloadHours ?? null,
+                requiredWeeklyHours: projection.requiredWeeklyHours,
+                coverageStatus: projection.status,
+                availableSchedule: availableSchedule.length > 0
+                    ? availableSchedule.map((day) => ({
+                        day: day.fullLabel,
+                        availableHours: day.availableHours,
+                    }))
+                    : [{ day: 'Segunda', availableHours: consistency?.weeklyGoalHours ?? 10 }],
                 planSubjects: planWeights.map(p => {
                     const accData = accuracyData?.find(a => a.subject === p.subject);
                     return {
@@ -93,7 +122,7 @@ export default function SmartScheduleCard({
         } finally {
             setLoading(false);
         }
-    }, [loading, userName, consistency, planWeights, accuracyData]);
+    }, [loading, userName, activePlanName, consistency, examDate, materialWorkloadHours, projection.requiredWeeklyHours, projection.status, availableSchedule, planWeights, accuracyData]);
 
     return (
         <motion.div
@@ -135,6 +164,22 @@ export default function SmartScheduleCard({
                 <div className="rounded-xl border border-am-warning/30 bg-am-warning/10 px-4 py-3 text-sm text-am-warning flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 flex-shrink-0" />
                     <p>Defina as matérias e seus pesos no &apos;Edital&apos; para a IA poder calcular sua rota ideal.</p>
+                </div>
+            )}
+
+            {hasContext && (
+                <div className="mb-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-am-border-default bg-am-surface-subtle px-3 py-1 text-[11px] text-am-text-secondary">
+                        Capacidade da semana: <strong className="text-am-text-primary">{projection.weeklyCapacityHours.toFixed(1)}h</strong>
+                    </span>
+                    <span className="rounded-full border border-am-border-default bg-am-surface-subtle px-3 py-1 text-[11px] text-am-text-secondary">
+                        Meta do plano: <strong className="text-am-text-primary">{(consistency?.weeklyGoalHours ?? 10).toFixed(1)}h</strong>
+                    </span>
+                    {projection.requiredWeeklyHours != null && (
+                        <span className="rounded-full border border-am-border-default bg-am-surface-subtle px-3 py-1 text-[11px] text-am-text-secondary">
+                            Ritmo necessário: <strong className="text-am-text-primary">{projection.requiredWeeklyHours.toFixed(1)}h</strong>
+                        </span>
+                    )}
                 </div>
             )}
 

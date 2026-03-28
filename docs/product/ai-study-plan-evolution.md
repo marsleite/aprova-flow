@@ -265,6 +265,24 @@ Entrou uma primeira versão prática dessa evolução, sem ainda depender do PDF
 - aproxima a IA da rotina real do aluno
 - prepara o terreno para estimar carga de material depois
 
+## Fase 2 em andamento: coerencia semanal
+
+Próximo corte natural:
+
+- fazer o `SmartSchedule` respeitar a disponibilidade real por dia
+- parar de distribuir a semana como se todos os dias fossem igualmente livres
+- levar para o prompt semanal:
+  - nome do plano ativo
+  - data da prova
+  - carga do material
+  - ritmo semanal necessário
+  - status de cobertura
+
+Objetivo:
+
+- alinhar a camada macro com a camada tática semanal
+- reduzir a chance de a IA sugerir 4h em um dia onde o aluno declarou 1h
+
 ## O que ainda fica para depois
 
 - estimativa automática de carga a partir do PDF do material do aluno

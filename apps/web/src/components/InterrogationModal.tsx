@@ -163,7 +163,7 @@ export default function InterrogationModal({
                                 <div className="flex justify-center">
                                     <div className="relative flex h-28 w-28 flex-col items-center justify-center rounded-full border-4 border-indigo-500/20 bg-indigo-500/10 shadow-[0_0_30px_rgba(99,102,241,0.2)]">
                                         <span className="text-3xl font-extrabold text-am-text-primary tracking-tighter">{result.score}</span>
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-300 mt-1">Focus Score</span>
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-300 mt-1">Score de Retenção</span>
                                     </div>
                                 </div>
 

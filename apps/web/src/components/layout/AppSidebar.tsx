@@ -56,8 +56,8 @@ function SidebarItem({ href, icon: Icon, label, isActive, isAi }: SidebarItemPro
 const NAV_ITEMS = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/engine', icon: Timer, label: 'Sessão de Estudo' },
-    { href: '/planner', icon: CalendarDays, label: 'Planner Diário' },
-    { href: '/mentoring', icon: Sparkles, label: 'Mentoria Semanal', isAi: true },
+    { href: '/planner', icon: CalendarDays, label: 'Planner' },
+    { href: '/mentoring', icon: Sparkles, label: 'Mentoria', isAi: true },
 ];
 
 const SECONDARY_ITEMS = [
