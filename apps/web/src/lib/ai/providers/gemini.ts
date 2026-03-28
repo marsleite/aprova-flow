@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { buildUsage, estimateTokensFromText, extractGeminiUsage } from '@/lib/ai/metrics';
 import { AiPdfRequest, AiResponse, AiTextRequest } from '@/lib/ai/types';
+import { PromptHeuristics } from '@aprovamind/domain';
 
 function getGeminiApiKey(): string {
   const key = process.env.GEMINI_API_KEY;
@@ -15,6 +16,27 @@ export async function generateGeminiText(params: {
   request: AiTextRequest;
 }): Promise<AiResponse> {
   const startedAt = Date.now();
+
+  // 1. Heurísticas Locais (Custos Zero)
+  if (typeof params.request.prompt === 'string') {
+    const heuristic = PromptHeuristics.evaluateChatPrompt(params.request.prompt);
+    if (!heuristic.requiresLLM) {
+      const tokens = estimateTokensFromText(heuristic.localResponse);
+      return {
+        text: heuristic.localResponse,
+        provider: 'local-heuristic',
+        model: 'heuristic-engine-v1',
+        latencyMs: Date.now() - startedAt,
+        usage: buildUsage({
+          model: 'heuristic',
+          inputTokens: 0,
+          outputTokens: tokens,
+        }),
+        raw: { heuristicConfidence: heuristic.confidence },
+      };
+    }
+  }
+
   const ai = new GoogleGenAI({ apiKey: getGeminiApiKey() });
 
   const response = await ai.models.generateContent({

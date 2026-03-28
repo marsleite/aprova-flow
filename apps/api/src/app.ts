@@ -3,6 +3,8 @@ import {
   registerEntitlementRoutes,
   type EntitlementRouteOptions,
 } from './modules/entitlements/routes';
+import { firebaseAuth } from './plugins/firebase-auth';
+import { featureGuard } from './plugins/feature-guard';
 
 export interface CreateAppOptions {
   entitlements?: EntitlementRouteOptions;
@@ -46,6 +48,9 @@ export function createApp(options: CreateAppOptions = {}) {
       status: 'ok',
     };
   });
+
+  app.register(firebaseAuth, { allowSandbox: true });
+  app.register(featureGuard);
 
   void registerEntitlementRoutes(app, options.entitlements);
 

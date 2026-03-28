@@ -126,25 +126,18 @@ function buildAdminDataSource(
 async function resolveAuthenticatedIdentity(
   request: FastifyRequest,
   reply: FastifyReply,
-  options: EntitlementRouteOptions
+  options: EntitlementRouteOptions,
+  app: FastifyInstance
 ): Promise<{ idToken: string; identity: VerifiedFirebaseUser } | null> {
-  const token = extractBearerToken(request.headers.authorization);
-  if (!token) {
-    buildUnauthorizedReply(reply);
-    return null;
-  }
-
-  const verifyIdToken = options.verifyIdToken ?? verifyFirebaseIdToken;
-  const identity = await verifyIdToken(token);
-
-  if (!identity) {
-    buildUnauthorizedReply(reply);
-    return null;
-  }
+  await app.authenticate(request, reply);
+  if (reply.sent) return null;
+  
+  const authHeader = request.headers.authorization || '';
+  const idToken = authHeader.replace(/^Bearer\s/i, '').trim();
 
   return {
-    idToken: token,
-    identity,
+    idToken,
+    identity: request.user as VerifiedFirebaseUser,
   };
 }
 
@@ -381,7 +374,8 @@ export async function registerEntitlementRoutes(
       const authenticated = await resolveAuthenticatedIdentity(
         request,
         reply,
-        options
+        options,
+        app
       );
       if (!authenticated) return reply;
 
@@ -435,7 +429,8 @@ export async function registerEntitlementRoutes(
       const authenticated = await resolveAuthenticatedIdentity(
         request,
         reply,
-        options
+        options,
+        app
       );
       if (!authenticated) return reply;
 
@@ -471,7 +466,8 @@ export async function registerEntitlementRoutes(
       const authenticated = await resolveAuthenticatedIdentity(
         request,
         reply,
-        options
+        options,
+        app
       );
       if (!authenticated) return reply;
       if (!ensureAdminIdentity(reply, authenticated.identity, options)) return reply;
@@ -522,7 +518,8 @@ export async function registerEntitlementRoutes(
       const authenticated = await resolveAuthenticatedIdentity(
         request,
         reply,
-        options
+        options,
+        app
       );
       if (!authenticated) return reply;
       if (!ensureAdminIdentity(reply, authenticated.identity, options)) return reply;
