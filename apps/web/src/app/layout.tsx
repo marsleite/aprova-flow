@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AprovaMind | Kinetic Study System",
+  title: "AprovaMind | Alta Performance",
   description: "Plataforma inteligente de estudo para concursos baseada no conceito Flux.",
   icons: {
     icon: "/favicon.ico",
