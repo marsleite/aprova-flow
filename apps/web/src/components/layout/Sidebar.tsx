@@ -163,7 +163,7 @@ export default function Sidebar({
               className="mt-1 text-[9px] uppercase tracking-[0.2em]"
               style={{ fontFamily: 'var(--ds-font-display, inherit)', color: 'var(--am-text-tertiary)' }}
             >
-              Strategic Engine
+              Alta Performance
             </p>
           </div>
           {/* Mobile close */}
@@ -405,7 +405,7 @@ export default function Sidebar({
               className="text-[10px] font-mono uppercase tracking-wide"
               style={{ color: 'var(--am-text-tertiary)' }}
             >
-              AI Engine · Online
+              Motor de IA · Online
             </span>
           </div>
         </div>

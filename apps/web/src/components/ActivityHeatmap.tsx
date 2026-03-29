@@ -172,7 +172,7 @@ export default function ActivityHeatmap({ userId, planId, refreshKey = 0 }: Acti
             <CalendarDays className="h-3.5 w-3.5 text-primary" />
           </div>
           <div>
-            <p className="text-sm font-bold text-foreground">Activity</p>
+            <p className="text-sm font-bold text-foreground">Atividade</p>
             <p className="text-[10px] text-muted-foreground">
               {totalDays} {totalDays === 1 ? 'dia' : 'dias'} · últimas {DISPLAY_WEEKS} semanas
             </p>

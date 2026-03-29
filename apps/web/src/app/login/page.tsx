@@ -125,7 +125,7 @@ export default function LoginPage() {
               className="text-[10px] uppercase tracking-widest mt-0.5"
               style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--muted-foreground)', letterSpacing: 'var(--ds-letter-kicker)' }}
             >
-              Strategic Engine
+              Alta Performance
             </p>
           </div>
         </div>
@@ -388,7 +388,7 @@ export default function LoginPage() {
                       color: 'var(--muted-foreground)',
                     }}
                   >
-                    Work Email
+                    Seu Email
                   </label>
                   <input
                     type="email"
