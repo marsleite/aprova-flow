@@ -207,7 +207,7 @@ export default function DashboardPage() {
 
           {/* Radar + Heatmap stacked — 2/5 width */}
           <div className="lg:col-span-2 flex flex-col gap-6">
-            <ChartCard title="Mapa de Foco" subtitle="Distribuição atual por matéria" loading={loading} height={320}>
+            <ChartCard title="Mapa de Foco" subtitle="Distribuição atual por matéria" loading={loading} height={480}>
               <SubjectRadarChart data={subjectData} loading={loading} />
             </ChartCard>
             <ChartCard title="Consistência" subtitle="Mapa de calor de horas diárias">

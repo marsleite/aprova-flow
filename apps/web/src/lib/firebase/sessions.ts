@@ -53,8 +53,14 @@ function formatDateLocal(date: Date): string {
  * Salva uma nova sessão de estudo no Firestore
  */
 export async function saveSession(session: Omit<StudySession, 'id' | 'createdAt'>): Promise<string> {
+  // Firestore throws an error when any field is explicitly `undefined`.
+  // We sanitize the session payload to strip completely undefined properties.
+  const cleanSession = Object.fromEntries(
+    Object.entries(session).filter(([_, v]) => v !== undefined)
+  );
+
   const docRef = await addDoc(collection(db, SESSIONS_COLLECTION), {
-    ...session,
+    ...cleanSession,
     source: session.source || 'timer',
     wasEdited: session.wasEdited || false,
     createdAt: new Date().toISOString(),
@@ -74,8 +80,13 @@ export async function updateSession(
   updates: UpdatableSessionFields
 ): Promise<void> {
   const ref = doc(db, SESSIONS_COLLECTION, sessionId);
+  
+  const cleanUpdates = Object.fromEntries(
+    Object.entries(updates).filter(([_, v]) => v !== undefined)
+  );
+
   await updateDoc(ref, {
-    ...updates,
+    ...cleanUpdates,
     wasEdited: true,
     updatedAt: new Date().toISOString(),
   });

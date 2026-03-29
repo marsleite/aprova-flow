@@ -37,14 +37,31 @@ function abbreviateSubject(subject: string): string {
     'Direito Administrativo': 'D. Admin.',
     'Direito Civil': 'D. Civil',
     'Direito Penal': 'D. Penal',
-    'Direito Processual Civil': 'Proc. Civil',
-    'Direito Processual Penal': 'Proc. Penal',
-    'Direito do Trabalho': 'D. Trabalho',
-    'Direito Tributário': 'D. Tribut.',
-    'Raciocínio Lógico': 'Rac. Lógico',
-    'Legislação Específica': 'Leg. Espec.',
+    'Direito Processual Civil': 'P. Civil',
+    'Direito Processual Penal': 'P. Penal',
+    'Direito do Trabalho': 'D. Trab.',
+    'Direito Processual do Trabalho': 'P. Trab.',
+    'Direito Tributário': 'D. Trib.',
+    'Direito Previdenciário': 'D. Prev.',
+    'Direito Empresarial': 'D. Emp.',
+    'Direito Ambiental': 'D. Amb.',
+    'Direito Internacional': 'D. Int.',
+    'Direito Eleitoral': 'D. Eleit.',
+    'Direito Financeiro': 'D. Fin.',
+    'Direito da Criança e do Adolescente': 'ECA',
+    'Direito do Consumidor': 'D. Cons.',
+    'Direitos Humanos': 'DH',
+    'Raciocínio Lógico': 'RLM',
+    'Legislação Específica': 'Leg. Esp.',
+    'Língua Portuguesa': 'Port.',
+    'Informática': 'Info.',
+    'Filosofia': 'Filo.',
+    'Sociologia': 'Socio.',
+    'Medicina Legal': 'Med. Leg.',
+    'Criminologia': 'Crim.',
+    'Ética': 'Ética',
   };
-  return abbreviations[subject] || subject;
+  return abbreviations[subject] || (subject.length > 20 ? subject.substring(0, 18) + '...' : subject);
 }
 
 function formatHours(hours: number): string {
@@ -70,20 +87,23 @@ function getSubjectColor(subject: string): string {
 // Sub-components
 // ============================
 
-function CustomTick(props: Record<string, unknown>) {
-  const { payload, x, y, textAnchor } = props as {
-    payload: { value: string };
-    x: number;
-    y: number;
-    textAnchor: string;
-  };
+function CustomTick(props: any) {
+  const { payload, x, y, textAnchor, index, total } = props;
+  
+  // Dynamic font size based on subject count
+  let fontSize = 11;
+  if (total > 20) fontSize = 8.5;
+  else if (total > 15) fontSize = 9.5;
+  else if (total > 10) fontSize = 10.5;
+
   return (
     <text
       x={x}
       y={y}
       textAnchor={textAnchor as 'start' | 'middle' | 'end'}
       fill="var(--color-am-text-secondary)"
-      fontSize={11}
+      fontSize={fontSize}
+      fontWeight={500}
       dy={4}
     >
       {payload.value}
@@ -204,11 +224,11 @@ function FullRadarChart({ data }: { data: SubjectHours[] }) {
   return (
     <div className="flex-1 min-h-[160px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
+        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
           <PolarGrid stroke="var(--color-am-border-default)" strokeDasharray="3 3" />
           <PolarAngleAxis
             dataKey="abbr"
-            tick={(props: Record<string, unknown>) => <CustomTick {...props} />}
+            tick={(props: any) => <CustomTick {...props} total={chartData.length} />}
           />
           <PolarRadiusAxis
             tick={{ fill: 'var(--color-am-text-tertiary)', fontSize: 10 }}
