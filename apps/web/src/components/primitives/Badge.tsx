@@ -7,47 +7,45 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
     ({ className = '', variant = 'default', size = 'sm', ...props }, ref) => {
-        let classes = 'inline-flex items-center font-semibold rounded-full transition-colors ';
+        let classes = 'inline-flex items-center font-medium transition-colors border ';
 
-        // Size — DS chip sizing
+        // Size 
         switch (size) {
             case 'sm':
-                classes += 'px-2.5 py-0.5 text-[10px] uppercase tracking-wider gap-1.5 ';
+                classes += 'px-3 py-1 text-[10px] uppercase tracking-widest gap-1.5 ';
                 break;
             case 'md':
-                classes += 'px-3 py-1 text-am-caption gap-2 ';
+                classes += 'px-4 py-1.5 text-xs uppercase tracking-widest gap-2 ';
                 break;
         }
 
-        // Variant — Sitetrip accent colors
+        // Variant 
         switch (variant) {
             case 'default':
-                classes += 'bg-am-surface-subtle text-am-text-secondary border border-am-border-default ';
+                classes += 'bg-transparent text-muted-foreground border-border ';
                 break;
             case 'primary':
-                classes += 'bg-am-brand-primary/10 text-am-brand-primary border border-am-brand-primary/20 ';
+                classes += 'bg-primary/10 text-primary border-primary/20 ';
                 break;
             case 'success':
-                classes += 'bg-am-success/10 text-am-success border border-am-success/20 ';
+                classes += 'bg-green-500/10 text-green-500 border-green-500/20 ';
                 break;
             case 'warning':
-                classes += 'bg-am-warning/10 text-am-warning border border-am-warning/20 ';
+                classes += 'bg-orange-500/10 text-orange-500 border-orange-500/20 ';
                 break;
             case 'error':
-                classes += 'bg-am-error/10 text-am-error border border-am-error/20 ';
+                classes += 'bg-red-500/10 text-red-500 border-red-500/20 ';
                 break;
             case 'ai':
-                classes += 'bg-am-ai-subtle text-am-brand-secondary border border-am-ai-border ';
+                classes += 'bg-primary/5 text-primary border-primary/20 ';
                 break;
             case 'outline':
-                classes += 'bg-transparent text-am-text-secondary border border-am-border-strong ';
+                classes += 'bg-transparent text-muted-foreground border-border ';
                 break;
         }
 
-        classes += className;
-
         return (
-            <div ref={ref} className={classes} {...props} />
+            <div ref={ref} className={`${classes} ${className}`} {...props} />
         );
     }
 );

@@ -275,20 +275,20 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2, ease: 'easeOut' }}
-      className="relative overflow-hidden rounded-2xl border border-am-border-default bg-am-surface-elevated p-6"
+      className="relative overflow-hidden rounded-2xl border border-border bg-card p-6"
       style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.4)' }}
     >
       {/* Decorative glow */}
-      <div className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-blue-600/8 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-violet-600/6 blur-3xl" />
+      <div className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-primary/8 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-primary/6 blur-3xl" />
 
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         {/* Left: text content */}
         <div className="max-w-lg flex-1">
-          <h3 className="text-xl font-bold text-am-text-primary">
+          <h3 className="text-xl font-bold text-foreground">
             Nunca perca um ciclo de revisão.
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-am-text-secondary">
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             Sincronize o Plano Diário IA direto no seu Google Calendar,
             ou crie eventos manualmente. Tudo aparece na sua agenda.
           </p>
@@ -296,9 +296,9 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
           {/* Status indicators */}
           <div className="mt-4 flex flex-wrap items-center gap-3">
             {loadingPlan ? (
-              <div className="flex items-center gap-2 rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-2.5">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-am-text-secondary" />
-                <span className="text-xs text-am-text-secondary">Carregando plano do dia...</span>
+              <div className="flex items-center gap-2 rounded-xl border border-border bg-muted px-4 py-2.5">
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Carregando plano do dia...</span>
               </div>
             ) : hasPlan ? (
               <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-2.5">
@@ -307,7 +307,7 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
                   <p className="text-xs font-semibold text-emerald-300">
                     Plano Diário IA disponível
                   </p>
-                  <p className="text-[10px] text-am-text-secondary">
+                  <p className="text-[10px] text-muted-foreground">
                     {todayPlan!.blocks.length} blocos · {todayPlan!.estimatedTotalMinutes} min total
                   </p>
                 </div>
@@ -317,15 +317,15 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
                 <AlertTriangle className="h-4 w-4 text-amber-400" />
                 <div>
                   <p className="text-xs font-semibold text-amber-300">Sem plano para hoje</p>
-                  <p className="text-[10px] text-am-text-secondary">Gere um plano diário IA na página Engine</p>
+                  <p className="text-[10px] text-muted-foreground">Gere um plano diário IA na página Engine</p>
                 </div>
               </div>
             )}
 
             {hasExistingEvents && (
-              <div className="flex items-center gap-2 rounded-xl border border-[#3150AA]/20 bg-blue-500/[0.06] px-3 py-2">
-                <Clock className="h-3.5 w-3.5 text-[#F59768]" />
-                <span className="text-xs text-[#F59768]/80">
+              <div className="flex items-center gap-2 rounded-xl border border-[var(--primary)]/20 bg-primary/[0.06] px-3 py-2">
+                <Clock className="h-3.5 w-3.5 text-[var(--primary)]" />
+                <span className="text-xs text-[var(--primary)]/80">
                   {todayEvents.length} evento{todayEvents.length !== 1 ? 's' : ''} hoje
                 </span>
               </div>
@@ -337,7 +337,7 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
             <button
               onClick={handleSync}
               disabled={!hasPlan || syncing}
-              className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-am-text-primary transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-foreground transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', boxShadow: '0 4px 16px rgba(59,130,246,0.25)' }}
             >
               {syncing ? (
@@ -358,7 +358,7 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
 
             <button
               onClick={() => { setShowRules(!showRules); setShowCreateForm(false); }}
-              className="flex items-center gap-2 rounded-xl border border-am-border-strong bg-am-surface-subtle px-3 py-2.5 text-xs font-medium text-am-text-secondary transition-colors hover:bg-am-surface-subtle hover:text-slate-200"
+              className="flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-slate-200"
             >
               <Settings className="h-3.5 w-3.5" />
               Regras de Sync
@@ -413,7 +413,7 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
               />
             ))}
           </div>
-          <p className="mt-2 text-center text-[9px] text-am-text-tertiary">Calendário interno</p>
+          <p className="mt-2 text-center text-[9px] text-muted-foreground">Calendário interno</p>
         </div>
       </div>
 
@@ -424,11 +424,11 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-5 overflow-hidden rounded-xl border border-am-border-default bg-am-surface-subtle"
+            className="mt-5 overflow-hidden rounded-xl border border-border bg-muted"
           >
-            <div className="flex items-center justify-between border-b border-am-border-default px-4 py-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-am-text-secondary">Novo Evento</p>
-              <button onClick={() => setShowCreateForm(false)} className="text-am-text-secondary hover:text-am-text-secondary">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Novo Evento</p>
+              <button onClick={() => setShowCreateForm(false)} className="text-muted-foreground hover:text-muted-foreground">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -436,14 +436,14 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
               {/* Row 1: Subject + Title */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-am-text-secondary">Matéria *</label>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Matéria *</label>
                   <input
                     type="text"
                     list="subject-suggestions"
                     value={formSubject}
                     onChange={(e) => setFormSubject(e.target.value)}
                     placeholder="Selecionar ou digitar matéria..."
-                    className="w-full rounded-lg border border-am-border-strong bg-am-surface-elevated px-3 py-2 text-sm text-am-text-primary outline-none placeholder:text-am-text-secondary focus:border-blue-500"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
                   />
                   <datalist id="subject-suggestions">
                     {subjects.map((s) => (
@@ -452,13 +452,13 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
                   </datalist>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-am-text-secondary">Título (opcional)</label>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Título (opcional)</label>
                   <input
                     type="text"
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
                     placeholder="Descrição do evento"
-                    className="w-full rounded-lg border border-am-border-strong bg-am-surface-elevated px-3 py-2 text-sm text-am-text-primary outline-none placeholder:text-am-text-secondary focus:border-blue-500"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
                   />
                 </div>
               </div>
@@ -466,32 +466,32 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
               {/* Row 2: Date, Time, Duration */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-am-text-secondary">Data</label>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Data</label>
                   <input
                     type="date"
                     value={formDate}
                     onChange={(e) => setFormDate(e.target.value)}
-                    className="w-full rounded-lg border border-am-border-strong bg-am-surface-elevated px-3 py-2 text-sm text-am-text-primary outline-none focus:border-blue-500"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-am-text-secondary">Horário</label>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Horário</label>
                   <input
                     type="time"
                     value={formTime}
                     onChange={(e) => setFormTime(e.target.value)}
-                    className="w-full rounded-lg border border-am-border-strong bg-am-surface-elevated px-3 py-2 text-sm text-am-text-primary outline-none focus:border-blue-500"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-am-text-secondary">Duração (min)</label>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Duração (min)</label>
                   <input
                     type="number"
                     min={5}
                     max={480}
                     value={formDuration}
                     onChange={(e) => setFormDuration(Math.max(5, Math.min(480, Number(e.target.value))))}
-                    className="w-full rounded-lg border border-am-border-strong bg-am-surface-elevated px-3 py-2 text-sm text-am-text-primary outline-none focus:border-blue-500"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -499,7 +499,7 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
               {/* Row 3: Type + Priority */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-am-text-secondary">Tipo</label>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Tipo</label>
                   <div className="flex gap-1.5">
                     {EVENT_TYPES.map((t) => (
                       <button
@@ -507,8 +507,8 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
                         onClick={() => setFormType(t.value)}
                         className={`flex-1 rounded-lg border px-2 py-1.5 text-[11px] font-medium transition-colors ${
                           formType === t.value
-                            ? 'border-blue-500/40 bg-[#3150AA]/15 text-[#F59768]/80'
-                            : 'border-am-border-default bg-am-surface-subtle text-am-text-secondary hover:text-am-text-secondary'
+                            ? 'border-primary/40 bg-[var(--primary)]/15 text-[var(--primary)]/80'
+                            : 'border-border bg-muted text-muted-foreground hover:text-muted-foreground'
                         }`}
                       >
                         {t.label}
@@ -517,7 +517,7 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-am-text-secondary">Prioridade</label>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Prioridade</label>
                   <div className="flex gap-1.5">
                     {EVENT_PRIORITIES.map((p) => (
                       <button
@@ -528,7 +528,7 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
                             ? p.value === 'high' ? 'border-red-500/40 bg-red-500/15 text-red-300'
                               : p.value === 'medium' ? 'border-amber-500/40 bg-amber-500/15 text-amber-300'
                               : 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
-                            : 'border-am-border-default bg-am-surface-subtle text-am-text-secondary hover:text-am-text-secondary'
+                            : 'border-border bg-muted text-muted-foreground hover:text-muted-foreground'
                         }`}
                       >
                         {p.label}
@@ -542,14 +542,14 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
               <div className="flex items-center justify-end gap-2 pt-1">
                 <button
                   onClick={() => setShowCreateForm(false)}
-                  className="rounded-lg border border-am-border-default px-3 py-1.5 text-xs text-am-text-secondary hover:text-am-text-secondary transition-colors"
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-muted-foreground transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleCreateManual}
                   disabled={!formSubject.trim() || creating}
-                  className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-bold text-am-text-primary transition-all hover:brightness-110 disabled:opacity-40"
+                  className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-bold text-foreground transition-all hover:brightness-110 disabled:opacity-40"
                   style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
                 >
                   {creating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
@@ -568,11 +568,11 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-5 overflow-hidden rounded-xl border border-am-border-default bg-am-surface-subtle"
+            className="mt-5 overflow-hidden rounded-xl border border-border bg-muted"
           >
-            <div className="flex items-center justify-between border-b border-am-border-default px-4 py-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-am-text-secondary">Regras de Sincronização</p>
-              <button onClick={() => setShowRules(false)} className="text-am-text-secondary hover:text-am-text-secondary">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Regras de Sincronização</p>
+              <button onClick={() => setShowRules(false)} className="text-muted-foreground hover:text-muted-foreground">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -580,13 +580,13 @@ export default function CalendarSyncSection({ userId, subjects = [] }: CalendarS
               {syncRules.map((rule) => (
                 <div key={rule.id} className="flex items-center justify-between px-4 py-3">
                   <div>
-                    <p className="text-sm font-medium text-am-text-primary">{rule.label}</p>
-                    <p className="text-xs text-am-text-secondary">{rule.description}</p>
+                    <p className="text-sm font-medium text-foreground">{rule.label}</p>
+                    <p className="text-xs text-muted-foreground">{rule.description}</p>
                   </div>
                   <button
                     onClick={() => toggleRule(rule.id)}
                     className={`relative h-6 w-11 rounded-full transition-colors ${
-                      rule.enabled ? 'bg-blue-600' : 'bg-am-surface-subtle'
+                      rule.enabled ? 'bg-primary' : 'bg-muted'
                     }`}
                   >
                     <div

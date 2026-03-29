@@ -123,7 +123,7 @@ function SubjectAutocomplete({
   return (
     <div ref={containerRef} className="relative">
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
         <input
           ref={inputRef}
           type="text"
@@ -132,7 +132,7 @@ function SubjectAutocomplete({
           onFocus={() => setFocused(true)}
           onKeyDown={handleKeyDown}
           placeholder="Buscar ou digitar matéria..."
-          className="w-full rounded-xl border border-dashed border-am-border-default bg-transparent py-2.5 pl-9 pr-4 text-sm text-gray-300 outline-none transition-all placeholder:text-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
+          className="w-full rounded-xl border border-dashed border-border bg-transparent py-2.5 pl-9 pr-4 text-sm text-gray-300 outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/20"
         />
       </div>
 
@@ -143,13 +143,13 @@ function SubjectAutocomplete({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[180px] overflow-y-auto rounded-xl border border-am-border-default bg-gray-800 shadow-xl"
+            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[180px] overflow-y-auto rounded-xl border border-border bg-gray-800 shadow-xl"
           >
             {/* Opção de adicionar matéria personalizada */}
             {canAddCustom && (
               <button
                 onClick={() => handleAdd(trimmed)}
-                className="flex w-full items-center gap-2 border-b border-am-border-default px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
+                className="flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left text-sm text-[var(--primary)] transition hover:bg-[var(--primary)]/10"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Adicionar &quot;{trimmed}&quot;</span>
@@ -161,7 +161,7 @@ function SubjectAutocomplete({
               <button
                 key={s}
                 onClick={() => handleAdd(s)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-am-surface-subtle hover:text-am-text-primary"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-muted hover:text-foreground"
               >
                 <span className="flex-1">{s}</span>
               </button>
@@ -501,16 +501,16 @@ export default function PlanManager({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="mx-4 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-am-border-default bg-gray-900 shadow-2xl"
+            className="mx-4 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-am-border-default px-6 py-4">
-              <h2 className="text-lg font-semibold text-am-text-primary">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-lg font-semibold text-foreground">
                 {isEditing ? 'Editar Edital' : 'Novo Edital'}
               </h2>
               <button
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-gray-500 transition hover:bg-gray-800 hover:text-gray-300"
+                className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-gray-800 hover:text-gray-300"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -528,7 +528,7 @@ export default function PlanManager({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: PGE-SP, Magistratura Federal..."
-                  className="w-full rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                  className="w-full rounded-xl border border-border bg-gray-800/50 px-4 py-2.5 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
@@ -568,7 +568,7 @@ export default function PlanManager({
                     max={80}
                     value={weeklyGoalHours}
                     onChange={(e) => setWeeklyGoalHours(Math.max(1, Math.min(80, Number(e.target.value))))}
-                    className="w-full rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                    className="w-full rounded-xl border border-border bg-gray-800/50 px-4 py-2.5 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -582,7 +582,7 @@ export default function PlanManager({
                     type="date"
                     value={examDate}
                     onChange={(e) => setExamDate(e.target.value)}
-                    className="w-full rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                    className="w-full rounded-xl border border-border bg-gray-800/50 px-4 py-2.5 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -599,29 +599,29 @@ export default function PlanManager({
                     value={materialWorkloadHours}
                     onChange={(e) => setMaterialWorkloadHours(e.target.value)}
                     placeholder="Ex: 180"
-                    className="w-full rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary outline-none transition-all placeholder:text-gray-500 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                    className="w-full rounded-xl border border-border bg-gray-800/50 px-4 py-2.5 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
-                  <p className="mt-1 text-[11px] text-am-text-tertiary">
+                  <p className="mt-1 text-[11px] text-muted-foreground">
                     Preencha manualmente por enquanto. Depois podemos estimar pelo PDF do material.
                   </p>
                 </div>
               </div>
 
               {/* Disponibilidade semanal real */}
-              <div className="rounded-2xl border border-am-border-default bg-am-surface-subtle/60 p-4">
+              <div className="rounded-2xl border border-border bg-muted/60 p-4">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-medium text-am-text-primary">
+                    <p className="text-sm font-medium text-foreground">
                       Disponibilidade real por dia
                     </p>
-                    <p className="text-xs text-am-text-secondary">
+                    <p className="text-xs text-muted-foreground">
                       O plano macro e o plano diário passam a usar essa janela real, em vez de assumir 3h fixas.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={resetStudyCapacityFromGoal}
-                    className="rounded-full border border-am-border-default px-3 py-1.5 text-[11px] font-medium text-am-text-secondary transition hover:border-violet-500/40 hover:text-violet-300"
+                    className="rounded-full border border-border px-3 py-1.5 text-[11px] font-medium text-muted-foreground transition hover:border-primary/40 hover:text-primary"
                   >
                     Recalcular pela meta
                   </button>
@@ -631,9 +631,9 @@ export default function PlanManager({
                   {STUDY_CAPACITY_DAY_ORDER.map((day) => (
                     <label
                       key={day}
-                      className="rounded-xl border border-am-border-default bg-gray-800/40 px-3 py-2"
+                      className="rounded-xl border border-border bg-gray-800/40 px-3 py-2"
                     >
-                      <span className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-am-text-tertiary">
+                      <span className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         {STUDY_CAPACITY_DAY_LABELS[day]}
                       </span>
                       <div className="flex items-center gap-2">
@@ -644,20 +644,20 @@ export default function PlanManager({
                           step={0.5}
                           value={studyCapacityHours[day]}
                           onChange={(e) => updateStudyCapacityHour(day, e.target.value)}
-                          className="w-full rounded-lg border border-am-border-default bg-gray-900/70 px-2 py-1.5 text-center text-sm text-am-text-primary outline-none focus:border-violet-500"
+                          className="w-full rounded-lg border border-border bg-card/70 px-2 py-1.5 text-center text-sm text-foreground outline-none focus:border-primary"
                         />
-                        <span className="text-[11px] text-am-text-tertiary">h</span>
+                        <span className="text-[11px] text-muted-foreground">h</span>
                       </div>
                     </label>
                   ))}
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-full bg-am-surface px-3 py-1 text-am-text-secondary">
-                    Capacidade semanal: <strong className="text-am-text-primary">{weeklyCapacityHours.toFixed(1)}h</strong>
+                  <span className="rounded-full bg-card px-3 py-1 text-muted-foreground">
+                    Capacidade semanal: <strong className="text-foreground">{weeklyCapacityHours.toFixed(1)}h</strong>
                   </span>
-                  <span className="rounded-full bg-am-surface px-3 py-1 text-am-text-secondary">
-                    Meta atual: <strong className="text-am-text-primary">{weeklyGoalHours}h</strong>
+                  <span className="rounded-full bg-card px-3 py-1 text-muted-foreground">
+                    Meta atual: <strong className="text-foreground">{weeklyGoalHours}h</strong>
                   </span>
                   <span
                     className={`rounded-full px-3 py-1 ${
@@ -690,31 +690,31 @@ export default function PlanManager({
                     onClick={() => !importing && fileInputRef.current?.click()}
                     className={`relative cursor-pointer rounded-xl border-2 border-dashed px-4 py-5 text-center transition-all ${
                       dragging
-                        ? 'border-violet-400 bg-violet-500/15 shadow-[0_0_20px_rgba(139,92,246,0.15)]'
-                        : 'border-violet-500/30 bg-violet-500/5 hover:border-violet-500/50 hover:bg-[#3150AA]/10'
+                        ? 'border-primary bg-primary/20 shadow-lg shadow-primary/20'
+                        : 'border-primary/30 bg-primary/20 hover:border-primary/50 hover:bg-[var(--primary)]/10'
                     } ${importing ? 'cursor-wait opacity-60' : ''}`}
                   >
                     {importing ? (
                       <div className="flex flex-col items-center gap-2">
-                        <Loader2 className="h-6 w-6 animate-spin text-[#F59768]" />
-                        <span className="text-sm text-[#F59768]">
+                        <Loader2 className="h-6 w-6 animate-spin text-[var(--primary)]" />
+                        <span className="text-sm text-[var(--primary)]">
                           Analisando edital...
                         </span>
                       </div>
                     ) : dragging ? (
                       <div className="flex flex-col items-center gap-2">
-                        <FileUp className="h-6 w-6 text-violet-300" />
-                        <span className="text-sm font-medium text-violet-300">
+                        <FileUp className="h-6 w-6 text-primary" />
+                        <span className="text-sm font-medium text-primary">
                           Solte o PDF aqui
                         </span>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-1.5">
-                        <FileUp className="h-5 w-5 text-[#F59768]" />
-                        <span className="text-sm text-[#F59768]">
+                        <FileUp className="h-5 w-5 text-[var(--primary)]" />
+                        <span className="text-sm text-[var(--primary)]">
                           Importar Edital (PDF)
                         </span>
-                        <span className="text-[10px] text-gray-500">
+                        <span className="text-[10px] text-muted-foreground">
                           Arraste o PDF aqui ou clique para selecionar
                         </span>
                       </div>
@@ -749,19 +749,19 @@ export default function PlanManager({
               )}
 
               {!isEditing && !canUseEditalParse && (
-                <div className="rounded-xl border border-am-ai-border/30 bg-am-surface-subtle px-4 py-5 text-center">
-                  <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-am-brand-primary/10">
-                    <FileUp className="h-4 w-4 text-[#F59768]" />
+                <div className="rounded-xl border border-border/50/30 bg-muted px-4 py-5 text-center">
+                  <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <FileUp className="h-4 w-4 text-[var(--primary)]" />
                   </div>
-                  <p className="text-sm font-medium text-am-text-primary">
+                  <p className="text-sm font-medium text-foreground">
                     Importacao de edital bloqueada neste plano
                   </p>
-                  <p className="mt-1 text-xs text-am-text-secondary">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     O parse de edital por IA entra a partir do plano pago e ganha mais folga de uso nos niveis superiores.
                   </p>
                   <Link
                     href="/settings"
-                    className="mt-3 inline-flex items-center gap-2 rounded-full border border-am-ai-border/30 bg-am-surface px-4 py-2 text-xs font-medium text-am-brand-primary transition hover:bg-am-brand-primary/10"
+                    className="mt-3 inline-flex items-center gap-2 rounded-full border border-border/50/30 bg-card px-4 py-2 text-xs font-medium text-primary transition hover:bg-primary/10"
                   >
                     Ver planos
                   </Link>
@@ -777,7 +777,7 @@ export default function PlanManager({
                   {subjects.length > 0 && (
                     <button
                       onClick={distributeEvenly}
-                      className="text-xs text-[#F59768] transition hover:text-violet-300"
+                      className="text-xs text-[var(--primary)] transition hover:text-primary"
                     >
                       Distribuir igual
                     </button>
@@ -789,7 +789,7 @@ export default function PlanManager({
                   {subjects.map((sw) => (
                     <div
                       key={sw.subject}
-                      className="flex items-center gap-2 rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2"
+                      className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2"
                     >
                       <span className="flex-1 truncate text-sm text-gray-300">
                         {sw.subject}
@@ -800,9 +800,9 @@ export default function PlanManager({
                         max={100}
                         value={sw.weight}
                         onChange={(e) => updateWeight(sw.subject, Number(e.target.value))}
-                        className="w-16 rounded-lg border border-am-border-default bg-gray-800/60 px-2 py-1 text-center text-sm text-am-text-primary outline-none focus:border-violet-500"
+                        className="w-16 rounded-lg border border-border bg-gray-800/60 px-2 py-1 text-center text-sm text-foreground outline-none focus:border-primary"
                       />
-                      <span className="text-xs text-gray-500">%</span>
+                      <span className="text-xs text-muted-foreground">%</span>
                       <button
                         onClick={() => removeSubject(sw.subject)}
                         className="text-gray-600 transition hover:text-red-400"
@@ -834,7 +834,7 @@ export default function PlanManager({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between border-t border-am-border-default px-6 py-4">
+            <div className="flex items-center justify-between border-t border-border px-6 py-4">
               <div>
                 {isEditing && !editPlan?.isDefault && (
                   <>
@@ -844,13 +844,13 @@ export default function PlanManager({
                         <button
                           onClick={handleDelete}
                           disabled={deleting}
-                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-am-text-primary transition hover:bg-red-500 disabled:opacity-50"
+                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-foreground transition hover:bg-red-500 disabled:opacity-50"
                         >
                           {deleting ? 'Deletando...' : 'Sim, deletar'}
                         </button>
                         <button
                           onClick={() => setConfirmDelete(false)}
-                          className="text-xs text-gray-500 hover:text-gray-300"
+                          className="text-xs text-muted-foreground hover:text-gray-300"
                         >
                           Cancelar
                         </button>
@@ -858,7 +858,7 @@ export default function PlanManager({
                     ) : (
                       <button
                         onClick={() => setConfirmDelete(true)}
-                        className="flex items-center gap-1.5 text-xs text-gray-500 transition hover:text-red-400"
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground transition hover:text-red-400"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         Deletar edital
@@ -871,14 +871,14 @@ export default function PlanManager({
               <div className="flex items-center gap-3">
                 <button
                   onClick={onClose}
-                  className="rounded-xl border border-am-border-default px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-800"
+                  className="rounded-xl border border-border px-4 py-2 text-sm text-muted-foreground transition hover:bg-gray-800"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={!isValid || saving}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-5 py-2 text-sm font-medium text-am-text-primary shadow-lg shadow-[#3150AA]/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary)] px-5 py-2 text-sm font-medium text-foreground shadow-lg shadow-[var(--primary)]/15 transition-all hover:shadow-[var(--primary)]/25 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
                 >
                   {saving ? (
                     <>

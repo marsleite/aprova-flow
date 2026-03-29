@@ -124,8 +124,8 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
   // Obter cor baseada no tipo de evento
   const getEventColor = (event: CalendarEvent) => {
     switch (event.type) {
-      case 'study': return 'bg-violet-500';
-      case 'review': return 'bg-blue-500';
+      case 'study': return 'bg-primary';
+      case 'review': return 'bg-primary';
       case 'test': return 'bg-red-500';
       case 'break': return 'bg-green-500';
       default: return 'bg-gray-500';
@@ -143,7 +143,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
 
   if (loading || calendarLoading) {
     return (
-      <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6">
+      <div className="rounded-xl border border-border bg-card/50 p-6">
         <div className="animate-pulse">
           <div className="mb-6 h-8 w-48 rounded bg-gray-800"></div>
           <div className="grid grid-cols-7 gap-2 mb-4">
@@ -168,13 +168,13 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="rounded-xl border border-gray-800 bg-gray-900/50 p-6"
+      className="rounded-xl border border-border bg-card/50 p-6"
     >
       {/* Header do calendário */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <CalendarIcon className="h-5 w-5 text-[#F59768]" />
-          <h3 className="text-lg font-semibold text-am-text-primary">
+          <CalendarIcon className="h-5 w-5 text-[var(--primary)]" />
+          <h3 className="text-lg font-semibold text-foreground">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h3>
         </div>
@@ -184,12 +184,12 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
             onClick={() => navigateMonth('prev')}
             className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
           >
-            <ChevronLeft className="h-4 w-4 text-gray-400" />
+            <ChevronLeft className="h-4 w-4 text-muted-foreground" />
           </button>
           
           <button
             onClick={() => setCurrentDate(new Date())}
-            className="px-3 py-2 text-sm rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-gray-400"
+            className="px-3 py-2 text-sm rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-muted-foreground"
           >
             Hoje
           </button>
@@ -198,7 +198,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
             onClick={() => navigateMonth('next')}
             className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
           >
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
       </div>
@@ -206,7 +206,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
       {/* Dias da semana */}
       <div className="grid grid-cols-7 gap-2 mb-2">
         {weekDays.map(day => (
-          <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+          <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
             {day}
           </div>
         ))}
@@ -235,8 +235,8 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
               }}
               className={`
                 h-20 p-1 rounded-lg border cursor-pointer transition-all
-                ${today ? 'border-violet-500 bg-[#3150AA]/10' : 'border-gray-800 bg-gray-800/50'}
-                ${selected ? 'ring-2 ring-violet-400' : ''}
+                ${today ? 'border-primary bg-[var(--primary)]/10' : 'border-border bg-gray-800/50'}
+                ${selected ? 'ring-2 ring-primary' : ''}
                 ${hasEvents ? 'hover:bg-gray-700/50' : 'hover:bg-gray-800'}
               `}
             >
@@ -244,7 +244,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
                 {/* Número do dia */}
                 <div className={`
                   text-sm font-medium mb-1
-                  ${today ? 'text-[#F59768]' : 'text-gray-400'}
+                  ${today ? 'text-[var(--primary)]' : 'text-muted-foreground'}
                 `}>
                   {date.getDate()}
                 </div>
@@ -257,7 +257,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
                       className={`
                         text-xs px-1 py-0.5 rounded truncate
                         ${getEventColor(event)} ${getEventStatusColor(event)}
-                        text-am-text-primary
+                        text-foreground
                       `}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -269,7 +269,7 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
                   ))}
                   
                   {dayEvents.length > 3 && (
-                    <div className="text-xs text-gray-500 px-1">
+                    <div className="text-xs text-muted-foreground px-1">
                       +{dayEvents.length - 3} mais
                     </div>
                   )}
@@ -281,13 +281,13 @@ export default function Calendar({ userId, planId, onEventClick, onDateClick, lo
       </div>
 
       {/* Legendas */}
-      <div className="mt-6 flex flex-wrap gap-4 text-xs text-gray-500">
+      <div className="mt-6 flex flex-wrap gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-violet-500"></div>
+          <div className="w-3 h-3 rounded bg-primary"></div>
           <span>Estudo</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-blue-500"></div>
+          <div className="w-3 h-3 rounded bg-primary"></div>
           <span>Revisão</span>
         </div>
         <div className="flex items-center gap-2">

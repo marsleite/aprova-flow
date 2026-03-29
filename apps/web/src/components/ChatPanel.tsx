@@ -272,24 +272,24 @@ export default function ChatPanel({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-md flex-col border-l border-am-border-default bg-gray-950"
+            className="fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-md flex-col border-l border-border bg-background"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-am-border-default px-4 py-3">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-gradient-to-br from-violet-500/30 to-blue-500/20 p-2">
-                  <Brain className="h-5 w-5 text-violet-300" />
+                <div className="rounded-lg bg-gradient-to-br from-primary/20/30 to-primary/20/20 p-2">
+                  <Brain className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-am-text-primary">Coach IA</h3>
-                  <p className="text-[11px] text-gray-500">Powered by Gemini</p>
+                  <h3 className="text-sm font-semibold text-foreground">Coach IA</h3>
+                  <p className="text-[11px] text-muted-foreground">Powered by Gemini</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 {messages.length > 0 && (
                   <button
                     onClick={clearChat}
-                    className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-900 hover:text-gray-300"
+                    className="rounded-lg p-2 text-muted-foreground transition hover:bg-card hover:text-gray-300"
                     title="Limpar conversa"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -297,7 +297,7 @@ export default function ChatPanel({
                 )}
                 <button
                   onClick={onClose}
-                  className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-900 hover:text-am-text-primary"
+                  className="rounded-lg p-2 text-muted-foreground transition hover:bg-card hover:text-foreground"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -319,14 +319,14 @@ export default function ChatPanel({
                     <div
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
                         msg.role === 'assistant'
-                          ? 'bg-[#3150AA]/20'
+                          ? 'bg-[var(--primary)]/20'
                           : 'bg-gray-800'
                       }`}
                     >
                       {msg.role === 'assistant' ? (
-                        <Brain className="h-3.5 w-3.5 text-[#F59768]" />
+                        <Brain className="h-3.5 w-3.5 text-[var(--primary)]" />
                       ) : (
-                        <User className="h-3.5 w-3.5 text-gray-400" />
+                        <User className="h-3.5 w-3.5 text-muted-foreground" />
                       )}
                     </div>
 
@@ -334,8 +334,8 @@ export default function ChatPanel({
                     <div
                       className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed sm:max-w-[80%] ${
                         msg.role === 'user'
-                          ? 'rounded-tr-sm bg-violet-600 text-am-text-primary'
-                          : 'rounded-tl-sm border border-am-border-default bg-gray-900 text-gray-300'
+                          ? 'rounded-tr-sm bg-primary text-foreground'
+                          : 'rounded-tl-sm border border-border bg-card text-gray-300'
                       }`}
                     >
                       {msg.content}
@@ -350,14 +350,14 @@ export default function ChatPanel({
                     animate={{ opacity: 1 }}
                     className="flex gap-2.5"
                   >
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#3150AA]/20">
-                      <Brain className="h-3.5 w-3.5 text-[#F59768]" />
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--primary)]/20">
+                      <Brain className="h-3.5 w-3.5 text-[var(--primary)]" />
                     </div>
-                    <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-am-border-default bg-gray-900 px-4 py-3">
+                    <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-border bg-card px-4 py-3">
                       {[0, 1, 2].map((i) => (
                         <motion.div
                           key={i}
-                          className="h-1.5 w-1.5 rounded-full bg-violet-400"
+                          className="h-1.5 w-1.5 rounded-full bg-primary"
                           animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
                           transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
                         />
@@ -376,7 +376,7 @@ export default function ChatPanel({
                     <button
                       key={s}
                       onClick={() => sendMessage(s)}
-                      className="rounded-full border border-am-border-default bg-am-surface-subtle px-3 py-1.5 text-xs text-gray-400 transition hover:border-violet-500/30 hover:text-violet-300"
+                      className="rounded-full border border-border bg-muted px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary/30 hover:text-primary"
                     >
                       {s}
                     </button>
@@ -386,7 +386,7 @@ export default function ChatPanel({
             </div>
 
             {/* Input */}
-            <div className="border-t border-am-border-default px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3">
+            <div className="border-t border-border px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3">
               <div className="flex items-center gap-2">
                 <input
                   ref={inputRef}
@@ -395,12 +395,12 @@ export default function ChatPanel({
                   onKeyDown={handleKeyDown}
                   placeholder="Pergunte ao seu coach..."
                   disabled={loading}
-                  className="flex-1 rounded-xl border border-am-border-default bg-gray-900 px-4 py-2.5 text-sm text-am-text-primary placeholder-gray-600 outline-none transition focus:border-violet-500 disabled:opacity-50"
+                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder-gray-600 outline-none transition focus:border-primary disabled:opacity-50"
                 />
                 <button
                   onClick={() => sendMessage(input)}
                   disabled={!input.trim() || loading}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-am-text-primary transition hover:bg-violet-500 disabled:opacity-30"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-foreground transition hover:bg-primary disabled:opacity-30"
                 >
                   <Send className="h-4 w-4" />
                 </button>

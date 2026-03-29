@@ -62,7 +62,7 @@ interface PlanStats {
 const URGENCY_CONFIG = {
   critical: { label: 'CRÍTICO', bg: 'bg-am-error/10', text: 'text-am-error', border: 'border-am-error/20' },
   medium: { label: 'MÉDIO', bg: 'bg-am-warning/10', text: 'text-am-warning', border: 'border-am-warning/20' },
-  low: { label: 'BAIXO', bg: 'bg-am-success/10', text: 'text-am-success', border: 'border-am-success/20' },
+  low: { label: 'BAIXO', bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-am-success/20' },
 };
 
 export default function PlannerPage() {
@@ -177,10 +177,10 @@ export default function PlannerPage() {
       {/* Flush Topbar */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-12 pb-6 px-8">
         <div>
-          <h1 className="font-brand text-[40px] font-light text-am-text-primary tracking-tighter leading-none">
+          <h1 className="font-sans text-[40px] font-light text-foreground tracking-tighter leading-none">
             Agenda Estratégica
           </h1>
-          <p className="text-[12px] text-am-text-tertiary mt-3 font-mono uppercase tracking-widest">
+          <p className="text-[12px] text-muted-foreground mt-3 font-mono uppercase tracking-widest">
             Centro de decisão imediata e planejamento
           </p>
         </div>
@@ -212,22 +212,22 @@ export default function PlannerPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Card Hero: Next Best Session */}
           <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show" className="h-full">
-            <div className="h-full rounded-am-xl bg-am-surface border border-am-ai-border/40 shadow-am-md hover:shadow-am-lg transition-transform duration-300 hover:-translate-y-1 p-8 relative overflow-hidden flex flex-col justify-between" style={{ background: 'linear-gradient(145deg, var(--color-am-surface) 0%, rgba(139,92,246,0.05) 100%)' }}>
+            <div className="h-full rounded-xl bg-card border border-border/50/40 shadow-am-md hover:shadow-am-lg transition-transform duration-300 hover:-translate-y-1 p-8 relative overflow-hidden flex flex-col justify-between" style={{ background: 'linear-gradient(145deg, var(--color-am-surface) 0%, rgba(139,92,246,0.05) 100%)' }}>
               <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
-                <Zap className="h-32 w-32 text-am-ai-default" />
+                <Zap className="h-32 w-32 text-primary" />
               </div>
 
               <div>
                 <div className="flex items-center gap-3 mb-6">
                   <Badge variant="ai" className="shadow-[0_0_12px_var(--color-am-ai-glow)]"><Sparkles className="h-3 w-3 mr-1" /> IA MATCH</Badge>
-                  <span className="text-am-caption font-semibold uppercase tracking-wider text-am-text-secondary font-mono">Próxima melhor sessão</span>
+                  <span className="text-am-caption font-semibold uppercase tracking-wider text-muted-foreground font-mono">Próxima melhor sessão</span>
                 </div>
 
-                <h2 className="font-brand text-4xl font-bold tracking-tight text-am-text-primary mb-3">
+                <h2 className="font-sans text-4xl font-bold tracking-tight text-foreground mb-3">
                   {loading ? <Skeleton className="h-10 w-48" /> : nextBestSubject}
                 </h2>
 
-                <p className="text-am-body-sm text-am-text-secondary max-w-md leading-relaxed">
+                <p className="text-am-body-sm text-muted-foreground max-w-md leading-relaxed">
                   Baseado no seu mapa de calor e edital ativo, você está com um déficit nesta matéria. Uma sessão agora maximizará sua curva de retenção.
                 </p>
               </div>
@@ -249,27 +249,27 @@ export default function PlannerPage() {
                 {todaySessions.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-10 flex-1">
                     <Calendar className="h-10 w-10 text-am-border-strong mb-4" />
-                    <p className="text-am-body-sm text-am-text-secondary">Nenhuma sessão registrada hoje.</p>
+                    <p className="text-am-body-sm text-muted-foreground">Nenhuma sessão registrada hoje.</p>
                   </div>
                 ) : (
                   <div className="space-y-3 flex-1 overflow-y-auto pr-2">
                     {todaySessions.map((t, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 rounded-am-md bg-am-surface-subtle border border-am-border-default hover:bg-am-surface-elevated transition-colors cursor-default">
+                      <div key={i} className="flex items-center justify-between p-3 rounded-md bg-muted border border-border hover:bg-card transition-colors cursor-default">
                         <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-am-sm bg-am-brand-primary/10 flex items-center justify-center">
-                            <CheckCircle2 className="h-4 w-4 text-am-brand-primary" />
+                          <div className="h-8 w-8 rounded-sm bg-primary/10 flex items-center justify-center">
+                            <CheckCircle2 className="h-4 w-4 text-primary" />
                           </div>
                           <div>
-                            <p className="font-semibold text-am-body-sm text-am-text-primary">{t.subject}</p>
-                            <p className="text-am-caption text-am-text-tertiary">{new Date(t.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                            <p className="font-semibold text-am-body-sm text-foreground">{t.subject}</p>
+                            <p className="text-am-caption text-muted-foreground">{new Date(t.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                           </div>
                         </div>
-                        <span className="font-mono text-am-body-sm font-bold text-am-text-primary">{formatDuration(t.duration)}</span>
+                        <span className="font-mono text-am-body-sm font-bold text-foreground">{formatDuration(t.duration)}</span>
                       </div>
                     ))}
                   </div>
                 )}
-                <div className="pt-4 border-t border-am-border-default mt-4">
+                <div className="pt-4 border-t border-border mt-4">
                   <Button asChild variant="secondary" className="w-full">
                     <Link href="/history">Ver Histórico Completo</Link>
                   </Button>
@@ -293,20 +293,20 @@ export default function PlannerPage() {
                 {insights.length > 0 ? (
                   <div className="space-y-4">
                     {insights.slice(0, 2).map((insight, idx) => (
-                      <div key={idx} className="p-4 rounded-am-lg bg-am-surface border border-am-ai-border/40 relative overflow-hidden">
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-am-ai-default" />
+                      <div key={idx} className="p-4 rounded-lg bg-card border border-border/50/40 relative overflow-hidden">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
                         <div className="flex items-start gap-3">
-                          <Zap className="h-4 w-4 mt-1 text-am-ai-default" />
+                          <Zap className="h-4 w-4 mt-1 text-primary" />
                           <div>
-                            <p className="text-am-body-sm text-am-text-primary font-medium mb-1">{insight.type === 'celebrate' ? 'Consistência' : 'Alerta de Retenção'}</p>
-                            <p className="text-am-body-sm text-am-text-secondary leading-relaxed">{insight.message}</p>
+                            <p className="text-am-body-sm text-foreground font-medium mb-1">{insight.type === 'celebrate' ? 'Consistência' : 'Alerta de Retenção'}</p>
+                            <p className="text-am-body-sm text-muted-foreground leading-relaxed">{insight.message}</p>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-am-text-secondary">Conclua mais sessões para gerar insights robustos de IA.</p>
+                  <p className="text-center text-muted-foreground">Conclua mais sessões para gerar insights robustos de IA.</p>
                 )}
               </div>
             </ChartCard>
@@ -329,11 +329,11 @@ export default function PlannerPage() {
 
         {/* ROW 3: Planner Manager (Legacy Table) */}
         <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
-          <h3 className="font-brand text-am-h5 font-bold tracking-tight text-am-text-primary mb-4 flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-am-brand-primary" /> Gerenciamento de Editais
+          <h3 className="font-sans text-am-h5 font-bold tracking-tight text-foreground mb-4 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-primary" /> Gerenciamento de Editais
           </h3>
-          <div className="rounded-am-xl border border-am-border-default bg-am-surface overflow-hidden">
-            <div className="flex items-center justify-between border-b border-am-border-default px-5 py-4 bg-am-surface-subtle">
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-muted">
               <div className="flex gap-2">
                 <Badge variant="success">Em Dia</Badge>
                 <Badge variant="warning">Atenção</Badge>
@@ -342,15 +342,15 @@ export default function PlannerPage() {
 
             {loading ? (
               <div className="p-5 space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-am-lg" />)}
+                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-lg" />)}
               </div>
             ) : plans.length === 0 ? (
               <div className="py-12 text-center px-6">
-                <CalendarDays className="mx-auto mb-3 h-8 w-8 text-am-text-tertiary" />
-                <p className="text-sm font-medium text-am-text-secondary">Nenhum edital configurado</p>
+                <CalendarDays className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+                <p className="text-sm font-medium text-muted-foreground">Nenhum edital configurado</p>
                 <button
                   onClick={() => canCreate ? (setEditingPlan(null), setPlanManagerOpen(true)) : null}
-                  className="mt-4 inline-flex items-center gap-2 rounded-am-lg bg-am-brand-primary/10 px-4 py-2 text-sm text-am-brand-primary font-semibold transition-colors"
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary/10 px-4 py-2 text-sm text-primary font-semibold transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   Criar primeiro edital
@@ -358,13 +358,13 @@ export default function PlannerPage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-[1fr_80px_100px_80px_80px] gap-4 border-b border-am-border-default px-5 py-2.5">
+                <div className="grid grid-cols-[1fr_80px_100px_80px_80px] gap-4 border-b border-border px-5 py-2.5">
                   {['Edital / Concurso', 'Progresso', 'Último Mês', 'Urgência', 'Visão'].map((h) => (
-                    <p key={h} className="text-[10px] font-semibold uppercase tracking-wider text-am-text-tertiary">{h}</p>
+                    <p key={h} className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{h}</p>
                   ))}
                 </div>
 
-                <div className="divide-y divide-am-border-default bg-am-surface">
+                <div className="divide-y divide-border bg-card">
                   {plans.map((plan, i) => {
                     const stats = planStats.find((s) => s.planId === plan.id);
                     const urgency = stats?.urgency || 'low';
@@ -374,52 +374,52 @@ export default function PlannerPage() {
                     return (
                       <div
                         key={plan.id}
-                        className={`grid grid-cols-[1fr_80px_100px_80px_80px] gap-4 items-center px-5 py-4 transition-colors hover:bg-am-surface-subtle/50`}
+                        className={`grid grid-cols-[1fr_80px_100px_80px_80px] gap-4 items-center px-5 py-4 transition-colors hover:bg-muted/50`}
                       >
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 flex-shrink-0 rounded-full bg-am-brand-primary" />
-                            <p className="truncate text-sm font-semibold text-am-text-primary">{plan.name}</p>
+                            <div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
+                            <p className="truncate text-sm font-semibold text-foreground">{plan.name}</p>
                             {isActive && (
                               <Badge variant="primary">ATIVO</Badge>
                             )}
                           </div>
-                          <p className="mt-0.5 pl-4 text-xs text-am-text-secondary">
+                          <p className="mt-0.5 pl-4 text-xs text-muted-foreground">
                             {plan.subjects.length > 0 ? `${plan.subjects.length} matérias` : 'Sem matérias'} · Meta {plan.weeklyGoalHours}h/sem
                             {plan.examDate ? ` · Prova ${plan.examDate}` : ''}
                           </p>
                         </div>
 
-                        <div className="text-center font-brand font-bold text-am-text-primary">
+                        <div className="text-center font-sans font-bold text-foreground">
                           {stats?.progress || 0}%
                         </div>
 
-                        <p className="text-xs text-am-text-secondary">
+                        <p className="text-xs text-muted-foreground">
                           {stats?.totalHoursMonth ? `${stats.totalHoursMonth.toFixed(1)}h` : '0h'}
                         </p>
 
-                        <span className={`inline-flex items-center justify-center rounded-am-sm px-2 py-0.5 text-[10px] font-bold ${uc.bg} ${uc.text}`}>
+                        <span className={`inline-flex items-center justify-center rounded-sm px-2 py-0.5 text-[10px] font-bold ${uc.bg} ${uc.text}`}>
                           {uc.label}
                         </span>
 
                         <div className="flex items-center justify-end gap-1 relative">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleSelectActive(plan.id || ''); }}
-                            className={`rounded-am-sm px-2 py-1 text-[10px] font-medium transition-colors ${isActive ? 'bg-am-brand-primary/10 text-am-brand-primary' : 'bg-am-surface-subtle text-am-text-secondary hover:text-am-text-primary'}`}
+                            className={`rounded-sm px-2 py-1 text-[10px] font-medium transition-colors ${isActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
                           >
                             {isActive ? 'Ativo' : 'Ativar'}
                           </button>
                           <div className="relative">
                             <button
                               onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === plan.id ? null : (plan.id || null)); }}
-                              className="rounded-am-sm p-1 text-am-text-tertiary hover:text-am-text-primary transition-colors"
+                              className="rounded-sm p-1 text-muted-foreground hover:text-foreground transition-colors"
                             >
                               <MoreVertical className="h-3.5 w-3.5" />
                             </button>
                             {openMenuId === plan.id && (
-                              <div className="absolute right-0 top-6 z-50 w-36 overflow-hidden rounded-am-md border border-am-border-strong bg-am-surface-elevated shadow-am-xl">
+                              <div className="absolute right-0 top-6 z-50 w-36 overflow-hidden rounded-md border border-border bg-card shadow-am-xl">
                                 <button onClick={(e) => { e.stopPropagation(); setEditingPlan(plan); setPlanManagerOpen(true); setOpenMenuId(null); }}
-                                  className="flex w-full items-center gap-2 px-3 py-2 text-xs text-am-text-secondary hover:bg-am-surface-subtle transition-colors">
+                                  className="flex w-full items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:bg-muted transition-colors">
                                   <Edit2 className="h-3 w-3" /> Editar
                                 </button>
                                 <button onClick={(e) => { e.stopPropagation(); handleDelete(plan.id || ''); }}

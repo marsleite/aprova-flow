@@ -68,9 +68,9 @@ export default function EnginePage() {
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-12 pb-6 px-8">
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <Badge variant="outline" className="border-white/10 text-am-text-secondary bg-transparent"><Zap className="h-3 w-3 mr-1" /> Motor do Dia</Badge>
+            <Badge variant="outline" className="border-white/10 text-muted-foreground bg-transparent"><Zap className="h-3 w-3 mr-1" /> Motor do Dia</Badge>
           </div>
-          <h1 className="font-brand text-[40px] font-light text-am-text-primary tracking-tighter leading-none">
+          <h1 className="font-sans text-[40px] font-light text-foreground tracking-tighter leading-none">
             Sessão
           </h1>
         </div>
@@ -78,12 +78,12 @@ export default function EnginePage() {
         {consistency && (
           <div className="hidden items-center gap-8 lg:flex mt-4 sm:mt-0">
             <div className="text-right">
-              <p className="text-[10px] text-am-text-tertiary uppercase font-mono tracking-widest">Esta semana</p>
-              <p className="text-[28px] font-light text-am-text-primary tracking-tighter leading-none mt-1">{weeklyHours.toFixed(1)}<span className="text-sm text-am-text-secondary ml-1">h</span></p>
+              <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest">Esta semana</p>
+              <p className="text-[28px] font-light text-foreground tracking-tighter leading-none mt-1">{weeklyHours.toFixed(1)}<span className="text-sm text-muted-foreground ml-1">h</span></p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-am-text-tertiary uppercase font-mono tracking-widest">Sequência</p>
-              <p className="text-[28px] font-light text-am-text-primary tracking-tighter leading-none mt-1 flex items-center justify-end gap-1">{consistency.currentStreak} <Flame className="h-4 w-4 text-am-text-tertiary" /></p>
+              <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest">Sequência</p>
+              <p className="text-[28px] font-light text-foreground tracking-tighter leading-none mt-1 flex items-center justify-end gap-1">{consistency.currentStreak} <Flame className="h-4 w-4 text-muted-foreground" /></p>
             </div>
           </div>
         )}
@@ -101,10 +101,10 @@ export default function EnginePage() {
             {/* Context bar */}
             {activePlanObj && (
               <motion.div custom={0.5} variants={fadeUp} initial="hidden" animate="show"
-                className="flex items-center gap-4 rounded-am-md border border-am-border-default bg-am-surface px-5 py-3 shadow-am-sm"
+                className="flex items-center gap-4 rounded-md border border-border bg-card px-5 py-3 shadow-am-sm"
               >
                 <div className="flex items-center gap-3 flex-1">
-                  <span className="text-am-caption font-bold text-am-text-tertiary uppercase tracking-wider hidden sm:inline-block">Contexto Ativo:</span>
+                  <span className="text-am-caption font-bold text-muted-foreground uppercase tracking-wider hidden sm:inline-block">Contexto Ativo:</span>
                   <div
                     className="flex items-center gap-2 rounded-am-full px-3 py-1 text-xs font-semibold"
                     style={{
@@ -119,7 +119,7 @@ export default function EnginePage() {
                 </div>
                 {activePlanObj.subjects.length > 0 && (
                   <div className="flex items-center gap-3">
-                    <span className="text-am-caption text-am-text-secondary hidden md:inline-block">
+                    <span className="text-am-caption text-muted-foreground hidden md:inline-block">
                       {activePlanObj.subjects.length} matérias
                     </span>
                     <Button asChild variant="outline" size="sm" className="h-8">
@@ -134,7 +134,7 @@ export default function EnginePage() {
 
             {/* Timer */}
             <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show">
-              <div className="rounded-am-xl bg-am-surface shadow-am-lg border border-am-border-default overflow-hidden">
+              <div className="rounded-xl bg-card shadow-am-lg border border-border overflow-hidden">
                 <StudyTimer
                   key={activePlanId || 'all'}
                   userId={user.uid}
@@ -150,8 +150,8 @@ export default function EnginePage() {
 
             {/* Question Tracker */}
             <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
-              <div className="rounded-am-xl bg-am-surface shadow-am-md border border-am-border-default overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-am-brand-primary/5 blur-3xl pointer-events-none" />
+              <div className="rounded-xl bg-card shadow-am-md border border-border overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl pointer-events-none" />
                 <QuestionTrackerCard
                   userId={user.uid}
                   planId={activePlanId || undefined}
@@ -163,7 +163,7 @@ export default function EnginePage() {
             </motion.div>
 
             {/* Daily AI Planner */}
-            <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show" className="rounded-am-xl bg-am-surface shadow-am-md border border-am-ai-border/40 overflow-hidden relative">
+            <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show" className="rounded-xl bg-card shadow-am-md border border-border/50/40 overflow-hidden relative">
               <div className="absolute top-0 left-0 w-64 h-64 bg-am-ai-glow/10 blur-[80px] pointer-events-none" />
               <DailyAiPlannerCard
                 userId={user.uid}
@@ -228,7 +228,7 @@ export default function EnginePage() {
               variants={fadeUp}
               initial="hidden"
               animate="show"
-              className="rounded-am-xl border border-am-ai-border/40 bg-am-surface p-5 shadow-am-sm relative overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(139, 92, 246, 0.04) 100%)' }}
+              className="rounded-xl border border-border/50/40 bg-card p-5 shadow-am-sm relative overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(139, 92, 246, 0.04) 100%)' }}
             >
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-am-ai-glow/20 blur-[50px] rounded-full pointer-events-none"></div>
 
@@ -238,11 +238,11 @@ export default function EnginePage() {
 
               {loading ? (
                 <div className="space-y-2 relative z-10">
-                  <div className="h-4 w-full rounded bg-am-surface-subtle animate-pulse" />
-                  <div className="h-4 w-3/4 rounded bg-am-surface-subtle animate-pulse" />
+                  <div className="h-4 w-full rounded bg-muted animate-pulse" />
+                  <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
                 </div>
               ) : recentSessions.length > 0 ? (
-                <p className="text-am-body-sm text-am-text-secondary leading-relaxed relative z-10">
+                <p className="text-am-body-sm text-muted-foreground leading-relaxed relative z-10">
                   {consistency && consistency.weeklyProgressPercent >= 80
                     ? `Excelente ritmo! Você já garantiu ${consistency.weeklyProgressPercent}% da carga horária. O algoritmo prediz alta retenção de base estrutural.`
                     : consistency && consistency.weeklyProgressPercent > 0
@@ -250,7 +250,7 @@ export default function EnginePage() {
                       : 'O cronômetro calibra sua inteligência analítica. Inicie uma sessão para receber tracking de performance.'}
                 </p>
               ) : (
-                <p className="text-am-body-sm text-am-text-secondary relative z-10">
+                <p className="text-am-body-sm text-muted-foreground relative z-10">
                   Inicie sua primeira sessão cronometrada para ativar as inferências do motor de performance inteligente.
                 </p>
               )}
@@ -266,24 +266,24 @@ export default function EnginePage() {
               <Card padding="md" variant="default">
                 <div className="mb-4 flex items-center justify-between border-b border-am-border-subtle pb-3">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-am-text-tertiary" />
-                    <h3 className="text-am-body-sm font-bold text-am-text-primary tracking-wide">Log de Sessões Realizadas</h3>
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="text-am-body-sm font-bold text-foreground tracking-wide">Log de Sessões Realizadas</h3>
                   </div>
-                  <Link href="/history" className="text-am-caption font-bold text-am-brand-primary hover:text-am-brand-primary/80 transition-colors flex items-center gap-1">
+                  <Link href="/history" className="text-am-caption font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
                     Ver Detalhes <ChevronRight className="h-3 w-3" />
                   </Link>
                 </div>
 
                 {loading ? (
                   <div className="space-y-3">
-                    {Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-10 rounded border border-am-border-subtle bg-am-surface-subtle animate-pulse" />)}
+                    {Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-10 rounded border border-am-border-subtle bg-muted animate-pulse" />)}
                   </div>
                 ) : recentSessions.length === 0 ? (
-                  <div className="py-8 text-center bg-am-surface-subtle rounded-am-md border border-am-border-subtle">
-                    <div className="mx-auto w-12 h-12 bg-am-surface-elevated rounded-full flex items-center justify-center mb-3">
-                      <BookOpen className="h-5 w-5 text-am-text-tertiary" />
+                  <div className="py-8 text-center bg-muted rounded-md border border-am-border-subtle">
+                    <div className="mx-auto w-12 h-12 bg-card rounded-full flex items-center justify-center mb-3">
+                      <BookOpen className="h-5 w-5 text-muted-foreground" />
                     </div>
-                    <p className="text-am-body-sm text-am-text-secondary">Abra o cronômetro para injetar dados.</p>
+                    <p className="text-am-body-sm text-muted-foreground">Abra o cronômetro para injetar dados.</p>
                   </div>
                 ) : (
                   <div className="space-y-2.5">
@@ -296,19 +296,19 @@ export default function EnginePage() {
                             key={session.id || i}
                             initial={isRecent ? { opacity: 0, x: 10 } : false}
                             animate={{ opacity: 1, x: 0 }}
-                            className={`flex items-center gap-3 rounded-am-md px-3 py-2.5 transition-colors border ${isRecent ? 'bg-am-brand-primary/5 border-am-brand-primary/20' : 'bg-am-surface-elevated border-am-border-default hover:bg-am-surface-subtle'}`}
+                            className={`flex items-center gap-3 rounded-md px-3 py-2.5 transition-colors border ${isRecent ? 'bg-primary/5 border-am-brand-primary/20' : 'bg-card border-border hover:bg-muted'}`}
                           >
-                            <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-am-full ${isRecent ? 'bg-am-brand-primary/20' : 'bg-am-surface-subtle'}`}>
+                            <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-am-full ${isRecent ? 'bg-primary/20' : 'bg-muted'}`}>
                               {isRecent
-                                ? <CheckCircle2 className="h-3.5 w-3.5 text-am-brand-primary" />
+                                ? <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                                 : <div className="h-2 w-2 rounded-full bg-am-text-tertiary" />
                               }
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-am-body-sm font-medium text-am-text-primary leading-tight">{session.subject}</p>
-                              <p className="text-[10px] text-am-text-tertiary font-mono mt-0.5">{session.date}</p>
+                              <p className="truncate text-am-body-sm font-medium text-foreground leading-tight">{session.subject}</p>
+                              <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{session.date}</p>
                             </div>
-                            <span className="flex-shrink-0 text-am-caption font-bold text-am-text-secondary">{mins}m</span>
+                            <span className="flex-shrink-0 text-am-caption font-bold text-muted-foreground">{mins}m</span>
                           </motion.div>
                         );
                       })}
@@ -325,13 +325,13 @@ export default function EnginePage() {
                 variants={fadeUp}
                 initial="hidden"
                 animate="show"
-                className="rounded-am-md border border-dashed border-am-border-strong bg-am-surface-subtle p-5 text-center"
+                className="rounded-md border border-dashed border-border bg-muted p-5 text-center"
               >
-                <div className="mx-auto w-10 h-10 bg-am-surface-elevated rounded-full flex items-center justify-center mb-3">
-                  <Plus className="h-4 w-4 text-am-text-tertiary" />
+                <div className="mx-auto w-10 h-10 bg-card rounded-full flex items-center justify-center mb-3">
+                  <Plus className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="text-am-body-sm font-bold text-am-text-primary mb-1">Sem contexto estrutural</p>
-                <p className="text-am-caption text-am-text-secondary mb-4 max-w-[200px] mx-auto">Vincule um edital para liberar o track de consistência.</p>
+                <p className="text-am-body-sm font-bold text-foreground mb-1">Sem contexto estrutural</p>
+                <p className="text-am-caption text-muted-foreground mb-4 max-w-[200px] mx-auto">Vincule um edital para liberar o track de consistência.</p>
                 <Button asChild variant="outline" size="sm" className="w-full">
                   <Link href="/planner">
                     Configurar Edital

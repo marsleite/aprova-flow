@@ -30,8 +30,8 @@ import { KPICard, ChartCard, Skeleton, Button, Badge } from '@/components';
 import { fadeUp } from '@/design-system/tokens';
 
 function getAccuracyColor(acc: number) {
-  if (acc >= 80) return { text: 'text-am-success', bar: 'bg-am-success', glow: 'var(--color-am-success)', label: 'Excelente' };
-  if (acc >= 65) return { text: 'text-am-brand-primary', bar: 'bg-am-brand-primary', glow: 'var(--color-am-brand-primary)', label: 'Bom' };
+  if (acc >= 80) return { text: 'text-green-500', bar: 'bg-green-500', glow: 'var(--color-am-success)', label: 'Excelente' };
+  if (acc >= 65) return { text: 'text-primary', bar: 'bg-primary', glow: 'var(--color-am-brand-primary)', label: 'Bom' };
   if (acc >= 50) return { text: 'text-am-warning', bar: 'bg-am-warning', glow: 'var(--color-am-warning)', label: 'Regular' };
   return { text: 'text-am-error', bar: 'bg-am-error', glow: 'var(--color-am-error)', label: 'Crítico' };
 }
@@ -99,15 +99,15 @@ export default function SimulationsPage() {
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* ── Topbar ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 px-6 border-b border-am-border-default bg-am-surface/30 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 px-6 border-b border-border bg-card/30 backdrop-blur-md">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-am-ai-default mb-2 flex items-center gap-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
             <Target className="h-3.5 w-3.5" /> Centro de Simulação Avançada
           </p>
-          <h1 className="font-brand text-am-h2 md:text-[42px] font-bold text-am-text-primary tracking-tight leading-[1.1]">
+          <h1 className="font-sans text-am-h2 md:text-[42px] font-bold text-foreground tracking-tight leading-[1.1]">
             Provas & <br className="sm:hidden" /> Simulados
           </h1>
-          <p className="text-am-body-sm text-am-text-secondary mt-4 max-w-xl leading-relaxed">
+          <p className="text-am-body-sm text-muted-foreground mt-4 max-w-xl leading-relaxed">
             Treine com banco oficial, simulados personalizados e leitura de desempenho
             para calibrar seu nível de prontidão antes da prova real.
           </p>
@@ -116,16 +116,16 @@ export default function SimulationsPage() {
         {/* Projected score card - Premium AI Feel */}
         {projectedScore && (
           <div className="hidden sm:flex flex-col items-end">
-            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-secondary mb-1">Índice Estimado</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-1">Índice Estimado</span>
             <div className="flex items-baseline gap-1.5">
-              <span className="font-brand text-4xl font-bold text-transparent bg-clip-text bg-am-brand-gradient tracking-tighter">
+              <span className="font-sans text-4xl font-bold text-transparent bg-clip-text bg-am-brand-gradient tracking-tighter">
                 {projectedScore}
               </span>
-              <span className="text-am-body-sm font-bold text-am-text-secondary">/1000</span>
+              <span className="text-am-body-sm font-bold text-muted-foreground">/1000</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-am-success/10 border border-am-success/20 mt-2">
-              <Sparkles className="h-3 w-3 text-am-success" />
-              <span className="text-[10px] font-bold text-am-success uppercase tracking-wider">Faixa estimada {percentile}</span>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/10 border border-am-success/20 mt-2">
+              <Sparkles className="h-3 w-3 text-green-500" />
+              <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider">Faixa estimada {percentile}</span>
             </div>
           </div>
         )}
@@ -134,30 +134,30 @@ export default function SimulationsPage() {
       <div className="px-6 space-y-6">
         {/* Launch Simulation Banner */}
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show"
-          className="relative overflow-hidden rounded-am-xl border border-am-brand-secondary/30 p-6 shadow-am-md"
+          className="relative overflow-hidden rounded-xl border border-am-brand-secondary/30 p-6 shadow-am-md"
           style={{ background: 'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(218, 202, 255, 0.08) 100%)' }}
         >
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-am-brand-secondary/10 blur-[80px] pointer-events-none" />
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-foreground/10 blur-[80px] pointer-events-none" />
 
           <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6 z-10">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-am-full bg-am-brand-secondary/10 border border-am-brand-secondary/20">
-                <Play className="h-5 w-5 text-am-brand-secondary ml-1" />
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-am-full bg-foreground/10 border border-am-brand-secondary/20">
+                <Play className="h-5 w-5 text-foreground ml-1" />
               </div>
               <div>
-                <h3 className="font-brand text-am-h5 font-bold text-am-text-primary">Iniciar Novo Simulado</h3>
-                <p className="text-am-body-sm text-am-text-secondary">Questões calibradas pelo histórico do edital</p>
+                <h3 className="font-sans text-am-h5 font-bold text-foreground">Iniciar Novo Simulado</h3>
+                <p className="text-am-body-sm text-muted-foreground">Questões calibradas pelo histórico do edital</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex rounded-am-full border border-am-border-default bg-am-surface-subtle p-1">
+              <div className="flex rounded-am-full border border-border bg-muted p-1">
                 {(['1h', '2h', '4h'] as const).map((d) => (
                   <button
                     key={d}
                     onClick={() => setSelectedDuration(d)}
                     className={`px-4 py-1.5 text-xs font-bold transition-all rounded-am-full ${selectedDuration === d
-                      ? 'bg-am-text-primary text-am-canvas shadow-sm'
-                      : 'text-am-text-secondary hover:text-am-text-primary'
+                      ? 'bg-foreground text-background shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                       }`}
                   >
                     {d}
@@ -241,21 +241,21 @@ export default function SimulationsPage() {
             <ChartCard title="Mapa de Calor (Erros)" subtitle="Zonas de atrito e vulnerabilidade" loading={loading}>
               {accuracyData.length === 0 ? (
                 <div className="py-10 text-center">
-                  <AlertTriangle className="h-8 w-8 text-am-text-tertiary mx-auto mb-3" />
-                  <p className="text-am-body-sm text-am-text-secondary">Volume estatístico insuficiente para mapeamento de calor.</p>
+                  <AlertTriangle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-am-body-sm text-muted-foreground">Volume estatístico insuficiente para mapeamento de calor.</p>
                 </div>
               ) : (
                 <>
                   <div className="mb-6 flex flex-wrap gap-2">
                     {accuracyData.map((s) => {
                       const errorRate = 100 - s.accuracy;
-                      let bgClass = 'bg-am-surface-subtle text-am-text-secondary border-am-border-default';
+                      let bgClass = 'bg-muted text-muted-foreground border-border';
                       if (errorRate >= 60) bgClass = 'bg-am-error/10 text-am-error border-am-error/30 shadow-[0_0_12px_var(--color-am-error)_inset]';
-                      else if (errorRate >= 35) bgClass = 'bg-am-brand-primary/10 text-am-brand-primary border-am-brand-primary/30';
+                      else if (errorRate >= 35) bgClass = 'bg-primary/10 text-primary border-am-brand-primary/30';
 
                       return (
                         <div key={s.subject}
-                          className={`flex items-center justify-center rounded-am-md border px-3 py-2 cursor-pointer transition-all hover:scale-[1.03] ${bgClass}`}
+                          className={`flex items-center justify-center rounded-md border px-3 py-2 cursor-pointer transition-all hover:scale-[1.03] ${bgClass}`}
                           title={`${s.subject}: ${s.accuracy}% acerto`}
                         >
                           <span className="text-[10px] font-bold uppercase tracking-wider">
@@ -266,15 +266,15 @@ export default function SimulationsPage() {
                     })}
                   </div>
 
-                  <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-am-border-default">
-                    <div className="bg-am-surface-subtle p-4 rounded-am-md">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-tertiary mb-1">Ameaça Principal</p>
-                      <p className="font-brand text-am-body font-bold text-am-text-primary">{worstSubject?.subject || '—'}</p>
+                  <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-border">
+                    <div className="bg-muted p-4 rounded-md">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-1">Ameaça Principal</p>
+                      <p className="font-sans text-am-body font-bold text-foreground">{worstSubject?.subject || '—'}</p>
                       {worstSubject && <p className="text-xs font-bold text-am-error mt-2">{worstSubject.accuracy}% Retenção (Crítico)</p>}
                     </div>
-                    <div className="bg-am-surface-subtle p-4 rounded-am-md">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-tertiary mb-1">Padrão Detectado</p>
-                      <p className="text-am-body-sm text-am-text-secondary mt-1">
+                    <div className="bg-muted p-4 rounded-md">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-1">Padrão Detectado</p>
+                      <p className="text-am-body-sm text-muted-foreground mt-1">
                         {worstSubject?.accuracy !== undefined && worstSubject.accuracy < 50 ? 'Viés consistente de erro conceitual. Demandando reestudo de teoria base.' : 'Em análise neural contínua.'}
                       </p>
                     </div>
@@ -286,7 +286,7 @@ export default function SimulationsPage() {
             {/* Strategic Review */}
             <ChartCard title="Efetividade por Disciplina" subtitle="Volume vs Taxa de Acerto" loading={loading}>
               {accuracyData.length === 0 ? (
-                <p className="py-6 text-center text-am-body-sm text-am-text-secondary">Faça testes para popular este quadro.</p>
+                <p className="py-6 text-center text-am-body-sm text-muted-foreground">Faça testes para popular este quadro.</p>
               ) : (
                 <div className="space-y-4">
                   {[...accuracyData]
@@ -298,12 +298,12 @@ export default function SimulationsPage() {
                         <div key={s.subject} className="group">
                           <div className="mb-2 flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <span className="text-am-body-sm text-am-text-primary font-medium">{s.subject}</span>
+                              <span className="text-am-body-sm text-foreground font-medium">{s.subject}</span>
                               <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-tighter py-0 px-1.5 h-auto">Peso {weight.toFixed(1)}</Badge>
                             </div>
                             <span className={`text-sm font-bold ${c.text}`}>{s.accuracy}%</span>
                           </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-am-surface-subtle">
+                          <div className="h-2 overflow-hidden rounded-full bg-muted">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${s.accuracy}%` }}
@@ -325,26 +325,26 @@ export default function SimulationsPage() {
             {/* Quick Access */}
             <ChartCard title="Acesso Rápido" loading={false}>
               <div className="space-y-3">
-                <Link href="/provas" className="flex items-center justify-between p-3 rounded-am-md bg-am-surface-elevated border border-am-border-default hover:border-am-brand-primary/50 transition-colors group">
+                <Link href="/provas" className="flex items-center justify-between p-3 rounded-md bg-card border border-border hover:border-am-brand-primary/50 transition-colors group">
                   <div className="flex items-center gap-3">
-                    <BookOpen className="h-4 w-4 text-am-text-secondary group-hover:text-am-brand-primary transition-colors" />
-                    <span className="text-am-body-sm font-medium text-am-text-primary">Banco Oficial</span>
+                    <BookOpen className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <span className="text-am-body-sm font-medium text-foreground">Banco Oficial</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-am-text-tertiary" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
                 {canUseCustomSimulations ? (
-                  <Link href="/provas/criar-simulado" className="flex items-center justify-between p-3 rounded-am-md bg-am-brand-primary/10 border border-am-brand-primary/30 hover:bg-am-brand-primary/20 transition-colors group">
+                  <Link href="/provas/criar-simulado" className="flex items-center justify-between p-3 rounded-md bg-primary/10 border border-am-brand-primary/30 hover:bg-primary/20 transition-colors group">
                     <div className="flex items-center gap-3">
-                      <Zap className="h-4 w-4 text-am-brand-primary" />
-                      <span className="text-am-body-sm font-medium text-am-brand-primary">Gerador Inteligente</span>
+                      <Zap className="h-4 w-4 text-primary" />
+                      <span className="text-am-body-sm font-medium text-primary">Gerador Inteligente</span>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-am-brand-primary/50" />
+                    <ChevronRight className="h-4 w-4 text-primary/50" />
                   </Link>
                 ) : (
-                  <div className="flex items-center justify-between p-3 rounded-am-md bg-am-surface-elevated border border-am-border-default opacity-60">
+                  <div className="flex items-center justify-between p-3 rounded-md bg-card border border-border opacity-60">
                     <div className="flex items-center gap-3">
-                      <Lock className="h-4 w-4 text-am-text-tertiary" />
-                      <span className="text-am-body-sm font-medium text-am-text-primary">Gerador Inteligente</span>
+                      <Lock className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-am-body-sm font-medium text-foreground">Gerador Inteligente</span>
                     </div>
                     <Badge variant="outline">Pro</Badge>
                   </div>
@@ -358,14 +358,14 @@ export default function SimulationsPage() {
                 {accuracyData.slice(0, 5).map((s, i) => {
                   const c = getAccuracyColor(s.accuracy);
                   return (
-                    <div key={s.subject + i} className="flex items-center justify-between p-3 rounded-am-md bg-am-surface-subtle border border-am-border-subtle">
+                    <div key={s.subject + i} className="flex items-center justify-between p-3 rounded-md bg-muted border border-am-border-subtle">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex-shrink-0 bg-am-surface h-8 w-8 rounded-am-md flex items-center justify-center border border-am-border-default">
-                          <Trophy className="h-3 w-3 text-am-text-secondary" />
+                        <div className="flex-shrink-0 bg-card h-8 w-8 rounded-md flex items-center justify-center border border-border">
+                          <Trophy className="h-3 w-3 text-muted-foreground" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-am-body-sm font-bold text-am-text-primary truncate">{s.subject}</p>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-am-text-tertiary">{s.totalQuestions} qs</p>
+                          <p className="text-am-body-sm font-bold text-foreground truncate">{s.subject}</p>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{s.totalQuestions} qs</p>
                         </div>
                       </div>
                       <div className="flex-shrink-0 text-right pl-2">
@@ -376,8 +376,8 @@ export default function SimulationsPage() {
                 })}
                 {accuracyData.length === 0 && !loading && (
                   <div className="text-center py-6">
-                    <p className="text-am-caption text-am-text-secondary">Sem baterias recentes.</p>
-                    <Link href="/provas" className="text-am-caption text-am-brand-primary hover:underline mt-1 inline-flex items-center gap-1">Realizar Bateria <ChevronRight className="h-3 w-3" /></Link>
+                    <p className="text-am-caption text-muted-foreground">Sem baterias recentes.</p>
+                    <Link href="/provas" className="text-am-caption text-primary hover:underline mt-1 inline-flex items-center gap-1">Realizar Bateria <ChevronRight className="h-3 w-3" /></Link>
                   </div>
                 )}
               </div>

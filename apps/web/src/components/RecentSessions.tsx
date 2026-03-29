@@ -20,18 +20,18 @@ interface RecentSessionsProps {
 /** Gera uma cor consistente baseada no nome da matéria */
 function getSubjectColor(subject: string): { bg: string; text: string; dot: string } {
   const colors = [
-    { bg: 'bg-violet-500/15', text: 'text-violet-300', dot: 'bg-violet-400' },
-    { bg: 'bg-[#3150AA]/15', text: 'text-[#F59768]/80', dot: 'bg-blue-400' },
-    { bg: 'bg-cyan-500/15', text: 'text-cyan-300', dot: 'bg-cyan-400' },
+    { bg: 'bg-primary/20', text: 'text-primary', dot: 'bg-primary' },
+    { bg: 'bg-[var(--primary)]/15', text: 'text-[var(--primary)]/80', dot: 'bg-primary' },
+    { bg: 'bg-primary/20/15', text: 'text-primary', dot: 'bg-primary/20' },
     { bg: 'bg-emerald-500/15', text: 'text-emerald-300', dot: 'bg-emerald-400' },
     { bg: 'bg-amber-500/15', text: 'text-amber-300', dot: 'bg-amber-400' },
-    { bg: 'bg-pink-500/15', text: 'text-pink-300', dot: 'bg-pink-400' },
-    { bg: 'bg-indigo-500/15', text: 'text-indigo-300', dot: 'bg-indigo-400' },
-    { bg: 'bg-teal-500/15', text: 'text-teal-300', dot: 'bg-teal-400' },
+    { bg: 'bg-pink-500/15', text: 'text-primary', dot: 'bg-pink-400' },
+    { bg: 'bg-primary/20', text: 'text-indigo-300', dot: 'bg-primary' },
+    { bg: 'bg-primary/20/15', text: 'text-teal-300', dot: 'bg-primary/20' },
     { bg: 'bg-orange-500/15', text: 'text-orange-300', dot: 'bg-orange-400' },
     { bg: 'bg-rose-500/15', text: 'text-rose-300', dot: 'bg-rose-400' },
     { bg: 'bg-lime-500/15', text: 'text-lime-300', dot: 'bg-lime-400' },
-    { bg: 'bg-fuchsia-500/15', text: 'text-fuchsia-300', dot: 'bg-fuchsia-400' },
+    { bg: 'bg-primary/20/15', text: 'text-fuchsia-300', dot: 'bg-primary/20' },
   ];
   // Hash simples baseado no nome para consistência
   let hash = 0;
@@ -60,15 +60,15 @@ function SessionItem({ session }: { session: StudySession }) {
   return (
     <motion.div
       variants={item}
-      className="flex items-center gap-3 rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-3 transition-colors hover:bg-am-surface-subtle"
+      className="flex items-center gap-3 rounded-xl border border-border bg-muted px-4 py-3 transition-colors hover:bg-muted"
     >
       {/* Dot colorido */}
       <div className={`h-2 w-2 shrink-0 rounded-full ${color.dot}`} />
 
       {/* Info */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-am-text-primary">{session.subject}</p>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
+        <p className="truncate text-sm font-medium text-foreground">{session.subject}</p>
+        <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {formatDuration(session.duration)}
@@ -88,7 +88,7 @@ function ListSkeleton() {
   return (
     <div className="space-y-2">
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="flex animate-pulse items-center gap-3 rounded-xl bg-gray-900/50 px-4 py-3">
+        <div key={i} className="flex animate-pulse items-center gap-3 rounded-xl bg-card/50 px-4 py-3">
           <div className="h-2 w-2 rounded-full bg-gray-800" />
           <div className="flex-1 space-y-1.5">
             <div className="h-4 w-32 rounded bg-gray-800" />
@@ -107,7 +107,7 @@ function EmptyState() {
       <div className="mb-3 rounded-xl bg-gray-800/50 p-3">
         <History className="h-8 w-8 text-gray-600" />
       </div>
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm text-muted-foreground">
         Nenhuma sessão registrada
       </p>
       <p className="mt-1 text-center text-xs text-gray-600">
@@ -123,7 +123,7 @@ export default function RecentSessions({ sessions, loading }: RecentSessionsProp
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
-      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
+      className="rounded-xl border border-border bg-card p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
@@ -131,8 +131,8 @@ export default function RecentSessions({ sessions, loading }: RecentSessionsProp
           <History className="h-4 w-4 text-amber-400" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-am-text-primary">Sessões Recentes</h2>
-          <p className="text-xs text-am-text-secondary">Últimas sessões de estudo</p>
+          <h2 className="text-sm font-semibold text-foreground">Sessões Recentes</h2>
+          <p className="text-xs text-muted-foreground">Últimas sessões de estudo</p>
         </div>
       </div>
 

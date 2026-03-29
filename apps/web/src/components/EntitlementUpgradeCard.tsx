@@ -23,7 +23,7 @@ export default function EntitlementUpgradeCard({
 }: EntitlementUpgradeCardProps) {
   return (
     <div
-      className="relative overflow-hidden rounded-am-xl border border-am-ai-border/40 bg-am-surface p-6 shadow-am-md"
+      className="relative overflow-hidden rounded-xl border border-border/50/40 bg-card p-6 shadow-am-md"
       style={{
         background:
           'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(139, 92, 246, 0.06) 100%)',
@@ -44,21 +44,21 @@ export default function EntitlementUpgradeCard({
           </div>
 
           <div>
-            <h3 className="font-brand text-2xl font-bold tracking-tight text-am-text-primary">
+            <h3 className="font-sans text-2xl font-bold tracking-tight text-foreground">
               {title}
             </h3>
-            <p className="mt-2 max-w-xl text-am-body-sm leading-relaxed text-am-text-secondary">
+            <p className="mt-2 max-w-xl text-am-body-sm leading-relaxed text-muted-foreground">
               {description}
             </p>
           </div>
 
-          <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle px-4 py-3 text-am-body-sm text-am-text-primary">
+          <div className="rounded-md border border-border bg-muted px-4 py-3 text-am-body-sm text-foreground">
             <span className="font-semibold">Destravando com {recommendedPlan}:</span>{' '}
             {highlight}
           </div>
         </div>
 
-        <div className="hidden rounded-full border border-am-ai-border/40 bg-am-surface-subtle p-3 text-am-ai-default md:block">
+        <div className="hidden rounded-full border border-border/50/40 bg-muted p-3 text-primary md:block">
           <Sparkles className="h-6 w-6" />
         </div>
       </div>

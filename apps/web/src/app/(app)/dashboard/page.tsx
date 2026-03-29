@@ -128,17 +128,17 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6 pb-10">
       {/* ── Topbar ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 px-6 border-b border-am-border-default bg-am-surface/30 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 px-6 border-b border-border bg-card/30 backdrop-blur-md">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="outline"><LayoutDashboard className="h-3 w-3 mr-1" /> Painel Geral</Badge>
           </div>
-          <h1 className="font-brand text-am-h3 font-bold text-am-text-primary tracking-tight mt-2">
+          <h1 className="font-sans text-am-h3 font-bold text-foreground tracking-tight mt-2">
             Dashboard
           </h1>
-          <p className="text-am-caption text-am-text-secondary mt-1">
+          <p className="text-am-caption text-muted-foreground mt-1">
             Visão estratégica consolidada do seu desempenho
-            {activePlan && <> — <span className="font-medium text-am-text-primary">{activePlan.name}</span></>}
+            {activePlan && <> — <span className="font-medium text-foreground">{activePlan.name}</span></>}
           </p>
         </div>
 

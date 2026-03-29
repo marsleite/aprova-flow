@@ -214,7 +214,7 @@ export interface StudyPlanEdital {
   examDate?: string | null;    // Data da prova em YYYY-MM-DD
   materialWorkloadHours?: number | null; // Carga total estimada do material/edital
   studyCapacityHours?: StudyCapacityHours | null; // Disponibilidade real por dia
-  color: string;               // Hex para badges: "#8b5cf6"
+  color: string;               // Hex para badges: "var(--primary)"
   isDefault: boolean;          // true para o plano "Geral" auto-criado
   createdAt: string;
   updatedAt: string;
@@ -222,13 +222,13 @@ export interface StudyPlanEdital {
 
 /** Cores pré-definidas para planos */
 export const PLAN_COLORS = [
-  { hex: '#8b5cf6', name: 'Violeta' },
+  { hex: 'var(--primary)', name: 'Violeta' },
   { hex: '#06b6d4', name: 'Ciano' },
   { hex: '#f59e0b', name: 'Âmbar' },
   { hex: '#10b981', name: 'Esmeralda' },
   { hex: '#ef4444', name: 'Vermelho' },
   { hex: '#ec4899', name: 'Rosa' },
-  { hex: '#3b82f6', name: 'Azul' },
+  { hex: 'var(--primary)', name: 'Azul' },
   { hex: '#f97316', name: 'Laranja' },
 ] as const;
 

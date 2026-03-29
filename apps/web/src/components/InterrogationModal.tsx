@@ -80,26 +80,26 @@ export default function InterrogationModal({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-indigo-500/20 bg-gray-950 p-6 shadow-2xl"
+                className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-primary/20 bg-background p-6 shadow-2xl"
             >
                 {/* Glow Effects */}
-                <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#3150AA]/10 blur-[80px]" />
-                <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-blue-600/10 blur-[80px]" />
+                <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[var(--primary)]/10 blur-[80px]" />
+                <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-primary/10 blur-[80px]" />
 
                 {/* Header */}
                 <div className="relative z-10 mb-6 flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 text-indigo-400 border border-indigo-500/20 shadow-inner">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20/20 to-primary/20/20 text-primary border border-primary/20 shadow-inner">
                             <Brain className="h-6 w-6" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-am-text-primary tracking-tight">O Interrogatório</h2>
+                            <h2 className="text-xl font-bold text-foreground tracking-tight">O Interrogatório</h2>
                             <p className="text-sm font-medium text-indigo-300">Residência de {subjectName}</p>
                         </div>
                     </div>
 
                     {step === 'input' && (
-                        <button onClick={onSkip} className="rounded-full bg-am-surface-subtle p-2 text-gray-400 hover:bg-am-surface-subtle hover:text-am-text-primary transition-colors">
+                        <button onClick={onSkip} className="rounded-full bg-muted p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
                             <X className="h-5 w-5" />
                         </button>
                     )}
@@ -118,7 +118,7 @@ export default function InterrogationModal({
                                         value={summaryText}
                                         onChange={(e) => setSummaryText(e.target.value)}
                                         placeholder="Digite aqui os conceitos chaves, artigos da lei ou principais conclusões do tópico estudado..."
-                                        className="h-32 w-full resize-none rounded-xl border border-am-border-default bg-gray-900/50 p-4 text-sm text-am-text-primary placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        className="h-32 w-full resize-none rounded-xl border border-border bg-card/50 p-4 text-sm text-foreground placeholder-gray-500 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                                     />
                                 </div>
 
@@ -131,13 +131,13 @@ export default function InterrogationModal({
                                 <div className="mt-6 flex items-center justify-end gap-3">
                                     <button
                                         onClick={onSkip}
-                                        className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-400 hover:bg-am-surface-subtle hover:text-am-text-primary transition-colors"
+                                        className="rounded-xl px-5 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                     >
                                         Pular Avaliação
                                     </button>
                                     <button
                                         onClick={handleSubmit}
-                                        className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-am-text-primary shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500"
+                                        className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-foreground shadow-lg shadow-primary/20/25 transition-all hover:bg-primary"
                                     >
                                         Enviar para Mentoria
                                         <ChevronRight className="h-4 w-4" />
@@ -148,9 +148,9 @@ export default function InterrogationModal({
 
                         {step === 'evaluating' && (
                             <motion.div key="evaluating" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center py-12 text-center">
-                                <Loader2 className="h-10 w-10 animate-spin text-indigo-500 mb-6" />
-                                <h3 className="text-lg font-bold text-am-text-primary mb-2">Analisando Retenção</h3>
-                                <p className="text-sm text-gray-400 max-w-xs mx-auto">
+                                <Loader2 className="h-10 w-10 animate-spin text-primary mb-6" />
+                                <h3 className="text-lg font-bold text-foreground mb-2">Analisando Retenção</h3>
+                                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
                                     O Mentor IA está avaliando seu resumo contra a base de conhecimento de {subjectName}...
                                 </p>
                             </motion.div>
@@ -161,8 +161,8 @@ export default function InterrogationModal({
 
                                 {/* Circle Score */}
                                 <div className="flex justify-center">
-                                    <div className="relative flex h-28 w-28 flex-col items-center justify-center rounded-full border-4 border-indigo-500/20 bg-indigo-500/10 shadow-[0_0_30px_rgba(99,102,241,0.2)]">
-                                        <span className="text-3xl font-extrabold text-am-text-primary tracking-tighter">{result.score}</span>
+                                    <div className="relative flex h-28 w-28 flex-col items-center justify-center rounded-full border-4 border-primary/20 bg-primary/20 shadow-lg shadow-primary/20">
+                                        <span className="text-3xl font-extrabold text-foreground tracking-tighter">{result.score}</span>
                                         <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-300 mt-1">Score de Retenção</span>
                                     </div>
                                 </div>

@@ -105,15 +105,15 @@ export function exportSessionsCSV(
  */
 export function getChartColor(index: number): string {
   const colors = [
-    '#8B5CF6', // violet
-    '#6366F1', // indigo
-    '#3B82F6', // blue
+    'var(--primary)', // violet
+    'var(--primary)', // indigo
+    'var(--primary)', // blue
     '#06B6D4', // cyan
     '#10B981', // emerald
     '#F59E0B', // amber
     '#EF4444', // red
     '#EC4899', // pink
-    '#8B5CF6', // violet (repetição)
+    'var(--primary)', // violet (repetição)
     '#14B8A6', // teal
     '#F97316', // orange
     '#84CC16', // lime

@@ -1,343 +1,183 @@
 import Link from 'next/link';
-import { Button, Badge } from '@/components';
-import { Sparkles, Brain, Target, TrendingUp, ChevronRight, CheckCircle2, Zap, Flame, AlertTriangle, LayoutDashboard, Timer, CalendarDays, BarChart2, Play } from 'lucide-react';
+import { Target, Brain, TrendingUp, ChevronRight, CheckCircle2, Zap, LayoutDashboard, Timer, CalendarDays, BarChart2, Flame, AlertTriangle } from 'lucide-react';
 
 export default function LandingPage() {
   return (
-    <div className="dark min-h-screen font-sans text-am-text-primary overflow-x-hidden selection:bg-am-brand-primary/30" style={{ background: 'var(--am-bg-canvas)' }}>
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 selection:bg-primary/30 font-sans">
       {/* Navigation */}
-      <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/[0.04] bg-am-surface-subtle/80 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-6 flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: 'var(--am-brand-primary)' }}>
-              <Zap className="h-4 w-4" style={{ color: 'var(--ds-color-text-on-light, #171412)' }} />
+      <nav className="z-50 sticky global-nav w-full border-b border-border top-0 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div className="flex items-center gap-12">
+                {/* Logo */}
+                <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center justify-center w-2 h-2 rounded-full animate-pulse bg-primary"></span>
+                    <span className="font-medium tracking-tight text-foreground text-lg transition-colors">Aprova<span className="text-muted-foreground">Mind</span></span>
+                </div>
             </div>
-            <span className="text-lg font-semibold tracking-tight" style={{ fontFamily: 'var(--ds-font-display, inherit)', color: 'var(--am-text-primary)' }}>AprovaMind</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-am-body-sm font-semibold text-am-text-secondary hover:text-white transition-colors">
-              Entrar
-            </Link>
-            <Button asChild variant="primary" size="sm" className="hidden sm:flex">
-              <Link href="/login">Começar Gratuitamente</Link>
-            </Button>
-          </div>
+            <div className="flex items-center gap-6">
+                <Link href="/login" className="text-xs font-medium tracking-widest text-muted-foreground uppercase hover:text-foreground transition-colors">
+                    Entrar
+                </Link>
+                <Link href="/login" className="px-6 py-3 text-primary-foreground text-xs font-semibold uppercase tracking-widest transition-all duration-300 shadow-lg bg-primary hover:opacity-90 shadow-primary/20 hover:shadow-primary/40 rounded-sm">
+                    Começar
+                </Link>
+            </div>
         </div>
       </nav>
 
-      <main>
-        {/* Hero Section */}
-        <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-          {/* Ambient Glows */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-am-ai-glow/20 rounded-full blur-[120px] pointer-events-none opacity-50" />
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-am-brand-primary/10 rounded-full blur-[100px] pointer-events-none" />
-
-          <div className="mx-auto max-w-7xl px-6 relative z-10 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-am-ai-border/40 bg-am-surface/60 px-4 py-1.5 mb-8 backdrop-blur-sm shadow-[0_0_16px_var(--color-am-ai-glow)]">
-              <Sparkles className="h-4 w-4 text-am-ai-default" />
-              <span className="text-sm font-medium text-am-text-primary tracking-wide">Inteligência Estratégica para Concursos</span>
-            </div>
-
-            <h1 className="ds-display-1 mb-6 max-w-4xl mx-auto" style={{ color: 'var(--am-text-primary)' }}>
-              Não estude mais.<br /> Estude <span style={{ color: 'var(--am-brand-primary)' }}>cirurgicamente.</span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-am-text-secondary mb-10 max-w-2xl mx-auto leading-relaxed">
-              O AprovaMind não é mais um cursinho com milhares de PDFs. É o primeiro sistema de performance guiado por IA que diagnostica suas fraquezas e traça a rota exata até a aprovação.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button asChild variant="premium" size="lg" className="w-full sm:w-auto h-14 px-8 text-base shadow-[0_4px_24px_var(--color-am-ai-glow)]">
-                <Link href="/login">Criar meu plano estratégico agora <ChevronRight className="ml-2 h-5 w-5" /></Link>
-              </Button>
-            </div>
-
-            {/* Platform Mockup Preview */}
-            <div className="mt-20 relative mx-auto max-w-5xl">
-              <div className="rounded-xl border border-white/10 bg-am-canvas p-1 sm:p-2 shadow-[0_0_60px_rgba(61,116,246,0.1)] backdrop-blur-sm relative z-20">
-                <div className="rounded-lg border border-white/5 bg-am-canvas overflow-hidden aspect-video relative flex">
-                  {/* Subtle top fade for realism */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent z-10 pointer-events-none" />
-
-                  {/* Sidebar Mock */}
-                  <div className="w-16 lg:w-56 flex-shrink-0 flex flex-col border-r border-white/5 bg-am-canvas transition-all z-20">
-                    {/* Logo Area */}
-                    <div className="flex items-center gap-3 px-4 lg:px-6 py-5 lg:py-6 border-b border-white/5">
-                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-am-surface-elevated ring-1 ring-white/10">
-                        <Zap className="h-4 w-4 text-am-text-primary" />
-                      </div>
-                      <div className="min-w-0 hidden lg:block">
-                        <p className="font-brand text-[15px] font-medium tracking-tight text-am-text-primary leading-none mt-1">
-                          AprovaMind
-                        </p>
-                        <p className="mt-1 text-[9px] text-am-text-tertiary uppercase tracking-[0.2em] font-mono">
-                          Strategic Engine
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Fake Plan Badge */}
-                    <div className="hidden lg:block mx-3 mt-3">
-                      <div className="flex w-full items-center gap-2 rounded-full border border-am-border-default bg-am-surface-subtle px-3 py-2">
-                        <div className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: 'var(--am-brand-primary)', boxShadow: '0 0 6px rgba(154,117,240,0.5)' }} />
-                        <span className="min-w-0 flex-1 truncate text-xs text-am-text-secondary font-mono">
-                          Edital Master (RFB)
+      <main className="relative z-10">
+        {/* Hero Identity */}
+        <header className="overflow-hidden border-border border-b pt-20 pb-32 relative transition-colors duration-300">
+            <div className="max-w-7xl mx-auto px-6 relative">
+                <div className="max-w-4xl pt-12">
+                    <div className="flex items-center gap-3 mb-6">
+                        <span className="text-xs font-medium tracking-widest uppercase text-primary border border-primary/20 bg-primary/10 px-3 py-1 rounded">
+                            Inteligência Estratégica
                         </span>
-                        <ChevronRight className="h-3 w-3 text-am-text-secondary" />
-                      </div>
                     </div>
-
-                    {/* Nav Items */}
-                    <nav className="flex-1 overflow-y-auto px-2 lg:px-4 py-6 space-y-1">
-                      <p className="mb-4 px-2 text-[10px] uppercase tracking-widest text-am-text-tertiary font-mono hidden lg:block">Navegação</p>
-                      <div className="relative flex items-center justify-center lg:justify-start gap-3 rounded-lg px-2 py-2 text-[13px] font-medium bg-white/5 text-am-text-primary transition-all duration-150">
-                        <LayoutDashboard className="h-[18px] w-[18px] flex-shrink-0 text-am-text-primary" strokeWidth={2} />
-                        <span className="hidden lg:inline truncate">Dashboard</span>
-                        <span className="absolute right-2 h-1 w-1 rounded-full bg-am-brand-primary hidden lg:block" />
-                      </div>
-                      <div className="relative flex items-center justify-center lg:justify-start gap-3 rounded-lg px-2 py-2 text-[13px] font-medium text-am-text-secondary transition-all duration-150">
-                        <Timer className="h-[18px] w-[18px] flex-shrink-0 text-am-text-tertiary" strokeWidth={1.5} />
-                        <span className="hidden lg:inline truncate">Sessão de Estudo</span>
-                      </div>
-                      <div className="relative flex items-center justify-center lg:justify-start gap-3 rounded-lg px-2 py-2 text-[13px] font-medium text-am-text-secondary transition-all duration-150">
-                        <CalendarDays className="h-[18px] w-[18px] flex-shrink-0 text-am-text-tertiary" strokeWidth={1.5} />
-                        <span className="hidden lg:inline truncate">Planner</span>
-                      </div>
-                      <div className="relative flex items-center justify-center lg:justify-start gap-3 rounded-lg px-2 py-2 text-[13px] font-medium text-am-text-secondary transition-all duration-150">
-                        <Brain className="h-[18px] w-[18px] flex-shrink-0 text-am-text-tertiary" strokeWidth={1.5} />
-                        <span className="hidden lg:inline truncate">Mentoria</span>
-                      </div>
-                      <div className="relative flex items-center justify-center lg:justify-start gap-3 rounded-lg px-2 py-2 text-[13px] font-medium text-am-text-secondary transition-all duration-150">
-                        <BarChart2 className="h-[18px] w-[18px] flex-shrink-0 text-am-text-tertiary" strokeWidth={1.5} />
-                        <span className="hidden lg:inline truncate">Análises</span>
-                      </div>
-                    </nav>
-
-                    {/* Fake Avatar */}
-                    <div className="border-t border-am-border-default p-3 flex justify-center lg:justify-start">
-                      <div className="flex items-center gap-2 rounded-lg lg:px-2 lg:py-2">
-                        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-am-surface-elevated text-[10px] text-am-text-secondary font-mono ring-1 ring-white/10">
-                          E
-                        </div>
-                        <div className="min-w-0 flex-1 hidden lg:block">
-                          <p className="truncate text-xs text-am-text-primary">Estudante</p>
-                          <p className="truncate text-[9px] text-am-text-tertiary font-mono">user@aprovamind.com</p>
-                        </div>
-                      </div>
+                    <h1 className="text-6xl md:text-8xl font-medium tracking-tighter leading-[0.9] text-foreground mb-8 text-glow transition-colors">
+                        Estudo<br/>
+                        <span className="text-primary">Cirúrgico</span><br/>
+                        e Implacável
+                    </h1>
+                    <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed mb-10 font-light transition-colors">
+                        O primeiro sistema de performance guiado por IA que diagnostica suas fraquezas e traça a rota exata até a aprovação.
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-start gap-6">
+                        <Link href="/login" className="px-8 py-5 text-primary-foreground text-xs font-semibold uppercase tracking-widest transition-all duration-300 shadow-lg bg-primary hover:opacity-90 shadow-primary/20 hover:shadow-primary/40 flex items-center gap-2">
+                            Criar Meu Plano
+                            <ChevronRight className="w-4 h-4" />
+                        </Link>
+                        <Link href="#features" className="px-8 py-5 uppercase hover:bg-foreground hover:text-background transition-all duration-300 text-xs font-semibold text-muted-foreground tracking-widest border-border border flex items-center gap-2">
+                            Conhecer o Motor
+                        </Link>
                     </div>
-                  </div>
+                </div>
+                
+                {/* Minimal Interface Mockup embedded in Hero */}
+                <div className="mt-24 max-w-5xl rounded-lg border border-border bg-card shadow-2xl overflow-hidden shadow-primary/5 transition-all">
+                    <div className="grid grid-cols-1 md:grid-cols-4 min-h-[400px]">
+                        <div className="border-r border-border p-6 flex flex-col gap-6 bg-muted/20">
+                            <div className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4">Navegação</div>
+                            <div className="flex items-center gap-3 text-sm text-foreground group cursor-pointer group-hover:text-primary transition-colors">
+                                <LayoutDashboard className="w-4 h-4 text-primary" /> <span className="font-medium">Dashboard</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                                <Timer className="w-4 h-4" /> <span>Sessão Estudo</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                                <Brain className="w-4 h-4" /> <span>Mentoria IA</span>
+                            </div>
+                        </div>
+                        <div className="md:col-span-3 p-8 md:p-12 relative flex flex-col">
+                            <h2 className="text-4xl md:text-5xl font-medium text-foreground tracking-tight leading-none mb-10 transition-colors">
+                                Análise de Precisão
+                            </h2>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                                <div className="group relative overflow-hidden bg-card border border-border hover:border-primary/50 transition-all p-6">
+                                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Média Atual</span>
+                                    <h3 className="text-3xl font-medium text-foreground tracking-tight transition-colors">82%</h3>
+                                </div>
+                                <div className="group relative overflow-hidden bg-card border border-border hover:border-primary/50 transition-all p-6">
+                                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Retenção</span>
+                                    <h3 className="text-3xl font-medium text-foreground tracking-tight transition-colors">75%</h3>
+                                </div>
+                                <div className="group relative overflow-hidden bg-card border border-border hover:border-primary/50 transition-all p-6 hidden md:block">
+                                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Ritmo</span>
+                                    <h3 className="text-3xl font-medium text-foreground tracking-tight transition-colors">6d</h3>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-8 flex gap-3 border border-border p-4 bg-muted/10 items-start">
+                                <AlertTriangle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                                <div>
+                                    <h4 className="text-sm font-semibold tracking-wide text-foreground">Ajuste de Rota</h4>
+                                    <p className="text-xs text-muted-foreground leading-relaxed mt-1">Sua retenção em Contratos Administrativos caiu 12%. Sugiro sessão focada hoje.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                  {/* Main Platform Section Mock */}
-                  <div className="flex-1 flex flex-col bg-am-canvas overflow-y-auto no-scrollbar relative z-20">
-                    <div className="px-5 sm:px-8 pt-8 sm:pt-12 pb-6 flex flex-col gap-6 sm:gap-8 min-w-[600px]">
+            </div>
+        </header>
 
-                      {/* Header */}
-                      <div className="flex justify-between items-start">
+        {/* Feature Sections Based on DS Typography & Cards */}
+        <section id="features" className="border-b border-border py-32 bg-background transition-colors">
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="flex justify-center items-center gap-4 text-xs font-medium tracking-widest uppercase mb-16 text-primary">
+                    <span className="w-8 h-[1px] bg-primary"></span>
+                    O Fim da Força Bruta
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="group overflow-hidden bg-card border border-border hover:border-border/80 transition-all h-full p-10 flex flex-col justify-between">
                         <div>
-                          <h1 className="font-brand text-[32px] sm:text-[40px] font-light text-am-text-primary tracking-tighter leading-none">
-                            Dashboard
-                          </h1>
-                          <p className="text-[10px] sm:text-[12px] text-am-text-tertiary mt-2 sm:mt-3 font-mono uppercase tracking-widest">
-                            Análise Estratégica
-                          </p>
-                        </div>
-                        <div className="hidden sm:flex items-center gap-3 mt-2">
-                          <div className="h-9 px-6 rounded-full flex items-center gap-2 text-sm font-semibold" style={{ background: 'var(--am-brand-primary)', color: 'var(--ds-color-text-on-light, #171412)', boxShadow: '0 4px 12px rgba(154,117,240,0.3)' }}>
-                            <Play className="h-4 w-4 fill-current" /> Iniciar
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* KPIs */}
-                      <div className="grid grid-cols-3 gap-4 sm:gap-6">
-                        <div className="rounded-am-xl bg-am-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] border border-am-border-default/50 ring-1 ring-white/5 p-4 sm:p-6 flex flex-col justify-between min-h-[140px] sm:min-h-[160px]">
-                          <div className="flex justify-between items-center mb-4">
-                            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-am-text-secondary font-mono">Precisão Média</span>
-                            <Target className="h-4 w-4 text-am-text-tertiary opacity-50" />
-                          </div>
-                          <div className="mt-auto flex flex-col gap-1">
-                            <span className="font-brand text-4xl sm:text-5xl font-light tracking-tighter text-am-text-primary leading-none">82%</span>
-                          </div>
-                        </div>
-                        <div className="rounded-am-xl bg-am-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] border border-am-border-default/50 ring-1 ring-white/5 p-4 sm:p-6 flex flex-col justify-between min-h-[140px] sm:min-h-[160px]">
-                          <div className="flex justify-between items-center mb-4">
-                            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-am-text-secondary font-mono">Retenção Semanal</span>
-                            <TrendingUp className="h-4 w-4 text-am-text-tertiary opacity-50" />
-                          </div>
-                          <div className="mt-auto flex flex-col gap-1">
-                            <span className="font-brand text-4xl sm:text-5xl font-light tracking-tighter text-am-text-primary leading-none">75%</span>
-                          </div>
-                        </div>
-                        <div className="rounded-am-xl bg-am-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] border border-am-border-default/50 ring-1 ring-white/5 p-4 sm:p-6 flex flex-col justify-between min-h-[140px] sm:min-h-[160px]">
-                          <div className="flex justify-between items-center mb-4">
-                            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-am-text-secondary font-mono">Ritmo de Estudo</span>
-                            <Flame className="h-4 w-4 text-am-text-tertiary opacity-50" />
-                          </div>
-                          <div className="mt-auto flex flex-col gap-1">
-                            <span className="font-brand text-4xl sm:text-5xl font-light tracking-tighter text-am-text-primary leading-none">6d</span>
-                            <span className="flex items-center gap-1 text-[11px] font-mono mt-1 text-am-success">+1d <span className="font-normal text-am-text-secondary ml-1 lowercase tracking-normal">dias seguidos</span></span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Lower Body - Charts Mock */}
-                      <div className="grid grid-cols-5 gap-4 sm:gap-6 flex-1 min-h-[220px]">
-                        <div className="col-span-3 rounded-am-xl bg-am-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] border border-am-border-default/50 ring-1 ring-white/5 p-4 sm:p-6 flex flex-col">
-                          <div className="mb-6 flex justify-between items-start">
-                            <div>
-                              <h3 className="font-brand text-sm sm:text-base font-bold text-am-text-primary tracking-tight">Pulso da Semana</h3>
-                              <p className="text-[10px] sm:text-xs text-am-text-tertiary mt-0.5 font-mono uppercase tracking-widest">Evolução de horas líquidas</p>
+                            <div className="flex group-hover:border-primary/50 group-hover:text-primary transition-colors text-foreground bg-muted w-14 h-14 border border-border rounded-full mb-8 items-center justify-center">
+                                <Target className="w-6 h-6" />
                             </div>
-                          </div>
-                          <div className="flex-1 relative mt-2 border-b border-l border-am-border-strong border-opacity-30">
-                            {/* Fake SVG Area Chart */}
-                            <svg className="absolute inset-0 h-full w-full opacity-80" preserveAspectRatio="none" viewBox="0 0 100 100">
-                              <defs>
-                                <linearGradient id="heroGradient" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="var(--color-am-brand-primary)" stopOpacity={0.3} />
-                                  <stop offset="95%" stopColor="var(--color-am-brand-primary)" stopOpacity={0} />
-                                </linearGradient>
-                              </defs>
-                              <path d="M0 80 L15 50 L30 65 L45 35 L60 55 L75 25 L90 40 L100 15 L100 100 L0 100 Z" fill="url(#heroGradient)" stroke="none" />
-                              <path d="M0 80 L15 50 L30 65 L45 35 L60 55 L75 25 L90 40 L100 15" fill="none" stroke="var(--color-am-brand-primary)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-                            </svg>
-                          </div>
+                            <h3 className="text-2xl font-medium text-foreground tracking-tight mb-4 transition-colors">Tracking Milimétrico</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed font-light transition-colors">
+                                Adeus planilhas de excel. Cada segundo da sua sessão abastece o motor analítico e reconstrói seu panorama de estudo nativamente.
+                            </p>
                         </div>
-                        <div className="col-span-2 rounded-am-xl bg-am-surface border border-am-ai-border/20 shadow-[inset_0_1px_0_rgba(139,92,246,0.1)] relative overflow-hidden flex flex-col p-5 sm:p-6">
-                          <div className="absolute top-0 left-0 right-0 h-[2px] bg-am-brand-gradient opacity-80" />
-                          <div className="mb-4 sm:mb-6 flex items-start gap-3">
-                            <div className="rounded-am-md border border-am-border-default bg-am-brand-primary/10 p-2">
-                              <Sparkles className="h-4 w-4 text-am-brand-primary" />
-                            </div>
-                            <div>
-                              <h3 className="font-brand text-sm sm:text-base font-bold text-am-text-primary tracking-tight">Insights Estratégicos</h3>
-                              <p className="text-[10px] text-am-text-secondary mt-0.5 font-mono uppercase tracking-widest">Recomendações</p>
-                            </div>
-                          </div>
-                          <div className="flex gap-3 rounded-lg border border-am-border-default bg-am-surface px-3 py-3 shadow-sm hover:bg-am-surface-subtle transition-colors">
-                            <div className="mt-0.5 shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-am-brand-primary/10">
-                              <AlertTriangle className="h-4 w-4 text-am-brand-primary" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-[13px] font-medium text-am-text-primary">Ajuste de Rota Detectado</p>
-                              <p className="mt-0.5 text-[11px] leading-relaxed text-am-text-secondary">Sua retenção em <strong>Contratos Administrativos</strong> caiu 12% nas últimas métricas. Sugiro uma sessão focada hoje.</p>
-                            </div>
-                          </div>
-                          <div className="mt-auto h-9 w-full rounded-am-md bg-am-ai-default flex items-center justify-center text-[11px] font-bold text-white shadow-[0_4px_12px_var(--color-am-ai-glow)] cursor-pointer hover:bg-am-brand-secondary transition-colors">
-                            Aceitar Recomendação
-                          </div>
-                        </div>
-                      </div>
                     </div>
-                  </div>
+                    
+                    <div className="group overflow-hidden bg-card border border-border hover:border-primary/50 transition-all h-full p-10 flex flex-col justify-between relative">
+                        <div className="absolute inset-0 bg-primary/5 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="relative z-10">
+                            <div className="flex group-hover:border-primary/50 text-foreground group-hover:text-primary transition-colors bg-muted w-14 h-14 border border-border rounded-full mb-8 items-center justify-center shadow-lg group-hover:shadow-primary/20">
+                                <Brain className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-2xl font-medium text-foreground tracking-tight mb-4 transition-colors text-glow">Ajuste Fino por IA</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed font-light transition-colors">
+                                Se a sua retenção caiu, a IA percebe antes de você e injeta na sua agenda a sessão exata para reverter o quadro do conhecimento.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="group overflow-hidden bg-card border border-border hover:border-border/80 transition-all h-full p-10 flex flex-col justify-between">
+                        <div>
+                            <div className="flex group-hover:border-primary/50 group-hover:text-primary transition-colors text-foreground bg-muted w-14 h-14 border border-border rounded-full mb-8 items-center justify-center">
+                                <TrendingUp className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-2xl font-medium text-foreground tracking-tight mb-4 transition-colors">Multi-Edital Nativo</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed font-light transition-colors">
+                                Gerencie o peso estratégico de cada matéria entre múltiplos editais simultaneamente sem enlouquecer e maximizando aprovações.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
         </section>
 
-        {/* Feature: The Problem vs The System */}
-        <section className="py-24 bg-am-surface border-y border-white/[0.02]">
-          <div className="mx-auto max-w-7xl px-6">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="font-brand text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">O Fim da &quot;Força Bruta&quot; e Ansiedade</h2>
-              <p className="text-am-text-secondary">O cenário atual de concursos vende a ilusão de que 12h líquidas te aprovam. Nós provamos que 4h líquidas bem direcionadas ganham o jogo.</p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: Target,
-                  title: 'Tracking Milimétrico',
-                  desc: 'Adeus planilhas confusas de excel. Cada segundo da sua sessão abastece o motor analítico e reconstrói o seu edital dinamicamente.',
-                  color: 'text-am-brand-primary',
-                  bg: 'bg-am-brand-primary/10'
-                },
-                {
-                  icon: Brain,
-                  title: 'Ajuste Fino por IA',
-                  desc: 'Se a sua retenção em Contratos Administrativos caiu, a IA percebe antes de você e injeta na sua agenda a sessão exata para reverter o quadro.',
-                  color: 'text-am-ai-default',
-                  bg: 'bg-am-ai-default/10'
-                },
-                {
-                  icon: TrendingUp,
-                  title: 'Multi-Edital Nativo',
-                  desc: 'Estuda para TSE e TRTs ao mesmo tempo? Gerencie o peso estratégico de cada matéria entre múltiplos editais sem enlouquecer.',
-                  color: 'text-am-brand-secondary',
-                  bg: 'bg-am-brand-secondary/10'
-                }
-              ].map((f, i) => (
-                <div key={i} className="rounded-2xl border border-white/[0.04] bg-am-surface-elevated p-8 hover:bg-white/[0.02] transition-colors">
-                  <div className={`mb-6 flex h-12 w-12 items-center justify-center rounded-xl ${f.bg}`}>
-                    <f.icon className={`h-6 w-6 ${f.color}`} />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">{f.title}</h3>
-                  <p className="text-am-text-secondary leading-relaxed">{f.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Deep Dive Section */}
-        <section className="py-32 relative overflow-hidden">
-          <div className="mx-auto max-w-7xl px-6">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <div>
-                <Badge variant="ai" className="mb-4">
-                  <Brain className="h-3 w-3 mr-1" /> Diagnóstico Preditivo
-                </Badge>
-                <h2 className="font-brand text-4xl font-bold tracking-tight text-white mb-6">Mentoria Analítica e <br /><span className="text-am-ai-default">Decisão Implacável</span></h2>
-                <p className="text-lg text-am-text-secondary mb-8">
-                  O SmartSchedule do AprovaMind não monta uma grade fixa de horários de colégio. Ele analisa o <strong>seu mapa de calor</strong>, suas taxas de acerto e sugere a <strong>próxima melhor sessão</strong> que maximiza a sua curva de esquecimento.
+        {/* CTA Bottom Section */}
+        <section className="py-32 bg-background border-b border-border">
+            <div className="max-w-3xl mx-auto px-6 text-center">
+                <h2 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground mb-6 transition-colors">
+                    Preparado para jogar de forma Estratégica?
+                </h2>
+                <p className="text-lg text-muted-foreground font-light mb-12">
+                    Abandone a ilusão de cobrir 100% de materiais gigantes. Mude para um planejamento cirúrgico e adaptativo guiado por resultados reais.
                 </p>
-                <ul className="space-y-4">
-                  {['Relocalização de Tempo Ocioso', 'Previsão de Declínio de Memória', 'Priorização de Blocos Críticos do Edital'].map((item, i) => (
-                    <li key={i} className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-am-success" />
-                      <span className="text-am-text-primary font-medium">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-0 bg-am-ai-glow/20 blur-[80px] rounded-full" />
-                <div className="relative rounded-2xl border border-am-ai-border/40 bg-am-surface p-8 shadow-2xl backdrop-blur-md">
-                  {/* Component preview */}
-                  <div className="space-y-4">
-                    <div className="h-4 pl-1 text-[10px] font-mono text-am-text-tertiary uppercase tracking-wider">Mentor IA</div>
-                    <div className="p-4 rounded-lg bg-am-surface-subtle border border-white/[0.05]">
-                      <p className="text-am-text-secondary text-sm">&quot;Notei que a sua precisão média em <strong className="text-white">Direito Administrativo</strong> caiu para 64% na última bateria. Como esta disciplina representa 18% do Edital 1, sugiro que a próxima sessão de 50min foque na re-leitura de Licitações.&quot;</p>
-                    </div>
-                    <Button variant="premium" className="w-full mt-2">Acionar Modo Resgate</Button>
-                  </div>
-                </div>
-              </div>
+                <Link href="/login" className="inline-flex px-10 py-5 text-primary-foreground text-xs font-semibold uppercase tracking-widest transition-all duration-300 shadow-lg bg-primary hover:opacity-90 shadow-primary/20 hover:shadow-primary/40 items-center justify-center gap-3">
+                    Estudar com AprovaMind
+                    <ChevronRight className="w-4 h-4" />
+                </Link>
             </div>
-          </div>
-        </section>
-
-        <section className="py-24 border-t" style={{ background: 'var(--am-bg-surface)', borderColor: 'var(--am-border-default)' }}>
-          <div className="mx-auto max-w-3xl px-6 text-center">
-            <h2 className="font-brand text-3xl font-bold text-white mb-6">Preparado para jogar com Estratégia?</h2>
-            <p className="text-am-text-secondary mb-10">Junte-se a candidatos que trocaram a ansiedade de cobrir 100% de materiais gigantescos por um planejamento cirúrgico e adaptativo.</p>
-            <Button asChild variant="primary" size="lg" className="h-14 px-10 text-base shadow-[0_0_20px_var(--color-am-brand-primary)]">
-              <Link href="/login">Criar Minha Conta Gratuita <ChevronRight className="ml-2 h-5 w-5" /></Link>
-            </Button>
-          </div>
         </section>
       </main>
 
-      <footer className="border-t border-white/[0.05] bg-am-surface-subtle py-12">
-        <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2 opacity-50">
-            <Zap className="h-5 w-5" />
-            <span className="font-brand font-bold text-white">AprovaMind</span>
-          </div>
-          <p className="text-sm text-am-text-tertiary">
-            © {new Date().getFullYear()} AprovaMind. Sistema de Performance para Concurseiros.
-          </p>
+      {/* Footer */}
+      <footer className="py-12 bg-background z-20 relative">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-border pt-8">
+            <div className="flex items-center gap-2 opacity-50">
+                <Zap className="w-4 h-4 text-foreground" />
+                <span className="font-medium tracking-tight text-foreground text-sm">AprovaMind</span>
+            </div>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest">
+                © {new Date().getFullYear()} Sistema de Performance
+            </p>
         </div>
       </footer>
     </div>

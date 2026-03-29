@@ -51,18 +51,18 @@ export default function Header({
   }, []);
 
   return (
-    <header className="relative z-50 border-b border-am-border-default bg-gray-950/80 backdrop-blur-xl">
+    <header className="relative z-50 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         {/* Logo & Nome */}
         <div className="flex items-center gap-3 self-start sm:self-auto">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-blue-500 shadow-lg shadow-[#3150AA]/25">
-            <Zap className="h-5 w-5 text-am-text-primary" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/20 shadow-lg shadow-[var(--primary)]/25">
+            <Zap className="h-5 w-5 text-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-am-text-primary">
-              Aprova<span className="text-[#F59768]">Mind</span>
+            <h1 className="text-xl font-bold text-foreground">
+              Aprova<span className="text-[var(--primary)]">Mind</span>
             </h1>
-            <p className="hidden text-xs text-gray-500 sm:block">
+            <p className="hidden text-xs text-muted-foreground sm:block">
               Rastreie seu progresso
             </p>
           </div>
@@ -102,7 +102,7 @@ export default function Header({
             <div ref={menuRef} className="relative shrink-0">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="flex items-center gap-2 rounded-lg border border-am-border-default px-2.5 py-2 text-sm text-gray-300 transition-colors hover:border-am-border-default hover:bg-gray-900"
+                className="flex items-center gap-2 rounded-lg border border-border px-2.5 py-2 text-sm text-gray-300 transition-colors hover:border-border hover:bg-card"
               >
                 {user.photoURL ? (
                   <Image
@@ -110,41 +110,41 @@ export default function Header({
                     alt={user.displayName || 'Avatar'}
                     width={28}
                     height={28}
-                    className="rounded-full ring-2 ring-violet-500/30"
+                    className="rounded-full ring-2 ring-primary/30"
                   />
                 ) : (
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-800">
-                    <User className="h-4 w-4 text-gray-400" />
+                    <User className="h-4 w-4 text-muted-foreground" />
                   </div>
                 )}
                 <span className="hidden max-w-[140px] truncate sm:inline">
                   {user.displayName || user.email}
                 </span>
-                <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-am-border-default bg-gray-900 shadow-2xl shadow-black/50">
-                  <div className="border-b border-am-border-default px-3 py-2.5">
-                    <p className="truncate text-sm font-medium text-am-text-primary">{user.displayName || 'Usuário'}</p>
-                    <p className="truncate text-xs text-gray-400">{user.email}</p>
+                <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-border bg-card shadow-2xl shadow-black/50">
+                  <div className="border-b border-border px-3 py-2.5">
+                    <p className="truncate text-sm font-medium text-foreground">{user.displayName || 'Usuário'}</p>
+                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                   </div>
 
-                  <div className="space-y-1 border-b border-am-border-default px-3 py-2.5">
-                    <p className="inline-flex items-center gap-1 text-xs text-gray-400">
-                      <Crown className="h-3.5 w-3.5 text-violet-300" />
+                  <div className="space-y-1 border-b border-border px-3 py-2.5">
+                    <p className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                      <Crown className="h-3.5 w-3.5 text-primary" />
                       Plano atual
                     </p>
-                    <p className="text-sm font-medium uppercase text-violet-300">{planTier}</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-sm font-medium uppercase text-primary">{planTier}</p>
+                    <p className="text-xs text-muted-foreground">
                       {isUnlimited(capabilities.maxStudyPlans)
                         ? 'Editais ilimitados'
                         : `Editais: ${plans.length}/${capabilities.maxStudyPlans}`}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-muted-foreground">
                       Calendário: {capabilities.canUseCalendar ? 'incluído' : 'bloqueado no Free'}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-muted-foreground">
                       Simulados: {capabilities.canCreateSimulados ? 'incluído' : 'bloqueado no Free'}
                     </p>
                   </div>
@@ -155,9 +155,9 @@ export default function Header({
                         setMenuOpen(false);
                         setAccountModalOpen(true);
                       }}
-                      className="mb-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-gray-200 transition-colors hover:bg-am-surface-subtle"
+                      className="mb-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-gray-200 transition-colors hover:bg-muted"
                     >
-                      <CreditCard className="h-4 w-4 text-violet-300" />
+                      <CreditCard className="h-4 w-4 text-primary" />
                       Conta e plano
                     </button>
                     <button

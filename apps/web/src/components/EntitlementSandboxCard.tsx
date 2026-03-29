@@ -76,26 +76,26 @@ export default function EntitlementSandboxCard({
         <div>
           <div className="flex items-center gap-2">
             <Beaker className="h-4 w-4 text-am-warning" />
-            <h2 className="font-brand text-am-body font-bold text-am-text-primary tracking-wide">
+            <h2 className="font-sans text-am-body font-bold text-foreground tracking-wide">
               Sandbox de Entitlements
             </h2>
           </div>
-          <p className="mt-2 text-am-body-sm text-am-text-secondary">
+          <p className="mt-2 text-am-body-sm text-muted-foreground">
             {'Troque o cenario do plano para validar a jornada `free -> pro -> premium` no navegador sem gateway.'}
           </p>
         </div>
         <Badge variant="outline">Local</Badge>
       </div>
 
-      <div className="mb-4 rounded-am-md border border-am-border-default bg-am-surface-subtle p-3 text-sm text-am-text-secondary">
+      <div className="mb-4 rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">
         Cenario ativo:{' '}
-        <span className="font-semibold text-am-text-primary">
+        <span className="font-semibold text-foreground">
           {selectedScenarioUserId ?? 'usuario real'}
         </span>
       </div>
 
       {error && (
-        <div className="mb-4 rounded-am-md border border-am-error/20 bg-am-error/10 p-3 text-sm text-am-error">
+        <div className="mb-4 rounded-md border border-am-error/20 bg-am-error/10 p-3 text-sm text-am-error">
           {error}
         </div>
       )}
@@ -124,7 +124,7 @@ export default function EntitlementSandboxCard({
         })}
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3 text-xs text-am-text-tertiary">
+      <div className="mt-4 flex items-center justify-between gap-3 text-xs text-muted-foreground">
         <span>
           {loading
             ? 'Carregando cenarios da API local...'
@@ -133,7 +133,7 @@ export default function EntitlementSandboxCard({
         <button
           type="button"
           onClick={() => dispatchEntitlementsUpdated()}
-          className="inline-flex items-center gap-1 text-am-text-secondary transition hover:text-am-text-primary"
+          className="inline-flex items-center gap-1 text-muted-foreground transition hover:text-foreground"
         >
           <RefreshCcw className="h-3.5 w-3.5" />
           Atualizar

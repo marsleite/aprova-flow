@@ -18,7 +18,7 @@ export function InsightCardAI({ diagnosis, recommendation, confidence, ctaText, 
             <div className="flex items-center justify-between">
                 <Badge variant="ai">AI INSIGHT</Badge>
                 {confidence !== undefined && (
-                    <span className="text-am-caption font-semibold text-am-ai-default font-mono">
+                    <span className="text-am-caption font-semibold text-primary font-mono">
                         {confidence}% CONFIANÇA
                     </span>
                 )}
@@ -32,10 +32,10 @@ export function InsightCardAI({ diagnosis, recommendation, confidence, ctaText, 
                 </div>
             ) : (
                 <div className="space-y-3 flex-1">
-                    <p className="font-brand text-am-body-lg font-bold text-am-text-primary leading-snug">
+                    <p className="font-sans text-am-body-lg font-bold text-foreground leading-snug">
                         {diagnosis}
                     </p>
-                    <p className="text-am-body-sm text-am-text-secondary leading-relaxed">
+                    <p className="text-am-body-sm text-muted-foreground leading-relaxed">
                         {recommendation}
                     </p>
                 </div>

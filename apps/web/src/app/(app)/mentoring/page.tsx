@@ -108,15 +108,15 @@ export default function MentoringPage() {
   return (
     <div className="flex flex-col gap-6 pb-12">
       {/* ── Topbar ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 px-6 border-b border-am-border-default bg-am-surface/30 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 px-6 border-b border-border bg-card/30 backdrop-blur-md">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-am-ai-default mb-2 flex items-center gap-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-1.5">
             <Sparkles className="h-3 w-3" /> Mentoria Analítica
           </p>
-          <h1 className="font-brand text-am-h2 md:text-[42px] font-bold text-am-text-primary tracking-tight leading-[1.1]">
+          <h1 className="font-sans text-am-h2 md:text-[42px] font-bold text-foreground tracking-tight leading-[1.1]">
             Mentoria & <br className="sm:hidden" /> Diagnóstico
           </h1>
-          <p className="text-am-body-sm text-am-text-secondary mt-4 max-w-xl leading-relaxed">
+          <p className="text-am-body-sm text-muted-foreground mt-4 max-w-xl leading-relaxed">
             Leituras orientadas da sua semana para identificar lacunas de retenção,
             redistribuir esforço e decidir o próximo ajuste com mais clareza.
           </p>
@@ -167,32 +167,32 @@ export default function MentoringPage() {
           <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show" className="space-y-6">
             {/* Log IA */}
             <ChartCard title="Log de Ajustes IA" subtitle="Micro-correções de rota" loading={loading}>
-              <div className="relative space-y-4 pl-4 before:absolute before:inset-y-0 before:left-[7px] before:w-[2px] before:bg-am-border-strong rounded-am-md">
+              <div className="relative space-y-4 pl-4 before:absolute before:inset-y-0 before:left-[7px] before:w-[2px] before:bg-am-border-strong rounded-md">
                 {planVsActual.length > 0 ? (
                   <>
                     {neglected.slice(0, 2).map((pva, i) => (
                       <div key={pva.subject} className="relative">
-                        <div className={`absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-am-surface ${i === 0 ? 'bg-am-ai-default shadow-[0_0_8px_var(--color-am-ai-glow)]' : 'bg-am-border-strong'}`} />
-                        <div className="bg-am-surface-elevated p-3 rounded-am-md border border-am-border-default shadow-am-sm">
-                          <p className="text-am-caption text-am-text-tertiary font-mono">{i === 0 ? 'HOJE' : 'ONTEM'}</p>
-                          <p className="font-semibold text-am-body-sm text-am-text-primary">Ajuste de Carga</p>
-                          <p className="text-am-caption text-am-text-secondary mt-1">{pva.subject}: <span className="text-am-error font-medium">{Math.abs(pva.deviation).toFixed(0)}% sugerido</span></p>
+                        <div className={`absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-am-surface ${i === 0 ? 'bg-primary shadow-[0_0_8px_var(--color-am-ai-glow)]' : 'bg-am-border-strong'}`} />
+                        <div className="bg-card p-3 rounded-md border border-border shadow-am-sm">
+                          <p className="text-am-caption text-muted-foreground font-mono">{i === 0 ? 'HOJE' : 'ONTEM'}</p>
+                          <p className="font-semibold text-am-body-sm text-foreground">Ajuste de Carga</p>
+                          <p className="text-am-caption text-muted-foreground mt-1">{pva.subject}: <span className="text-am-error font-medium">{Math.abs(pva.deviation).toFixed(0)}% sugerido</span></p>
                         </div>
                       </div>
                     ))}
                     {strengths.slice(0, 1).map((pva) => (
                       <div key={pva.subject} className="relative">
-                        <div className="absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-am-surface bg-am-success" />
-                        <div className="bg-am-surface-elevated p-3 rounded-am-md border border-am-border-default shadow-am-sm">
-                          <p className="text-am-caption text-am-text-tertiary font-mono">NESTA SEMANA</p>
-                          <p className="font-semibold text-am-body-sm text-am-text-primary">Marco Atingido</p>
-                          <p className="text-am-caption text-am-text-secondary mt-1">{pva.subject}: cobertura equilibrada.</p>
+                        <div className="absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-am-surface bg-green-500" />
+                        <div className="bg-card p-3 rounded-md border border-border shadow-am-sm">
+                          <p className="text-am-caption text-muted-foreground font-mono">NESTA SEMANA</p>
+                          <p className="font-semibold text-am-body-sm text-foreground">Marco Atingido</p>
+                          <p className="text-am-caption text-muted-foreground mt-1">{pva.subject}: cobertura equilibrada.</p>
                         </div>
                       </div>
                     ))}
                   </>
                 ) : (
-                  <p className="text-am-body-sm text-am-text-secondary">Sem volume estatístico suficiente. Continue estudando.</p>
+                  <p className="text-am-body-sm text-muted-foreground">Sem volume estatístico suficiente. Continue estudando.</p>
                 )}
               </div>
             </ChartCard>
@@ -201,22 +201,22 @@ export default function MentoringPage() {
               <div className="overflow-hidden">
                 <table className="w-full text-am-body-sm">
                   <thead>
-                    <tr className="border-b border-am-border-default bg-am-surface-subtle">
-                      <th className="px-3 py-2 text-left text-am-caption font-semibold uppercase tracking-wider text-am-text-tertiary">Matéria</th>
-                      <th className="px-3 py-2 text-right text-am-caption font-semibold uppercase tracking-wider text-am-text-tertiary">Real</th>
-                      <th className="px-3 py-2 text-right text-am-caption font-semibold uppercase tracking-wider text-am-text-tertiary">Gap</th>
+                    <tr className="border-b border-border bg-muted">
+                      <th className="px-3 py-2 text-left text-am-caption font-semibold uppercase tracking-wider text-muted-foreground">Matéria</th>
+                      <th className="px-3 py-2 text-right text-am-caption font-semibold uppercase tracking-wider text-muted-foreground">Real</th>
+                      <th className="px-3 py-2 text-right text-am-caption font-semibold uppercase tracking-wider text-muted-foreground">Gap</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-am-border-default">
+                  <tbody className="divide-y divide-border">
                     {planVsActual.slice(0, 5).map((pva) => (
                       <tr key={pva.subject}>
-                        <td className="px-3 py-2 text-am-text-secondary truncate max-w-[120px]" title={pva.subject}>{pva.subject}</td>
+                        <td className="px-3 py-2 text-muted-foreground truncate max-w-[120px]" title={pva.subject}>{pva.subject}</td>
                         <td className="px-3 py-2 text-right">
-                          <span className={`font-medium ${pva.actualPercent >= 70 ? 'text-am-success' : pva.actualPercent >= 40 ? 'text-am-warning' : 'text-am-error'}`}>
+                          <span className={`font-medium ${pva.actualPercent >= 70 ? 'text-green-500' : pva.actualPercent >= 40 ? 'text-am-warning' : 'text-am-error'}`}>
                             {pva.actualPercent.toFixed(0)}%
                           </span>
                         </td>
-                        <td className={`px-3 py-2 text-right font-medium font-mono ${pva.deviation >= 0 ? 'text-am-success' : 'text-am-error'}`}>
+                        <td className={`px-3 py-2 text-right font-medium font-mono ${pva.deviation >= 0 ? 'text-green-500' : 'text-am-error'}`}>
                           {pva.deviation > 0 ? '+' : ''}{pva.deviation.toFixed(0)}
                         </td>
                       </tr>
@@ -270,22 +270,22 @@ export default function MentoringPage() {
             )}
 
             {/* AI Action Block Extendido */}
-            <div className="rounded-am-xl border border-am-ai-border/30 bg-am-surface p-6 relative overflow-hidden flex flex-col sm:flex-row gap-6 items-center justify-between" style={{ background: 'linear-gradient(145deg, var(--color-am-surface) 0%, rgba(139,92,246,0.05) 100%)' }}>
+            <div className="rounded-xl border border-border/50/30 bg-card p-6 relative overflow-hidden flex flex-col sm:flex-row gap-6 items-center justify-between" style={{ background: 'linear-gradient(145deg, var(--color-am-surface) 0%, rgba(139,92,246,0.05) 100%)' }}>
               <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
-                <Brain className="h-40 w-40 text-am-ai-default" />
+                <Brain className="h-40 w-40 text-primary" />
               </div>
 
               <div className="flex-1 relative z-10">
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="h-5 w-5 text-am-ai-default" />
-                  <h3 className="font-brand text-am-h5 font-bold text-am-text-primary">Pergunte ao Mentor IA</h3>
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h3 className="font-sans text-am-h5 font-bold text-foreground">Pergunte ao Mentor IA</h3>
                 </div>
-                <p className="text-am-body-sm text-am-text-secondary">A IA do AprovaMind compilou essa base de dados gerencial. Abra o chat contextual para simular cenários de tempo real ou pedir novos roteiros de distribuição.</p>
+                <p className="text-am-body-sm text-muted-foreground">A IA do AprovaMind compilou essa base de dados gerencial. Abra o chat contextual para simular cenários de tempo real ou pedir novos roteiros de distribuição.</p>
               </div>
 
               <div className="w-full sm:w-auto flex-shrink-0 relative z-10 space-y-2">
                 {canUseContextualChat && neglected.length > 0 && (
-                  <button onClick={() => setChatOpen(true)} className="block w-full text-left bg-am-surface-elevated hover:bg-am-ai-default/10 border border-am-border-default hover:border-am-ai-border text-am-body-sm text-am-text-primary transition-colors px-4 py-2.5 rounded-am-md shadow-am-sm">
+                  <button onClick={() => setChatOpen(true)} className="block w-full text-left bg-card hover:bg-primary/10 border border-border hover:border-border/50 text-am-body-sm text-foreground transition-colors px-4 py-2.5 rounded-md shadow-am-sm">
                     Reorganizar {neglected[0].subject}?
                   </button>
                 )}

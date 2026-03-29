@@ -48,7 +48,7 @@ export function normalizeStudyPlanDocument(raw: LegacyStudyPlanDocument): StudyP
     weeklyGoalHours: clampInt(raw.weeklyGoalHours, 1, 80, 10),
     examDate: normalizeDateOnly(raw.examDate, null),
     userPriority: clampInt(raw.userPriority, 1, 5, 3),
-    color: typeof raw.color === 'string' && raw.color ? raw.color : '#8b5cf6',
+    color: typeof raw.color === 'string' && raw.color ? raw.color : 'var(--primary)',
     isDefault: Boolean(raw.isDefault),
     createdAt,
     updatedAt,

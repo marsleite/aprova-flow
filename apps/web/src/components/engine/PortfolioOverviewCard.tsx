@@ -48,10 +48,10 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
                             Multi-Edital
                         </Badge>
                     </div>
-                    <h3 className="font-brand text-am-body-lg font-bold text-am-text-primary tracking-tight">
+                    <h3 className="font-sans text-am-body-lg font-bold text-foreground tracking-tight">
                         Visão Global de Portfólio
                     </h3>
-                    <p className="mt-1 text-am-caption text-am-text-secondary">
+                    <p className="mt-1 text-am-caption text-muted-foreground">
                         Alocação recomendada pelo Motor Estratégico considerando risco, urgência e dados reais.
                     </p>
                 </div>
@@ -72,7 +72,7 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
             </div>
 
             {error ? (
-                <div className="mb-4 rounded-am-md border border-am-error/20 bg-am-error/5 p-4 text-am-error">
+                <div className="mb-4 rounded-md border border-am-error/20 bg-am-error/5 p-4 text-am-error">
                     <div className="flex items-center gap-2 font-semibold text-sm mb-1">
                         <AlertTriangle className="h-4 w-4" /> Falha Crítica
                     </div>
@@ -108,7 +108,7 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
                             <Card key={plan.planId} variant="elevated" padding="none" className="p-4 overflow-hidden relative group transition-colors">
                                 {/* Progress Background */}
                                 <div
-                                    className="absolute left-0 top-0 bottom-0 bg-am-brand-primary/5 transition-all duration-1000 ease-out"
+                                    className="absolute left-0 top-0 bottom-0 bg-primary/5 transition-all duration-1000 ease-out"
                                     style={{ width: `${plan.allocatedPercent}%` }}
                                 />
 
@@ -116,24 +116,24 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-am-surface text-am-text-secondary text-[10px] font-bold ring-1 ring-white/5">
+                                                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-card text-muted-foreground text-[10px] font-bold ring-1 ring-white/5">
                                                     #{index + 1}
                                                 </span>
-                                                <h4 className="font-semibold text-am-text-primary truncate">{plan.planName}</h4>
+                                                <h4 className="font-semibold text-foreground truncate">{plan.planName}</h4>
                                                 {plan.phase === 'post_exam' && <Badge variant="outline" className="text-[10px]">Passou</Badge>}
                                                 {plan.phase === 'final_push' && <Badge variant="warning" className="text-[10px]">Reta Final</Badge>}
                                             </div>
-                                            <p className="text-xs text-am-text-tertiary flex items-center gap-1.5 mt-2">
+                                            <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-2">
                                                 {plan.daysToExam !== null ? (plan.daysToExam > 0 ? `Prova em ${plan.daysToExam} dias` : 'Prova Hoje') : 'Sem data definida'}
                                                 <span className="w-1 h-1 rounded-full bg-am-border-strong"></span>
-                                                <strong className="text-am-text-secondary">{plan.allocatedHours}h</strong> alocadas na semana
+                                                <strong className="text-muted-foreground">{plan.allocatedHours}h</strong> alocadas na semana
                                             </p>
                                         </div>
 
                                         <div className="text-right shrink-0 ml-4">
-                                            <p className="text-[10px] uppercase tracking-wider text-am-text-tertiary mb-0.5">Fatia Ideal</p>
-                                            <p className="text-2xl font-medium tracking-tight text-am-brand-primary">
-                                                {plan.allocatedPercent}<span className="text-sm text-am-text-tertiary ml-0.5">%</span>
+                                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">Fatia Ideal</p>
+                                            <p className="text-2xl font-medium tracking-tight text-primary">
+                                                {plan.allocatedPercent}<span className="text-sm text-muted-foreground ml-0.5">%</span>
                                             </p>
                                         </div>
                                     </div>
@@ -141,18 +141,18 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
                                     {/* Meta Indicators */}
                                     <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-am-border-subtle/50">
                                         <div>
-                                            <span className="text-[10px] uppercase tracking-wider text-am-text-tertiary block mb-0.5">Score Composto</span>
-                                            <span className="text-sm font-semibold text-am-text-primary">{plan.compositeScore}</span>
+                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Score Composto</span>
+                                            <span className="text-sm font-semibold text-foreground">{plan.compositeScore}</span>
                                         </div>
                                         <div>
-                                            <span className="text-[10px] uppercase tracking-wider text-am-text-tertiary block mb-0.5">Risco de Edital</span>
-                                            <span className={`text-sm font-semibold ${plan.riskScore > 60 ? 'text-am-error' : 'text-am-text-primary'}`}>
+                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Risco de Edital</span>
+                                            <span className={`text-sm font-semibold ${plan.riskScore > 60 ? 'text-am-error' : 'text-foreground'}`}>
                                                 {plan.riskScore}
                                             </span>
                                         </div>
                                         <div>
-                                            <span className="text-[10px] uppercase tracking-wider text-am-text-tertiary block mb-0.5">Urgência</span>
-                                            <span className="text-sm font-semibold text-am-text-primary">{plan.urgencyScore}</span>
+                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Urgência</span>
+                                            <span className="text-sm font-semibold text-foreground">{plan.urgencyScore}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -161,14 +161,14 @@ export default function PortfolioOverviewCard({ globalWeeklyBudget = 30 }: Portf
                     </div>
 
                     <div className="flex justify-between items-center px-2">
-                        <div className="flex items-center gap-2 text-am-text-secondary">
+                        <div className="flex items-center gap-2 text-muted-foreground">
                             <Activity className="h-4 w-4" />
                             <span className="text-am-body-sm">
-                                Índice de Dispersão: <strong className="text-am-text-primary">{portfolio.kpis.dispersionIndex}%</strong>
+                                Índice de Dispersão: <strong className="text-foreground">{portfolio.kpis.dispersionIndex}%</strong>
                             </span>
                         </div>
                         {portfolio.sharedSubjects.length > 0 && (
-                            <div className="text-am-body-sm text-am-brand-primary flex items-center gap-1.5 font-medium">
+                            <div className="text-am-body-sm text-primary flex items-center gap-1.5 font-medium">
                                 <Target className="h-4 w-4" />
                                 {portfolio.sharedSubjects.length} matérias compartilhadas ({portfolio.kpis.sharingEfficiencyPercent}% eficiênca)
                             </div>

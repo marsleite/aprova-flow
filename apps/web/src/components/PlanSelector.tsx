@@ -71,7 +71,7 @@ export default function PlanSelector({
       {/* Botão principal */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 rounded-lg border border-am-border-default bg-gray-800/50 px-3 py-2 text-sm text-gray-300 transition-all hover:border-am-border-default hover:bg-gray-800 sm:w-auto sm:py-1.5"
+        className="flex w-full items-center gap-2 rounded-lg border border-border bg-gray-800/50 px-3 py-2 text-sm text-gray-300 transition-all hover:border-border hover:bg-gray-800 sm:w-auto sm:py-1.5"
       >
         {activePlan ? (
           <span
@@ -79,11 +79,11 @@ export default function PlanSelector({
             style={{ backgroundColor: color }}
           />
         ) : (
-          <Layers className="h-3.5 w-3.5 text-gray-500" />
+          <Layers className="h-3.5 w-3.5 text-muted-foreground" />
         )}
         <span className="min-w-0 flex-1 truncate text-left sm:max-w-[160px] sm:flex-none">{label}</span>
         <ChevronDown
-          className={`h-3.5 w-3.5 text-gray-500 transition-transform ${
+          className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${
             open ? 'rotate-180' : ''
           }`}
         />
@@ -97,7 +97,7 @@ export default function PlanSelector({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -5, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute left-0 right-0 top-full z-50 mt-1.5 min-w-[200px] overflow-hidden rounded-xl border border-am-border-default bg-gray-900 shadow-xl shadow-black/40 sm:left-auto sm:right-0 sm:w-[320px]"
+            className="absolute left-0 right-0 top-full z-50 mt-1.5 min-w-[200px] overflow-hidden rounded-xl border border-border bg-card shadow-xl shadow-black/40 sm:left-auto sm:right-0 sm:w-[320px]"
           >
             {/* Opção "Todos" */}
             <button
@@ -106,14 +106,14 @@ export default function PlanSelector({
                 setOpen(false);
               }}
               className={`flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm transition-colors
-                ${!activePlanId ? 'bg-am-surface-subtle text-am-text-primary' : 'text-gray-400 hover:bg-am-surface-subtle hover:text-am-text-primary'}`}
+                ${!activePlanId ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
             >
-              <Layers className="h-3.5 w-3.5 text-gray-500" />
+              <Layers className="h-3.5 w-3.5 text-muted-foreground" />
               <span>Todos os Planos</span>
             </button>
 
             {/* Divider */}
-            <div className="border-t border-am-border-default" />
+            <div className="border-t border-border" />
 
             {/* Planos */}
             {plans.map((plan) => (
@@ -124,7 +124,7 @@ export default function PlanSelector({
                     setOpen(false);
                   }}
                   className={`flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm transition-colors
-                    ${activePlanId === plan.id ? 'bg-am-surface-subtle text-am-text-primary' : 'text-gray-400 hover:bg-am-surface-subtle hover:text-am-text-primary'}`}
+                    ${activePlanId === plan.id ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                 >
                   <span
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -132,7 +132,7 @@ export default function PlanSelector({
                   />
                   <span className="flex-1 truncate">{plan.name}</span>
                   {plan.isDefault && (
-                    <span className="rounded bg-gray-800 px-1.5 py-0.5 text-[9px] text-gray-500">
+                    <span className="rounded bg-gray-800 px-1.5 py-0.5 text-[9px] text-muted-foreground">
                       padrão
                     </span>
                   )}
@@ -147,7 +147,7 @@ export default function PlanSelector({
                       }}
                       title="Editar edital"
                     >
-                      <Pencil className="h-3.5 w-3.5 text-gray-400 hover:text-[#F59768]" />
+                      <Pencil className="h-3.5 w-3.5 text-muted-foreground hover:text-[var(--primary)]" />
                     </button>
                     <button
                       onClick={(e) => {
@@ -161,19 +161,19 @@ export default function PlanSelector({
                   </div>
                 )}
                 {confirmDelete === plan.id && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-900/95 backdrop-blur-sm rounded-xl">
+                  <div className="absolute inset-0 flex items-center justify-center bg-card/95 backdrop-blur-sm rounded-xl">
                     <div className="flex items-center gap-2 px-2">
                       <span className="text-xs text-red-400">Deletar?</span>
                       <button
                         onClick={() => handleDelete(plan.id!)}
                         disabled={deleting}
-                        className="rounded bg-red-600 px-2 py-0.5 text-xs text-am-text-primary transition hover:bg-red-500 disabled:opacity-50"
+                        className="rounded bg-red-600 px-2 py-0.5 text-xs text-foreground transition hover:bg-red-500 disabled:opacity-50"
                       >
                         {deleting ? '...' : 'Sim'}
                       </button>
                       <button
                         onClick={() => setConfirmDelete(null)}
-                        className="text-xs text-gray-500 hover:text-gray-300"
+                        className="text-xs text-muted-foreground hover:text-gray-300"
                       >
                         Não
                       </button>
@@ -184,13 +184,13 @@ export default function PlanSelector({
             ))}
 
             {/* Divider + Novo */}
-            <div className="border-t border-am-border-default" />
+            <div className="border-t border-border" />
             <button
               onClick={() => {
                 onCreatePlan();
                 setOpen(false);
               }}
-              className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-[#F59768] transition-colors hover:bg-[#3150AA]/10"
+              className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm text-[var(--primary)] transition-colors hover:bg-[var(--primary)]/10"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Novo Edital</span>
