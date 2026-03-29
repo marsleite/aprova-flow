@@ -3,6 +3,10 @@ import {
   registerEntitlementRoutes,
   type EntitlementRouteOptions,
 } from './modules/entitlements/routes';
+import { registerAiRoutes } from './modules/ai/routes';
+import { registerEngineRoutes } from './modules/engine/routes';
+import { firebaseAuth } from './plugins/firebase-auth';
+import { featureGuard } from './plugins/feature-guard';
 
 export interface CreateAppOptions {
   entitlements?: EntitlementRouteOptions;
@@ -47,7 +51,19 @@ export function createApp(options: CreateAppOptions = {}) {
     };
   });
 
+  app.register(firebaseAuth, { allowSandbox: true });
+  app.register(featureGuard);
+
   void registerEntitlementRoutes(app, options.entitlements);
+
+  // AI and Engine routes depend on app.authenticate (from firebase-auth plugin).
+  // Registering them as plugins ensures they run after the decorator is available.
+  app.register(async (instance) => {
+    await registerAiRoutes(instance);
+  });
+  app.register(async (instance) => {
+    await registerEngineRoutes(instance);
+  });
 
   return app;
 }

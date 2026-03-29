@@ -1,23 +1,17 @@
 'use client';
 
 import { FeatureCode } from '@aprovamind/domain';
-import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { usePlanContext } from '@/contexts/PlanContext';
 import { useEntitlements } from '@/hooks/useEntitlements';
-import {
-  getStudyConsistency,
-  getRecentSessions,
-} from '@/lib/firebase/sessions';
-import { StudySession, StudyConsistency } from '@/types';
+import { useEngineData } from '@/hooks/useEngineData';
 import StudyTimer from '@/components/StudyTimer';
 import QuestionTrackerCard from '@/components/QuestionTrackerCard';
 import DailyAiPlannerCard from '@/components/DailyAiPlannerCard';
 import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
 import StudyJourneyCard from '@/components/StudyJourneyCard';
 import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
-import { createStudyPlan, setActivePlan } from '@/lib/firebase/plans';
 import { getStudyCapacityHoursForDate } from '@/lib/plans/studyCapacity';
 import {
   CheckCircle2,
@@ -42,51 +36,23 @@ export default function EnginePage() {
   const { user } = useAuthContext();
   const { hasFeature, planTier } = useEntitlements(user?.uid, user?.email);
   const { plans, activePlanId, activePlan: activePlanObj } = usePlanContext();
-  const [recentSessions, setRecentSessions] = useState<StudySession[]>([]);
-  const [consistency, setConsistency] = useState<StudyConsistency | null>(null);
-  const [lastSavedSession, setLastSavedSession] = useState<{ subject: string; duration: number } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [creatingPlan, setCreatingPlan] = useState(false);
+
+  const {
+    recentSessions,
+    consistency,
+    lastSavedSession,
+    loading,
+    creatingPlan,
+    fetchData,
+    handleSessionSaved,
+    handleCreateFreePlan,
+  } = useEngineData({
+    userId: user?.uid,
+    activePlanId,
+    weeklyGoalHours: activePlanObj?.weeklyGoalHours,
+  });
 
   const initialRecoveryMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('recovery') === 'true';
-
-  const filterPlanId = activePlanId || undefined;
-
-  const fetchData = useCallback(async () => {
-    if (!user) return;
-    try {
-      const [recent, cons] = await Promise.all([
-        getRecentSessions(user.uid, 8, filterPlanId),
-        getStudyConsistency(user.uid, filterPlanId, activePlanObj?.weeklyGoalHours).catch(() => null),
-      ]);
-      setRecentSessions(recent);
-      setConsistency(cons);
-    } catch { /* */ } finally {
-      setLoading(false);
-    }
-  }, [user, filterPlanId, activePlanObj?.weeklyGoalHours]);
-
-  useEffect(() => { if (user) fetchData(); }, [fetchData, user, activePlanId]);
-
-  const handleSessionSaved = async (session: { subject: string; duration: number }) => {
-    setLastSavedSession(session);
-    await fetchData();
-  };
-
-  const handleCreateSession = async () => {
-    if (!user || creatingPlan) return;
-    setCreatingPlan(true);
-    try {
-      const name = 'Sessão Livre';
-      const planId = await createStudyPlan(user.uid, {
-        name, subjects: [], weeklyGoalHours: 10, color: '#06b6d4', isDefault: false,
-      });
-      await setActivePlan(user.uid, planId);
-      await fetchData();
-    } finally {
-      setCreatingPlan(false);
-    }
-  };
 
   if (!user) return null;
 
@@ -175,7 +141,7 @@ export default function EnginePage() {
                   plans={plans}
                   activePlanId={activePlanId}
                   onSessionSaved={handleSessionSaved}
-                  onCreateSession={handleCreateSession}
+                  onCreateSession={handleCreateFreePlan}
                   onCreateEdital={() => { }}
                   creatingSession={creatingPlan}
                 />

@@ -105,14 +105,17 @@ export default function QuestionTrackerCard({
       const today = new Date();
       const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-      await saveQuestionSession({
+      const sessionPayload: Parameters<typeof saveQuestionSession>[0] = {
         userId,
-        planId: planId || undefined,
         subject: finalSubject,
         totalQuestions: total,
         correctAnswers: correct,
         date,
-      });
+      };
+      if (planId) {
+        sessionPayload.planId = planId;
+      }
+      await saveQuestionSession(sessionPayload);
 
       const pct = Math.round((correct / total) * 100);
       setSavedAccuracy(pct);

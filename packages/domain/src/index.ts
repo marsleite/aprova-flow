@@ -123,3 +123,9 @@ export {
     computeBonusFactor,
     computeCreditedMinutes,
 } from './services';
+
+// ── AI ──
+export {
+    PromptHeuristics,
+    type AIHeuristicResult,
+} from './ai/PromptHeuristics';

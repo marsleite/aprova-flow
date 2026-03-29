@@ -11,6 +11,23 @@ service cloud.firestore {
                'graceandradeleite@gmail.com'
              ];
     }
+
+    // Helper: recupera o plano atual do usuário
+    function getUserPlan() {
+      return get(/databases/$(database)/documents/user_stats/$(request.auth.uid)).data.planTier;
+    }
+
+    // Helper: verifica se usuário é Pro ou Premium
+    function isProOrPremium() {
+      let plan = getUserPlan();
+      return plan == 'pro' || plan == 'premium' || isAdmin();
+    }
+
+    // Helper: verifica se usuário é Premium
+    function isPremium() {
+      let plan = getUserPlan();
+      return plan == 'premium' || isAdmin();
+    }
     
     // Sessões de estudo
     match /sessions/{sessionId} {
@@ -192,13 +209,15 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Snapshots do plano diário gerado por IA
+    // Snapshots do plano diário gerado por IA (Exclusivo Premium)
     match /daily_ai_plans/{planId} {
       allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
+                  && resource.data.userId == request.auth.uid
+                  && isPremium();
 
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid
+                    && isPremium()
                     && request.resource.data.dateISO is string
                     && request.resource.data.estimatedTotalMinutes is number
                     && request.resource.data.blocksCount is number
@@ -241,13 +260,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Progresso de execução do plano diário (concluir/adiar blocos)
+    // Progresso de execução do plano diário (Exclusivo Premium)
     match /daily_ai_plan_progress/{progressId} {
       allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
+                  && resource.data.userId == request.auth.uid
+                  && isPremium();
 
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid
+                    && isPremium()
                     && request.resource.data.dateISO is string
                     && request.resource.data.planSignature is string
                     && request.resource.data.completedBlocks is list
@@ -288,6 +309,19 @@ service cloud.firestore {
       
       allow delete: if request.auth != null 
                     && resource.data.userId == request.auth.uid;
+    }
+
+    // Mentoria Semanal (Exclusivo Pro/Premium)
+    match /weekly_mentoring/{mentoringId} {
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid
+                  && isProOrPremium();
+
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && isProOrPremium();
+
+      allow update, delete: if false;
     }
     
     // Bloqueia tudo que não esteja permitido

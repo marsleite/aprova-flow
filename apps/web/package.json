@@ -13,9 +13,11 @@
     "typecheck": "tsc --noEmit --project tsconfig.json"
   },
   "dependencies": {
+    "@aprovamind/ai-gateway": "*",
     "@aprovamind/application": "*",
     "@aprovamind/contracts": "*",
     "@aprovamind/domain": "*",
+    "@aprovamind/infrastructure-firebase": "*",
     "@google/genai": "^1.41.0",
     "@radix-ui/react-slot": "^1.2.4",
     "firebase": "^12.9.0",

@@ -16,12 +16,16 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@aprovamind/ai-gateway": ["../../packages/ai-gateway/src/index.ts"],
+      "@aprovamind/ai-gateway/*": ["../../packages/ai-gateway/src/*"],
       "@aprovamind/domain": ["../../packages/domain/src/index.ts"],
       "@aprovamind/domain/*": ["../../packages/domain/src/*"],
       "@aprovamind/application": ["../../packages/application/src/index.ts"],
       "@aprovamind/application/*": ["../../packages/application/src/*"],
       "@aprovamind/contracts": ["../../packages/contracts/src/index.ts"],
-      "@aprovamind/contracts/*": ["../../packages/contracts/src/*"]
+      "@aprovamind/contracts/*": ["../../packages/contracts/src/*"],
+      "@aprovamind/infrastructure-firebase": ["../../packages/infrastructure-firebase/src/index.ts"],
+      "@aprovamind/infrastructure-firebase/*": ["../../packages/infrastructure-firebase/src/*"]
     }
   },
   "include": [

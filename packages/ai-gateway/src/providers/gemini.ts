@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
-import { buildUsage, estimateTokensFromText, extractGeminiUsage } from '@/lib/ai/metrics';
-import { AiPdfRequest, AiResponse, AiTextRequest } from '@/lib/ai/types';
+import { buildUsage, estimateTokensFromText, extractGeminiUsage } from '../metrics';
+import type { AiPdfRequest, AiResponse, AiTextRequest } from '../types';
 import { PromptHeuristics } from '@aprovamind/domain';
 
 function getGeminiApiKey(): string {
@@ -17,7 +17,7 @@ export async function generateGeminiText(params: {
 }): Promise<AiResponse> {
   const startedAt = Date.now();
 
-  // 1. Heurísticas Locais (Custos Zero)
+  // 1. Heurísticas Locais (Custo Zero)
   if (typeof params.request.prompt === 'string') {
     const heuristic = PromptHeuristics.evaluateChatPrompt(params.request.prompt);
     if (!heuristic.requiresLLM) {
@@ -108,7 +108,6 @@ export async function generateGeminiPdf(params: {
   const text = response.text?.trim() || '';
   const usage = extractGeminiUsage(response);
 
-  // Estimativa fallback para PDF: base64 tende a inflar input; mantemos heurística conservadora.
   const inputFallback = Math.max(
     estimateTokensFromText(params.request.prompt),
     Math.ceil((params.request.pdfBase64.length * 0.75) / 4)
