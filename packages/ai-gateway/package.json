@@ -1,0 +1,14 @@
+{
+  "name": "@aprovamind/ai-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@aprovamind/domain": "*",
+    "@google/genai": "^0.14.0"
+  }
+}

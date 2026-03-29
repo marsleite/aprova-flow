@@ -8,6 +8,8 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
+      "@aprovamind/ai-gateway": ["../../packages/ai-gateway/src/index.ts"],
+      "@aprovamind/ai-gateway/*": ["../../packages/ai-gateway/src/*"],
       "@aprovamind/application": ["../../packages/application/src/index.ts"],
       "@aprovamind/application/*": ["../../packages/application/src/*"],
       "@aprovamind/contracts": ["../../packages/contracts/src/index.ts"],

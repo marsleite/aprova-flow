@@ -11,10 +11,12 @@
     "test": "node --import tsx --test src/**/*.test.ts"
   },
   "dependencies": {
+    "@aprovamind/ai-gateway": "*",
     "@aprovamind/application": "*",
     "@aprovamind/contracts": "*",
     "@aprovamind/domain": "*",
     "@aprovamind/infrastructure-firebase": "*",
+    "@google/genai": "^0.14.0",
     "fastify": "^5.6.2",
     "fastify-plugin": "^5.1.0"
   },
