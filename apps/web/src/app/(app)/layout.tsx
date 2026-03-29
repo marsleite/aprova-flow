@@ -74,12 +74,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-am-surface">
+      <div className="flex min-h-screen items-center justify-center bg-card">
         <div className="flex flex-col items-center gap-3">
           <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
             <Zap className="h-6 w-6 text-white" />
           </div>
-          <p className="text-am-caption text-am-text-tertiary uppercase tracking-wider font-mono">Carregando...</p>
+          <p className="text-am-caption text-muted-foreground uppercase tracking-wider font-mono">Carregando...</p>
         </div>
       </div>
     );
@@ -89,7 +89,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <PlanContext.Provider value={planContextValue}>
-      <div className="flex min-h-screen bg-am-canvas">
+      <div className="flex min-h-screen bg-background">
         {/* Sidebar */}
         <Sidebar
           plans={plans}
@@ -102,15 +102,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Main area */}
         <div className="flex-1 w-full min-h-screen flex flex-col lg:pl-64">
           {/* Mobile top bar */}
-          <div className="flex items-center justify-between border-b border-am-border-default bg-am-surface/80 px-4 py-3 backdrop-blur-xl lg:hidden">
+          <div className="flex items-center justify-between border-b border-border bg-card/80 px-4 py-3 backdrop-blur-xl lg:hidden">
             <div className="flex items-center gap-3">
               <MobileMenuButton onClick={() => setMobileOpen(true)} />
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
                   <Zap className="h-3.5 w-3.5 text-white" />
                 </div>
-                <span className="font-brand text-sm font-bold text-am-text-primary">
-                  Aprova<span className="text-am-brand-primary">Mind</span>
+                <span className="font-sans text-sm font-bold text-foreground">
+                  Aprova<span className="text-primary">Mind</span>
                 </span>
               </div>
             </div>

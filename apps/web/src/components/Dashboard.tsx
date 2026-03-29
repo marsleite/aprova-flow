@@ -351,7 +351,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-background">
       <Header
         plans={plans}
         activePlanId={activePlanId}
@@ -387,15 +387,15 @@ export default function Dashboard() {
           animate="show"
           className="mb-8"
         >
-          <h2 className="text-2xl font-bold text-am-text-primary sm:text-3xl">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
             Olá, {user.displayName?.split(' ')[0] || 'Estudante'} 👋
           </h2>
-          <p className="mt-1 text-gray-400">
+          <p className="mt-1 text-muted-foreground">
             {activePlanObj
-              ? <>Focando em <span className="font-medium text-am-text-primary" style={{ color: activePlanObj.color }}>{activePlanObj.name}</span></>
+              ? <>Focando em <span className="font-medium text-foreground" style={{ color: activePlanObj.color }}>{activePlanObj.name}</span></>
               : 'Acompanhe seu progresso e mantenha a consistência nos estudos.'}
           </p>
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             Plano atual: <span className="uppercase text-gray-300">{planTier}</span>
             {!isUnlimited(capabilities.maxStudyPlans) && (
               <>
@@ -435,8 +435,8 @@ export default function Dashboard() {
           className="mb-8"
         >
           <div className="mb-4 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-[#F59768]" />
-            <h3 className="text-lg font-semibold text-am-text-primary">Visão Geral</h3>
+            <TrendingUp className="h-5 w-5 text-[var(--primary)]" />
+            <h3 className="text-lg font-semibold text-foreground">Visão Geral</h3>
           </div>
           <SummaryCards summary={summary} loading={loading} />
         </motion.div>
@@ -512,21 +512,21 @@ export default function Dashboard() {
           className="mb-6"
         >
           <Link href="/provas">
-            <div className="group relative overflow-hidden rounded-2xl border border-gray-700 bg-gradient-to-br from-violet-900/20 to-blue-900/20 p-6 transition-all hover:border-violet-500 hover:shadow-lg hover:shadow-violet-500/20">
+            <div className="group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/20/20 to-primary/20/20 p-6 transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/20/20">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="mb-2 flex items-center gap-2">
-                    <BookOpen className="h-6 w-6 text-[#F59768]" />
-                    <h3 className="text-xl font-semibold text-am-text-primary">Provas & Simulados</h3>
+                    <BookOpen className="h-6 w-6 text-[var(--primary)]" />
+                    <h3 className="text-xl font-semibold text-foreground">Provas & Simulados</h3>
                   </div>
-                  <p className="mb-4 text-sm text-gray-400">
+                  <p className="mb-4 text-sm text-muted-foreground">
                     Pratique com provas oficiais, crie simulados personalizados e teste seus conhecimentos
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full bg-[#3150AA]/10 px-3 py-1 text-xs font-medium text-violet-300">
+                    <span className="rounded-full bg-[var(--primary)]/10 px-3 py-1 text-xs font-medium text-primary">
                       Provas Oficiais
                     </span>
-                    <span className="rounded-full bg-[#3150AA]/10 px-3 py-1 text-xs font-medium text-[#F59768]/80">
+                    <span className="rounded-full bg-[var(--primary)]/10 px-3 py-1 text-xs font-medium text-[var(--primary)]/80">
                       Simulados
                     </span>
                     <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
@@ -535,7 +535,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="flex-shrink-0 opacity-50 transition-opacity group-hover:opacity-100">
-                  <TrendingUp className="h-8 w-8 text-[#F59768]" />
+                  <TrendingUp className="h-8 w-8 text-[var(--primary)]" />
                 </div>
               </div>
             </div>
@@ -741,8 +741,8 @@ export default function Dashboard() {
               loading={loading}
             />
           ) : (
-            <div className="rounded-xl border border-[#3150AA]/30 bg-[#3150AA]/10 p-6">
-              <h3 className="text-lg font-semibold text-am-text-primary">Calendário avançado</h3>
+            <div className="rounded-xl border border-[var(--primary)]/30 bg-[var(--primary)]/10 p-6">
+              <h3 className="text-lg font-semibold text-foreground">Calendário avançado</h3>
               <p className="mt-2 text-sm text-blue-100/90">
                 Disponível nos planos Pro e Premium para organizar sessões com agenda mensal.
               </p>
@@ -757,10 +757,10 @@ export default function Dashboard() {
         animate={{ scale: 1 }}
         transition={{ delay: 1, type: 'spring', stiffness: 200 }}
         onClick={() => setChatOpen(true)}
-        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#F59768] to-[#3150AA] shadow-xl shadow-[#3150AA]/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 sm:bottom-6 sm:right-6"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary)] shadow-xl shadow-[var(--primary)]/25 transition-all hover:shadow-primary/20/40 hover:brightness-110 sm:bottom-6 sm:right-6"
         title="Conversar com o Coach IA"
       >
-        <MessageCircle className="h-6 w-6 text-am-text-primary" />
+        <MessageCircle className="h-6 w-6 text-foreground" />
       </motion.button>
 
       {/* Toast pós-sessão */}

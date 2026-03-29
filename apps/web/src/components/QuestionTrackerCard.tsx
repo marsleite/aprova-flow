@@ -86,7 +86,7 @@ export default function QuestionTrackerCard({
   }, [total, correct]);
 
   const accuracyColor = useMemo(() => {
-    if (accuracy === null) return 'text-gray-500';
+    if (accuracy === null) return 'text-muted-foreground';
     if (accuracy >= 80) return 'text-emerald-400';
     if (accuracy >= 60) return 'text-amber-400';
     return 'text-red-400';
@@ -142,36 +142,36 @@ export default function QuestionTrackerCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
+      className="rounded-xl border border-border bg-card p-5"
     >
       {/* Header */}
       <div className="mb-6 flex items-start gap-3">
-        <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-2">
-          <ClipboardCheck className="h-4 w-4 text-am-text-tertiary" />
+        <div className="rounded-md border border-border bg-muted p-2">
+          <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
         </div>
         <div>
-          <h2 className="font-brand text-am-body-lg font-bold text-am-text-primary tracking-tight">Registro Manual</h2>
-          <p className="text-am-caption text-am-text-secondary mt-0.5 font-mono uppercase tracking-widest">Banco Externo</p>
+          <h2 className="font-sans text-am-body-lg font-bold text-foreground tracking-tight">Registro Manual</h2>
+          <p className="text-am-caption text-muted-foreground mt-0.5 font-mono uppercase tracking-widest">Banco Externo</p>
         </div>
       </div>
 
       {/* Formulário */}
       <div className="space-y-4">
-        <div className="rounded-am-md border border-am-brand-primary/20 bg-am-brand-primary/5 px-3 py-2 text-xs text-am-brand-primary">
+        <div className="rounded-md border border-am-brand-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
           Provas e simulados do AprovaMind já entram automaticamente na taxa de acerto.
         </div>
 
         {/* Matéria */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-am-text-secondary">Matéria</label>
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Matéria</label>
           <input
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             list="question-tracker-subjects"
             disabled={saving}
             placeholder="Selecione ou digite uma matéria..."
-            className="w-full rounded-xl border border-am-border-strong bg-am-surface-subtle px-4 py-2.5 text-sm text-am-text-primary
-                       outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+            className="w-full rounded-xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground
+                       outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20
                        disabled:opacity-50"
           />
           <datalist id="question-tracker-subjects">
@@ -179,7 +179,7 @@ export default function QuestionTrackerCard({
               <option key={s} value={s} />
             ))}
           </datalist>
-          <p className="mt-1.5 text-[11px] text-am-text-secondary">
+          <p className="mt-1.5 text-[11px] text-muted-foreground">
             Se a matéria não existir ainda, é só digitar que a gente salva para as próximas sessões.
           </p>
         </div>
@@ -187,7 +187,7 @@ export default function QuestionTrackerCard({
         {/* Questões + Acertos em grid */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-gray-400">
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
               Total de questões
             </label>
             <input
@@ -198,13 +198,13 @@ export default function QuestionTrackerCard({
               onChange={(e) => setTotalQuestions(e.target.value)}
               disabled={saving}
               placeholder="0"
-              className="w-full rounded-xl border border-am-border-default bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary
-                         outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+              className="w-full rounded-xl border border-border bg-gray-800/50 px-4 py-2.5 text-sm text-foreground
+                         outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20
                          disabled:opacity-50"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-gray-400">
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
               Acertos
             </label>
             <input
@@ -215,12 +215,12 @@ export default function QuestionTrackerCard({
               onChange={(e) => handleCorrectChange(e.target.value)}
               disabled={saving}
               placeholder="0"
-              className={`w-full rounded-xl border bg-gray-800/50 px-4 py-2.5 text-sm text-am-text-primary
+              className={`w-full rounded-xl border bg-gray-800/50 px-4 py-2.5 text-sm text-foreground
                          outline-none transition-all focus:ring-2
                          disabled:opacity-50
                          ${hasOverflow
                   ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-am-border-default focus:border-blue-500 focus:ring-blue-500/20'
+                  : 'border-border focus:border-primary focus:ring-primary/20'
                 }`}
             />
           </div>
@@ -255,7 +255,7 @@ export default function QuestionTrackerCard({
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="flex items-center justify-between rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-border bg-muted px-4 py-3">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
                     <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
@@ -267,7 +267,7 @@ export default function QuestionTrackerCard({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="h-3.5 w-3.5 text-gray-500" />
+                  <BarChart3 className="h-3.5 w-3.5 text-muted-foreground" />
                   <span className={`text-lg font-bold ${accuracyColor}`}>
                     {accuracy}%
                   </span>
@@ -311,7 +311,7 @@ export default function QuestionTrackerCard({
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="flex items-center justify-center gap-2 text-xs text-gray-400"
+                  className="flex items-center justify-center gap-2 text-xs text-muted-foreground"
                 >
                   <span>{savedSubject}</span>
                   <span className="text-gray-600">·</span>
@@ -333,7 +333,7 @@ export default function QuestionTrackerCard({
               exit={{ opacity: 0 }}
               onClick={handleSave}
               disabled={!isValid || saving || hasOverflow}
-              className="flex w-full items-center justify-center gap-2 rounded-am-md border border-am-border-default bg-am-surface-elevated px-4 py-2.5 text-am-body-sm font-medium text-am-text-primary shadow-am-sm transition-colors hover:bg-am-surface-subtle hover:border-am-border-strong disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-card px-4 py-2.5 text-am-body-sm font-medium text-foreground shadow-am-sm transition-colors hover:bg-muted hover:border-border disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
             >
               {saving ? (
                 <>

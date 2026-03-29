@@ -28,25 +28,25 @@ function SidebarItem({ href, icon: Icon, label, isActive, isAi }: SidebarItemPro
         <Link
             href={href}
             className={`
-        group relative flex items-center gap-3 rounded-am-md px-3 py-2.5 text-am-body-sm transition-all duration-200
+        group relative flex items-center gap-3 rounded-md px-3 py-2.5 text-am-body-sm transition-all duration-200
         ${isActive
-                    ? 'bg-am-surface-subtle text-am-text-primary font-medium'
-                    : 'text-am-text-secondary hover:bg-am-surface-subtle/50 hover:text-am-text-primary'
+                    ? 'bg-muted text-foreground font-medium'
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                 }
       `}
         >
             {/* Active Indicator Line */}
             {isActive && (
-                <div className={`absolute left-0 top-1/2 h-2/3 w-[3px] -translate-y-1/2 rounded-r-am-sm ${isAi ? 'bg-am-ai-default' : 'bg-am-brand-primary'}`} />
+                <div className={`absolute left-0 top-1/2 h-2/3 w-[3px] -translate-y-1/2 rounded-r-am-sm ${isAi ? 'bg-primary' : 'bg-primary'}`} />
             )}
 
-            <Icon className={`h-4 w-4 transition-colors ${isActive ? (isAi ? 'text-am-ai-default' : 'text-am-brand-primary') : 'text-am-text-tertiary group-hover:text-am-text-secondary'}`} />
+            <Icon className={`h-4 w-4 transition-colors ${isActive ? (isAi ? 'text-primary' : 'text-primary') : 'text-muted-foreground group-hover:text-muted-foreground'}`} />
 
             <span className="flex-1">{label}</span>
 
             {isAi && (
-                <div className="flex h-4 w-4 items-center justify-center rounded-am-pill bg-am-ai-subtle border border-am-ai-border">
-                    <Sparkles className="h-2.5 w-2.5 text-am-ai-default" />
+                <div className="flex h-4 w-4 items-center justify-center rounded-full bg-am-ai-subtle border border-border/50">
+                    <Sparkles className="h-2.5 w-2.5 text-primary" />
                 </div>
             )}
         </Link>
@@ -69,14 +69,14 @@ export function AppSidebar() {
     const pathname = usePathname();
 
     return (
-        <aside className="fixed inset-y-0 left-0 z-40 flex w-[240px] flex-col border-r border-am-border-default bg-am-bg-canvas">
+        <aside className="fixed inset-y-0 left-0 z-40 flex w-[240px] flex-col border-r border-border bg-background">
             {/* Logo Area */}
             <div className="flex h-16 shrink-0 items-center px-6">
                 <Link href="/dashboard" className="flex items-center gap-2 group">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-am-md bg-am-brand-gradient shadow-am-sm transition-transform duration-300 group-hover:scale-105">
-                        <Zap className="h-4 w-4 text-am-text-primary" />
+                    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-am-brand-gradient shadow-am-sm transition-transform duration-300 group-hover:scale-105">
+                        <Zap className="h-4 w-4 text-foreground" />
                     </div>
-                    <span className="font-brand text-lg font-bold text-am-text-primary tracking-tighter">
+                    <span className="font-sans text-lg font-bold text-foreground tracking-tighter">
                         Aprova<span className="text-am-text-brand">Mind</span>
                     </span>
                 </Link>
@@ -85,7 +85,7 @@ export function AppSidebar() {
             {/* Main Nav */}
             <div className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin">
                 <div className="space-y-1">
-                    <p className="px-3 pb-2 text-am-caption font-semibold uppercase tracking-wider text-am-text-tertiary">Principal</p>
+                    <p className="px-3 pb-2 text-am-caption font-semibold uppercase tracking-wider text-muted-foreground">Principal</p>
                     {NAV_ITEMS.map((item) => (
                         <SidebarItem
                             key={item.href}
@@ -99,7 +99,7 @@ export function AppSidebar() {
                 </div>
 
                 <div className="mt-8 space-y-1">
-                    <p className="px-3 pb-2 text-am-caption font-semibold uppercase tracking-wider text-am-text-tertiary">Evolução</p>
+                    <p className="px-3 pb-2 text-am-caption font-semibold uppercase tracking-wider text-muted-foreground">Evolução</p>
                     {SECONDARY_ITEMS.map((item) => (
                         <SidebarItem
                             key={item.href}
@@ -113,11 +113,11 @@ export function AppSidebar() {
             </div>
 
             {/* Footer Area */}
-            <div className="border-t border-am-border-default p-4">
+            <div className="border-t border-border p-4">
                 <div className="space-y-1">
                     <SidebarItem href="/settings" icon={Settings} label="Configurações" isActive={pathname.startsWith('/settings')} />
-                    <button className="flex w-full items-center gap-3 rounded-am-md px-3 py-2.5 text-am-body-sm text-am-text-secondary hover:bg-am-error/5 hover:text-am-error transition-colors">
-                        <LogOut className="h-4 w-4 text-am-text-tertiary" />
+                    <button className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-am-body-sm text-muted-foreground hover:bg-am-error/5 hover:text-am-error transition-colors">
+                        <LogOut className="h-4 w-4 text-muted-foreground" />
                         <span>Sair da conta</span>
                     </button>
                 </div>

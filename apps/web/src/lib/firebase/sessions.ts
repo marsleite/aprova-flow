@@ -503,7 +503,7 @@ export async function generateInsights(
       title: 'Sugestão para hoje',
       message: `Estude ${neglected[0].subject} para equilibrar seu radar.`,
       icon: 'Lightbulb',
-      color: 'text-violet-400',
+      color: 'text-primary',
     });
   } else if (planVsActual.length > 0) {
     const leastStudied = [...planVsActual].sort(
@@ -514,7 +514,7 @@ export async function generateInsights(
       title: 'Sugestão para hoje',
       message: `${leastStudied.subject} é a matéria com menos horas. Que tal dedicar um tempo a ela?`,
       icon: 'Lightbulb',
-      color: 'text-violet-400',
+      color: 'text-primary',
     });
   }
 
@@ -564,7 +564,7 @@ export async function generateInsights(
       title: 'Quase lá!',
       message: `Faltam apenas ${Math.round(consistency.remainingSeconds / 60)} minutos para bater a meta semanal.`,
       icon: 'Target',
-      color: 'text-cyan-400',
+      color: 'text-primary',
     });
   }
 

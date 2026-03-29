@@ -85,11 +85,11 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
     return (
         <div className="mt-4">
             {!canUseAiExplanations && !explanation && (
-                <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-3 text-sm">
+                <div className="rounded-lg border border-primary/20 bg-primary/20 p-3 text-sm">
                     <div className="flex items-start gap-2">
-                        <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#F59768]" />
+                        <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--primary)]" />
                         <div className="space-y-2">
-                            <p className="text-[#F59768] font-medium">
+                            <p className="text-[var(--primary)] font-medium">
                                 A explicação por IA de cada erro entra no Pro.
                             </p>
                             <p className="text-gray-300/80 text-xs leading-relaxed">
@@ -98,7 +98,7 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                             </p>
                             <Link
                                 href="/settings"
-                                className="inline-flex items-center gap-1 text-xs font-medium text-[#F59768] underline underline-offset-4 hover:text-[#ffb18d]"
+                                className="inline-flex items-center gap-1 text-xs font-medium text-[var(--primary)] underline underline-offset-4 hover:text-[#ffb18d]"
                             >
                                 <Crown className="h-3.5 w-3.5" />
                                 Ver benefícios do Pro
@@ -111,7 +111,7 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
             {canUseAiExplanations && !explanation && !loading && !error && (
                 <button
                     onClick={handleExplain}
-                    className="flex items-center gap-2 px-4 py-2 bg-violet-600/20 hover:bg-violet-600/30 text-[#F59768] rounded-lg transition-colors border border-violet-500/30 text-sm font-medium"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 text-[var(--primary)] rounded-lg transition-colors border border-primary/30 text-sm font-medium"
                 >
                     <Sparkles className="h-4 w-4" />
                     Explicar erro com IA
@@ -119,11 +119,11 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
             )}
 
             {canUseAiExplanations && loading && (
-                <div className="flex items-center gap-3 text-[#F59768] text-sm p-3 bg-[#3150AA]/10 rounded-lg border border-[#3150AA]/20">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-500"></div>
+                <div className="flex items-center gap-3 text-[var(--primary)] text-sm p-3 bg-[var(--primary)]/10 rounded-lg border border-[var(--primary)]/20">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
                     <div>
                         <span className="font-medium">Analisando questão...</span>
-                        <p className="text-xs text-[#F59768]/60 mt-0.5">Consultando legislação e fundamentação jurídica</p>
+                        <p className="text-xs text-[var(--primary)]/60 mt-0.5">Consultando legislação e fundamentação jurídica</p>
                     </div>
                 </div>
             )}
@@ -141,12 +141,12 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
             )}
 
             {canUseAiExplanations && explanation && (
-                <div className="mt-4 p-5 bg-gray-900 border border-violet-500/30 rounded-xl relative overflow-hidden">
+                <div className="mt-4 p-5 bg-card border border-primary/30 rounded-xl relative overflow-hidden">
                     {/* Decorative background glow */}
-                    <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-[#3150AA]/10 blur-3xl rounded-full pointer-events-none"></div>
-                    <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full pointer-events-none"></div>
+                    <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-[var(--primary)]/10 blur-3xl rounded-full pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-primary/20 blur-3xl rounded-full pointer-events-none"></div>
 
-                    <h4 className="flex items-center gap-2 text-[#F59768] font-semibold mb-4">
+                    <h4 className="flex items-center gap-2 text-[var(--primary)] font-semibold mb-4">
                         <Sparkles className="h-4 w-4" />
                         Professor IA — Explicação Fundamentada
                     </h4>
@@ -154,7 +154,7 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                     <div className="space-y-4">
                         {/* Explicação principal */}
                         <div className="flex gap-3 items-start">
-                            <BookOpen className="h-5 w-5 text-[#F59768] mt-0.5 flex-shrink-0" />
+                            <BookOpen className="h-5 w-5 text-[var(--primary)] mt-0.5 flex-shrink-0" />
                             <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
                                 {explanation.text}
                             </p>
@@ -162,10 +162,10 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
 
                         {/* Base legal */}
                         {explanation.legalBasis && (
-                            <div className="flex gap-3 items-start bg-blue-900/20 p-3.5 rounded-lg border border-[#3150AA]/20">
-                                <Scale className="h-5 w-5 text-[#F59768] mt-0.5 flex-shrink-0" />
+                            <div className="flex gap-3 items-start bg-primary/20/20 p-3.5 rounded-lg border border-[var(--primary)]/20">
+                                <Scale className="h-5 w-5 text-[var(--primary)] mt-0.5 flex-shrink-0" />
                                 <div>
-                                    <strong className="text-sm text-[#F59768]/80 block mb-1">📜 Base Legal</strong>
+                                    <strong className="text-sm text-[var(--primary)]/80 block mb-1">📜 Base Legal</strong>
                                     <p className="text-sm text-blue-200/80 leading-relaxed">{explanation.legalBasis}</p>
                                 </div>
                             </div>

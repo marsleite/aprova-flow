@@ -1,81 +1,26 @@
 @import "tailwindcss";
 @import "../design-system/foundations/theme.css";
-@import "../design-system/sitetrip/tokens.css";
-@import "../design-system/sitetrip/components.css";
 
-/* Maintain legacy custom properties so the current app doesnt break */
 @theme inline {
-  /* Legacy */
-  --color-background: #0A0A0A;
-  --color-foreground: #e2e8f0;
-  --color-surface: #0E111B;
-  --color-surface-hover: #141925;
-  --color-primary: #3150AA;
-  --color-accent: #F59768;
-  --color-muted: #666666;
-
-  /* Sitetrip DS Map (st- prefix) */
-  --color-st-canvas: var(--ds-color-canvas);
-  --color-st-canvas-2: var(--ds-color-canvas-2);
-  --color-st-surface-0: var(--ds-color-surface-0);
-  --color-st-surface-1: var(--ds-color-surface-1);
-  --color-st-surface-2: var(--ds-color-surface-2);
-  --color-st-surface-3: var(--ds-color-surface-3);
-
-  --color-st-text-on-dark: var(--ds-color-text-on-dark);
-  --color-st-text-on-light: var(--ds-color-text-on-light);
-  --color-st-text-muted: var(--ds-color-text-muted);
-  --color-st-border-soft: var(--ds-color-border-soft);
-  --color-st-divider: var(--ds-color-divider);
-  --color-st-glass: var(--ds-color-glass);
-
-  --color-st-brand: var(--ds-color-brand);
-  --color-st-brand-mid: var(--ds-color-brand-mid);
-  --color-st-brand-strong: var(--ds-color-brand-strong);
-
-  --color-st-lime: var(--ds-color-accent-lime);
-  --color-st-yellow: var(--ds-color-accent-yellow);
-  --color-st-cyan: var(--ds-color-accent-cyan);
-  --color-st-focus: var(--ds-color-focus);
-  --color-st-danger: var(--ds-color-danger);
-
-  --font-st-body: var(--ds-font-body);
-  --font-st-display: var(--ds-font-display);
-
-  /* New Semantic Tokens (Mapped into TW v4) */
-  --color-am-brand-primary: var(--am-brand-primary);
-  --color-am-brand-primary-hover: var(--am-brand-primary-hover);
-  --color-am-brand-secondary: var(--am-brand-secondary);
-  --color-am-brand-gradient-start: var(--am-brand-gradient-start);
-  --color-am-brand-gradient-end: var(--am-brand-gradient-end);
-
-  --color-am-canvas: var(--am-bg-canvas);
-  --color-am-surface: var(--am-bg-surface);
-  --color-am-surface-subtle: var(--am-bg-surface-subtle);
-  --color-am-surface-elevated: var(--am-bg-elevated);
-
-  --color-am-border-default: var(--am-border-default);
-  --color-am-border-strong: var(--am-border-strong);
-
-  --color-am-text-primary: var(--am-text-primary);
-  --color-am-text-secondary: var(--am-text-secondary);
-  --color-am-text-tertiary: var(--am-text-tertiary);
-  --color-am-text-inverse: var(--am-text-inverse);
-
-  --color-am-ai-default: var(--am-ai-default);
-  --color-am-ai-subtle: var(--am-ai-subtle);
-  --color-am-ai-border: var(--am-ai-border);
-
-  --radius-am-sm: var(--am-radius-sm);
-  --radius-am-md: var(--am-radius-md);
-  --radius-am-lg: var(--am-radius-lg);
-  --radius-am-xl: var(--am-radius-xl);
-  --radius-am-pill: var(--am-radius-pill);
-
-  --font-manrope: var(--font-manrope);
-
-  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
-  --animate-shimmer: shimmer 2s linear infinite;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  
+  --font-sans: var(--font-inter), "Inter", sans-serif;
+  
+  /* Legacy tokens mapping to avoid fatal breaking during transition */
+  --color-am-brand-primary: var(--primary);
+  --color-am-bg-canvas: var(--background);
+  --color-am-text-primary: var(--foreground);
+  --color-am-surface: var(--card);
+  --color-am-border-default: var(--border);
+  --color-am-text-secondary: var(--muted-foreground);
 }
 
 /* ━━━ Global Settings ━━━ */
@@ -83,101 +28,32 @@
   color-scheme: light dark;
 }
 
-html {
-  font-family: var(--font-manrope), sans-serif;
-  scroll-behavior: smooth;
-  /* Dark mode is handled via class 'dark' applied on <html> */
-}
-
-@utility bg-am-brand-gradient {
-  background-image: linear-gradient(135deg, var(--am-brand-gradient-start) 0%, var(--am-brand-gradient-end) 100%);
-}
-
 body {
-  /* Using new tokens for global canvas and text */
-  background-color: var(--am-bg-canvas);
-  color: var(--am-text-primary);
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.font-brand {
-  font-family: var(--font-manrope), sans-serif;
-  letter-spacing: -0.03em;
+.text-glow {
+  text-shadow: var(--text-glow-shadow);
 }
 
-.font-mono {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+.bg-grid-pattern {
+  background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                    linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
 }
 
-/* ===== Animations ===== */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
+.global-nav {
+  background-color: var(--nav-bg);
+  backdrop-filter: blur(12px);
 }
 
-.shimmer {
-  background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.03) 25%,
-      rgba(255, 255, 255, 0.07) 50%,
-      rgba(255, 255, 255, 0.03) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.8s linear infinite;
-}
-
-@keyframes timer-glow {
-
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(154, 117, 240, 0.15),
-      0 0 40px rgba(154, 117, 240, 0.08);
-  }
-
-  50% {
-    box-shadow: 0 0 30px rgba(154, 117, 240, 0.35),
-      0 0 60px rgba(154, 117, 240, 0.18);
-  }
-}
-
-@keyframes glow-pulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 12px rgba(218, 202, 255, 0.1);
-  }
-
-  50% {
-    box-shadow: 0 0 24px rgba(218, 202, 255, 0.25);
-  }
-}
-
-@keyframes pulse-slow {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.6;
-  }
-}
-
-/* ===== Utilities / Layout ===== */
+/* Utilities */
 ::selection {
-  background: var(--am-text-primary);
-  color: var(--am-bg-canvas);
-}
-
-*:focus-visible {
-  outline: 2px solid var(--ds-color-focus, #e6ff5b);
-  outline-offset: 3px;
-  border-radius: var(--am-radius-sm);
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 ::-webkit-scrollbar {
@@ -190,10 +66,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--am-border-strong);
+  background: var(--border);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--am-text-tertiary);
+  background: var(--muted-foreground);
 }

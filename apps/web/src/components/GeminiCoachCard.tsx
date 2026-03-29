@@ -39,9 +39,9 @@ export default function GeminiCoachCard({
   const tip: QuickTip = useMemo(() => {
     if (!consistency) {
       return {
-        icon: <Sparkles className="h-4 w-4 text-[#F59768]" />,
+        icon: <Sparkles className="h-4 w-4 text-[var(--primary)]" />,
         text: 'Configure sua meta semanal e plano de estudo para receber dicas personalizadas.',
-        color: 'border-violet-500/15 bg-violet-500/5',
+        color: 'border-primary/15 bg-primary/20',
       };
     }
 
@@ -70,9 +70,9 @@ export default function GeminiCoachCard({
     if (consistency.weeklyProgressPercent >= 70 && consistency.weeklyProgressPercent < 100) {
       const remainMins = Math.round(consistency.remainingSeconds / 60);
       return {
-        icon: <Target className="h-4 w-4 text-cyan-400" />,
+        icon: <Target className="h-4 w-4 text-primary" />,
         text: `Faltam ${remainMins} min para bater a meta semanal. Você está quase lá!`,
-        color: 'border-cyan-500/15 bg-cyan-500/5',
+        color: 'border-cyan-500/15 bg-primary/20/5',
       };
     }
 
@@ -89,22 +89,22 @@ export default function GeminiCoachCard({
     if (subjectHours.length > 0) {
       const least = [...subjectHours].sort((a, b) => a.hours - b.hours)[0];
       return {
-        icon: <Sparkles className="h-4 w-4 text-[#F59768]" />,
+        icon: <Sparkles className="h-4 w-4 text-[var(--primary)]" />,
         text: `${least.subject} é sua matéria com menos horas. Que tal dedicar um tempo a ela?`,
-        color: 'border-violet-500/15 bg-violet-500/5',
+        color: 'border-primary/15 bg-primary/20',
       };
     }
 
     return {
-      icon: <Sparkles className="h-4 w-4 text-[#F59768]" />,
+      icon: <Sparkles className="h-4 w-4 text-[var(--primary)]" />,
       text: 'Comece a estudar para receber dicas inteligentes do seu coach.',
-      color: 'border-violet-500/15 bg-violet-500/5',
+      color: 'border-primary/15 bg-primary/20',
     };
   }, [consistency, planVsActual, subjectHours, totalTodaySeconds]);
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
+      <div className="rounded-xl border border-border bg-card p-5">
         <div className="mb-3 h-4 w-32 rounded shimmer" />
         <div className="h-12 rounded shimmer" />
       </div>
@@ -116,19 +116,19 @@ export default function GeminiCoachCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="relative overflow-hidden rounded-xl border border-[#3150AA]/20 bg-gradient-to-b from-violet-900/10 to-[#0f1825] p-5"
+      className="relative overflow-hidden rounded-xl border border-[var(--primary)]/20 bg-gradient-to-b from-primary/20/10 to-[#0f1825] p-5"
     >
       {/* Decoração */}
-      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-violet-500/5 blur-xl" />
+      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/20 blur-xl" />
 
       <div className="relative z-10">
         {/* Header */}
         <div className="mb-3 flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/15">
-            <Brain className="h-3.5 w-3.5 text-violet-300" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/20">
+            <Brain className="h-3.5 w-3.5 text-primary" />
           </div>
-          <span className="text-sm font-semibold text-am-text-primary">Coach IA</span>
-          <span className="rounded-md bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-300">
+          <span className="text-sm font-semibold text-foreground">Coach IA</span>
+          <span className="rounded-md bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium text-primary">
             Gemini
           </span>
         </div>
@@ -136,13 +136,13 @@ export default function GeminiCoachCard({
         {/* Dica do dia */}
         <div className={`mb-4 flex items-start gap-2.5 rounded-xl border ${tip.color} px-3.5 py-3`}>
           <div className="mt-0.5 shrink-0">{tip.icon}</div>
-          <p className="text-sm leading-relaxed text-am-text-secondary">{tip.text}</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">{tip.text}</p>
         </div>
 
         {/* Botão conversar */}
         <button
           onClick={onOpenChat}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#F59768] to-[#3150AA] px-4 py-2.5 text-sm font-medium text-am-text-primary shadow-lg shadow-[#3150AA]/15 transition-all hover:shadow-[#3150AA]/25 hover:brightness-110"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary)] px-4 py-2.5 text-sm font-medium text-foreground shadow-lg shadow-[var(--primary)]/15 transition-all hover:shadow-[var(--primary)]/25 hover:brightness-110"
         >
           <MessageCircle className="h-4 w-4" />
           Conversar com o Coach

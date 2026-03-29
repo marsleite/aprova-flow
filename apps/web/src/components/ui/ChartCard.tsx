@@ -15,8 +15,8 @@ export function ChartCard({ title, subtitle, action, loading, children, height =
         <Card className="flex flex-col h-full transition-all duration-300" padding="none">
             <div className="flex items-center justify-between px-8 py-6">
                 <div>
-                    <h3 className="font-brand text-xl font-bold text-am-text-primary tracking-tight">{title}</h3>
-                    {subtitle && <p className="mt-1.5 text-[10px] font-mono uppercase tracking-widest text-am-text-tertiary">{subtitle}</p>}
+                    <h3 className="font-sans text-xl font-bold text-foreground tracking-tight">{title}</h3>
+                    {subtitle && <p className="mt-1.5 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{subtitle}</p>}
                 </div>
                 {action && <div>{action}</div>}
             </div>

@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 
-export interface ButtonProps
-    extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     asChild?: boolean;
     variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'premium';
     size?: 'sm' | 'md' | 'lg' | 'icon';
@@ -12,52 +11,46 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className = '', variant = 'primary', size = 'md', asChild = false, disabled, ...props }, ref) => {
         const Comp = asChild ? Slot : 'button';
 
-        // Base styles — Sitetrip DS pill shape
-        let classes = 'inline-flex items-center justify-center rounded-full font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-am-canvas ';
+        // Base styles — Flux Concept v3.0 brutalist structure
+        let classes = 'inline-flex items-center justify-center font-semibold uppercase tracking-widest transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-50 disabled:pointer-events-none rounded-sm ';
 
         // Size styles
         switch (size) {
             case 'sm':
-                classes += 'h-9 px-4 text-am-caption gap-1.5 ';
+                classes += 'h-10 px-5 text-[10px] gap-2 ';
                 break;
             case 'md':
-                classes += 'h-11 px-5 text-am-body-sm gap-2 ';
+                classes += 'h-12 px-6 text-xs gap-2 ';
                 break;
             case 'lg':
-                classes += 'h-12 px-7 text-am-body-md gap-2.5 ';
+                classes += 'h-14 px-8 text-xs gap-3 ';
                 break;
             case 'icon':
-                classes += 'h-11 w-11 ';
+                classes += 'h-12 w-12 text-xs ';
                 break;
         }
 
-        // Variant styles — Sitetrip brand
+        // Variant styles — Flux brand
         switch (variant) {
             case 'primary':
-                classes += 'bg-am-brand-secondary text-am-text-primary hover:bg-am-brand-secondary-hover shadow-sm focus-visible:ring-am-brand-secondary ';
+            case 'premium':
+                classes += 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:opacity-90 ';
                 break;
             case 'secondary':
-                classes += 'bg-am-surface-elevated text-am-text-primary border border-am-border-strong hover:bg-am-surface-subtle focus-visible:ring-am-border-strong ';
+                classes += 'bg-card text-foreground border border-border hover:border-primary/50 ';
                 break;
             case 'outline':
-                classes += 'border border-am-border-default bg-transparent hover:bg-am-surface-subtle text-am-text-primary focus-visible:ring-am-border-default ';
-                break;
             case 'ghost':
-                classes += 'bg-transparent hover:bg-am-surface-subtle text-am-text-primary focus-visible:ring-am-border-default ';
+                classes += 'border border-border text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground ';
                 break;
             case 'danger':
-                classes += 'bg-am-error/10 text-am-error hover:bg-am-error/20 border border-am-error/20 focus-visible:ring-am-error ';
-                break;
-            case 'premium':
-                classes += 'bg-am-brand-gradient text-am-text-primary hover:brightness-105 shadow-[0_0_20px_rgba(218,202,255,0.2)] focus-visible:ring-am-brand-secondary ';
+                classes += 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 ';
                 break;
         }
-
-        classes += className;
 
         return (
             <Comp
-                className={classes}
+                className={`${classes} ${className}`}
                 ref={ref}
                 disabled={disabled}
                 {...props}

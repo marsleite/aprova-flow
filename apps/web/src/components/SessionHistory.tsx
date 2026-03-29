@@ -327,16 +327,16 @@ export default function SessionHistory({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
+      className="rounded-xl border border-border bg-card p-5"
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3150AA]/10">
-            <History className="h-4 w-4 text-[#F59768]" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)]/10">
+            <History className="h-4 w-4 text-[var(--primary)]" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-am-text-primary">Histórico Completo</h3>
-            <p className="text-xs text-am-text-secondary">
+            <h3 className="text-sm font-semibold text-foreground">Histórico Completo</h3>
+            <p className="text-xs text-muted-foreground">
               {sessions.length} {sessions.length === 1 ? 'sessão' : 'sessões'} encontradas
             </p>
           </div>
@@ -345,7 +345,7 @@ export default function SessionHistory({
         <div className="flex flex-wrap gap-2">
           <button
             onClick={openCreateForm}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs text-am-text-primary transition hover:bg-blue-500"
+            className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs text-foreground transition hover:bg-primary/90"
           >
             <Plus className="h-3.5 w-3.5" />
             Adicionar tempo
@@ -354,14 +354,14 @@ export default function SessionHistory({
           <button
             onClick={() => setFiltersOpen((v) => !v)}
             className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition ${hasFilters
-              ? 'border-blue-500/40 text-[#F59768]/80'
-              : 'border-am-border-strong text-am-text-secondary hover:text-am-text-primary'
+              ? 'border-primary/40 text-primary'
+              : 'border-border text-muted-foreground hover:text-foreground'
               }`}
           >
             <Filter className="h-3.5 w-3.5" />
             Filtros
             {hasFilters && (
-              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] text-am-text-primary">
+              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-foreground">
                 !
               </span>
             )}
@@ -375,7 +375,7 @@ export default function SessionHistory({
           <button
             onClick={() => exportSessionsCSV(sessions)}
             disabled={sessions.length === 0}
-            className="flex items-center gap-1.5 rounded-lg border border-am-border-strong px-3 py-1.5 text-xs text-am-text-secondary transition hover:text-am-text-primary disabled:opacity-40"
+            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:text-foreground disabled:opacity-40"
           >
             <Download className="h-3.5 w-3.5" />
             CSV
@@ -391,13 +391,13 @@ export default function SessionHistory({
             exit={{ height: 0, opacity: 0 }}
             className="mb-4 overflow-hidden"
           >
-              <div className="grid gap-3 rounded-xl border border-am-border-default bg-am-surface-subtle p-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-3 rounded-xl border border-border bg-muted p-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <label className="mb-1 block text-xs text-gray-400">Matéria</label>
+                <label className="mb-1 block text-xs text-muted-foreground">Matéria</label>
                 <select
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
+                  className="w-full rounded-lg border border-border bg-gray-800/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
                 >
                   <option value="">Todas</option>
                   {subjectOptions.map((s) => (
@@ -409,34 +409,34 @@ export default function SessionHistory({
               </div>
 
               <div>
-                <label className="mb-1 block text-xs text-gray-400">De</label>
+                <label className="mb-1 block text-xs text-muted-foreground">De</label>
                 <input
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
+                  className="w-full rounded-lg border border-border bg-gray-800/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs text-gray-400">Até</label>
+                <label className="mb-1 block text-xs text-muted-foreground">Até</label>
                 <input
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
+                  className="w-full rounded-lg border border-border bg-gray-800/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs text-gray-400">Duração mín. (min)</label>
+                <label className="mb-1 block text-xs text-muted-foreground">Duração mín. (min)</label>
                 <input
                   type="number"
                   min={0}
                   value={minMinutes}
                   onChange={(e) => setMinMinutes(e.target.value)}
                   placeholder="0"
-                  className="w-full rounded-lg border border-am-border-default bg-gray-800/60 px-3 py-2 text-sm text-am-text-primary outline-none focus:border-violet-500"
+                  className="w-full rounded-lg border border-border bg-gray-800/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
                 />
               </div>
             </div>
@@ -444,7 +444,7 @@ export default function SessionHistory({
             {hasFilters && (
               <button
                 onClick={clearFilters}
-                className="mt-2 flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300"
+                className="mt-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-gray-300"
               >
                 <X className="h-3 w-3" />
                 Limpar filtros
@@ -452,7 +452,7 @@ export default function SessionHistory({
             )}
 
             {activePlanName && planSubjectNames.length > 0 && (
-              <div className="mt-3 flex items-start gap-2 rounded-xl border border-am-brand-primary/20 bg-am-brand-primary/5 px-3 py-2 text-xs text-am-brand-primary">
+              <div className="mt-3 flex items-start gap-2 rounded-xl border border-am-brand-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
                 <BookOpen className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>
                   Filtro e formulário priorizam as matérias do plano ativo <strong>{activePlanName}</strong>.
@@ -466,7 +466,7 @@ export default function SessionHistory({
       {loading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex animate-pulse items-center gap-3 rounded-xl bg-gray-900/50 px-4 py-3">
+            <div key={i} className="flex animate-pulse items-center gap-3 rounded-xl bg-card/50 px-4 py-3">
               <div className="h-2 w-2 rounded-full bg-gray-800" />
               <div className="flex-1 space-y-1">
                 <div className="h-4 w-32 rounded bg-gray-800" />
@@ -478,8 +478,8 @@ export default function SessionHistory({
         </div>
       ) : sessions.length === 0 ? (
         <div className="flex flex-col items-center py-10 text-center">
-          <Search className="mb-2 h-8 w-8 text-am-text-tertiary" />
-          <p className="text-sm text-am-text-secondary">
+          <Search className="mb-2 h-8 w-8 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
             {hasFilters ? 'Nenhuma sessão com esses filtros' : 'Nenhuma sessão registrada'}
           </p>
         </div>
@@ -489,14 +489,14 @@ export default function SessionHistory({
             {paginatedSessions.map((s, idx) => (
               <div
                 key={s.id || idx}
-                className="flex flex-col gap-2 rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-2.5 transition-colors hover:bg-am-surface-subtle sm:flex-row sm:items-center sm:gap-3"
+                className="flex flex-col gap-2 rounded-xl border border-border bg-muted px-4 py-2.5 transition-colors hover:bg-muted sm:flex-row sm:items-center sm:gap-3"
               >
-                <div className="h-2 w-2 shrink-0 rounded-full bg-violet-400" />
+                <div className="h-2 w-2 shrink-0 rounded-full bg-primary" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-am-text-primary">{s.subject}</p>
+                  <p className="truncate text-sm font-medium text-foreground">{s.subject}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {s.source === 'manual' && (
-                      <span className="rounded-md bg-am-brand-primary/15 px-2 py-0.5 text-[10px] font-medium text-am-brand-primary">
+                      <span className="rounded-md bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">
                         Manual
                       </span>
                     )}
@@ -506,10 +506,10 @@ export default function SessionHistory({
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-am-text-secondary">
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
                     {formatDuration(s.duration)}
-                    <span className="text-am-text-tertiary">·</span>
+                    <span className="text-muted-foreground">·</span>
                     {s.startTime &&
                       new Date(s.startTime).toLocaleTimeString('pt-BR', {
                         hour: '2-digit',
@@ -524,12 +524,12 @@ export default function SessionHistory({
                 </div>
 
                 <div className="flex items-center gap-2 self-start sm:self-auto">
-                  <span className="rounded-lg bg-am-ai-default/10 px-2.5 py-1 text-xs font-medium text-am-ai-default">
+                  <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
                     {formatRelativeDate(s.date)}
                   </span>
                   <button
                     onClick={() => openEditForm(s)}
-                    className="rounded-lg border border-am-border-default p-1.5 text-am-text-secondary transition hover:text-am-text-primary"
+                    className="rounded-lg border border-border p-1.5 text-muted-foreground transition hover:text-foreground"
                     title="Editar sessão"
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -540,21 +540,21 @@ export default function SessionHistory({
           </div>
 
           {totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-between border-t border-am-border-default pt-3">
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="rounded-lg border border-am-border-default px-2.5 py-1.5 text-xs text-am-text-secondary hover:text-am-text-primary disabled:opacity-30 sm:px-3"
+                className="rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 sm:px-3"
               >
                 Anterior
               </button>
-              <span className="text-xs text-am-text-tertiary">
+              <span className="text-xs text-muted-foreground">
                 {page + 1} de {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="rounded-lg border border-am-border-default px-2.5 py-1.5 text-xs text-am-text-secondary hover:text-am-text-primary disabled:opacity-30 sm:px-3"
+                className="rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30 sm:px-3"
               >
                 Próxima
               </button>
@@ -579,21 +579,21 @@ export default function SessionHistory({
               exit={{ y: 16, opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg rounded-2xl border border-am-border-default bg-am-surface-elevated p-5 shadow-2xl"
+              className="w-full max-w-lg rounded-2xl border border-border bg-card p-5 shadow-2xl"
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div>
-                  <h4 className="text-lg font-semibold text-am-text-primary">
+                  <h4 className="text-lg font-semibold text-foreground">
                     {editingSession ? 'Editar sessão' : 'Adicionar sessão manual'}
                   </h4>
-                  <p className="text-xs text-am-text-secondary">
+                  <p className="text-xs text-muted-foreground">
                     Ajuste o tempo real estudado quando o timer não refletir sua sessão.
                   </p>
                 </div>
                 <button
                   onClick={closeForm}
                   disabled={saving}
-                  className="rounded-lg border border-am-border-default p-1.5 text-am-text-secondary transition hover:text-am-text-primary disabled:opacity-50"
+                  className="rounded-lg border border-border p-1.5 text-muted-foreground transition hover:text-foreground disabled:opacity-50"
                   title="Fechar"
                 >
                   <X className="h-4 w-4" />
@@ -602,13 +602,13 @@ export default function SessionHistory({
 
               <form onSubmit={handleSubmitSession} className="space-y-3">
                 {activePlanName && planSubjectNames.length > 0 && (
-                  <div className="rounded-lg border border-am-brand-primary/20 bg-am-brand-primary/5 px-3 py-2 text-xs text-am-brand-primary">
+                  <div className="rounded-lg border border-am-brand-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
                     As sugestões abaixo seguem primeiro as matérias do plano ativo <strong>{activePlanName}</strong>.
                   </div>
                 )}
 
                 <div>
-                  <label className="mb-1 block text-xs text-am-text-secondary">Matéria</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">Matéria</label>
                   <input
                     value={formState.subject}
                     onChange={(e) => {
@@ -616,7 +616,7 @@ export default function SessionHistory({
                       setSaveError('');
                     }}
                     list="session-subject-options"
-                    className="w-full rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2 text-sm text-am-text-primary outline-none focus:border-am-brand-primary"
+                    className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground outline-none focus:border-am-brand-primary"
                     placeholder="Ex: Direito Constitucional"
                     required
                   />
@@ -629,7 +629,7 @@ export default function SessionHistory({
 
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div>
-                    <label className="mb-1 block text-xs text-am-text-secondary">Data</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">Data</label>
                     <input
                       type="date"
                       value={formState.date}
@@ -638,13 +638,13 @@ export default function SessionHistory({
                         setFormState((prev) => ({ ...prev, date: e.target.value }));
                         setSaveError('');
                       }}
-                      className="w-full rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2 text-sm text-am-text-primary outline-none focus:border-am-brand-primary"
+                      className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground outline-none focus:border-am-brand-primary"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs text-am-text-secondary">Início</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">Início</label>
                     <input
                       type="time"
                       value={formState.startTime}
@@ -652,13 +652,13 @@ export default function SessionHistory({
                         setFormState((prev) => ({ ...prev, startTime: e.target.value }));
                         setSaveError('');
                       }}
-                      className="w-full rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2 text-sm text-am-text-primary outline-none focus:border-am-brand-primary"
+                      className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground outline-none focus:border-am-brand-primary"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs text-am-text-secondary">Fim</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">Fim</label>
                     <input
                       type="time"
                       value={formState.endTime}
@@ -666,14 +666,14 @@ export default function SessionHistory({
                         setFormState((prev) => ({ ...prev, endTime: e.target.value }));
                         setSaveError('');
                       }}
-                      className="w-full rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2 text-sm text-am-text-primary outline-none focus:border-am-brand-primary"
+                      className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground outline-none focus:border-am-brand-primary"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2 text-xs text-am-text-secondary">
-                  Tempo calculado: <span className="font-medium text-am-text-primary">{durationPreview > 0 ? formatDuration(durationPreview) : '--'}</span>
+                <div className="rounded-lg border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+                  Tempo calculado: <span className="font-medium text-foreground">{durationPreview > 0 ? formatDuration(durationPreview) : '--'}</span>
                 </div>
 
                 {saveError && (
@@ -687,14 +687,14 @@ export default function SessionHistory({
                     type="button"
                     onClick={closeForm}
                     disabled={saving}
-                    className="rounded-lg border border-am-border-default bg-am-surface px-3 py-2 text-xs text-am-text-secondary transition hover:text-am-text-primary hover:bg-am-surface-subtle disabled:opacity-50"
+                    className="rounded-lg border border-border bg-card px-3 py-2 text-xs text-muted-foreground transition hover:text-foreground hover:bg-muted disabled:opacity-50"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center gap-1.5 rounded-lg bg-am-brand-primary px-3 py-2 text-xs text-white transition hover:brightness-110 disabled:opacity-60"
+                    className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs text-white transition hover:brightness-110 disabled:opacity-60"
                   >
                     {saving ? (
                       <>

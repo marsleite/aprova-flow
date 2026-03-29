@@ -5,8 +5,8 @@
  */
 
 export const fontFamily = {
-    base: 'var(--font-manrope), system-ui, -apple-system, sans-serif',
-    display: 'var(--font-manrope), system-ui, sans-serif',
+    base: 'var(--font-sans), system-ui, -apple-system, sans-serif',
+    display: 'var(--font-sans), system-ui, sans-serif',
     mono: 'var(--font-geist-mono), ui-monospace, monospace',
 } as const;
 

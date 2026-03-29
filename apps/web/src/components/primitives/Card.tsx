@@ -12,16 +12,16 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         // Variant styles — Sitetrip DS
         switch (variant) {
             case 'default':
-                classes += 'bg-am-surface border border-am-border-default ';
+                classes += 'bg-card border border-border ';
                 break;
             case 'elevated':
-                classes += 'bg-am-surface-elevated shadow-xl border border-am-border-strong ';
+                classes += 'bg-card shadow-xl border border-border ';
                 break;
             case 'glass':
-                classes += 'backdrop-blur-2xl border border-am-border-default ';
+                classes += 'backdrop-blur-2xl border border-border ';
                 break;
             case 'ai':
-                classes += 'bg-am-surface border border-am-ai-border/30 relative overflow-hidden ';
+                classes += 'bg-card border border-border/50/30 relative overflow-hidden ';
                 break;
         }
 

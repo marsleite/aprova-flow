@@ -52,14 +52,14 @@ function InsightItem({ insight }: { insight: StudyInsight }) {
   return (
     <motion.div
       variants={item}
-      className="flex gap-3 rounded-lg border border-am-border-default bg-am-surface px-3 py-3 transition-colors hover:bg-am-surface-subtle"
+      className="flex gap-3 rounded-lg border border-border bg-card px-3 py-3 transition-colors hover:bg-muted"
     >
-      <div className="mt-0.5 shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-am-brand-primary/10">
-        <Icon className={`h-4 w-4 text-am-brand-primary`} />
+      <div className="mt-0.5 shrink-0 flex items-center justify-center h-8 w-8 rounded-md bg-primary/10">
+        <Icon className={`h-4 w-4 text-primary`} />
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-medium text-am-text-primary">{insight.title}</p>
-        <p className="mt-0.5 text-xs leading-relaxed text-am-text-secondary">
+        <p className="text-sm font-medium text-foreground">{insight.title}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
           {insight.message}
         </p>
       </div>
@@ -70,9 +70,9 @@ function InsightItem({ insight }: { insight: StudyInsight }) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center py-8 text-center">
-      <Sparkles className="mb-2 h-8 w-8 text-am-text-tertiary" />
-      <p className="text-sm text-am-text-secondary">Nenhum insight disponível</p>
-      <p className="mt-1 text-xs text-am-text-tertiary">Configure seu plano de estudo e registre sessões para receber dicas</p>
+      <Sparkles className="mb-2 h-8 w-8 text-muted-foreground" />
+      <p className="text-sm text-muted-foreground">Nenhum insight disponível</p>
+      <p className="mt-1 text-xs text-muted-foreground">Configure seu plano de estudo e registre sessões para receber dicas</p>
     </div>
   );
 }
@@ -81,7 +81,7 @@ function Skeleton() {
   return (
     <div className="space-y-2">
       {[1, 2].map((i) => (
-        <div key={i} className="flex items-center gap-3 rounded-lg bg-am-surface-subtle px-3 py-3">
+        <div key={i} className="flex items-center gap-3 rounded-lg bg-muted px-3 py-3">
           <div className="h-4 w-4 rounded shimmer" />
           <div className="flex-1 space-y-1.5">
             <div className="h-3 w-28 rounded shimmer" />
@@ -99,16 +99,16 @@ export default function InsightsPanel({ insights, loading }: InsightsPanelProps)
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="h-full rounded-am-xl border border-am-border-default border-t border-t-am-ai-default/30 bg-am-surface p-8 shadow-am-md relative overflow-hidden"
+      className="h-full rounded-xl border border-border border-t border-t-am-ai-default/30 bg-card p-8 shadow-am-md relative overflow-hidden"
     >
       {/* Header */}
       <div className="mb-6 flex items-start gap-3">
-        <div className="rounded-am-md border border-am-border-default bg-am-brand-primary/10 p-2">
-          <Sparkles className="h-4 w-4 text-am-brand-primary" />
+        <div className="rounded-md border border-border bg-primary/10 p-2">
+          <Sparkles className="h-4 w-4 text-primary" />
         </div>
         <div>
-          <h3 className="font-brand text-am-body-lg font-bold text-am-text-primary tracking-tight">Insights Estratégicos</h3>
-          <p className="text-am-caption text-am-text-secondary mt-0.5 font-mono uppercase tracking-widest">Recomendações</p>
+          <h3 className="font-sans text-am-body-lg font-bold text-foreground tracking-tight">Insights Estratégicos</h3>
+          <p className="text-am-caption text-muted-foreground mt-0.5 font-mono uppercase tracking-widest">Recomendações</p>
         </div>
       </div>
 

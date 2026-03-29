@@ -58,9 +58,9 @@ export default function LoginPage() {
     return (
       <div
         className="flex min-h-screen items-center justify-center"
-        style={{ background: 'var(--ds-color-canvas)' }}
+        style={{ background: 'var(--background)' }}
       >
-        <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-full bg-st-brand">
+        <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-full bg-primary">
           <Zap className="h-6 w-6 text-st-text-on-light" />
         </div>
       </div>
@@ -70,24 +70,24 @@ export default function LoginPage() {
   return (
     <div
       className="dark relative flex min-h-screen overflow-hidden"
-      style={{ background: 'var(--ds-color-canvas)' }}
+      style={{ background: 'var(--background)' }}
     >
       {/* ── Ambient background ── Sitetrip warm glow palette ── */}
       <div className="pointer-events-none absolute inset-0">
         {/* Brand purple glow — top-left */}
         <div
           className="absolute -left-64 -top-64 h-[800px] w-[800px] rounded-full blur-[140px]"
-          style={{ background: 'rgba(218, 202, 255, 0.08)' }}
+          style={{ background: 'rgba(234, 88, 12, 0.04)' }}
         />
         {/* Lime glow — center-left */}
         <div
           className="absolute top-1/2 left-0 h-[600px] w-[600px] -translate-y-1/2 rounded-full blur-[130px]"
-          style={{ background: 'rgba(230, 255, 91, 0.05)' }}
+          style={{ background: 'rgba(234, 88, 12, 0.03)' }}
         />
         {/* Brand strong — bottom-right */}
         <div
           className="absolute -bottom-64 -right-64 h-[800px] w-[800px] rounded-full blur-[150px]"
-          style={{ background: 'rgba(154, 117, 240, 0.1)' }}
+          style={{ background: 'rgba(234, 88, 12, 0.05)' }}
         />
         {/* Soft noise */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
@@ -107,23 +107,23 @@ export default function LoginPage() {
         <div
           className="flex items-center gap-3 w-fit px-5 py-2.5 rounded-full backdrop-blur-md"
           style={{
-            background: 'var(--ds-color-glass)',
-            border: '1px solid rgba(218, 202, 255, 0.25)',
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
           }}
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-st-brand">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
             <Zap className="h-4 w-4 text-st-text-on-light" />
           </div>
           <div className="flex flex-col">
             <p
               className="text-lg font-semibold tracking-tight leading-none"
-              style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--ds-color-text-on-dark)' }}
+              style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--foreground)' }}
             >
-              Aprova<span className="text-st-brand">Mind</span>
+              Aprova<span className="text-primary">Mind</span>
             </p>
             <p
               className="text-[10px] uppercase tracking-widest mt-0.5"
-              style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--ds-color-text-muted)', letterSpacing: 'var(--ds-letter-kicker)' }}
+              style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--muted-foreground)', letterSpacing: 'var(--ds-letter-kicker)' }}
             >
               Strategic Engine
             </p>
@@ -139,16 +139,16 @@ export default function LoginPage() {
             className="mb-8 inline-flex items-center gap-2 rounded-full px-4 py-1.5"
             style={{
               background: 'rgba(253, 252, 251, 0.08)',
-              border: '1px solid var(--ds-color-border-soft)',
+              border: '1px solid var(--border)',
             }}
           >
-            <div className="h-2 w-2 rounded-full bg-st-lime animate-pulse" />
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span
               className="text-xs font-medium uppercase"
               style={{
                 fontFamily: 'var(--ds-font-display)',
                 letterSpacing: 'var(--ds-letter-kicker)',
-                color: 'var(--ds-color-accent-lime)',
+                color: 'var(--primary)',
               }}
             >
               IA de Alta Performance
@@ -160,10 +160,10 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
             className="ds-display-1 mb-6"
-            style={{ color: 'var(--ds-color-text-on-dark)' }}
+            style={{ color: 'var(--foreground)' }}
           >
             Sua jornada começa com{' '}
-            <span className="text-st-brand">
+            <span className="text-primary">
               estratégia inteligente.
             </span>
           </motion.h1>
@@ -173,7 +173,7 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
             className="ds-body-lg"
-            style={{ color: 'var(--ds-color-text-muted)' }}
+            style={{ color: 'var(--muted-foreground)' }}
           >
             O AprovaMind combina IA diagnóstica, gestão multi-edital e análise preditiva para acelerar o seu tempo até a aprovação.
           </motion.p>
@@ -187,17 +187,17 @@ export default function LoginPage() {
           className="grid grid-cols-2 gap-4 max-w-lg mt-8"
         >
           {[
-            { icon: Brain, label: 'IA Diagnóstica', desc: 'Mentoria personalizada diária', accent: 'var(--ds-color-brand)' },
-            { icon: Target, label: 'Multi-Edital', desc: 'Foque no peso de cada matéria', accent: 'var(--ds-color-accent-lime)' },
-            { icon: TrendingUp, label: 'Provas & Simulados', desc: 'Treino e evolução', accent: 'var(--ds-color-accent-cyan)' },
-            { icon: BarChart2, label: 'Performance Real', desc: 'Identifique seus gaps', accent: 'var(--ds-color-accent-yellow)' },
+            { icon: Brain, label: 'IA Diagnóstica', desc: 'Mentoria personalizada diária', accent: 'var(--primary)' },
+            { icon: Target, label: 'Multi-Edital', desc: 'Foque no peso de cada matéria', accent: 'var(--primary)' },
+            { icon: TrendingUp, label: 'Provas & Simulados', desc: 'Treino e evolução', accent: 'var(--primary)' },
+            { icon: BarChart2, label: 'Performance Real', desc: 'Identifique seus gaps', accent: 'var(--primary)' },
           ].map(({ icon: Icon, label, desc, accent }) => (
             <div
               key={label}
               className="flex items-start gap-3 rounded-2xl p-4 transition-all duration-300 hover:translate-y-[-2px]"
               style={{
                 background: 'rgba(253, 252, 251, 0.04)',
-                border: '1px solid var(--ds-color-border-soft)',
+                border: '1px solid var(--border)',
               }}
             >
               <div
@@ -209,11 +209,11 @@ export default function LoginPage() {
               <div>
                 <p
                   className="text-sm font-semibold mb-0.5"
-                  style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--ds-color-text-on-dark)' }}
+                  style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--foreground)' }}
                 >
                   {label}
                 </p>
-                <p className="text-[11px] leading-tight" style={{ color: 'var(--ds-color-text-muted)' }}>
+                <p className="text-[11px] leading-tight" style={{ color: 'var(--muted-foreground)' }}>
                   {desc}
                 </p>
               </div>
@@ -222,7 +222,7 @@ export default function LoginPage() {
         </motion.div>
 
         {/* Footer */}
-        <div className="flex items-center gap-2 text-xs pt-8" style={{ color: 'var(--ds-color-text-muted)' }}>
+        <div className="flex items-center gap-2 text-xs pt-8" style={{ color: 'var(--muted-foreground)' }}>
           <Shield className="h-4 w-4" />
           <span style={{ fontFamily: 'var(--ds-font-body)' }}>Dados criptografados · Google Cloud Firebase</span>
         </div>
@@ -238,14 +238,14 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="mb-10 flex flex-col items-center justify-center gap-3 lg:hidden">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-st-brand shadow-xl">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-xl">
               <Zap className="h-7 w-7 text-st-text-on-light" />
             </div>
             <p
               className="text-2xl font-semibold tracking-tight"
-              style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--ds-color-text-on-dark)' }}
+              style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--foreground)' }}
             >
-              Aprova<span className="text-st-brand">Mind</span>
+              Aprova<span className="text-primary">Mind</span>
             </p>
           </div>
 
@@ -254,16 +254,16 @@ export default function LoginPage() {
             {/* Outer Glow */}
             <div
               className="absolute -inset-1 rounded-[32px] opacity-20 blur-xl transition duration-1000 group-hover:opacity-30"
-              style={{ background: 'linear-gradient(135deg, var(--ds-color-brand), var(--ds-color-brand-strong))' }}
+              style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary))' }}
             />
 
             <div
               className="relative rounded-[32px] p-8 sm:p-10 shadow-2xl overflow-hidden"
               style={{
-                background: 'var(--ds-color-glass)',
+                background: 'var(--card)',
                 backdropFilter: 'blur(16px)',
                 WebkitBackdropFilter: 'blur(16px)',
-                border: '1px solid rgba(218, 202, 255, 0.25)',
+                border: '1px solid var(--border)',
               }}
             >
               {betaRestricted && (
@@ -279,12 +279,12 @@ export default function LoginPage() {
                     style={{
                       fontFamily: 'var(--ds-font-display)',
                       letterSpacing: 'var(--ds-letter-kicker)',
-                      color: 'var(--ds-color-accent-yellow)',
+                      color: 'var(--primary)',
                     }}
                   >
                     Beta por convite
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--ds-color-text-muted)' }}>
+                  <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
                     {betaMessage}
                   </p>
                 </div>
@@ -300,11 +300,11 @@ export default function LoginPage() {
               <div className="mb-8 text-center sm:text-left">
                 <h2
                   className="ds-title-1"
-                  style={{ color: 'var(--ds-color-text-on-dark)' }}
+                  style={{ color: 'var(--foreground)' }}
                 >
                   {mode === 'login' ? 'Acesse sua conta' : 'Crie seu acesso'}
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--ds-color-text-muted)' }}>
+                <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
                   {mode === 'login'
                     ? 'Retome o controle da sua preparação.'
                     : 'A IA que entende o seu ritmo de estudo.'}
@@ -317,8 +317,8 @@ export default function LoginPage() {
                 disabled={isDisabled}
                 className="group flex w-full items-center justify-center gap-3 rounded-full px-5 py-3.5 font-semibold transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                 style={{
-                  background: 'var(--ds-color-surface-0)',
-                  color: 'var(--ds-color-text-on-light)',
+                  background: 'white',
+                  color: '#09090B',
                   minHeight: 'var(--ds-size-button-height)',
                 }}
               >
@@ -334,18 +334,18 @@ export default function LoginPage() {
 
               {/* Divider */}
               <div className="my-6 flex items-center gap-4">
-                <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, transparent, var(--ds-color-border-soft))' }} />
+                <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, transparent, var(--border))' }} />
                 <span
                   className="text-[11px] uppercase"
                   style={{
                     fontFamily: 'var(--ds-font-display)',
                     letterSpacing: 'var(--ds-letter-kicker)',
-                    color: 'var(--ds-color-text-muted)',
+                    color: 'var(--muted-foreground)',
                   }}
                 >
                   Ou com email
                 </span>
-                <div className="h-px flex-1" style={{ background: 'linear-gradient(to left, transparent, var(--ds-color-border-soft))' }} />
+                <div className="h-px flex-1" style={{ background: 'linear-gradient(to left, transparent, var(--border))' }} />
               </div>
 
               {/* Form */}
@@ -357,7 +357,7 @@ export default function LoginPage() {
                       style={{
                         fontFamily: 'var(--ds-font-display)',
                         letterSpacing: 'var(--ds-letter-kicker)',
-                        color: 'var(--ds-color-text-muted)',
+                        color: 'var(--muted-foreground)',
                       }}
                     >
                       Nome
@@ -371,8 +371,8 @@ export default function LoginPage() {
                       className="w-full rounded-full px-5 py-3.5 text-sm outline-none transition-all"
                       style={{
                         background: 'rgba(23, 20, 18, 0.6)',
-                        border: '1px solid var(--ds-color-border-soft)',
-                        color: 'var(--ds-color-text-on-dark)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--foreground)',
                         backdropFilter: 'blur(8px)',
                       }}
                     />
@@ -385,7 +385,7 @@ export default function LoginPage() {
                     style={{
                       fontFamily: 'var(--ds-font-display)',
                       letterSpacing: 'var(--ds-letter-kicker)',
-                      color: 'var(--ds-color-text-muted)',
+                      color: 'var(--muted-foreground)',
                     }}
                   >
                     Work Email
@@ -399,8 +399,8 @@ export default function LoginPage() {
                     className="w-full rounded-full px-5 py-3.5 text-sm outline-none transition-all"
                     style={{
                       background: 'rgba(23, 20, 18, 0.6)',
-                      border: '1px solid var(--ds-color-border-soft)',
-                      color: 'var(--ds-color-text-on-dark)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--foreground)',
                       backdropFilter: 'blur(8px)',
                     }}
                   />
@@ -413,13 +413,13 @@ export default function LoginPage() {
                       style={{
                         fontFamily: 'var(--ds-font-display)',
                         letterSpacing: 'var(--ds-letter-kicker)',
-                        color: 'var(--ds-color-text-muted)',
+                        color: 'var(--muted-foreground)',
                       }}
                     >
                       Senha Secreta
                     </label>
                     {mode === 'login' && (
-                      <span className="text-[11px] cursor-pointer hover:underline" style={{ color: 'var(--ds-color-brand)' }}>
+                      <span className="text-[11px] cursor-pointer hover:underline" style={{ color: 'var(--primary)' }}>
                         Esqueceu?
                       </span>
                     )}
@@ -435,8 +435,8 @@ export default function LoginPage() {
                       className="w-full rounded-full px-5 py-3.5 pr-12 text-sm outline-none transition-all"
                       style={{
                         background: 'rgba(23, 20, 18, 0.6)',
-                        border: '1px solid var(--ds-color-border-soft)',
-                        color: 'var(--ds-color-text-on-dark)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--foreground)',
                         backdropFilter: 'blur(8px)',
                       }}
                     />
@@ -444,7 +444,7 @@ export default function LoginPage() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors"
-                      style={{ color: 'var(--ds-color-text-muted)' }}
+                      style={{ color: 'var(--muted-foreground)' }}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -455,10 +455,10 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={isDisabled}
-                    className="ds-button ds-button--primary w-full justify-center gap-2 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex bg-primary text-primary-foreground w-full justify-center items-center gap-2 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                     style={{
                       minHeight: '48px',
-                      borderRadius: 'var(--ds-radius-pill)',
+                      borderRadius: "9999px",
                       fontSize: '0.875rem',
                     }}
                   >
@@ -493,7 +493,7 @@ export default function LoginPage() {
                   >
                     <Zap className="h-3 w-3" style={{ color: 'var(--ds-color-danger)' }} />
                   </div>
-                  <p className="text-xs font-medium leading-tight" style={{ color: '#e57373' }}>{error}</p>
+                  <p className="text-xs font-medium leading-tight" style={{ color: '#ef4444' }}>{error}</p>
                 </motion.div>
               )}
 
@@ -502,23 +502,23 @@ export default function LoginPage() {
                 className="mt-8 text-center rounded-2xl p-4"
                 style={{
                   background: 'rgba(23, 20, 18, 0.4)',
-                  border: '1px solid var(--ds-color-border-soft)',
+                  border: '1px solid var(--border)',
                 }}
               >
-                <p className="text-xs" style={{ color: 'var(--ds-color-text-muted)' }}>
+                <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                   {mode === 'login' ? 'Novo por aqui? ' : 'Já é um estrategista? '}
                   <button
                     onClick={() => {
                       setMode(mode === 'login' ? 'register' : 'login');
                     }}
                     className="font-semibold transition-colors hover:underline"
-                    style={{ color: 'var(--ds-color-brand)' }}
+                    style={{ color: 'var(--primary)' }}
                   >
                     {mode === 'login' ? 'Criar sua conta gratuita' : 'Faça seu login'}
                   </button>
                 </p>
                 {betaRestricted && (
-                  <p className="mt-2 text-[11px]" style={{ color: 'var(--ds-color-text-muted)' }}>
+                  <p className="mt-2 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
                     Cadastro e login por email funcionam normalmente para emails já liberados no beta.
                   </p>
                 )}

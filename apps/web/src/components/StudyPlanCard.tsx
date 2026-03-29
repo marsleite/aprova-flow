@@ -79,7 +79,7 @@ function SubjectInput({
   return (
     <div ref={containerRef} className="relative mb-3">
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
         <input
           ref={inputRef}
           type="text"
@@ -88,7 +88,7 @@ function SubjectInput({
           onFocus={() => setFocused(true)}
           onKeyDown={handleKeyDown}
           placeholder="Buscar ou digitar matéria..."
-          className="w-full rounded-lg border border-am-border-default bg-gray-800/60 py-2 pl-9 pr-4 text-sm text-gray-300 outline-none transition-all placeholder:text-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20"
+          className="w-full rounded-lg border border-border bg-gray-800/60 py-2 pl-9 pr-4 text-sm text-gray-300 outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/20"
         />
       </div>
 
@@ -99,12 +99,12 @@ function SubjectInput({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[160px] overflow-y-auto rounded-xl border border-am-border-default bg-gray-800 shadow-xl"
+            className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[160px] overflow-y-auto rounded-xl border border-border bg-gray-800 shadow-xl"
           >
             {canAddCustom && (
               <button
                 onClick={() => handleAdd(trimmed)}
-                className="flex w-full items-center gap-2 border-b border-am-border-default px-3 py-2 text-left text-sm text-[#F59768] transition hover:bg-[#3150AA]/10"
+                className="flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left text-sm text-[var(--primary)] transition hover:bg-[var(--primary)]/10"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Adicionar &quot;{trimmed}&quot;</span>
@@ -114,7 +114,7 @@ function SubjectInput({
               <button
                 key={s}
                 onClick={() => handleAdd(s)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-am-surface-subtle hover:text-am-text-primary"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-300 transition hover:bg-muted hover:text-foreground"
               >
                 <span className="flex-1">{s}</span>
               </button>
@@ -141,7 +141,7 @@ function StatusBadge({ status }: { status: PlanVsActual['status'] }) {
   const map = {
     ok: { label: 'OK', cls: 'bg-emerald-500/15 text-emerald-400' },
     neglected: { label: 'Abaixo', cls: 'bg-amber-500/15 text-amber-400' },
-    over: { label: 'Acima', cls: 'bg-[#3150AA]/15 text-[#F59768]' },
+    over: { label: 'Acima', cls: 'bg-[var(--primary)]/15 text-[var(--primary)]' },
   };
   const { label, cls } = map[status];
   return (
@@ -207,7 +207,7 @@ export default function StudyPlanCard({
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
+      <div className="rounded-xl border border-border bg-card p-5">
         <div className="mb-4 h-5 w-40 rounded shimmer" />
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
@@ -223,23 +223,23 @@ export default function StudyPlanCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
+      className="rounded-xl border border-border bg-card p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500/10">
-            <BookOpen className="h-4 w-4 text-pink-400" />
+            <BookOpen className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-am-text-primary">Plano de Estudo</h3>
-            <p className="text-xs text-am-text-secondary">Planejado vs Real</p>
+            <h3 className="text-sm font-semibold text-foreground">Plano de Estudo</h3>
+            <p className="text-xs text-muted-foreground">Planejado vs Real</p>
           </div>
         </div>
         {!editing && (
           <button
             onClick={handleStartEdit}
-            className="flex items-center gap-1.5 rounded-lg border border-am-border-strong px-3 py-1.5 text-xs text-am-text-secondary transition hover:border-[#3150AA]/30 hover:text-[#F59768]/80"
+            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:border-[var(--primary)]/30 hover:text-[var(--primary)]/80"
           >
             <Settings className="h-3.5 w-3.5" />
             {hasPlan ? 'Editar' : 'Configurar'}
@@ -261,7 +261,7 @@ export default function StudyPlanCard({
               {weights.map((w) => (
                 <div
                   key={w.subject}
-                  className="flex items-center gap-2 rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2"
+                  className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2"
                 >
                   <span className="flex-1 truncate text-sm text-gray-300">
                     {w.subject}
@@ -274,9 +274,9 @@ export default function StudyPlanCard({
                     onChange={(e) =>
                       handleWeightChange(w.subject, Math.max(0, Math.min(100, Number(e.target.value))))
                     }
-                    className="w-16 rounded-lg border border-am-border-default bg-gray-800/60 px-2 py-1 text-center text-sm text-am-text-primary outline-none focus:border-violet-500"
+                    className="w-16 rounded-lg border border-border bg-gray-800/60 px-2 py-1 text-center text-sm text-foreground outline-none focus:border-primary"
                   />
-                  <span className="text-xs text-gray-500">%</span>
+                  <span className="text-xs text-muted-foreground">%</span>
                   <button
                     onClick={() => handleRemoveSubject(w.subject)}
                     className="text-gray-600 hover:text-red-400"
@@ -294,7 +294,7 @@ export default function StudyPlanCard({
             />
 
             {/* Total e ações */}
-            <div className="flex items-center justify-between border-t border-am-border-default pt-3">
+            <div className="flex items-center justify-between border-t border-border pt-3">
               <span
                 className={`text-sm font-medium ${
                   isValid ? 'text-emerald-400' : 'text-red-400'
@@ -310,14 +310,14 @@ export default function StudyPlanCard({
               <div className="flex gap-2">
                 <button
                   onClick={() => setEditing(false)}
-                  className="rounded-lg border border-am-border-default px-3 py-1.5 text-xs text-gray-400 hover:text-am-text-primary"
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={!isValid || saving}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-medium text-am-text-primary hover:bg-violet-500 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-foreground hover:bg-primary disabled:opacity-50"
                 >
                   <Save className={`h-3.5 w-3.5 ${saving ? 'animate-spin' : ''}`} />
                   Salvar
@@ -333,7 +333,7 @@ export default function StudyPlanCard({
             className="flex flex-col items-center py-8 text-center"
           >
             <BookOpen className="mb-2 h-8 w-8 text-gray-600" />
-            <p className="text-sm text-gray-500">Nenhum plano configurado</p>
+            <p className="text-sm text-muted-foreground">Nenhum plano configurado</p>
             <p className="mt-1 text-xs text-gray-600">
               Defina pesos por matéria para ver se está no caminho certo
             </p>
@@ -345,10 +345,10 @@ export default function StudyPlanCard({
               {(expanded ? planVsActual : planVsActual.slice(0, 4)).map((item) => (
                 <div
                   key={item.subject}
-                  className="rounded-lg border border-am-border-default bg-am-surface-subtle px-3 py-2"
+                  className="rounded-lg border border-border bg-muted px-3 py-2"
                 >
                   <div className="mb-1.5 flex items-center justify-between">
-                    <span className="truncate text-sm text-am-text-primary">{item.subject}</span>
+                    <span className="truncate text-sm text-foreground">{item.subject}</span>
                     <StatusBadge status={item.status} />
                   </div>
                   <div className="flex items-center gap-3">
@@ -365,13 +365,13 @@ export default function StudyPlanCard({
                           item.status === 'neglected'
                             ? 'bg-amber-500'
                             : item.status === 'over'
-                            ? 'bg-blue-500'
+                            ? 'bg-primary'
                             : 'bg-emerald-500'
                         }`}
                         style={{ width: `${Math.min(100, Math.max(3, item.actualPercent))}%` }}
                       />
                     </div>
-                    <span className="w-20 text-right text-xs text-gray-400">
+                    <span className="w-20 text-right text-xs text-muted-foreground">
                       {item.actualPercent}% / {item.plannedPercent}%
                     </span>
                   </div>
@@ -383,7 +383,7 @@ export default function StudyPlanCard({
             {planVsActual.length > 4 && (
               <button
                 onClick={() => setExpanded((v) => !v)}
-                className="mt-2 flex w-full items-center justify-center gap-1 text-xs text-gray-500 hover:text-gray-300"
+                className="mt-2 flex w-full items-center justify-center gap-1 text-xs text-muted-foreground hover:text-gray-300"
               >
                 {expanded ? (
                   <>

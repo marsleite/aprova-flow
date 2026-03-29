@@ -208,10 +208,10 @@ export default function PlanEngineSnapshotCard({
               <Badge variant="outline">{snapshot.engineVersion}</Badge>
             ) : null}
           </div>
-          <h3 className="text-am-body-sm font-bold text-am-text-primary">
+          <h3 className="text-am-body-sm font-bold text-foreground">
             Núcleo de Prioridade
           </h3>
-          <p className="mt-1 text-am-caption text-am-text-secondary">
+          <p className="mt-1 text-am-caption text-muted-foreground">
             Snapshot determinístico do plano ativo, isolado da UI legada.
           </p>
         </div>
@@ -238,19 +238,19 @@ export default function PlanEngineSnapshotCard({
           <Skeleton className="h-12 w-full" />
         </div>
       ) : error ? (
-        <div className="rounded-am-md border border-am-error/20 bg-am-error/5 p-4">
+        <div className="rounded-md border border-am-error/20 bg-am-error/5 p-4">
           <div className="mb-2 flex items-center gap-2 text-am-error">
             <AlertTriangle className="h-4 w-4" />
             <span className="text-am-body-sm font-semibold">Falha ao carregar</span>
           </div>
-          <p className="text-am-body-sm text-am-text-secondary">{error}</p>
+          <p className="text-am-body-sm text-muted-foreground">{error}</p>
         </div>
       ) : reason ? (
-        <div className="rounded-am-md border border-am-border-default bg-am-surface-elevated p-4">
-          <p className="text-am-body-sm font-semibold text-am-text-primary">
+        <div className="rounded-md border border-border bg-card p-4">
+          <p className="text-am-body-sm font-semibold text-foreground">
             {emptyStateCopy(reason).title}
           </p>
-          <p className="mt-1 text-am-body-sm text-am-text-secondary">
+          <p className="mt-1 text-am-body-sm text-muted-foreground">
             {emptyStateCopy(reason).description}
           </p>
           <Button asChild variant="outline" size="sm" className="mt-4">
@@ -262,44 +262,44 @@ export default function PlanEngineSnapshotCard({
         </div>
       ) : snapshot ? (
         <div className="space-y-4">
-          <div className="rounded-am-md border border-am-border-default bg-am-surface-elevated p-4">
+          <div className="rounded-md border border-border bg-card p-4">
             <div className="mb-2 flex items-center justify-between gap-3">
               <div>
-                <p className="text-am-caption uppercase tracking-wider text-am-text-tertiary">
+                <p className="text-am-caption uppercase tracking-wider text-muted-foreground">
                   Plano ativo
                 </p>
-                <p className="text-am-body-sm font-semibold text-am-text-primary">
+                <p className="text-am-body-sm font-semibold text-foreground">
                   {snapshot.plan.name}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-am-caption uppercase tracking-wider text-am-text-tertiary">
+                <p className="text-am-caption uppercase tracking-wider text-muted-foreground">
                   Meta semanal
                 </p>
-                <p className="text-am-body-sm font-semibold text-am-text-primary">
+                <p className="text-am-body-sm font-semibold text-foreground">
                   {snapshot.plan.weeklyGoalHours}h
                 </p>
               </div>
             </div>
 
             {topRecommendation ? (
-              <div className="rounded-am-md border border-am-ai-border/40 bg-am-ai-subtle/50 p-3">
+              <div className="rounded-md border border-border/50/40 bg-am-ai-subtle/50 p-3">
                 <div className="mb-2 flex items-center gap-2">
                   <Badge variant="ai">Prioridade do dia</Badge>
                   <Badge variant="outline">
                     {formatRecommendationLabel(topRecommendation.type)}
                   </Badge>
                 </div>
-                <p className="text-am-body-sm font-semibold text-am-text-primary">
+                <p className="text-am-body-sm font-semibold text-foreground">
                   {topRecommendation.targetSubject}
                 </p>
-                <p className="mt-1 text-am-body-sm text-am-text-secondary">
+                <p className="mt-1 text-am-body-sm text-muted-foreground">
                   {topRecommendation.reasons.join(' · ')}
                 </p>
               </div>
             ) : (
-              <div className="rounded-am-md border border-am-border-default bg-am-surface p-3">
-                <p className="text-am-body-sm text-am-text-secondary">
+              <div className="rounded-md border border-border bg-card p-3">
+                <p className="text-am-body-sm text-muted-foreground">
                   O motor não gerou recomendações acionáveis para o plano atual.
                 </p>
               </div>
@@ -315,7 +315,7 @@ export default function PlanEngineSnapshotCard({
               >
                 <div className="mb-2 flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-am-body-sm font-semibold text-am-text-primary">
+                    <p className="text-am-body-sm font-semibold text-foreground">
                       {subject.subject}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -329,31 +329,31 @@ export default function PlanEngineSnapshotCard({
                   </div>
 
                   <div className="text-right">
-                    <p className="text-am-caption uppercase tracking-wider text-am-text-tertiary">
+                    <p className="text-am-caption uppercase tracking-wider text-muted-foreground">
                       Pontuação
                     </p>
-                    <p className="text-xl font-light tracking-tight text-am-text-primary">
+                    <p className="text-xl font-light tracking-tight text-foreground">
                       {subject.priorityScore}
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 text-am-caption text-am-text-secondary">
-                  <div className="rounded-am-md bg-am-surface px-2 py-2 overflow-hidden min-w-0">
-                    <p className="uppercase tracking-wider text-am-text-tertiary truncate">Saúde</p>
-                    <p className="mt-1 text-am-body-sm font-semibold text-am-text-primary truncate">
+                <div className="grid grid-cols-3 gap-2 text-am-caption text-muted-foreground">
+                  <div className="rounded-md bg-card px-2 py-2 overflow-hidden min-w-0">
+                    <p className="uppercase tracking-wider text-muted-foreground truncate">Saúde</p>
+                    <p className="mt-1 text-am-body-sm font-semibold text-foreground truncate">
                       {formatOverallMetric(subject)}
                     </p>
                   </div>
-                  <div className="rounded-am-md bg-am-surface px-2 py-2 overflow-hidden min-w-0">
-                    <p className="uppercase tracking-wider text-am-text-tertiary truncate">Recência</p>
-                    <p className="mt-1 text-am-body-sm font-semibold text-am-text-primary truncate">
+                  <div className="rounded-md bg-card px-2 py-2 overflow-hidden min-w-0">
+                    <p className="uppercase tracking-wider text-muted-foreground truncate">Recência</p>
+                    <p className="mt-1 text-am-body-sm font-semibold text-foreground truncate">
                       {formatRecencyMetric(subject)}
                     </p>
                   </div>
-                  <div className="rounded-am-md bg-am-surface px-2 py-2 overflow-hidden min-w-0">
-                    <p className="uppercase tracking-wider text-am-text-tertiary truncate">Questões</p>
-                    <p className="mt-1 text-am-body-sm font-semibold text-am-text-primary truncate">
+                  <div className="rounded-md bg-card px-2 py-2 overflow-hidden min-w-0">
+                    <p className="uppercase tracking-wider text-muted-foreground truncate">Questões</p>
+                    <p className="mt-1 text-am-body-sm font-semibold text-foreground truncate">
                       {formatPerformanceMetric(subject)}
                     </p>
                   </div>
@@ -362,8 +362,8 @@ export default function PlanEngineSnapshotCard({
             ))}
           </div>
 
-          <div className="flex items-center justify-between rounded-am-md border border-am-border-default bg-am-surface-elevated px-4 py-3">
-            <div className="flex items-center gap-2 text-am-text-secondary">
+          <div className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <Target className="h-4 w-4" />
               <span className="text-am-body-sm">
                 {snapshot.recommendations.length} recomendações no snapshot atual

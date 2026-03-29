@@ -341,24 +341,24 @@ export default function ExecutarProvaPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <p className="text-gray-400">Faça login para continuar</p>
+      <div className="min-h-screen flex items-center justify-center bg-card">
+        <p className="text-muted-foreground">Faça login para continuar</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-card">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!exam || questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <p className="text-gray-400">Prova não encontrada</p>
+      <div className="min-h-screen flex items-center justify-center bg-card">
+        <p className="text-muted-foreground">Prova não encontrada</p>
       </div>
     );
   }
@@ -368,13 +368,13 @@ export default function ExecutarProvaPage() {
   const reviewCount = questions.filter(q => q.markedForReview).length;
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-card">
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 px-4 py-4 sm:px-6">
+      <div className="bg-gray-800 border-b border-border px-4 py-4 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold text-white">{exam.name}</h1>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Questão {currentIndex + 1} de {questions.length}
             </p>
           </div>
@@ -401,7 +401,7 @@ export default function ExecutarProvaPage() {
         {/* Área Principal - Questão */}
         <div className="lg:col-span-3 space-y-6">
           {/* Enunciado */}
-          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+          <div className="bg-gray-800 rounded-lg border border-border p-6">
             <div className="prose prose-invert max-w-none">
               <p className="text-white whitespace-pre-wrap">{currentQuestion.question.statement}</p>
             </div>
@@ -414,13 +414,13 @@ export default function ExecutarProvaPage() {
                 key={alt.key}
                 onClick={() => handleSelectAnswer(alt.key)}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all ${currentQuestion.selectedAnswer === alt.key
-                  ? 'border-violet-500 bg-violet-500/10'
-                  : 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                  ? 'border-primary bg-primary/20'
+                  : 'border-border bg-gray-800 hover:border-gray-600'
                   }`}
               >
                 <div className="flex items-start gap-3">
                   <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold ${currentQuestion.selectedAnswer === alt.key
-                    ? 'bg-violet-500 text-white'
+                    ? 'bg-primary text-white'
                     : 'bg-gray-700 text-gray-300'
                     }`}>
                     {alt.key}
@@ -457,7 +457,7 @@ export default function ExecutarProvaPage() {
               <button
                 onClick={() => setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1))}
                 disabled={currentIndex === questions.length - 1}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-white transition-colors hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
               >
                 Próxima
                 <ChevronRight className="h-4 w-4" />
@@ -469,22 +469,22 @@ export default function ExecutarProvaPage() {
         {/* Sidebar */}
         <div className="lg:col-span-1 space-y-4">
           {/* Status */}
-          <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+          <div className="bg-gray-800 rounded-lg border border-border p-4">
             <h3 className="font-semibold text-white mb-3">Progresso</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-400">Respondidas</span>
+                <span className="text-muted-foreground">Respondidas</span>
                 <span className="text-white font-medium">{answeredCount}/{questions.length}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Para revisar</span>
+                <span className="text-muted-foreground">Para revisar</span>
                 <span className="text-amber-400 font-medium">{reviewCount}</span>
               </div>
             </div>
           </div>
 
           {/* Grid de questões */}
-          <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
+          <div className="bg-gray-800 rounded-lg border border-border p-4">
             <h3 className="font-semibold text-white mb-3">Questões</h3>
             <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
               {questions.map((q, idx) => (
@@ -492,7 +492,7 @@ export default function ExecutarProvaPage() {
                   key={idx}
                   onClick={() => setCurrentIndex(idx)}
                   className={`aspect-square rounded flex items-center justify-center text-sm font-medium transition-all ${idx === currentIndex
-                    ? 'bg-violet-600 text-white ring-2 ring-violet-400'
+                    ? 'bg-primary text-white ring-2 ring-primary'
                     : q.selectedAnswer
                       ? 'bg-green-600 text-white hover:bg-green-700'
                       : q.markedForReview
@@ -511,9 +511,9 @@ export default function ExecutarProvaPage() {
       {/* Modal de confirmação */}
       {showFinishConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 max-w-md w-full">
+          <div className="bg-gray-800 rounded-lg border border-border p-6 max-w-md w-full">
             <h2 className="text-xl font-semibold text-white mb-4">Finalizar Prova?</h2>
-            <p className="text-gray-400 mb-6">
+            <p className="text-muted-foreground mb-6">
               Você respondeu {answeredCount} de {questions.length} questões.
               {reviewCount > 0 && ` Há ${reviewCount} questão(ões) marcadas para revisão.`}
             </p>

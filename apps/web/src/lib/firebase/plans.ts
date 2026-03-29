@@ -81,7 +81,7 @@ function normalizeStudyPlan(
     examDate: normalizeDateOnly(raw.examDate),
     materialWorkloadHours: normalizeMaterialWorkloadHours(raw.materialWorkloadHours),
     studyCapacityHours: normalizeStudyCapacityHours(raw.studyCapacityHours, weeklyGoalHours),
-    color: typeof raw.color === 'string' && raw.color ? raw.color : '#8b5cf6',
+    color: typeof raw.color === 'string' && raw.color ? raw.color : 'var(--primary)',
     isDefault: Boolean(raw.isDefault),
     createdAt:
       typeof raw.createdAt === 'string' ? raw.createdAt : new Date().toISOString(),
@@ -110,7 +110,7 @@ function buildStudyPlanPayload(
     examDate: normalizeDateOnly(data.examDate),
     materialWorkloadHours: normalizeMaterialWorkloadHours(data.materialWorkloadHours),
     studyCapacityHours: normalizeStudyCapacityHours(data.studyCapacityHours, weeklyGoalHours),
-    color: typeof data.color === 'string' && data.color ? data.color : '#8b5cf6',
+    color: typeof data.color === 'string' && data.color ? data.color : 'var(--primary)',
     isDefault: Boolean(data.isDefault),
   };
 
@@ -193,7 +193,7 @@ export async function updateStudyPlan(
     name: updates.name ?? current?.name ?? 'Plano sem nome',
     subjects: updates.subjects ?? current?.subjects ?? [],
     weeklyGoalHours: updates.weeklyGoalHours ?? current?.weeklyGoalHours ?? 10,
-    color: updates.color ?? current?.color ?? '#8b5cf6',
+    color: updates.color ?? current?.color ?? 'var(--primary)',
     examDate: Object.prototype.hasOwnProperty.call(updates, 'examDate')
       ? updates.examDate
       : current?.examDate ?? null,
@@ -331,7 +331,7 @@ async function _doMigrate(userId: string): Promise<string> {
     name: 'Geral',
     subjects: migratedSubjects,
     weeklyGoalHours: migratedGoal,
-    color: '#8b5cf6',
+    color: 'var(--primary)',
     isDefault: true,
   });
 

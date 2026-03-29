@@ -55,12 +55,12 @@ const HELPER_COPY: Record<StudyJourneyStep, string> = {
 
 export default function StudyJourneyCard({ current }: StudyJourneyCardProps) {
   return (
-    <div className="rounded-am-xl border border-am-border-default bg-am-surface p-4 shadow-am-sm">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-am-sm">
       <div className="mb-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-am-text-tertiary">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
           Jornada Guiada
         </p>
-        <p className="mt-2 text-sm text-am-text-secondary">{HELPER_COPY[current]}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{HELPER_COPY[current]}</p>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
@@ -73,28 +73,28 @@ export default function StudyJourneyCard({ current }: StudyJourneyCardProps) {
             <Link
               key={step}
               href={meta.href}
-              className={`rounded-am-lg border px-4 py-3 transition-colors ${
+              className={`rounded-lg border px-4 py-3 transition-colors ${
                 isCurrent
-                  ? 'border-am-brand-primary/30 bg-am-brand-primary/10'
-                  : 'border-am-border-default bg-am-surface-subtle hover:border-am-brand-primary/20 hover:bg-am-surface-elevated'
+                  ? 'border-am-brand-primary/30 bg-primary/10'
+                  : 'border-border bg-muted hover:border-am-brand-primary/20 hover:bg-card'
               }`}
             >
               <div className="flex items-start gap-3">
                 <div
-                  className={`mt-0.5 rounded-am-md p-2 ${
+                  className={`mt-0.5 rounded-md p-2 ${
                     isCurrent
-                      ? 'bg-am-brand-primary/15 text-am-brand-primary'
-                      : 'bg-am-surface text-am-text-tertiary'
+                      ? 'bg-primary/15 text-primary'
+                      : 'bg-card text-muted-foreground'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-am-text-tertiary">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                     {meta.label}
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-am-text-primary">{meta.title}</p>
-                  <p className="mt-1 text-xs text-am-text-secondary">{meta.description}</p>
+                  <p className="mt-1 text-sm font-semibold text-foreground">{meta.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{meta.description}</p>
                 </div>
               </div>
             </Link>

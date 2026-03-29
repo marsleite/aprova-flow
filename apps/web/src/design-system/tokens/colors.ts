@@ -22,8 +22,8 @@ export const mindViolet = {
     100: '#EDE9FE',
     200: '#DDD6FE',
     300: '#C4B5FD',
-    400: '#A78BFA',
-    500: '#8B5CF6',
+    400: 'var(--primary)',
+    500: 'var(--primary)',
     600: '#7C3AED',
     700: '#6D28D9',
     800: '#5B21B6',
@@ -49,7 +49,7 @@ export const semantic = {
     success: '#10B981', // Emerald 500
     warning: '#F59E0B', // Amber 500
     error: '#EF4444',   // Red 500
-    info: '#3B82F6',    // Blue 500
+    info: 'var(--primary)',    // Blue 500
 } as const;
 
 export const brand = {

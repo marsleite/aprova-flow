@@ -57,15 +57,15 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Topbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 px-6 border-b border-am-border-default bg-am-surface/30 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 px-6 border-b border-border bg-card/30 backdrop-blur-md">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="outline"><Settings className="h-3 w-3 mr-1" /> Core</Badge>
           </div>
-          <h1 className="font-brand text-am-h3 font-bold text-am-text-primary tracking-tight mt-2">
+          <h1 className="font-sans text-am-h3 font-bold text-foreground tracking-tight mt-2">
             Conta e Configurações
           </h1>
-          <p className="text-am-caption text-am-text-secondary mt-1">
+          <p className="text-am-caption text-muted-foreground mt-1">
             Gerenciamento de perfil, assinaturas e segurança do sistema.
           </p>
         </div>
@@ -86,8 +86,8 @@ export default function SettingsPage() {
         <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show">
           <Card padding="lg" variant="default" className="w-full">
             <div className="mb-5 flex items-center gap-2 border-b border-am-border-subtle pb-3">
-              <User className="h-4 w-4 text-am-text-tertiary" />
-              <h2 className="font-brand text-am-body font-bold text-am-text-primary tracking-wide">Perfil Principal</h2>
+              <User className="h-4 w-4 text-muted-foreground" />
+              <h2 className="font-sans text-am-body font-bold text-foreground tracking-wide">Perfil Principal</h2>
             </div>
 
             <div className="flex items-center gap-5">
@@ -105,8 +105,8 @@ export default function SettingsPage() {
                 </div>
               )}
               <div>
-                <p className="text-am-body font-bold text-am-text-primary">{user.displayName || 'Usuário'}</p>
-                <p className="text-am-body-sm text-am-text-secondary">{user.email}</p>
+                <p className="text-am-body font-bold text-foreground">{user.displayName || 'Usuário'}</p>
+                <p className="text-am-body-sm text-muted-foreground">{user.email}</p>
                 <Badge variant="default" className="mt-2 text-[10px] uppercase font-mono tracking-wider">UID: {user.uid.substring(0, 8)}…</Badge>
               </div>
             </div>
@@ -115,44 +115,44 @@ export default function SettingsPage() {
 
         {/* Plan card */}
         <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
-          <div className="rounded-am-xl border border-am-ai-border/40 p-6 shadow-am-lg overflow-hidden relative" style={{ background: 'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(139, 92, 246, 0.05) 100%)' }}>
+          <div className="rounded-xl border border-border/50/40 p-6 shadow-am-lg overflow-hidden relative" style={{ background: 'linear-gradient(135deg, var(--color-am-surface) 0%, rgba(139, 92, 246, 0.05) 100%)' }}>
             <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-am-ai-glow/20 blur-[60px] rounded-full pointer-events-none transition-transform duration-1000"></div>
 
             <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
               <div className="flex-1">
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Crown className="h-5 w-5 text-am-brand-primary" />
-                    <h2 className="font-brand text-am-body font-bold text-am-text-primary tracking-wide">Plano e Licenças</h2>
+                    <Crown className="h-5 w-5 text-primary" />
+                    <h2 className="font-sans text-am-body font-bold text-foreground tracking-wide">Plano e Licenças</h2>
                   </div>
                   <Badge variant="ai" className="shadow-[0_0_12px_var(--color-am-ai-glow)]">
                     {planTier}
                   </Badge>
                 </div>
 
-                <p className="text-am-body-sm text-am-text-secondary mb-4 leading-relaxed">
+                <p className="text-am-body-sm text-muted-foreground mb-4 leading-relaxed">
                   O AprovaMind sobe de valor em três camadas: Free para ativação, Pro para estudo sério no single-plan e Premium para coordenação avançada da rotina.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-am-surface-subtle/50 p-4 rounded-am-md border border-am-border-subtle">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/50 p-4 rounded-md border border-am-border-subtle">
                   {planFeatures.map(({ label, available }) => (
                     <div key={label} className="flex items-center gap-2.5">
                       {available
-                        ? <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-am-success" />
-                        : <Lock className="h-4 w-4 flex-shrink-0 text-am-text-tertiary" />
+                        ? <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-green-500" />
+                        : <Lock className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
                       }
-                      <span className={`text-am-body-sm font-medium ${available ? 'text-am-text-primary' : 'text-am-text-tertiary'}`}>{label}</span>
+                      <span className={`text-am-body-sm font-medium ${available ? 'text-foreground' : 'text-muted-foreground'}`}>{label}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 pt-5 border-t border-am-ai-border/20 relative z-10">
+            <div className="mt-6 pt-5 border-t border-border/50/20 relative z-10">
               <Button
                 variant="outline"
                 onClick={() => setAccountModalOpen(true)}
-                className="w-full justify-between border-am-ai-border/40 text-am-ai-default hover:bg-am-ai-default/10"
+                className="w-full justify-between border-border/50/40 text-primary hover:bg-primary/10"
               >
                 <span className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> Gerenciar Faturamento</span>
                 <ChevronRight className="h-4 w-4" />
@@ -165,23 +165,23 @@ export default function SettingsPage() {
         <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show">
           <Card padding="lg" variant="default" className="w-full">
             <div className="mb-5 flex items-center gap-2 border-b border-am-border-subtle pb-3">
-              <Shield className="h-4 w-4 text-am-text-tertiary" />
-              <h2 className="font-brand text-am-body font-bold text-am-text-primary tracking-wide">Segurança Institucional</h2>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+              <h2 className="font-sans text-am-body font-bold text-foreground tracking-wide">Segurança Institucional</h2>
             </div>
-            <div className="space-y-3 bg-am-surface-subtle p-4 rounded-am-md border border-am-border-subtle">
-              <p className="text-am-body-sm text-am-text-secondary flex gap-2"><CheckCircle2 className="h-4 w-4 text-am-success flex-shrink-0" /> Dados armazenados com segurança em Data Centers da Google Cloud</p>
-              <p className="text-am-body-sm text-am-text-secondary flex gap-2"><CheckCircle2 className="h-4 w-4 text-am-success flex-shrink-0" /> Autenticação 256-bit via protocolo robusto (Google OAuth)</p>
-              <p className="text-am-body-sm text-am-text-secondary flex gap-2"><CheckCircle2 className="h-4 w-4 text-am-success flex-shrink-0" /> Conexão blindada TLS de ponta a ponta</p>
-              <p className="text-am-body-sm text-am-text-secondary flex gap-2"><CheckCircle2 className="h-4 w-4 text-am-success flex-shrink-0" /> Restrição total a compartilhamento com terceiros</p>
+            <div className="space-y-3 bg-muted p-4 rounded-md border border-am-border-subtle">
+              <p className="text-am-body-sm text-muted-foreground flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" /> Dados armazenados com segurança em Data Centers da Google Cloud</p>
+              <p className="text-am-body-sm text-muted-foreground flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" /> Autenticação 256-bit via protocolo robusto (Google OAuth)</p>
+              <p className="text-am-body-sm text-muted-foreground flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" /> Conexão blindada TLS de ponta a ponta</p>
+              <p className="text-am-body-sm text-muted-foreground flex gap-2"><CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" /> Restrição total a compartilhamento com terceiros</p>
             </div>
           </Card>
         </motion.div>
 
         {/* Danger zone */}
         <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
-          <div className="rounded-am-xl border border-am-error/30 bg-am-error/5 p-6 space-y-4">
+          <div className="rounded-xl border border-am-error/30 bg-am-error/5 p-6 space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <h2 className="font-brand text-am-body font-bold text-am-error tracking-wide">Zona de Risco</h2>
+              <h2 className="font-sans text-am-body font-bold text-am-error tracking-wide">Zona de Risco</h2>
             </div>
             <p className="text-am-body-sm text-am-error/80 leading-relaxed mb-4">
               Ações realizadas nesta área podem interromper temporariamente o seu progresso logado ou deletar artefatos irrecuperáveis caso solicitado.

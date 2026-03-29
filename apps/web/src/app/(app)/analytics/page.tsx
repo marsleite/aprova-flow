@@ -109,17 +109,17 @@ export default function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Topbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 px-6 border-b border-am-border-default bg-am-surface/30 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 px-6 border-b border-border bg-card/30 backdrop-blur-md">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="outline"><BarChart2 className="h-3 w-3 mr-1" /> Analytics</Badge>
           </div>
-          <h1 className="font-brand text-am-h3 font-bold text-am-text-primary tracking-tight mt-2">
+          <h1 className="font-sans text-am-h3 font-bold text-foreground tracking-tight mt-2">
             Inteligência de Performance
           </h1>
-          <p className="text-am-caption text-am-text-secondary mt-1">
+          <p className="text-am-caption text-muted-foreground mt-1">
             Métricas aprofundadas sobre execução e retenção
-            {activePlanObj && <> — <span className="font-medium text-am-text-primary">{activePlanObj.name}</span></>}
+            {activePlanObj && <> — <span className="font-medium text-foreground">{activePlanObj.name}</span></>}
           </p>
         </div>
       </div>
@@ -189,37 +189,37 @@ export default function AnalyticsPage() {
             <ChartCard title="Carga Horária vs. Peso" loading={false} subtitle="Análise de desvio sobre pesos do edital">
               {loading ? (
                 <div className="space-y-3">
-                  {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-8 rounded-am-md border border-am-border-subtle bg-am-surface-subtle animate-pulse" />)}
+                  {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-8 rounded-md border border-am-border-subtle bg-muted animate-pulse" />)}
                 </div>
               ) : planVsActual.length === 0 ? (
-                <div className="py-8 text-center bg-am-surface-subtle rounded-am-md border border-am-border-subtle">
-                  <p className="text-am-caption text-am-text-secondary">Atribua pesos no painel de edital para acompanhar aderência.</p>
+                <div className="py-8 text-center bg-muted rounded-md border border-am-border-subtle">
+                  <p className="text-am-caption text-muted-foreground">Atribua pesos no painel de edital para acompanhar aderência.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {planVsActual.map((pva) => {
                     const isNeglected = pva.status === 'neglected';
                     return (
-                      <div key={pva.subject} className="bg-am-surface-elevated p-3 rounded-am-md border border-am-border-default">
+                      <div key={pva.subject} className="bg-card p-3 rounded-md border border-border">
                         <div className="mb-2 flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             {isNeglected
                               ? <AlertTriangle className="h-3.5 w-3.5 text-am-warning" />
-                              : <CheckCircle2 className="h-3.5 w-3.5 text-am-success" />
+                              : <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
                             }
-                            <span className="text-am-body-sm text-am-text-primary font-medium">{pva.subject.length > 22 ? pva.subject.substring(0, 20) + '…' : pva.subject}</span>
+                            <span className="text-am-body-sm text-foreground font-medium">{pva.subject.length > 22 ? pva.subject.substring(0, 20) + '…' : pva.subject}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-am-caption text-am-text-tertiary">{pva.plannedPercent}% Plan</span>
-                            <span className={`text-am-caption font-bold font-mono ${isNeglected ? 'text-am-warning' : 'text-am-success'}`}>
+                            <span className="text-am-caption text-muted-foreground">{pva.plannedPercent}% Plan</span>
+                            <span className={`text-am-caption font-bold font-mono ${isNeglected ? 'text-am-warning' : 'text-green-500'}`}>
                               {pva.deviation >= 0 ? '+' : ''}{pva.deviation.toFixed(0)}%
                             </span>
                           </div>
                         </div>
-                        <div className="relative h-1.5 overflow-hidden rounded-full bg-am-surface-subtle">
+                        <div className="relative h-1.5 overflow-hidden rounded-full bg-muted">
                           <div className="absolute h-full rounded-full bg-am-border-strong" style={{ width: `${pva.plannedPercent}%` }} />
                           <div
-                            className={`absolute h-full rounded-full transition-all ${isNeglected ? 'bg-am-warning' : 'bg-am-success'}`}
+                            className={`absolute h-full rounded-full transition-all ${isNeglected ? 'bg-am-warning' : 'bg-green-500'}`}
                             style={{ width: `${Math.min(100, pva.actualPercent)}%` }}
                           />
                         </div>
@@ -244,51 +244,51 @@ export default function AnalyticsPage() {
 
         {/* Actionable Report Bottom */}
         <motion.div custom={6} variants={fadeUp} initial="hidden" animate="show" className="grid gap-6 lg:grid-cols-2">
-          <div className="bg-am-surface p-6 rounded-am-xl border border-am-border-default shadow-am-md">
+          <div className="bg-card p-6 rounded-xl border border-border shadow-am-md">
             <div className="flex items-center gap-2 mb-4">
-              <Flame className="h-4 w-4 text-am-success" />
-              <h3 className="font-brand text-am-body font-bold text-am-text-primary">Pilares Consistentes</h3>
+              <Flame className="h-4 w-4 text-green-500" />
+              <h3 className="font-sans text-am-body font-bold text-foreground">Pilares Consistentes</h3>
             </div>
             {loading ? (
-              <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-8 rounded border border-am-border-subtle bg-am-surface-subtle animate-pulse" />)}</div>
+              <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-8 rounded border border-am-border-subtle bg-muted animate-pulse" />)}</div>
             ) : strongSubjects.length > 0 ? (
               <div className="space-y-2">
                 {strongSubjects.slice(0, 3).map((s) => (
-                  <div key={s.subject} className="flex items-center justify-between p-3 rounded-am-md bg-am-success/5 border border-am-success/20">
+                  <div key={s.subject} className="flex items-center justify-between p-3 rounded-md bg-green-500/5 border border-am-success/20">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-am-success flex-shrink-0" />
-                      <span className="text-am-body-sm text-am-text-primary">{s.subject}</span>
+                      <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      <span className="text-am-body-sm text-foreground">{s.subject}</span>
                     </div>
-                    <span className="text-am-caption font-bold text-am-success font-mono">{s.actualPercent.toFixed(0)}% de Retenção de Base</span>
+                    <span className="text-am-caption font-bold text-green-500 font-mono">{s.actualPercent.toFixed(0)}% de Retenção de Base</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-am-body-sm text-am-text-secondary bg-am-surface-subtle p-4 rounded-am-md italic">Carga de estudo não polarizou forças ainda.</p>
+              <p className="text-am-body-sm text-muted-foreground bg-muted p-4 rounded-md italic">Carga de estudo não polarizou forças ainda.</p>
             )}
           </div>
 
-          <div className="bg-am-surface p-6 rounded-am-xl border border-am-border-default shadow-am-md">
+          <div className="bg-card p-6 rounded-xl border border-border shadow-am-md">
             <div className="flex items-center gap-2 mb-4">
               <Brain className="h-4 w-4 text-am-warning" />
-              <h3 className="font-brand text-am-body font-bold text-am-text-primary">Gargalos Preditivos</h3>
+              <h3 className="font-sans text-am-body font-bold text-foreground">Gargalos Preditivos</h3>
             </div>
             {loading ? (
-              <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-8 rounded border border-am-border-subtle bg-am-surface-subtle animate-pulse" />)}</div>
+              <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-8 rounded border border-am-border-subtle bg-muted animate-pulse" />)}</div>
             ) : criticalSubjects.length > 0 ? (
               <div className="space-y-2">
                 {criticalSubjects.slice(0, 3).map((s) => (
-                  <div key={s.subject} className="flex items-center justify-between p-3 rounded-am-md bg-am-warning/5 border border-am-warning/20">
+                  <div key={s.subject} className="flex items-center justify-between p-3 rounded-md bg-am-warning/5 border border-am-warning/20">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4 text-am-warning flex-shrink-0" />
-                      <span className="text-am-body-sm text-am-text-primary">{s.subject}</span>
+                      <span className="text-am-body-sm text-foreground">{s.subject}</span>
                     </div>
                     <span className="text-am-caption font-bold text-am-warning font-mono">{Math.abs(s.deviation).toFixed(0)}% Abaixo do Pleno</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-am-body-sm text-am-text-secondary bg-am-surface-subtle p-4 rounded-am-md italic">Todas as disciplinas base controladas no quadrante seguro.</p>
+              <p className="text-am-body-sm text-muted-foreground bg-muted p-4 rounded-md italic">Todas as disciplinas base controladas no quadrante seguro.</p>
             )}
           </div>
         </motion.div>

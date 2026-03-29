@@ -206,7 +206,7 @@ export default function WeeklyMentoringCard({
   // ---- Skeleton ----
   if (parentLoading || loading) {
     return (
-      <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
+      <div className="rounded-xl border border-border bg-card p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg shimmer" />
           <div className="h-4 w-48 rounded shimmer" />
@@ -226,18 +226,18 @@ export default function WeeklyMentoringCard({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
+        className="rounded-xl border border-border bg-card p-5"
       >
         <div className="mb-3 flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3150AA]/10">
-            <Brain className="h-4 w-4 text-[#F59768]" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)]/10">
+            <Brain className="h-4 w-4 text-[var(--primary)]" />
           </div>
           <div>
-            <span className="text-sm font-semibold text-am-text-primary">Mentoria Semanal</span>
-            <p className="text-[11px] text-am-text-secondary">Análise profunda via IA</p>
+            <span className="text-sm font-semibold text-foreground">Mentoria Semanal</span>
+            <p className="text-[11px] text-muted-foreground">Análise profunda via IA</p>
           </div>
         </div>
-        <p className="text-sm text-am-text-secondary">
+        <p className="text-sm text-muted-foreground">
           Estude durante a semana para desbloquear sua mentoria semanal personalizada com IA.
         </p>
       </motion.div>
@@ -254,30 +254,30 @@ export default function WeeklyMentoringCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="relative overflow-hidden rounded-am-xl border border-am-border-default border-t border-t-am-ai-default/30 bg-am-surface p-6 shadow-am-md"
+      className="relative overflow-hidden rounded-xl border border-border border-t border-t-am-ai-default/30 bg-card p-6 shadow-am-md"
     >
       <div className="relative z-10">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-am-ai-default/10">
-              <Brain className="h-4 w-4 text-am-ai-default" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Brain className="h-4 w-4 text-primary" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-am-text-primary">Mentoria Semanal</span>
-                <span className="rounded-md bg-am-ai-default/10 px-1.5 py-0.5 text-[10px] font-bold text-am-ai-default">
+                <span className="text-sm font-semibold text-foreground">Mentoria Semanal</span>
+                <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
                   IA
                 </span>
               </div>
-              <p className="text-[11px] text-am-text-secondary">{weekLabel}</p>
+              <p className="text-[11px] text-muted-foreground">{weekLabel}</p>
             </div>
           </div>
 
           {content && (
             <button
               onClick={() => setExpanded((e) => !e)}
-              className="rounded-lg p-1.5 text-am-text-secondary transition hover:bg-am-surface-subtle hover:text-am-text-secondary"
+              className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-muted-foreground"
             >
               {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
             </button>
@@ -327,21 +327,21 @@ export default function WeeklyMentoringCard({
                   className="space-y-3 overflow-hidden"
                 >
                   {/* Diagnóstico */}
-                  <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3.5">
-                    <p className="text-sm leading-relaxed text-am-text-secondary">{content.weekDiagnosis}</p>
+                  <div className="rounded-xl border border-border bg-muted p-3.5">
+                    <p className="text-sm leading-relaxed text-muted-foreground">{content.weekDiagnosis}</p>
                   </div>
 
                   {/* Pontos fortes */}
                   {content.strengths.length > 0 && (
-                    <div className="rounded-xl border border-am-success/20 bg-am-success/5 px-3.5 py-3">
+                    <div className="rounded-xl border border-am-success/20 bg-green-500/5 px-3.5 py-3">
                       <div className="mb-2 flex items-center gap-2">
-                        <Trophy className="h-3.5 w-3.5 text-am-success" />
-                        <span className="text-xs font-bold text-am-success uppercase tracking-wider">Pontos Fortes</span>
+                        <Trophy className="h-3.5 w-3.5 text-green-500" />
+                        <span className="text-xs font-bold text-green-500 uppercase tracking-wider">Pontos Fortes</span>
                       </div>
                       <ul className="space-y-1">
                         {content.strengths.map((s, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-am-text-secondary">
-                            <CheckCircle className="mt-0.5 h-3 w-3 shrink-0 text-am-success" />
+                          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                            <CheckCircle className="mt-0.5 h-3 w-3 shrink-0 text-green-500" />
                             {s}
                           </li>
                         ))}
@@ -358,7 +358,7 @@ export default function WeeklyMentoringCard({
                       </div>
                       <ul className="space-y-1">
                         {content.improvements.map((s, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-am-text-secondary">
+                          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
                             <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-am-warning" />
                             {s}
                           </li>
@@ -369,26 +369,26 @@ export default function WeeklyMentoringCard({
 
                   {/* Plano de recuperação */}
                   {content.recoveryPlan && (
-                    <div className="rounded-xl border border-am-ai-default/20 bg-am-ai-default/5 px-3.5 py-3">
+                    <div className="rounded-xl border border-am-ai-default/20 bg-primary/5 px-3.5 py-3">
                       <div className="mb-2 flex items-center gap-2">
-                        <Target className="h-3.5 w-3.5 text-am-ai-default" />
-                        <span className="text-xs font-bold text-am-ai-default uppercase tracking-wider">Próxima Semana</span>
+                        <Target className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider">Próxima Semana</span>
                       </div>
-                      <p className="text-sm leading-relaxed text-am-text-secondary">{content.recoveryPlan}</p>
+                      <p className="text-sm leading-relaxed text-muted-foreground">{content.recoveryPlan}</p>
                     </div>
                   )}
 
                   {/* Metas sugeridas */}
                   {content.suggestedGoals.length > 0 && (
-                    <div className="rounded-xl border border-am-ai-default/20 bg-am-ai-default/10 px-3.5 py-3">
+                    <div className="rounded-xl border border-am-ai-default/20 bg-primary/10 px-3.5 py-3">
                       <div className="mb-2 flex items-center gap-2">
-                        <Sparkles className="h-3.5 w-3.5 text-am-ai-default" />
-                        <span className="text-xs font-bold text-am-ai-default uppercase tracking-wider">Metas Sugeridas</span>
+                        <Sparkles className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider">Metas Sugeridas</span>
                       </div>
                       <ul className="space-y-1">
                         {content.suggestedGoals.map((g, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-am-text-secondary">
-                            <span className="mt-1 flex h-4 w-4 items-center justify-center rounded-full bg-am-ai-default/10 text-[10px] font-bold text-am-ai-default leading-none">
+                          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                            <span className="mt-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary leading-none">
                               {i + 1}
                             </span>
                             {g}
@@ -400,8 +400,8 @@ export default function WeeklyMentoringCard({
 
                   {/* Fechamento motivacional */}
                   {content.motivationalClose && (
-                    <div className="rounded-xl bg-am-surface-subtle/50 border border-am-border-default/50 px-3.5 py-3">
-                      <p className="text-xs italic leading-relaxed text-am-text-secondary">
+                    <div className="rounded-xl bg-muted/50 border border-border/50 px-3.5 py-3">
+                      <p className="text-xs italic leading-relaxed text-muted-foreground">
                         &ldquo;{content.motivationalClose}&rdquo;
                       </p>
                     </div>
@@ -411,7 +411,7 @@ export default function WeeklyMentoringCard({
                   <button
                     onClick={handleGenerate}
                     disabled={generating}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-2 text-xs text-am-text-secondary transition hover:bg-am-surface-subtle disabled:opacity-40"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-muted px-4 py-2 text-xs text-muted-foreground transition hover:bg-muted disabled:opacity-40"
                   >
                     {generating ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -429,7 +429,7 @@ export default function WeeklyMentoringCard({
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-xs italic text-am-text-secondary"
+                className="text-xs italic text-muted-foreground"
               >
                 &ldquo;{content.motivationalClose}&rdquo;
               </motion.p>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html class="scroll-smooth dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Design System | AprovaMind (Flux Vibe)</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'var(--background)',
+                        foreground: 'var(--foreground)',
+                        card: 'var(--card)',
+                        'card-foreground': 'var(--card-foreground)',
+                        muted: {
+                            DEFAULT: 'var(--muted)',
+                            foreground: 'var(--muted-foreground)',
+                        },
+                        border: 'var(--border)',
+                        primary: {
+                            DEFAULT: 'var(--primary)',
+                            foreground: 'var(--primary-foreground)',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Light Mode Rules (Flux Brutalist adaptation) */
+        :root {
+            --background: #FAFAFA; /* zinc-50 */
+            --foreground: #09090B; /* zinc-950 */
+            
+            --card: #FFFFFF;
+            --card-foreground: #09090B;
+            
+            --muted: rgba(0,0,0,0.03);
+            --muted-foreground: #64748B; /* slate-500 */
+            
+            --border: rgba(0,0,0,0.08);
+            
+            --primary: #ea580c; /* orange-600 */
+            --primary-foreground: #ffffff;
+            
+            --grid-color: rgba(0,0,0,0.05);
+            --text-glow-shadow: 0 0 30px rgba(0,0,0,0.15);
+            --nav-bg: rgba(250,250,250,0.7);
+        }
+
+        /* Dark Mode Rules (Original Flux Spec) */
+        .dark {
+            --background: #0B0C15;
+            --foreground: #FFFFFF;
+            
+            --card: rgba(255,255,255,0.02);
+            --card-foreground: #FFFFFF;
+            
+            --muted: rgba(255,255,255,0.02);
+            --muted-foreground: #94a3b8; /* slate-400 */
+            
+            --border: rgba(255,255,255,0.08); /* white/8 */
+            
+            --primary: #f97316; /* orange-500 */
+            --primary-foreground: #ffffff;
+            
+            --grid-color: rgba(255,255,255,0.04);
+            --text-glow-shadow: 0 0 30px rgba(255,255,255,0.1);
+            --nav-bg: rgba(11,12,21,0.7);
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .text-glow {
+            text-shadow: var(--text-glow-shadow);
+        }
+
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+        }
+        
+        .global-nav {
+            background-color: var(--nav-bg);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-primary/30 font-sans min-h-screen">
+
+    <!-- Background Grid -->
+    <div class="fixed inset-0 z-0 bg-grid-pattern bg-[length:4rem_4rem] pointer-events-none opacity-50"></div>
+
+    <!-- Navigation -->
+    <nav class="z-50 sticky global-nav w-full border-b border-border top-0 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-12">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center justify-center w-2 h-2 rounded-full animate-pulse bg-primary"></span>
+                    <span class="font-medium tracking-tight text-foreground text-lg transition-colors">Aprova<span class="text-muted-foreground">Mind</span></span>
+                </div>
+                
+                <div class="hidden md:flex items-center gap-8 text-xs font-medium tracking-widest text-muted-foreground uppercase">
+                    <a class="hover:text-foreground transition-colors" href="#typography">Typography</a>
+                    <a class="hover:text-foreground transition-colors" href="#components">Components</a>
+                    <a class="hover:text-foreground transition-colors" href="#cards">Cards</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-medium tracking-widest text-primary uppercase border border-primary/20 bg-primary/10 px-3 py-1 rounded">
+                    Flux Concept v3.0
+                </span>
+                
+                <!-- Theme Toggle -->
+                <button id="themeToggle" class="relative inline-flex h-9 w-9 items-center justify-center rounded border border-border bg-card text-foreground hover:bg-muted transition-colors" title="Alternar Tema">
+                    <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                    <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Identity -->
+    <header class="z-10 overflow-hidden border-border border-b pt-20 pb-32 relative transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-6 relative">
+            <div class="max-w-3xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-xs font-medium tracking-widest uppercase text-primary">
+                        Design System Core
+                    </span>
+                </div>
+                <h1 class="text-6xl md:text-8xl font-medium tracking-tighter leading-[0.9] text-foreground mb-8 text-glow transition-colors">
+                    Kinetic
+                    <br/>
+                    Study
+                    <br/>
+                    System
+                </h1>
+                <p class="text-lg text-muted-foreground max-w-md leading-relaxed mb-10 font-light transition-colors">
+                    Plataforma baseada no conceito 'Flux'. Foco profundo, alto contraste técnico e flexibilidade nativa entre Claro e Escuro.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <!-- 1) Typography -->
+    <section id="typography" class="border-b border-border relative z-20 bg-background transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-6 py-20">
+            <div class="flex items-center gap-4 text-xs font-medium tracking-widest uppercase mb-12 text-primary">
+                <span class="w-8 h-[1px] bg-primary"></span>
+                01 Typography (Inter)
+            </div>
+
+            <div class="grid grid-cols-1 gap-12">
+                <!-- Display H1 -->
+                <div class="border-b border-border pb-12 transition-colors">
+                    <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Heading 1 (Display / Hero)</span>
+                    <h1 class="text-6xl md:text-8xl font-medium tracking-tighter leading-[0.9] text-foreground text-glow transition-colors">
+                        Direito Penal
+                    </h1>
+                    <span class="text-xs font-mono text-muted-foreground mt-4 block">text-6xl / tracking-tighter / leading-[0.9] / text-glow</span>
+                </div>
+
+                <!-- Heading 2 -->
+                <div class="border-b border-border pb-12 transition-colors">
+                    <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Heading 2 (Seções)</span>
+                    <h2 class="text-4xl md:text-5xl font-medium text-foreground tracking-tight leading-none transition-colors">
+                        Módulos de Estudo
+                    </h2>
+                    <span class="text-xs font-mono text-muted-foreground mt-4 block">text-4xl / tracking-tight / leading-none</span>
+                </div>
+
+                <!-- Heading 3 -->
+                <div class="border-b border-border pb-12 transition-colors">
+                    <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Heading 3 (Cards)</span>
+                    <h3 class="text-3xl font-medium text-foreground tracking-tight transition-colors">
+                        Simulado Especial
+                    </h3>
+                    <span class="text-xs font-mono text-muted-foreground mt-4 block">text-3xl / tracking-tight / font-medium</span>
+                </div>
+
+                <!-- Body Text -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 border-b border-border pb-12 transition-colors">
+                    <div>
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Body Large (Questão Base)</span>
+                        <p class="text-lg text-muted-foreground leading-relaxed font-light transition-colors">
+                            Assinale a alternativa que apresenta corretamente um dos princípios fundamentais aplicados à administração pública direta e indireta. O modo Light mantém o aspecto brutaliano e altamente legível.
+                        </p>
+                    </div>
+                    <div>
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Body Small (Descritivos)</span>
+                        <p class="text-sm text-muted-foreground leading-relaxed transition-colors">
+                             Este simulado contém 50 questões inéditas focadas na banca CESPE. O tempo estimado de resolução é de 2 horas.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Labels -->
+                <div>
+                     <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Labels & Metadados (Fundamental no Flux)</span>
+                     <div class="flex flex-col gap-4">
+                        <span class="text-xs font-medium tracking-widest uppercase text-primary transition-colors">Próxima Revisão: Amanhã</span>
+                        <span class="text-xs font-medium tracking-widest uppercase text-muted-foreground transition-colors">Módulo Concluído</span>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2) Elements / Interactive -->
+    <section id="components" class="border-b border-border relative z-20 bg-background transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-6 py-20">
+            <div class="flex items-center gap-4 text-xs font-medium tracking-widest uppercase mb-12 text-primary">
+                <span class="w-8 h-[1px] bg-primary"></span>
+                02 Interactive Actions
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24">
+                
+                <div class="space-y-12">
+                    
+                    <!-- Primary CTA -->
+                    <div>
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Primary CTA (Solid Accent)</span>
+                        <div class="max-w-xs">
+                            <button class="w-full py-4 text-primary-foreground text-xs font-semibold uppercase tracking-widest transition-all duration-300 shadow-lg bg-primary hover:opacity-90 shadow-primary/20 hover:shadow-primary/40">
+                                Iniciar Simulado
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ghost Action -->
+                    <div>
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Ghost Action (Outline)</span>
+                        <div class="max-w-xs">
+                             <button class="uppercase hover:bg-foreground hover:text-background transition-all duration-300 group-hover:border-foreground text-xs font-semibold text-muted-foreground tracking-widest w-full border-border border pt-4 pb-4">
+                                Ver Estatísticas
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="space-y-12">
+                     <!-- Input -->
+                     <div>
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Input Field (Sharp)</span>
+                        <input class="bg-card border border-border px-4 py-3 text-sm text-foreground placeholder-muted-foreground focus:outline-none transition-colors w-full focus:border-primary max-w-xs" placeholder="Buscar concurso..." type="text"/>
+                    </div>
+
+                    <!-- Text Link -->
+                    <div>
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Text Link</span>
+                        <a class="text-xs font-semibold tracking-widest uppercase text-foreground border-b border-border pb-1 hover:border-primary hover:text-primary transition-colors inline-block" href="#">
+                            Acessar Dashboard Completo
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 3) Cards & Containers -->
+    <section id="cards" class="border-b border-border relative z-20 bg-background transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-6 py-20">
+            <div class="flex items-center gap-4 text-xs font-medium tracking-widest uppercase mb-12 text-primary">
+                <span class="w-8 h-[1px] bg-primary"></span>
+                03 Surfaces & Cards
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Module Card (List Item) -->
+                <div>
+                     <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Item de Navegação (List Card)</span>
+                     <div class="p-8 bg-card border border-border hover:border-muted-foreground/50 transition-colors cursor-pointer group">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-2 block group-hover:text-primary transition-colors">
+                            Aula 01
+                        </span>
+                        <h3 class="text-xl font-medium text-foreground tracking-tight mb-1 transition-colors">
+                            Fundamentos do Direito
+                        </h3>
+                        <p class="text-sm text-muted-foreground transition-colors">Conceitos iniciais e introdução bibliográfica.</p>
+                    </div>
+                </div>
+
+                <!-- Bento / Feature Card -->
+                <div>
+                    <span class="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Bento Card / Painel de Stats</span>
+                    <div class="group relative overflow-hidden bg-card border border-border hover:border-border/80 transition-all h-full">
+                        <div class="p-10 flex flex-col justify-between h-full">
+                            <div class="flex group-hover:border-primary/50 group-hover:text-primary transition-colors text-foreground bg-muted w-12 h-12 border border-border rounded-full mb-6 items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            <div class="">
+                                <h3 class="text-2xl font-medium text-foreground tracking-tight mb-2 transition-colors">Desempenho</h3>
+                                <p class="text-sm text-muted-foreground leading-relaxed font-light transition-colors">
+                                    Média de 85% de acertos na última semana em matérias específicas.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 4) Icons / Iconography -->
+    <section id="icons" class="border-b border-border relative z-20 bg-background transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-6 py-20">
+            <div class="flex items-center gap-4 text-xs font-medium tracking-widest uppercase mb-12 text-primary">
+                <span class="w-8 h-[1px] bg-primary"></span>
+                04 Iconography
+            </div>
+            
+            <p class="text-sm text-muted-foreground mb-8 font-light transition-colors">Sistema baseado no clássico Lucide Icons e Solar Icons (Duotone e Linear), mantendo consistência de traços finos e preenchimento de brand com opacidade.</p>
+
+            <div class="flex flex-wrap gap-8 text-foreground transition-colors">
+                <div class="flex flex-col items-center justify-center gap-3 p-6 border border-border bg-card hover:border-border/80 transition-all cursor-pointer w-28 group">
+                     <iconify-icon icon="solar:layers-minimalistic-bold-duotone" width="28" class="text-muted-foreground group-hover:text-primary transition-colors"></iconify-icon>
+                     <span class="text-[10px] uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">Camadas</span>
+                </div>
+                
+                <div class="flex flex-col items-center justify-center gap-3 p-6 border border-border bg-card hover:border-border/80 transition-all cursor-pointer w-28 group">
+                    <iconify-icon icon="solar:hamburger-menu-bold-duotone" width="28" class="text-muted-foreground group-hover:text-primary transition-colors"></iconify-icon>
+                    <span class="text-[10px] uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">Menu</span>
+                </div>
+
+                <div class="flex flex-col items-center justify-center gap-3 p-6 border border-border bg-card hover:border-border/80 transition-all cursor-pointer w-28 group">
+                    <iconify-icon icon="solar:box-minimalistic-bold-duotone" width="28" class="text-muted-foreground group-hover:text-primary transition-colors"></iconify-icon>
+                    <span class="text-[10px] uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">Módulo</span>
+                </div>
+
+                <div class="flex flex-col items-center justify-center gap-3 p-6 border border-border bg-card hover:border-border/80 transition-all cursor-pointer w-28 group">
+                    <iconify-icon icon="solar:users-group-rounded-bold-duotone" width="28" class="text-muted-foreground group-hover:text-primary transition-colors"></iconify-icon>
+                    <span class="text-[10px] uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">Ranking</span>
+                </div>
+
+                <div class="flex flex-col items-center justify-center gap-3 p-6 border border-border bg-card hover:border-border/80 transition-all cursor-pointer w-28 group">
+                    <iconify-icon icon="solar:chart-square-bold-duotone" width="28" class="text-muted-foreground group-hover:text-primary transition-colors"></iconify-icon>
+                    <span class="text-[10px] uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">Análise</span>
+                </div>
+
+                <div class="flex flex-col items-center justify-center gap-3 p-6 border border-border bg-card hover:border-primary/50 transition-all cursor-pointer w-28 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-primary/5 blur-xl group-hover:bg-primary/10 transition-colors"></div>
+                    <iconify-icon icon="solar:check-circle-bold" width="32" class="text-primary drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]"></iconify-icon>
+                    <span class="text-[10px] uppercase tracking-widest text-foreground font-semibold">Sucesso</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Dark/Light Mode Toggler logic
+        const btn = document.getElementById('themeToggle');
+        const sun = document.getElementById('sunIcon');
+        const moon = document.getElementById('moonIcon');
+        const html = document.documentElement;
+
+        btn.addEventListener('click', () => {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                sun.classList.remove('hidden');
+                moon.classList.add('hidden');
+            } else {
+                html.classList.add('dark');
+                moon.classList.remove('hidden');
+                sun.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -52,10 +52,10 @@ function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: Car
       variants={item}
       whileHover={{ scale: 1.03, y: -2 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className={`relative overflow-hidden rounded-xl border border-am-border-default bg-am-surface-elevated p-5`}
+      className={`relative overflow-hidden rounded-xl border border-border bg-card p-5`}
     >
       {/* Decoração de fundo */}
-      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-am-surface-subtle" />
+      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-muted" />
 
       <div className="relative z-10">
         <div className="mb-4 flex items-center justify-between">
@@ -63,12 +63,12 @@ function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: Car
             <div className={`rounded-xl ${iconBg} p-2.5 shadow-lg ${glowColor}`}>
               {icon}
             </div>
-            <span className="text-xs font-medium text-am-text-secondary">{title}</span>
+            <span className="text-xs font-medium text-muted-foreground">{title}</span>
           </div>
-          <TrendingUp className="h-3.5 w-3.5 text-am-text-tertiary" />
+          <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
-        <p className="text-2xl font-bold tracking-tight text-am-text-primary">{value}</p>
-        <p className="mt-1 text-xs text-am-text-secondary">{subtitle}</p>
+        <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
       </div>
     </motion.div>
   );
@@ -76,7 +76,7 @@ function Card({ title, value, subtitle, icon, gradient, iconBg, glowColor }: Car
 
 function CardSkeleton() {
   return (
-    <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <div className="mb-3 flex items-center gap-3">
         <div className="h-8 w-8 rounded-lg shimmer" />
         <div className="h-3 w-24 rounded shimmer" />
@@ -117,29 +117,29 @@ export default function SummaryCards({ summary, loading }: SummaryCardsProps) {
         title="Total Hoje"
         value={formatDuration(summary.totalToday)}
         subtitle={summary.totalToday === 0 ? 'Nenhuma sessão hoje' : 'Bom trabalho!'}
-        icon={<Clock className="h-5 w-5 text-violet-300" />}
-        gradient="from-violet-900/80 to-violet-950/80"
-        iconBg="bg-[#3150AA]/20"
-        glowColor="shadow-violet-500/20"
+        icon={<Clock className="h-5 w-5 text-primary" />}
+        gradient="from-primary/20/80 to-primary/20/80"
+        iconBg="bg-[var(--primary)]/20"
+        glowColor="shadow-primary/20/20"
         index={0}
       />
       <Card
         title="Total Semana"
         value={formatDuration(summary.totalWeek)}
         subtitle={getDailyGoalText(summary.totalWeek, summary.totalToday)}
-        icon={<CalendarDays className="h-5 w-5 text-[#F59768]/80" />}
-        gradient="from-blue-900/80 to-blue-950/80"
-        iconBg="bg-[#3150AA]/20"
-        glowColor="shadow-[#3150AA]/20"
+        icon={<CalendarDays className="h-5 w-5 text-[var(--primary)]/80" />}
+        gradient="from-primary/20/80 to-primary/20/80"
+        iconBg="bg-[var(--primary)]/20"
+        glowColor="shadow-[var(--primary)]/20"
         index={1}
       />
       <Card
         title="Total Mês"
         value={formatDuration(summary.totalMonth)}
         subtitle={summary.totalMonth > 0 ? `${Math.round(summary.totalMonth / 3600)}h acumuladas` : 'Mês começando'}
-        icon={<CalendarRange className="h-5 w-5 text-cyan-300" />}
+        icon={<CalendarRange className="h-5 w-5 text-primary" />}
         gradient="from-cyan-900/80 to-cyan-950/80"
-        iconBg="bg-cyan-500/20"
+        iconBg="bg-primary/20/20"
         glowColor="shadow-cyan-500/20"
         index={2}
       />

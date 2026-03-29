@@ -355,7 +355,7 @@ export default function MentorCard({
   // ---- Skeleton ----
   if (parentLoading) {
     return (
-      <div className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5">
+      <div className="rounded-xl border border-border bg-card p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg shimmer" />
           <div className="h-4 w-40 rounded shimmer" />
@@ -376,25 +376,25 @@ export default function MentorCard({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-am-xl border border-am-border-default bg-am-surface p-6 shadow-am-md"
+        className="relative overflow-hidden rounded-xl border border-border bg-card p-6 shadow-am-md"
       >
         <div className="mb-4 flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
             <Shield className="h-4 w-4 text-amber-300" />
           </div>
           <div>
-            <span className="text-sm font-semibold text-am-text-primary">Mentor AprovaMind</span>
-            <p className="text-[11px] text-am-text-secondary">Análise estratégica dos seus estudos</p>
+            <span className="text-sm font-semibold text-foreground">Mentor AprovaMind</span>
+            <p className="text-[11px] text-muted-foreground">Análise estratégica dos seus estudos</p>
           </div>
         </div>
-        <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-3.5">
-          <p className="text-sm leading-relaxed text-am-text-secondary">
+        <div className="rounded-xl border border-border bg-muted p-3.5">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             Comece sua primeira sessão de estudo e eu vou analisar seu desempenho, identificar matérias que precisam de atenção e traçar a melhor estratégia para sua aprovação.
           </p>
         </div>
-        <div className="mt-3 flex items-start gap-2 rounded-xl bg-am-surface-subtle px-3.5 py-3">
+        <div className="mt-3 flex items-start gap-2 rounded-xl bg-muted px-3.5 py-3">
           <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
-          <p className="text-xs text-am-text-secondary">
+          <p className="text-xs text-muted-foreground">
             Inicie o cronômetro acima para registrar sua primeira sessão. Sua jornada até a posse começa agora.
           </p>
         </div>
@@ -407,7 +407,7 @@ export default function MentorCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="relative overflow-hidden rounded-am-xl border border-am-border-default border-t border-t-am-ai-default/30 bg-am-surface p-6 shadow-am-md"
+      className="relative overflow-hidden rounded-xl border border-border border-t border-t-am-ai-default/30 bg-card p-6 shadow-am-md"
     >
       <div className="relative z-10">
         {/* Header */}
@@ -417,15 +417,15 @@ export default function MentorCard({
               <Shield className="h-4 w-4 text-am-warning" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-am-text-primary">Mentor AprovaMind</span>
-              <p className="text-[11px] text-am-text-secondary">Análise estratégica dos seus estudos</p>
+              <span className="text-sm font-semibold text-foreground">Mentor AprovaMind</span>
+              <p className="text-[11px] text-muted-foreground">Análise estratégica dos seus estudos</p>
             </div>
           </div>
 
           {/* Expand/Collapse */}
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="rounded-lg p-1.5 text-am-text-secondary transition hover:bg-am-surface-subtle hover:text-am-text-secondary"
+            className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-muted-foreground"
           >
             {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </button>
@@ -441,8 +441,8 @@ export default function MentorCard({
               className="overflow-hidden"
             >
               {/* Análise Estratégica */}
-              <div className="mb-3 rounded-xl border border-am-border-default bg-am-surface-subtle p-3.5">
-                <p className="text-sm leading-relaxed text-am-text-secondary">{data.analysis}</p>
+              <div className="mb-3 rounded-xl border border-border bg-muted p-3.5">
+                <p className="text-sm leading-relaxed text-muted-foreground">{data.analysis}</p>
               </div>
 
               {/* Performance Insight — Constância × Precisão */}
@@ -455,7 +455,7 @@ export default function MentorCard({
                   <Target className="mt-0.5 h-4 w-4 shrink-0 text-am-accent-cyan" />
                   <div>
                     <span className="text-xs font-bold text-am-accent-cyan uppercase tracking-wider">Constância vs Precisão</span>
-                    <p className="mt-1 text-am-body-sm leading-relaxed text-am-text-secondary">
+                    <p className="mt-1 text-am-body-sm leading-relaxed text-muted-foreground">
                       {data.performanceInsight}
                     </p>
                   </div>
@@ -472,7 +472,7 @@ export default function MentorCard({
                   <Coffee className="mt-0.5 h-4 w-4 shrink-0 text-am-warning" />
                   <div>
                     <span className="text-xs font-bold text-am-warning uppercase tracking-wider">Alerta de Fadiga</span>
-                    <p className="mt-1 text-am-body-sm leading-relaxed text-am-text-secondary">
+                    <p className="mt-1 text-am-body-sm leading-relaxed text-muted-foreground">
                       {data.fatigueAlert}
                     </p>
                   </div>
@@ -480,20 +480,20 @@ export default function MentorCard({
               )}
 
               {/* Ação Imediata */}
-              <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-am-ai-default/20 bg-am-ai-default/10 px-3.5 py-3">
-                <Zap className="mt-0.5 h-4 w-4 shrink-0 text-am-ai-default" />
+              <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-am-ai-default/20 bg-primary/10 px-3.5 py-3">
+                <Zap className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <div>
-                  <span className="text-xs font-bold text-am-ai-default uppercase tracking-wider">Ação Imediata</span>
-                  <p className="mt-1 text-am-body-sm leading-relaxed text-am-text-secondary">
+                  <span className="text-xs font-bold text-primary uppercase tracking-wider">Ação Imediata</span>
+                  <p className="mt-1 text-am-body-sm leading-relaxed text-muted-foreground">
                     {data.immediateAction}
                   </p>
                 </div>
               </div>
 
               {/* Frase Motivacional */}
-              <div className="flex items-start gap-2 rounded-xl bg-am-surface-subtle px-3.5 py-3">
-                <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-am-text-secondary" />
-                <p className="text-xs italic leading-relaxed text-am-text-secondary">
+              <div className="flex items-start gap-2 rounded-xl bg-muted px-3.5 py-3">
+                <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <p className="text-xs italic leading-relaxed text-muted-foreground">
                   {data.motivationalQuote}
                 </p>
               </div>
@@ -506,7 +506,7 @@ export default function MentorCard({
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-xs italic text-am-text-secondary"
+            className="text-xs italic text-muted-foreground"
           >
             &ldquo;{data.motivationalQuote}&rdquo;
           </motion.p>

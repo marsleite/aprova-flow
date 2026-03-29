@@ -129,17 +129,17 @@ export default function SmartScheduleCard({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="rounded-am-xl border border-am-border-default/50 border-t-2 border-t-am-ai-border/40 bg-am-surface/40 backdrop-blur-2xl p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ring-1 ring-white/5 relative overflow-hidden h-full flex flex-col"
+            className="rounded-xl border border-border/50 border-t-2 border-t-am-ai-border/40 bg-card/40 backdrop-blur-2xl p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ring-1 ring-white/5 relative overflow-hidden h-full flex flex-col"
         >
 
             <div className="relative mb-8 flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <div className="rounded-am-md border border-am-border-default/50 bg-am-surface p-2 ring-1 ring-white/5 shadow-sm">
-                        <CalendarDays className="h-4 w-4 text-am-text-primary" />
+                    <div className="rounded-md border border-border/50 bg-card p-2 ring-1 ring-white/5 shadow-sm">
+                        <CalendarDays className="h-4 w-4 text-foreground" />
                     </div>
                     <div>
-                        <h2 className="font-brand text-am-body-lg font-bold text-am-text-primary tracking-tight">Cronograma de Foco</h2>
-                        <p className="text-am-caption text-am-text-secondary mt-0.5 font-mono uppercase tracking-widest">Alocação Semanal AI</p>
+                        <h2 className="font-sans text-am-body-lg font-bold text-foreground tracking-tight">Cronograma de Foco</h2>
+                        <p className="text-am-caption text-muted-foreground mt-0.5 font-mono uppercase tracking-widest">Alocação Semanal AI</p>
                     </div>
                 </div>
 
@@ -154,7 +154,7 @@ export default function SmartScheduleCard({
                     ) : schedule ? (
                         <RefreshCw className="h-4 w-4" />
                     ) : (
-                        <Sparkles className="h-4 w-4 text-am-ai-default" />
+                        <Sparkles className="h-4 w-4 text-primary" />
                     )}
                     {schedule ? 'Recalcular' : 'Gerar'}
                 </Button>
@@ -169,15 +169,15 @@ export default function SmartScheduleCard({
 
             {hasContext && (
                 <div className="mb-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-am-border-default bg-am-surface-subtle px-3 py-1 text-[11px] text-am-text-secondary">
-                        Capacidade da semana: <strong className="text-am-text-primary">{projection.weeklyCapacityHours.toFixed(1)}h</strong>
+                    <span className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] text-muted-foreground">
+                        Capacidade da semana: <strong className="text-foreground">{projection.weeklyCapacityHours.toFixed(1)}h</strong>
                     </span>
-                    <span className="rounded-full border border-am-border-default bg-am-surface-subtle px-3 py-1 text-[11px] text-am-text-secondary">
-                        Meta do plano: <strong className="text-am-text-primary">{(consistency?.weeklyGoalHours ?? 10).toFixed(1)}h</strong>
+                    <span className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] text-muted-foreground">
+                        Meta do plano: <strong className="text-foreground">{(consistency?.weeklyGoalHours ?? 10).toFixed(1)}h</strong>
                     </span>
                     {projection.requiredWeeklyHours != null && (
-                        <span className="rounded-full border border-am-border-default bg-am-surface-subtle px-3 py-1 text-[11px] text-am-text-secondary">
-                            Ritmo necessário: <strong className="text-am-text-primary">{projection.requiredWeeklyHours.toFixed(1)}h</strong>
+                        <span className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] text-muted-foreground">
+                            Ritmo necessário: <strong className="text-foreground">{projection.requiredWeeklyHours.toFixed(1)}h</strong>
                         </span>
                     )}
                 </div>
@@ -195,21 +195,21 @@ export default function SmartScheduleCard({
                     {schedule.map((dayItem, idx) => {
                         const isExpanded = expandedDay === dayItem.day;
                         return (
-                            <div key={idx} className="rounded-am-lg border border-am-border-default/50 bg-am-surface-subtle overflow-hidden transition-all hover:border-am-border-strong ring-1 ring-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                            <div key={idx} className="rounded-lg border border-border/50 bg-muted overflow-hidden transition-all hover:border-border ring-1 ring-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
                                 <button
                                     onClick={() => setExpandedDay(isExpanded ? null : dayItem.day)}
                                     className="w-full flex items-center justify-between p-4 text-left focus:outline-none"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-am-md ring-1 ring-white/5 ${isExpanded ? 'bg-am-ai-subtle/40 text-am-ai-default' : 'bg-am-canvas text-am-text-tertiary'}`}>
+                                        <div className={`p-2 rounded-md ring-1 ring-white/5 ${isExpanded ? 'bg-am-ai-subtle/40 text-primary' : 'bg-background text-muted-foreground'}`}>
                                             <CalendarDays className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-am-text-primary">{dayItem.day}</p>
-                                            <p className="text-xs text-am-ai-default font-medium">{dayItem.totalHours} horas sugeridas</p>
+                                            <p className="font-semibold text-foreground">{dayItem.day}</p>
+                                            <p className="text-xs text-primary font-medium">{dayItem.totalHours} horas sugeridas</p>
                                         </div>
                                     </div>
-                                    {isExpanded ? <ChevronUp className="text-am-text-tertiary h-5 w-5" /> : <ChevronDown className="text-am-text-tertiary h-5 w-5" />}
+                                    {isExpanded ? <ChevronUp className="text-muted-foreground h-5 w-5" /> : <ChevronDown className="text-muted-foreground h-5 w-5" />}
                                 </button>
 
                                 <AnimatePresence>
@@ -219,22 +219,22 @@ export default function SmartScheduleCard({
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
                                             transition={{ duration: 0.2 }}
-                                            className="px-4 pb-4 pt-1 border-t border-am-border-default"
+                                            className="px-4 pb-4 pt-1 border-t border-border"
                                         >
                                             <div className="space-y-3">
                                                 {dayItem.subjects.map((sub, sIdx) => (
-                                                    <div key={sIdx} className="bg-am-surface rounded-am-md p-3 border border-am-border-default/50 shadow-sm ring-1 ring-white/5">
+                                                    <div key={sIdx} className="bg-card rounded-md p-3 border border-border/50 shadow-sm ring-1 ring-white/5">
                                                         <div className="flex justify-between items-center mb-1.5">
-                                                            <span className="text-sm font-semibold text-am-text-primary flex items-center gap-2">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-am-ai-default"></span>
+                                                            <span className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
                                                                 {sub.name}
                                                             </span>
-                                                            <span className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-am-md bg-am-ai-subtle/50 text-am-ai-default font-mono border border-am-ai-border/30">
+                                                            <span className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-md bg-am-ai-subtle/50 text-primary font-mono border border-border/50/30">
                                                                 {sub.hours}h
                                                             </span>
                                                         </div>
-                                                        <p className="text-xs text-am-text-secondary ml-3.5 leading-relaxed">
-                                                            <strong className="text-am-text-primary font-medium">Motivo:</strong> {sub.reason}
+                                                        <p className="text-xs text-muted-foreground ml-3.5 leading-relaxed">
+                                                            <strong className="text-foreground font-medium">Motivo:</strong> {sub.reason}
                                                         </p>
                                                     </div>
                                                 ))}

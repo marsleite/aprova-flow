@@ -106,38 +106,36 @@ export default function CriarSimuladoPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-am-canvas">
-        <p className="text-am-text-secondary font-mono">Faça login para criar simulados</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground font-mono">Faça login para criar simulados</p>
       </div>
     );
   }
 
   if (!capabilities.canCreateSimulados) {
     return (
-      <div className="relative min-h-screen bg-am-canvas">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 right-1/4 h-[400px] w-[400px] rounded-full bg-am-brand-secondary/8 blur-[140px]" />
-        </div>
+      <div className="flex flex-col gap-8 pb-10">
+        
         <div className="relative px-6 py-8">
           <div className="mx-auto max-w-3xl space-y-6">
             <div className="flex items-center gap-4">
-              <Link href="/provas" className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.03] text-am-text-secondary transition-all hover:bg-white/[0.06] hover:text-slate-300">
+              <Link href="/provas" className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground transition-all hover:bg-muted-foreground/10 hover:text-foreground">
                 <ArrowLeft className="h-5 w-5" />
               </Link>
               <div>
-                <h1 className="font-brand text-2xl font-bold text-white">Criar Simulado</h1>
-                <p className="text-sm text-am-text-secondary font-mono">Recurso Pro/Premium</p>
+                <h1 className="font-sans font-sans text-am-h3 md:text-3xl font-bold text-foreground tracking-tight leading-[1.1]">Criar Simulado</h1>
+                <p className="text-am-body-sm text-muted-foreground mt-4 max-w-xl leading-relaxed font-mono">Recurso Pro/Premium</p>
               </div>
             </div>
-            <div className="rounded-2xl border border-[#F59768]/20 p-10 text-center" style={{ background: 'linear-gradient(135deg, rgba(245,151,104,0.05), rgba(49,80,170,0.05))' }}>
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-am-brand-primary/15">
-                <Lock className="h-7 w-7 text-am-brand-primary" />
+            <div className="rounded-2xl border border-[var(--primary)]/20 p-10 text-center" >
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15">
+                <Lock className="h-7 w-7 text-primary" />
               </div>
-              <p className="font-brand text-lg font-semibold text-white">Simulados personalizados — Pro/Premium</p>
-              <p className="mt-2 text-sm text-am-text-secondary max-w-md mx-auto">
+              <p className="font-sans text-lg font-semibold text-foreground">Simulados personalizados — Pro/Premium</p>
+              <p className="mt-2 text-am-body-sm text-muted-foreground mt-4 max-w-xl leading-relaxed max-w-md mx-auto">
                 Você pode continuar usando provas oficiais na seção Provas &amp; Simulados.
               </p>
-              <Link href="/provas" className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.03] px-5 py-2.5 text-sm text-am-text-secondary transition-all hover:bg-white/[0.06] hover:text-slate-300 font-mono">
+              <Link href="/provas" className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-muted px-5 py-2.5 text-am-body-sm text-muted-foreground mt-4 max-w-xl leading-relaxed transition-all hover:bg-muted-foreground/10 hover:text-foreground font-mono">
                 <ArrowLeft className="h-4 w-4" />
                 Voltar para Provas
               </Link>
@@ -149,68 +147,59 @@ export default function CriarSimuladoPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-am-canvas">
+    <div className="flex flex-col gap-8 pb-10">
       {/* Atmospheric depth */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/4 h-[400px] w-[400px] rounded-full bg-am-brand-secondary/8 blur-[140px]" />
-        <div className="absolute bottom-1/4 -right-40 h-[350px] w-[350px] rounded-full bg-am-brand-primary/5 blur-[120px]" />
-      </div>
+      
 
       {/* Hero Header */}
-      <div className="relative border-b border-white/[0.07] px-6 py-8"
-        style={{ background: 'linear-gradient(180deg, rgba(14,17,27,0.9) 0%, rgba(10,10,10,0.95) 100%)' }}
-      >
-        <div className="rds-grid-bg absolute inset-0 pointer-events-none" />
-        <div className="relative mx-auto max-w-4xl flex items-center gap-4">
-          <Link href="/provas" className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.10] bg-white/[0.03] text-am-text-secondary transition-all hover:bg-white/[0.06] hover:text-slate-300">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 px-6 border-b border-border bg-card/30 backdrop-blur-md">
+        
+        <div className="flex items-center gap-4">
+          <Link href="/provas" className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground transition-all hover:bg-muted-foreground/10 hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
             <div className="flex items-center gap-2.5 mb-1">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-am-brand-primary opacity-40" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-am-brand-primary" style={{ boxShadow: '0 0 10px rgba(245,151,104,0.6)' }} />
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-am-text-secondary font-mono">Configuração</span>
+              <Target className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground font-mono">Configuração</span>
             </div>
-            <h1 className="font-brand text-2xl font-bold text-white">Criar Simulado</h1>
-            <p className="text-sm text-am-text-secondary">Configure seu simulado personalizado</p>
+            <h1 className="font-sans font-sans text-am-h3 md:text-3xl font-bold text-foreground tracking-tight leading-[1.1]">Criar Simulado</h1>
+            <p className="text-am-body-sm text-muted-foreground mt-4 max-w-xl leading-relaxed">Configure seu simulado personalizado</p>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="relative px-6 py-6">
-        <div className="mx-auto max-w-4xl space-y-5">
+      <div className="px-6 space-y-6">
+        <div className="space-y-6">
 
           {/* Configurações Básicas */}
           <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show"
-            className="relative overflow-hidden rounded-2xl border border-white/[0.10] p-6"
-            style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+            className="relative overflow-hidden rounded-2xl border border-border p-6 bg-card"
           >
-            <h2 className="font-brand text-lg font-bold text-white mb-5">Configurações</h2>
+            <h2 className="font-sans text-lg font-bold text-foreground mb-5">Configurações</h2>
 
             {/* Smart Mode Toggle */}
-            <div className="flex items-center gap-4 rounded-2xl border border-[#F59768]/20 p-5 mb-5"
+            <div className="flex items-center gap-4 rounded-2xl border border-[var(--primary)]/20 p-5 mb-5"
               style={{ background: smartMode ? 'rgba(245,151,104,0.05)' : 'rgba(255,255,255,0.02)' }}
             >
               <button
                 onClick={() => setSmartMode(!smartMode)}
                 className={'relative inline-flex h-7 w-12 items-center rounded-full transition-colors'}
-                style={{ background: smartMode ? 'var(--identity-grad)' : 'rgba(255,255,255,0.1)' }}
+                style={{ background: smartMode ? 'var(--primary)' : 'rgba(255,255,255,0.1)' }}
               >
                 <span className={'inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ' + (smartMode ? 'translate-x-6' : 'translate-x-1')} />
               </button>
               <div className="flex items-center gap-2.5">
                 {smartMode
-                  ? <Brain className="h-5 w-5 text-am-brand-primary" />
-                  : <Shuffle className="h-5 w-5 text-am-text-secondary" />
+                  ? <Brain className="h-5 w-5 text-primary" />
+                  : <Shuffle className="h-5 w-5 text-muted-foreground" />
                 }
                 <div>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-foreground">
                     {smartMode ? 'Simulado Inteligente (IA)' : 'Simulado Clássico'}
                   </p>
-                  <p className="text-xs text-am-text-secondary font-mono">
+                  <p className="text-xs text-muted-foreground font-mono">
                     {smartMode
                       ? 'Questões priorizadas pelos seus pontos fracos e peso do edital'
                       : 'Questões selecionadas aleatoriamente'}
@@ -221,7 +210,7 @@ export default function CriarSimuladoPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-secondary font-mono mb-2">
+                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground font-mono mb-2">
                   Número de questões
                 </label>
                 <input
@@ -230,11 +219,11 @@ export default function CriarSimuladoPage() {
                   max={100}
                   value={questionCount}
                   onChange={(e) => setQuestionCount(Number(e.target.value))}
-                  className="w-full rounded-full border border-white/[0.10] bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-all focus:border-[#3150AA]/50 focus:ring-1 focus:ring-[#3150AA]/30"
+                  className="w-full rounded-full border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-all focus:border-[var(--primary)]/50 focus:ring-1 focus:ring-[var(--primary)]/30"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-am-text-secondary font-mono mb-2">
+                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground font-mono mb-2">
                   Duração (min) — 0 para ilimitado
                 </label>
                 <input
@@ -243,7 +232,7 @@ export default function CriarSimuladoPage() {
                   max={300}
                   value={durationMinutes}
                   onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                  className="w-full rounded-full border border-white/[0.10] bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-all focus:border-[#3150AA]/50 focus:ring-1 focus:ring-[#3150AA]/30"
+                  className="w-full rounded-full border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-all focus:border-[var(--primary)]/50 focus:ring-1 focus:ring-[var(--primary)]/30"
                 />
               </div>
             </div>
@@ -251,21 +240,20 @@ export default function CriarSimuladoPage() {
 
           {/* Matérias */}
           <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show"
-            className="relative overflow-hidden rounded-2xl border border-white/[0.10] p-6"
-            style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+            className="relative overflow-hidden rounded-2xl border border-border p-6 bg-card"
           >
-            <h2 className="font-brand text-lg font-bold text-white mb-2">Matérias</h2>
-            <p className="text-xs text-am-text-secondary font-mono mb-5">Deixe vazio para incluir todas</p>
+            <h2 className="font-sans text-lg font-bold text-foreground mb-2">Matérias</h2>
+            <p className="text-xs text-muted-foreground font-mono mb-5">Deixe vazio para incluir todas</p>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
               {DEFAULT_SUBJECTS.map((materia) => (
                 <button
                   key={materia}
                   onClick={() => toggleMateria(materia)}
                   className={`px-4 py-2.5 rounded-full border-2 transition-all text-sm font-medium ${selectedMaterias.includes(materia)
-                    ? 'border-[#F59768]/50 text-am-brand-primary'
-                    : 'border-white/[0.10] text-am-text-secondary hover:border-white/[0.20] hover:text-slate-300'
+                    ? 'border-[var(--primary)]/50 text-primary'
+                    : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
                     }`}
-                  style={selectedMaterias.includes(materia) ? { background: 'rgba(245,151,104,0.1)' } : { background: 'rgba(255,255,255,0.02)' }}
+                  style={selectedMaterias.includes(materia) ? { background: "rgba(234,88,12,0.15)" } : { background: "var(--card)" }}
                 >
                   {materia}
                 </button>
@@ -275,21 +263,20 @@ export default function CriarSimuladoPage() {
 
           {/* Bancas */}
           <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show"
-            className="relative overflow-hidden rounded-2xl border border-white/[0.10] p-6"
-            style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+            className="relative overflow-hidden rounded-2xl border border-border p-6 bg-card"
           >
-            <h2 className="font-brand text-lg font-bold text-white mb-2">Bancas</h2>
-            <p className="text-xs text-am-text-secondary font-mono mb-5">Deixe vazio para incluir todas</p>
+            <h2 className="font-sans text-lg font-bold text-foreground mb-2">Bancas</h2>
+            <p className="text-xs text-muted-foreground font-mono mb-5">Deixe vazio para incluir todas</p>
             <div className="flex flex-wrap gap-2.5">
               {bancasDisponiveis.map((banca) => (
                 <button
                   key={banca}
                   onClick={() => toggleBanca(banca)}
                   className={`px-5 py-2.5 rounded-full border-2 transition-all text-sm font-medium ${selectedBancas.includes(banca)
-                    ? 'border-[#3150AA]/50 text-am-brand-primary'
-                    : 'border-white/[0.10] text-am-text-secondary hover:border-white/[0.20] hover:text-slate-300'
+                    ? 'border-[var(--primary)]/50 text-primary'
+                    : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
                     }`}
-                  style={selectedBancas.includes(banca) ? { background: 'rgba(49,80,170,0.15)' } : { background: 'rgba(255,255,255,0.02)' }}
+                  style={selectedBancas.includes(banca) ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { background: "var(--card)" }}
                 >
                   {banca}
                 </button>
@@ -299,21 +286,20 @@ export default function CriarSimuladoPage() {
 
           {/* Dificuldade */}
           <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show"
-            className="relative overflow-hidden rounded-2xl border border-white/[0.10] p-6"
-            style={{ background: 'linear-gradient(160deg, #0E111B 0%, #0A0A10 100%)', boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+            className="relative overflow-hidden rounded-2xl border border-border p-6 bg-card"
           >
-            <h2 className="font-brand text-lg font-bold text-white mb-2">Dificuldade</h2>
-            <p className="text-xs text-am-text-secondary font-mono mb-5">Deixe vazio para incluir todas</p>
+            <h2 className="font-sans text-lg font-bold text-foreground mb-2">Dificuldade</h2>
+            <p className="text-xs text-muted-foreground font-mono mb-5">Deixe vazio para incluir todas</p>
             <div className="flex flex-wrap gap-2.5">
               {dificuldades.map((dif) => (
                 <button
                   key={dif}
                   onClick={() => toggleDificuldade(dif)}
                   className={`px-5 py-2.5 rounded-full border-2 transition-all text-sm font-medium capitalize ${selectedDificuldades.includes(dif)
-                    ? 'border-[#F59768]/50 text-am-brand-primary'
-                    : 'border-white/[0.10] text-am-text-secondary hover:border-white/[0.20] hover:text-slate-300'
+                    ? 'border-[var(--primary)]/50 text-primary'
+                    : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
                     }`}
-                  style={selectedDificuldades.includes(dif) ? { background: 'rgba(245,151,104,0.1)' } : { background: 'rgba(255,255,255,0.02)' }}
+                  style={selectedDificuldades.includes(dif) ? { background: "rgba(234,88,12,0.15)" } : { background: "var(--card)" }}
                 >
                   {dif}
                 </button>
@@ -326,7 +312,7 @@ export default function CriarSimuladoPage() {
             <button
               onClick={handleStart}
               disabled={loading}
-              className="rds-btn-identity w-full flex items-center justify-center gap-3 px-6 py-4 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center rounded-sm bg-primary px-4 py-2 text-sm font-semibold tracking-wide text-primary-foreground uppercase hover:bg-primary/90 transition-all w-full flex items-center justify-center gap-3 px-6 py-4 text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>

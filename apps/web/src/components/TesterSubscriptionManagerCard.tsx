@@ -159,13 +159,13 @@ export default function TesterSubscriptionManagerCard() {
     <Card padding="lg" variant="default" className="w-full">
       <div className="mb-5 flex items-center gap-2 border-b border-am-border-subtle pb-3">
         <Shield className="h-4 w-4 text-am-warning" />
-        <h2 className="font-brand text-am-body font-bold text-am-text-primary tracking-wide">
+        <h2 className="font-sans text-am-body font-bold text-foreground tracking-wide">
           Operacao de Testers
         </h2>
       </div>
 
       <div className="space-y-4">
-        <p className="text-am-body-sm text-am-text-secondary leading-relaxed">
+        <p className="text-am-body-sm text-muted-foreground leading-relaxed">
           Use este painel interno para simular free, pro, premium, past due ou expiração sem gateway de pagamento.
         </p>
 
@@ -174,7 +174,7 @@ export default function TesterSubscriptionManagerCard() {
             value={userIdentifier}
             onChange={(event) => setUserIdentifier(event.target.value)}
             placeholder="UID ou e-mail do tester"
-            className="rounded-am-md border border-am-border-default bg-am-surface px-3 py-2 text-am-body-sm text-am-text-primary outline-none transition focus:border-am-brand-primary"
+            className="rounded-md border border-border bg-card px-3 py-2 text-am-body-sm text-foreground outline-none transition focus:border-am-brand-primary"
           />
           <Button variant="outline" onClick={handleLoad} disabled={loading}>
             <RefreshCw className="mr-2 h-4 w-4" />
@@ -184,11 +184,11 @@ export default function TesterSubscriptionManagerCard() {
 
         <div className="grid gap-3 md:grid-cols-2">
           <label className="space-y-1">
-            <span className="text-am-caption text-am-text-tertiary">Plano</span>
+            <span className="text-am-caption text-muted-foreground">Plano</span>
             <select
               value={plan}
               onChange={(event) => setPlan(event.target.value as PlanCode)}
-              className="w-full rounded-am-md border border-am-border-default bg-am-surface px-3 py-2 text-am-body-sm text-am-text-primary outline-none transition focus:border-am-brand-primary"
+              className="w-full rounded-md border border-border bg-card px-3 py-2 text-am-body-sm text-foreground outline-none transition focus:border-am-brand-primary"
             >
               {PLAN_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -199,11 +199,11 @@ export default function TesterSubscriptionManagerCard() {
           </label>
 
           <label className="space-y-1">
-            <span className="text-am-caption text-am-text-tertiary">Status</span>
+            <span className="text-am-caption text-muted-foreground">Status</span>
             <select
               value={status}
               onChange={(event) => setStatus(event.target.value as SubscriptionStatus)}
-              className="w-full rounded-am-md border border-am-border-default bg-am-surface px-3 py-2 text-am-body-sm text-am-text-primary outline-none transition focus:border-am-brand-primary"
+              className="w-full rounded-md border border-border bg-card px-3 py-2 text-am-body-sm text-foreground outline-none transition focus:border-am-brand-primary"
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -215,7 +215,7 @@ export default function TesterSubscriptionManagerCard() {
         </div>
 
         <label className="space-y-1 block">
-          <span className="text-am-caption text-am-text-tertiary">
+          <span className="text-am-caption text-muted-foreground">
             Usage (JSON opcional)
           </span>
           <textarea
@@ -223,11 +223,11 @@ export default function TesterSubscriptionManagerCard() {
             onChange={(event) => setUsageJson(event.target.value)}
             rows={6}
             placeholder='{"ai_explanations": 2, "contextual_ai_chat": 1}'
-            className="w-full rounded-am-md border border-am-border-default bg-am-surface px-3 py-2 text-am-body-sm text-am-text-primary outline-none transition focus:border-am-brand-primary"
+            className="w-full rounded-md border border-border bg-card px-3 py-2 text-am-body-sm text-foreground outline-none transition focus:border-am-brand-primary"
           />
         </label>
 
-        <label className="flex items-center gap-2 text-am-body-sm text-am-text-secondary">
+        <label className="flex items-center gap-2 text-am-body-sm text-muted-foreground">
           <input
             type="checkbox"
             checked={resetUsage}
@@ -241,30 +241,30 @@ export default function TesterSubscriptionManagerCard() {
             <Save className="mr-2 h-4 w-4" />
             Salvar assinatura
           </Button>
-          {loading && <span className="text-am-body-sm text-am-text-tertiary">Processando...</span>}
+          {loading && <span className="text-am-body-sm text-muted-foreground">Processando...</span>}
         </div>
 
         {error && (
-          <div className="rounded-am-md border border-am-error/30 bg-am-error/10 px-3 py-2 text-am-body-sm text-am-error">
+          <div className="rounded-md border border-am-error/30 bg-am-error/10 px-3 py-2 text-am-body-sm text-am-error">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="rounded-am-md border border-am-success/30 bg-am-success/10 px-3 py-2 text-am-body-sm text-am-success">
+          <div className="rounded-md border border-am-success/30 bg-green-500/10 px-3 py-2 text-am-body-sm text-green-500">
             {success}
           </div>
         )}
 
         {current && (
-          <div className="rounded-am-md border border-am-border-subtle bg-am-surface-subtle p-4 space-y-2">
+          <div className="rounded-md border border-am-border-subtle bg-muted p-4 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">userId: {current.userId}</Badge>
               {current.email ? <Badge variant="outline">email: {current.email}</Badge> : null}
               <Badge variant="outline">plan: {current.subscription.plan}</Badge>
               <Badge variant="outline">status: {current.subscription.status}</Badge>
             </div>
-            <pre className="overflow-auto rounded-am-md bg-am-surface px-3 py-2 text-xs text-am-text-secondary">
+            <pre className="overflow-auto rounded-md bg-card px-3 py-2 text-xs text-muted-foreground">
               {JSON.stringify(current.subscription.usage ?? {}, null, 2)}
             </pre>
           </div>

@@ -135,27 +135,27 @@ export default function ResultadoProvaPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <p className="text-gray-400">Faça login para ver os resultados</p>
+      <div className="min-h-screen flex items-center justify-center bg-card">
+        <p className="text-muted-foreground">Faça login para ver os resultados</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-card">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!exam || results.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 gap-4">
-        <p className="text-gray-400">Nenhum resultado encontrado</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-card gap-4">
+        <p className="text-muted-foreground">Nenhum resultado encontrado</p>
         <Link
           href="/provas"
-          className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
+          className="px-4 py-2 bg-primary hover:bg-primary/20 text-white rounded-lg transition-colors"
         >
           Voltar para Provas
         </Link>
@@ -173,7 +173,7 @@ export default function ResultadoProvaPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="mb-2 text-2xl font-bold text-white sm:text-3xl">Resultado da Prova</h1>
-            <p className="text-gray-400">{exam.name}</p>
+            <p className="text-muted-foreground">{exam.name}</p>
           </div>
           <Link
             href="/provas"
@@ -186,7 +186,7 @@ export default function ResultadoProvaPage() {
 
         {/* Resumo Geral */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="bg-gradient-to-br from-violet-600 to-violet-700 rounded-lg p-6 text-white">
+          <div className="bg-gradient-to-br from-primary/20 to-primary/20 rounded-lg p-6 text-white">
             <div className="flex items-center gap-2 mb-2">
               <Award className="h-5 w-5" />
               <span className="text-sm font-medium">Aproveitamento</span>
@@ -194,7 +194,7 @@ export default function ResultadoProvaPage() {
             <div className="text-4xl font-bold">{overallAccuracy}%</div>
           </div>
 
-          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+          <div className="bg-gray-800 rounded-lg border border-border p-6">
             <div className="flex items-center gap-2 mb-2">
               <Check className="h-5 w-5 text-green-400" />
               <span className="text-sm font-medium text-gray-300">Acertos</span>
@@ -202,7 +202,7 @@ export default function ResultadoProvaPage() {
             <div className="text-3xl font-bold text-white">{correctCount}</div>
           </div>
 
-          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+          <div className="bg-gray-800 rounded-lg border border-border p-6">
             <div className="flex items-center gap-2 mb-2">
               <X className="h-5 w-5 text-red-400" />
               <span className="text-sm font-medium text-gray-300">Erros</span>
@@ -210,9 +210,9 @@ export default function ResultadoProvaPage() {
             <div className="text-3xl font-bold text-white">{incorrectCount}</div>
           </div>
 
-          <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+          <div className="bg-gray-800 rounded-lg border border-border p-6">
             <div className="flex items-center gap-2 mb-2">
-              <Clock className="h-5 w-5 text-blue-400" />
+              <Clock className="h-5 w-5 text-primary" />
               <span className="text-sm font-medium text-gray-300">Tempo</span>
             </div>
             <div className="text-3xl font-bold text-white">{formatTime(totalTime)}</div>
@@ -220,7 +220,7 @@ export default function ResultadoProvaPage() {
         </div>
 
         {/* Desempenho por Matéria */}
-        <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+        <div className="bg-gray-800 rounded-lg border border-border p-6">
           <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
             <BookOpen className="h-5 w-5" />
             Desempenho por Matéria
@@ -231,7 +231,7 @@ export default function ResultadoProvaPage() {
                 <div className="flex-1">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-sm font-medium text-white">{subject.materia}</span>
-                    <span className="text-sm text-gray-400">
+                    <span className="text-sm text-muted-foreground">
                       {subject.correct}/{subject.total}
                     </span>
                   </div>
@@ -261,7 +261,7 @@ export default function ResultadoProvaPage() {
         </div>
 
         {/* Lista de Questões */}
-        <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+        <div className="bg-gray-800 rounded-lg border border-border p-6">
           <h2 className="text-xl font-semibold text-white mb-4">Questões</h2>
           <div className="space-y-3">
             {results.map((result, idx) => (
@@ -275,7 +275,7 @@ export default function ResultadoProvaPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium text-gray-400">Questão {idx + 1}</span>
+                      <span className="text-sm font-medium text-muted-foreground">Questão {idx + 1}</span>
                       <span className="text-xs px-2 py-1 bg-gray-700 rounded text-gray-300">
                         {result.question.materia}
                       </span>
@@ -289,7 +289,7 @@ export default function ResultadoProvaPage() {
                       {result.question.statement}
                     </p>
                     <div className="flex items-center gap-4 text-sm">
-                      <span className="text-gray-400">
+                      <span className="text-muted-foreground">
                         Sua resposta:{' '}
                         <span
                           className={
@@ -300,7 +300,7 @@ export default function ResultadoProvaPage() {
                         </span>
                       </span>
                       {!result.attempt.correct && (
-                        <span className="text-gray-400">
+                        <span className="text-muted-foreground">
                           Correta:{' '}
                           <span className="text-green-400 font-medium">{result.question.answer}</span>
                         </span>
@@ -332,7 +332,7 @@ export default function ResultadoProvaPage() {
         <div className="flex gap-4 justify-center">
           <Link
             href={`/provas/${examId}/executar`}
-            className="px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors font-medium"
+            className="px-6 py-3 bg-primary hover:bg-primary/20 text-white rounded-lg transition-colors font-medium"
           >
             Refazer Prova
           </Link>

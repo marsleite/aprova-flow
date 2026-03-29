@@ -77,7 +77,7 @@ export default function PrivacyPage() {
                   href="https://myaccount.google.com/permissions"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 underline"
+                  className="text-primary underline"
                 >
                   myaccount.google.com/permissions
                 </a>.
@@ -119,7 +119,7 @@ export default function PrivacyPage() {
             </ul>
             <p className="mt-2">
               Para exercer esses direitos, entre em contato:{' '}
-              <a href="mailto:marsleite@gmail.com" className="text-blue-400 underline">
+              <a href="mailto:marsleite@gmail.com" className="text-primary underline">
                 marsleite@gmail.com
               </a>
             </p>
@@ -142,7 +142,7 @@ export default function PrivacyPage() {
             </p>
             <p className="mt-2">
               <strong className="text-white">Marcelo Leite</strong><br />
-              <a href="mailto:marsleite@gmail.com" className="text-blue-400 underline">
+              <a href="mailto:marsleite@gmail.com" className="text-primary underline">
                 marsleite@gmail.com
               </a>
             </p>

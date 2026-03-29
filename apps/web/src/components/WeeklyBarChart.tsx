@@ -35,11 +35,11 @@ function CustomTooltip({ active, payload }: {
 
   const { day, hours, isToday } = payload[0].payload;
   return (
-    <div className="rounded-lg border border-am-border-strong bg-am-surface-elevated px-3 py-2 shadow-xl backdrop-blur-sm">
-      <p className="text-sm font-medium text-am-text-primary">
-        {day} {isToday && <span className="text-[#F59768]">(Hoje)</span>}
+    <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-xl backdrop-blur-sm">
+      <p className="text-sm font-medium text-foreground">
+        {day} {isToday && <span className="text-[var(--primary)]">(Hoje)</span>}
       </p>
-      <p className="text-sm text-[#F59768]">
+      <p className="text-sm text-[var(--primary)]">
         {hours < 1
           ? `${Math.round(hours * 60)} min`
           : `${hours.toFixed(1)}h`}
@@ -63,11 +63,11 @@ function ChartSkeleton() {
 function EmptyState() {
   return (
     <div className="flex h-[250px] flex-col items-center justify-center">
-      <div className="mb-3 rounded-xl bg-am-surface-subtle p-3">
-        <BarChart3 className="h-8 w-8 text-am-text-tertiary" />
+      <div className="mb-3 rounded-xl bg-muted p-3">
+        <BarChart3 className="h-8 w-8 text-muted-foreground" />
       </div>
-      <p className="text-center text-sm text-am-text-secondary">Nenhum dado nesta semana</p>
-      <p className="mt-1 text-center text-xs text-am-text-tertiary">Registre sessões para ver a evolução</p>
+      <p className="text-center text-sm text-muted-foreground">Nenhum dado nesta semana</p>
+      <p className="mt-1 text-center text-xs text-muted-foreground">Registre sessões para ver a evolução</p>
     </div>
   );
 }
@@ -80,7 +80,7 @@ export default function WeeklyBarChart({ data, loading }: WeeklyBarChartProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
-      className="rounded-xl border border-am-border-default bg-am-surface-elevated p-5"
+      className="rounded-xl border border-border bg-card p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
@@ -88,8 +88,8 @@ export default function WeeklyBarChart({ data, loading }: WeeklyBarChartProps) {
           <BarChart3 className="h-4 w-4 text-emerald-400" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-am-text-primary">Evolução Semanal</h2>
-          <p className="text-xs text-am-text-secondary">Horas por dia esta semana</p>
+          <h2 className="text-sm font-semibold text-foreground">Evolução Semanal</h2>
+          <p className="text-xs text-muted-foreground">Horas por dia esta semana</p>
         </div>
       </div>
 
@@ -127,7 +127,7 @@ export default function WeeklyBarChart({ data, loading }: WeeklyBarChartProps) {
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={entry.isToday ? '#3b82f6' : '#1e293b'}
+                  fill={entry.isToday ? 'var(--primary)' : '#1e293b'}
                   fillOpacity={entry.isToday ? 1 : 0.7}
                 />
               ))}
@@ -138,17 +138,17 @@ export default function WeeklyBarChart({ data, loading }: WeeklyBarChartProps) {
 
       {/* Legenda */}
       {!loading && hasData && (
-        <div className="mt-2 flex items-center justify-center gap-4 border-t border-am-border-default pt-3">
+        <div className="mt-2 flex items-center justify-center gap-4 border-t border-border pt-3">
           <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-sm bg-blue-500" />
-            <span className="text-xs text-am-text-secondary">Hoje</span>
+            <span className="h-2 w-2 rounded-sm bg-primary" />
+            <span className="text-xs text-muted-foreground">Hoje</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-sm bg-slate-700" />
-            <span className="text-xs text-am-text-secondary">Outros dias</span>
+            <span className="text-xs text-muted-foreground">Outros dias</span>
           </div>
-          <span className="text-xs text-am-text-tertiary">|</span>
-          <span className="text-xs text-am-text-secondary">
+          <span className="text-xs text-muted-foreground">|</span>
+          <span className="text-xs text-muted-foreground">
             Semana: {data.reduce((acc, d) => acc + d.hours, 0).toFixed(1)}h
           </span>
         </div>

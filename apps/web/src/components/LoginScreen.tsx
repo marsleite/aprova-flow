@@ -38,27 +38,27 @@ export default function LoginScreen() {
   const isDisabled = loading || submitting;
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-950">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background">
       {/* Background decorativo */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-violet-600/20 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-80 w-80 rounded-full bg-blue-600/20 blur-3xl" />
-        <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#3150AA]/10 blur-3xl" />
+        <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--primary)]/10 blur-3xl" />
       </div>
 
       {/* Conteúdo */}
       <div className="relative z-10 mx-4 w-full max-w-md">
         {/* Card principal */}
-        <div className="rounded-3xl border border-am-border-default bg-gray-900/80 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
+        <div className="rounded-3xl border border-border bg-card/80 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-blue-500 shadow-xl shadow-violet-500/30">
-              <Zap className="h-8 w-8 text-am-text-primary" />
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/20 shadow-xl shadow-primary/20/30">
+              <Zap className="h-8 w-8 text-foreground" />
             </div>
-            <h1 className="text-3xl font-bold text-am-text-primary">
-              Aprova<span className="text-[#F59768]">Mind</span>
+            <h1 className="text-3xl font-bold text-foreground">
+              Aprova<span className="text-[var(--primary)]">Mind</span>
             </h1>
-            <p className="mt-2 text-center text-sm text-gray-400">
+            <p className="mt-2 text-center text-sm text-muted-foreground">
               Rastreie seu tempo de estudo e acelere sua aprovação
             </p>
           </div>
@@ -66,19 +66,19 @@ export default function LoginScreen() {
           {/* Features */}
           <div className="mb-8 space-y-3">
             <Feature
-              icon={<Clock className="h-4 w-4 text-[#F59768]" />}
+              icon={<Clock className="h-4 w-4 text-[var(--primary)]" />}
               text="Cronômetro inteligente com horas líquidas"
             />
             <Feature
-              icon={<TrendingUp className="h-4 w-4 text-[#F59768]" />}
+              icon={<TrendingUp className="h-4 w-4 text-[var(--primary)]" />}
               text="Dashboard de progresso por matéria"
             />
             <Feature
-              icon={<BookOpen className="h-4 w-4 text-cyan-400" />}
+              icon={<BookOpen className="h-4 w-4 text-primary" />}
               text="Gráfico de radar para equilíbrio de estudos"
             />
             <Feature
-              icon={<Brain className="h-4 w-4 text-pink-400" />}
+              icon={<Brain className="h-4 w-4 text-primary" />}
               text="IA para sugestões personalizadas"
             />
           </div>
@@ -114,9 +114,9 @@ export default function LoginScreen() {
 
           {/* Divisor */}
           <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1 bg-am-surface-subtle" />
-            <span className="text-xs text-gray-500">ou</span>
-            <div className="h-px flex-1 bg-am-surface-subtle" />
+            <div className="h-px flex-1 bg-muted" />
+            <span className="text-xs text-muted-foreground">ou</span>
+            <div className="h-px flex-1 bg-muted" />
           </div>
 
           {/* Formulário Email/Senha */}
@@ -128,8 +128,8 @@ export default function LoginScreen() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 required
-                className="w-full rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-3 text-sm text-am-text-primary 
-                           placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-am-surface-subtle"
+                className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-sm text-foreground 
+                           placeholder-gray-500 outline-none transition-colors focus:border-primary/50 focus:bg-muted"
               />
             )}
             <input
@@ -138,8 +138,8 @@ export default function LoginScreen() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-3 text-sm text-am-text-primary 
-                         placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-am-surface-subtle"
+              className="w-full rounded-xl border border-border bg-muted px-4 py-3 text-sm text-foreground 
+                         placeholder-gray-500 outline-none transition-colors focus:border-primary/50 focus:bg-muted"
             />
             <div className="relative">
               <input
@@ -149,13 +149,13 @@ export default function LoginScreen() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-3 pr-11 text-sm text-am-text-primary 
-                           placeholder-gray-500 outline-none transition-colors focus:border-violet-500/50 focus:bg-am-surface-subtle"
+                className="w-full rounded-xl border border-border bg-muted px-4 py-3 pr-11 text-sm text-foreground 
+                           placeholder-gray-500 outline-none transition-colors focus:border-primary/50 focus:bg-muted"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-gray-300"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -164,9 +164,9 @@ export default function LoginScreen() {
             <button
               type="submit"
               disabled={isDisabled}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 
-                         px-6 py-3.5 font-medium text-am-text-primary shadow-lg shadow-violet-500/20 transition-all 
-                         hover:shadow-xl hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary/20 to-primary/20 
+                         px-6 py-3.5 font-medium text-foreground shadow-lg shadow-primary/20/20 transition-all 
+                         hover:shadow-xl hover:shadow-primary/20/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Mail className="h-4 w-4" />
               {submitting
@@ -178,13 +178,13 @@ export default function LoginScreen() {
           </form>
 
           {/* Toggle Login/Cadastro */}
-          <p className="mt-4 text-center text-sm text-gray-500">
+          <p className="mt-4 text-center text-sm text-muted-foreground">
             {mode === 'login' ? (
               <>
                 Não tem conta?{' '}
                 <button
                   onClick={() => setMode('register')}
-                  className="text-[#F59768] hover:text-violet-300 transition-colors"
+                  className="text-[var(--primary)] hover:text-primary transition-colors"
                 >
                   Criar conta
                 </button>
@@ -194,7 +194,7 @@ export default function LoginScreen() {
                 Já tem conta?{' '}
                 <button
                   onClick={() => setMode('login')}
-                  className="text-[#F59768] hover:text-violet-300 transition-colors"
+                  className="text-[var(--primary)] hover:text-primary transition-colors"
                 >
                   Fazer login
                 </button>
@@ -221,7 +221,7 @@ export default function LoginScreen() {
 
 function Feature({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg bg-am-surface-subtle px-4 py-2.5">
+    <div className="flex items-center gap-3 rounded-lg bg-muted px-4 py-2.5">
       {icon}
       <span className="text-sm text-gray-300">{text}</span>
     </div>

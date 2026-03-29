@@ -80,17 +80,17 @@ export default function PlanCoverageProjectionCard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="rounded-am-xl border border-am-border-default bg-am-surface p-6 shadow-am-md"
+      className="rounded-xl border border-border bg-card p-6 shadow-am-md"
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="mb-2 flex items-center gap-2">
-            <Gauge className="h-4 w-4 text-am-brand-primary" />
-            <h3 className="font-brand text-am-h5 font-bold tracking-tight text-am-text-primary">
+            <Gauge className="h-4 w-4 text-primary" />
+            <h3 className="font-sans text-am-h5 font-bold tracking-tight text-foreground">
               Viabilidade do Plano
             </h3>
           </div>
-          <p className="max-w-2xl text-sm text-am-text-secondary">
+          <p className="max-w-2xl text-sm text-muted-foreground">
             {plan
               ? `Projecao macro do edital ${plan.name}, combinando prazo, capacidade real e carga de material.`
               : 'Selecione um edital para projetar se o plano atual cabe no prazo e na sua rotina.'}
@@ -108,7 +108,7 @@ export default function PlanCoverageProjectionCard({
               <button
                 type="button"
                 onClick={onEdit}
-                className="inline-flex items-center gap-2 rounded-full border border-am-border-default px-3 py-1.5 text-xs font-medium text-am-text-secondary transition hover:border-violet-500/40 hover:text-violet-300"
+                className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-primary/40 hover:text-primary"
               >
                 <PencilLine className="h-3.5 w-3.5" />
                 Ajustar plano
@@ -119,81 +119,81 @@ export default function PlanCoverageProjectionCard({
       </div>
 
       {!plan ? (
-        <div className="mt-5 rounded-xl border border-am-border-default bg-am-surface-subtle px-4 py-5 text-sm text-am-text-secondary">
+        <div className="mt-5 rounded-xl border border-border bg-muted px-4 py-5 text-sm text-muted-foreground">
           Ative um edital para ver a projeção. A partir daqui vamos usar a disponibilidade real do aluno, o prazo da prova e a carga estimada do material para montar um plano mais inteligente.
         </div>
       ) : (
         <>
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-4">
-              <div className="mb-2 flex items-center gap-2 text-am-text-tertiary">
+            <div className="rounded-xl border border-border bg-muted p-4">
+              <div className="mb-2 flex items-center gap-2 text-muted-foreground">
                 <Clock3 className="h-4 w-4" />
                 <span className="text-xs uppercase tracking-wider">Capacidade semanal</span>
               </div>
-              <p className="text-2xl font-semibold text-am-text-primary">
+              <p className="text-2xl font-semibold text-foreground">
                 {formatHours(projection.weeklyCapacityHours)}
               </p>
-              <p className="mt-1 text-xs text-am-text-secondary">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Hoje voce declarou {formatHours(projection.todayAvailableHours)} disponiveis.
               </p>
             </div>
 
-            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-4">
-              <div className="mb-2 flex items-center gap-2 text-am-text-tertiary">
+            <div className="rounded-xl border border-border bg-muted p-4">
+              <div className="mb-2 flex items-center gap-2 text-muted-foreground">
                 <Target className="h-4 w-4" />
                 <span className="text-xs uppercase tracking-wider">Ritmo necessario</span>
               </div>
-              <p className="text-2xl font-semibold text-am-text-primary">
+              <p className="text-2xl font-semibold text-foreground">
                 {formatHours(projection.requiredWeeklyHours)}
               </p>
-              <p className="mt-1 text-xs text-am-text-secondary">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Meta atual do plano: {formatHours(projection.plannedWeeklyHours)} por semana.
               </p>
             </div>
 
-            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-4">
-              <div className="mb-2 flex items-center gap-2 text-am-text-tertiary">
+            <div className="rounded-xl border border-border bg-muted p-4">
+              <div className="mb-2 flex items-center gap-2 text-muted-foreground">
                 <CalendarDays className="h-4 w-4" />
                 <span className="text-xs uppercase tracking-wider">Prazo</span>
               </div>
-              <p className="text-2xl font-semibold text-am-text-primary">
+              <p className="text-2xl font-semibold text-foreground">
                 {projection.daysUntilExam != null ? `${projection.daysUntilExam}d` : '--'}
               </p>
-              <p className="mt-1 text-xs text-am-text-secondary">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Prova em {formatDate(plan.examDate)}.
               </p>
             </div>
 
-            <div className="rounded-xl border border-am-border-default bg-am-surface-subtle p-4">
-              <div className="mb-2 flex items-center gap-2 text-am-text-tertiary">
+            <div className="rounded-xl border border-border bg-muted p-4">
+              <div className="mb-2 flex items-center gap-2 text-muted-foreground">
                 <AlertTriangle className="h-4 w-4" />
                 <span className="text-xs uppercase tracking-wider">Cobertura</span>
               </div>
-              <p className="text-2xl font-semibold text-am-text-primary">
+              <p className="text-2xl font-semibold text-foreground">
                 {formatPercent(projection.plannedCoveragePercent)}
               </p>
-              <p className="mt-1 text-xs text-am-text-secondary">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Maximo com sua disponibilidade: {formatPercent(projection.maximumCoveragePercent)}.
               </p>
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-am-border-default bg-am-surface-subtle p-4">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-am-text-secondary">
-              <span className="rounded-full bg-am-surface px-3 py-1">
-                Material: <strong className="text-am-text-primary">{formatHours(projection.materialWorkloadHours)}</strong>
+          <div className="mt-4 rounded-xl border border-border bg-muted p-4">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <span className="rounded-full bg-card px-3 py-1">
+                Material: <strong className="text-foreground">{formatHours(projection.materialWorkloadHours)}</strong>
               </span>
-              <span className="rounded-full bg-am-surface px-3 py-1">
-                Horas planejadas ate a prova: <strong className="text-am-text-primary">{formatHours(projection.plannedHoursUntilExam)}</strong>
+              <span className="rounded-full bg-card px-3 py-1">
+                Horas planejadas ate a prova: <strong className="text-foreground">{formatHours(projection.plannedHoursUntilExam)}</strong>
               </span>
-              <span className="rounded-full bg-am-surface px-3 py-1">
-                Horas maximas disponiveis: <strong className="text-am-text-primary">{formatHours(projection.availableHoursUntilExam)}</strong>
+              <span className="rounded-full bg-card px-3 py-1">
+                Horas maximas disponiveis: <strong className="text-foreground">{formatHours(projection.availableHoursUntilExam)}</strong>
               </span>
-              <span className="rounded-full bg-am-surface px-3 py-1">
-                Meta recomendada: <strong className="text-am-text-primary">{formatHours(projection.recommendedWeeklyHours)}</strong>
+              <span className="rounded-full bg-card px-3 py-1">
+                Meta recomendada: <strong className="text-foreground">{formatHours(projection.recommendedWeeklyHours)}</strong>
               </span>
             </div>
-            <p className="mt-3 text-sm text-am-text-secondary">{helperMessage}</p>
+            <p className="mt-3 text-sm text-muted-foreground">{helperMessage}</p>
           </div>
         </>
       )}

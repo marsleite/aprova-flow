@@ -49,8 +49,8 @@ const PLAN_CARDS: PlanCard[] = [
     label: 'Free',
     priceLabel: 'R$ 0/mês',
     description: 'Para começar',
-    accentClass: 'text-am-text-primary',
-    borderClass: 'border-am-border-default',
+    accentClass: 'text-foreground',
+    borderClass: 'border-border',
   },
   {
     tier: 'pro',
@@ -58,7 +58,7 @@ const PLAN_CARDS: PlanCard[] = [
     priceLabel: 'R$ 34,90/mês',
     description: 'Para constância diária',
     highlight: 'Mais escolhido',
-    accentClass: 'text-am-brand-primary',
+    accentClass: 'text-primary',
     borderClass: 'border-am-brand-primary/30',
   },
   {
@@ -66,7 +66,7 @@ const PLAN_CARDS: PlanCard[] = [
     label: 'Premium',
     priceLabel: 'R$ 64,90/mês',
     description: 'Para máxima performance',
-    accentClass: 'text-am-brand-secondary',
+    accentClass: 'text-foreground',
     borderClass: 'border-am-brand-secondary/30',
   },
 ];
@@ -254,19 +254,19 @@ export default function AccountPlanModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-            className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-am-xl border border-am-border-default bg-am-canvas shadow-2xl"
+            className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-border bg-background shadow-2xl"
           >
-            <div className="flex items-center justify-between border-b border-am-border-default bg-gradient-to-r from-am-brand-primary/10 via-am-brand-secondary/5 to-transparent px-5 py-4">
+            <div className="flex items-center justify-between border-b border-border bg-gradient-to-r from-am-brand-primary/10 via-am-brand-secondary/5 to-transparent px-5 py-4">
               <div>
-                <p className="ds-kicker inline-flex items-center gap-2 text-am-brand-primary">
+                <p className="ds-kicker inline-flex items-center gap-2 text-primary">
                   <Crown className="h-3.5 w-3.5" />
                   Conta e Plano
                 </p>
-                <h2 className="font-brand text-lg font-bold tracking-tight text-am-text-primary">Gerenciar assinatura</h2>
+                <h2 className="font-sans text-lg font-bold tracking-tight text-foreground">Gerenciar assinatura</h2>
               </div>
               <button
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-am-text-tertiary transition hover:bg-am-surface-subtle hover:text-am-text-secondary"
+                className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-muted-foreground"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -274,30 +274,30 @@ export default function AccountPlanModal({
 
             <div className="space-y-4 overflow-y-auto p-5">
               {currentTier === 'admin' && (
-                <div className="rounded-am-md border border-am-success/30 bg-am-success/10 px-3 py-2 text-sm text-am-success">
+                <div className="rounded-md border border-am-success/30 bg-green-500/10 px-3 py-2 text-sm text-green-500">
                   Conta em modo <span className="font-semibold">ADMIN</span>. Escolha um plano abaixo para simular a experiência do usuário.
                 </div>
               )}
 
               <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-3 text-sm md:col-span-2">
-                  <p className="text-am-text-secondary">
-                    Plano atual: <span className="font-semibold uppercase text-am-text-primary">{currentTier}</span>
+                <div className="rounded-md border border-border bg-muted p-3 text-sm md:col-span-2">
+                  <p className="text-muted-foreground">
+                    Plano atual: <span className="font-semibold uppercase text-foreground">{currentTier}</span>
                   </p>
-                  <p className="mt-1 text-xs text-am-text-tertiary">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Editais usados: {currentPlansCount}
                   </p>
                 </div>
-                <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-3 text-sm">
-                  <p className="text-am-text-secondary">Acesso atual</p>
-                  <p className="mt-1 text-xs text-am-text-tertiary">
+                <div className="rounded-md border border-border bg-muted p-3 text-sm">
+                  <p className="text-muted-foreground">Acesso atual</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {PLAN_DISPLAY[currentDisplayTier].activePlansLabel}
                   </p>
                 </div>
               </div>
 
               {error && (
-                <div className="rounded-am-md border border-am-error/30 bg-am-error/10 px-3 py-2 text-sm text-am-error">
+                <div className="rounded-md border border-am-error/30 bg-am-error/10 px-3 py-2 text-sm text-am-error">
                   {error}
                 </div>
               )}
@@ -311,70 +311,70 @@ export default function AccountPlanModal({
                   return (
                     <div
                       key={plan.tier}
-                      className={`flex min-h-[420px] flex-col rounded-am-lg border bg-am-surface p-4 backdrop-blur-sm ${plan.borderClass} ${
+                      className={`flex min-h-[420px] flex-col rounded-lg border bg-card p-4 backdrop-blur-sm ${plan.borderClass} ${
                         isCurrent ? 'ring-1 ring-am-brand-primary/40' : ''
                       }`}
                     >
                       <div className="mb-3 flex items-start justify-between gap-2">
                         <div>
-                          <h3 className={`font-brand text-base font-bold tracking-tight ${plan.accentClass}`}>{plan.label}</h3>
-                          <p className="text-sm text-am-text-tertiary">{plan.description}</p>
-                          <p className="mt-0.5 font-brand whitespace-nowrap text-[28px] font-bold leading-none text-am-text-primary">{plan.priceLabel}</p>
+                          <h3 className={`font-sans text-base font-bold tracking-tight ${plan.accentClass}`}>{plan.label}</h3>
+                          <p className="text-sm text-muted-foreground">{plan.description}</p>
+                          <p className="mt-0.5 font-sans whitespace-nowrap text-[28px] font-bold leading-none text-foreground">{plan.priceLabel}</p>
                         </div>
                         {plan.highlight && (
-                          <span className="rounded-full bg-am-brand-primary/15 px-2 py-0.5 text-[10px] font-semibold text-am-brand-primary">
+                          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
                             {plan.highlight}
                           </span>
                         )}
                       </div>
 
-                      <ul className="space-y-1.5 text-xs text-am-text-secondary">
+                      <ul className="space-y-1.5 text-xs text-muted-foreground">
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           Dashboard completo
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           Cronômetro e histórico
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           {display.activePlansLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           {display.simulationsLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           {display.healthLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           Diagnóstico semanal: {display.weeklyDiagnosticLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           IA explicativa: {display.aiExplanationsLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           Chat contextual: {display.contextualChatLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           Mentoria recorrente: {display.mentoringLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           Parse de edital: {display.editalParseLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           Multi-edital: {display.multiEditalLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-am-success" />
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           Plano adaptativo: {display.adaptivePlanLabel}
                         </li>
                       </ul>
@@ -384,8 +384,8 @@ export default function AccountPlanModal({
                         disabled={isCurrent || Boolean(savingTier)}
                         className={`mt-auto flex w-full items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                           isCurrent
-                            ? 'bg-am-surface-subtle text-am-text-secondary'
-                            : 'bg-am-brand-gradient text-white hover:brightness-110 shadow-[0_0_16px_rgba(154,117,240,0.2)]'
+                            ? 'bg-muted text-muted-foreground'
+                            : 'bg-am-brand-gradient text-white hover:brightness-110 shadow-lg shadow-primary/20'
                         } disabled:cursor-not-allowed disabled:opacity-70`}
                       >
                         {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -396,16 +396,16 @@ export default function AccountPlanModal({
                 })}
               </div>
 
-              <div className="rounded-am-md border border-am-border-default bg-am-surface-subtle p-3">
+              <div className="rounded-md border border-border bg-muted p-3">
                 <button
                   onClick={() => setShowComparison((v) => !v)}
-                  className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-left transition hover:bg-am-surface-subtle"
+                  className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-left transition hover:bg-muted"
                 >
-                  <span className="text-sm font-medium text-am-text-primary">Comparativo lado a lado</span>
+                  <span className="text-sm font-medium text-foreground">Comparativo lado a lado</span>
                   {showComparison ? (
-                    <ChevronUp className="h-4 w-4 text-am-text-tertiary" />
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 text-am-text-tertiary" />
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   )}
                 </button>
 
@@ -413,20 +413,20 @@ export default function AccountPlanModal({
                   <div className="mt-3 overflow-x-auto">
                     <table className="min-w-[680px] w-full text-left text-xs">
                       <thead>
-                        <tr className="border-b border-am-border-default">
-                          <th className="px-3 py-2 text-am-text-tertiary">Recurso</th>
-                          <th className="px-3 py-2 text-am-text-primary">Free</th>
-                          <th className="px-3 py-2 text-am-brand-primary">Pro</th>
-                          <th className="px-3 py-2 text-am-brand-secondary">Premium</th>
+                        <tr className="border-b border-border">
+                          <th className="px-3 py-2 text-muted-foreground">Recurso</th>
+                          <th className="px-3 py-2 text-foreground">Free</th>
+                          <th className="px-3 py-2 text-primary">Pro</th>
+                          <th className="px-3 py-2 text-foreground">Premium</th>
                         </tr>
                       </thead>
                       <tbody>
                         {COMPARISON_ROWS.map((row) => (
-                          <tr key={row.label} className="border-b border-am-border-default last:border-b-0">
-                            <td className="px-3 py-2 text-am-text-secondary">{row.label}</td>
-                            <td className="px-3 py-2 text-am-text-secondary">{row.value('free')}</td>
-                            <td className="px-3 py-2 text-am-brand-primary">{row.value('pro')}</td>
-                            <td className="px-3 py-2 text-am-brand-secondary">{row.value('premium')}</td>
+                          <tr key={row.label} className="border-b border-border last:border-b-0">
+                            <td className="px-3 py-2 text-muted-foreground">{row.label}</td>
+                            <td className="px-3 py-2 text-muted-foreground">{row.value('free')}</td>
+                            <td className="px-3 py-2 text-primary">{row.value('pro')}</td>
+                            <td className="px-3 py-2 text-foreground">{row.value('premium')}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -435,7 +435,7 @@ export default function AccountPlanModal({
                 )}
               </div>
 
-              <p className="text-xs text-am-text-tertiary">
+              <p className="text-xs text-muted-foreground">
                 Fluxo de cobrança pode ser conectado aqui na próxima fase com Stripe/Pagar.me.
               </p>
             </div>
