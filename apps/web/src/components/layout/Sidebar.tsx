@@ -10,8 +10,6 @@ import {
   Timer,
   CalendarDays,
   Brain,
-  Target,
-  BookX,
   BarChart2,
   History,
   Settings,
@@ -51,18 +49,6 @@ const NAV_ITEMS = [
     icon: Brain,
     label: 'Mentoria',
     description: 'Diagnóstico e apoio',
-  },
-  {
-    href: '/provas',
-    icon: Target,
-    label: 'Provas e Simulados',
-    description: 'Hub de treino',
-  },
-  {
-    href: '/caderno-erros',
-    icon: BookX,
-    label: 'Caderno de Erros',
-    description: 'Erros e padrões',
   },
   {
     href: '/analytics',

@@ -43,7 +43,7 @@ src/
 - **edital_parse_ip_limits/{sha256(ip)}** — count, windowStart. Rate limit 3/h por IP, server-side only
 - **study_plans/{id}** — userId, name, subjects[], weeklyGoalHours, color, isDefault, createdAt, updatedAt
 - **user_stats/{userId}** — weeklyGoalHours, planSubjects[], activePlanId, planUpdatedAt, updatedAt
-- **questions_stats/{id}** — userId, planId, subject, totalQuestions, correctAnswers, accuracy, date, createdAt
+- **questions_stats/{id}** — userId, planId, subject, totalQuestions, correctAnswers, accuracy, date, createdAt (registro manual; alimenta motor de decisão)
 - **weekly_mentoring/{id}** — userId, planId, weekStart (YYYY-MM-DD seg), generatedAt, content (JSON da IA)
 - **ai_usage_events/{id}** — telemetria por chamada IA (tokens, custo, latência, status)
 - **daily_ai_plans/{id}** — snapshot do plano diário gerado por IA
@@ -140,6 +140,7 @@ src/
 14. ✅ P1 — Auditoria UX pré-lançamento: todos 4 itens já resolvidos (navegação, métricas reais, narrativa macro→semana→hoje, transparência Gap Analyzer)
 15. ✅ Instrumentação de métricas de produto: 7 eventos (`feature_blocked`, `upgrade_cta_viewed`, `upgrade_cta_clicked`, `ai_quota_exhausted`, `simulation_completed`, `plan_status_changed`, `tester_subscription_updated`) + painel admin BetaSignalsCard com janelas 7/14/30d
 16. ✅ Corte estratégico: banco de questões próprio cancelado, plano de provas arquivado em `docs/archive/`
+20. ✅ Deprecação de provas/simulados/caderno-erros (abril/2026) — 6 páginas removidas, 2 itens do Sidebar removidos, `questions.ts` reduzido de 629 → ~160 linhas, Firestore rules de `questions_bank`/`exams`/`question_attempts`/`simulated_configs` removidas. `QuestionTrackerCard`, `AccuracyChart` e `questions_stats` mantidos para o motor de decisão.
 
 17. ✅ Landing page pública — demo estático PGE-SP, seção de parse com email-gate (1/lifetime por email via SHA-256 + Firestore), rate limit 3/h por IP, preview 5 matérias, social proof, SEO, endpoint `/api/public/parse-edital-preview`
 18. ✅ Limpeza de legado — `LoginScreen.tsx` deletado (era stub deprecated sem imports)
