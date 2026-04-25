@@ -37,7 +37,7 @@ export default function Header({
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { planTier, capabilities, refresh } = useEntitlements(user?.uid, user?.email);
+  const { planTier, capabilities } = useEntitlements(user?.uid, user?.email);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -178,14 +178,9 @@ export default function Header({
       {user && (
         <AccountPlanModal
           isOpen={accountModalOpen}
-          userId={user.uid}
           currentTier={planTier}
           currentPlansCount={plans.length}
           onClose={() => setAccountModalOpen(false)}
-          onTierChanged={() => {
-            void refresh();
-            setAccountModalOpen(false);
-          }}
         />
       )}
     </header>

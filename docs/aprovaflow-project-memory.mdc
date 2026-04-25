@@ -5,7 +5,7 @@ alwaysApply: true
 
 # AprovaMind — Memória do Projeto
 
-Última atualização: 23/02/2026
+Última atualização: 24/04/2026
 
 ## O que é
 Plataforma de estudo para concursos. Rastreia horas líquidas de estudo, visualiza progresso por matéria, define metas e gera insights automáticos com IA. Suporta múltiplos editais (PGE, Magistratura, etc.) com dashboards filtrados por plano.
@@ -22,7 +22,8 @@ Plataforma de estudo para concursos. Rastreia horas líquidas de estudo, visuali
 src/
 ├── app/
 │   ├── api/chat/route.ts              # API Route — chat conversacional (Gemini)
-│   ├── api/parse-edital/route.ts      # API Route — importar PDF de edital (Gemini)
+│   ├── api/public/parse-edital-preview/route.ts  # API pública — preview sem auth, rate limit 3/h por IP
+│   ├── api/parse-edital/route.ts      # API Route — importar PDF de edital (Gemini, requer auth)
 │   ├── api/weekly-mentoring/route.ts  # API Route — mentoria semanal profunda (Gemini, 1x/semana)
 │   ├── api/planner-daily/route.ts     # API Route — plano diário IA com fallback resiliente
 │   ├── globals.css, layout.tsx, page.tsx
@@ -38,14 +39,18 @@ src/
 
 ## Firestore Schema
 - **sessions/{id}** — userId, planId, subject, subtopic, startTime, endTime, duration, date, createdAt
+- **edital_parse_tokens/{sha256(email)}** — emailHash, usedAt (ISO). 1 por email, server-side only
+- **edital_parse_ip_limits/{sha256(ip)}** — count, windowStart. Rate limit 3/h por IP, server-side only
 - **study_plans/{id}** — userId, name, subjects[], weeklyGoalHours, color, isDefault, createdAt, updatedAt
 - **user_stats/{userId}** — weeklyGoalHours, planSubjects[], activePlanId, planUpdatedAt, updatedAt
-- **questions_stats/{id}** — userId, planId, subject, totalQuestions, correctAnswers, accuracy, date, createdAt
+- **questions_stats/{id}** — userId, planId, subject, totalQuestions, correctAnswers, accuracy, date, createdAt (registro manual; alimenta motor de decisão)
 - **weekly_mentoring/{id}** — userId, planId, weekStart (YYYY-MM-DD seg), generatedAt, content (JSON da IA)
 - **ai_usage_events/{id}** — telemetria por chamada IA (tokens, custo, latência, status)
 - **daily_ai_plans/{id}** — snapshot do plano diário gerado por IA
 - **daily_ai_plan_progress/{id}** — execução do plano diário (blocos concluídos/adiados)
 - **calendar_events/{id}** — agenda de estudo
+- **product_usage_events/{id}** — eventos de produto (feature_blocked, upgrade_cta, ai_quota_exhausted, etc.)
+- **waitlist/{id}** — emails da fila de espera do beta (sem auth, admin lê)
 
 ## Arquitetura Multi-Edital
 - Cada sessão pertence a um edital (`planId` em sessions e questions_stats)
@@ -82,6 +87,7 @@ src/
 - ChatPanel (painel slide-in de chat conversacional com Coach IA Gemini)
 - PostSessionToast (feedback pós-sessão LOCAL, auto-dismiss 8s com ref estável)
 - ActivityHeatmap (grid anual estilo GitHub, últimos 52/53 weeks, filtrável por planId, escala dinâmica)
+- EditalParseSection (landing/EditalParseSection.tsx — upload PDF sem auth, preview de 5 matérias com CTA de conversão, drag-and-drop)
 
 ## O que já foi entregue
 
@@ -129,11 +135,23 @@ src/
 11. ✅ Base de entitlements transversal (`planTier`) aplicada em planos, simulados e calendário
 12. ✅ Menu de conta com modal "Conta e Plano" para visualizar benefícios e trocar tier
 
-### PRÓXIMA TASK:
-12. **Paywall contextual de produto + IA** (mensagem de upgrade + valor claro ao atingir limite)
+### Preparação para Distribuição (ABRIL/2026 — EM ANDAMENTO)
+13. ✅ P0 — Onboarding beta honesto: banner "beta fechado", waitlist com captura de email, Firestore rules para `waitlist`
+14. ✅ P1 — Auditoria UX pré-lançamento: todos 4 itens já resolvidos (navegação, métricas reais, narrativa macro→semana→hoje, transparência Gap Analyzer)
+15. ✅ Instrumentação de métricas de produto: 7 eventos (`feature_blocked`, `upgrade_cta_viewed`, `upgrade_cta_clicked`, `ai_quota_exhausted`, `simulation_completed`, `plan_status_changed`, `tester_subscription_updated`) + painel admin BetaSignalsCard com janelas 7/14/30d
+16. ✅ Corte estratégico: banco de questões próprio cancelado, plano de provas arquivado em `docs/archive/`
+20. ✅ Deprecação de provas/simulados/caderno-erros (abril/2026) — 6 páginas removidas, 2 itens do Sidebar removidos, `questions.ts` reduzido de 629 → ~160 linhas, Firestore rules de `questions_bank`/`exams`/`question_attempts`/`simulated_configs` removidas. `QuestionTrackerCard`, `AccuracyChart` e `questions_stats` mantidos para o motor de decisão.
+
+17. ✅ Landing page pública — demo estático PGE-SP, seção de parse com email-gate (1/lifetime por email via SHA-256 + Firestore), rate limit 3/h por IP, preview 5 matérias, social proof, SEO, endpoint `/api/public/parse-edital-preview`
+18. ✅ Limpeza de legado — `LoginScreen.tsx` deletado (era stub deprecated sem imports)
+19. ✅ Blog SEO — 3 páginas long-tail com conteúdo original 800-1200 palavras, links internos e meta tags:
+    - `/blog/como-montar-plano-estudo-concurso`
+    - `/blog/cronometro-estudo-horas-liquidas`
+    - `/blog/como-estudar-para-magistratura`
+    - Layout compartilhado em `apps/web/src/app/blog/layout.tsx` com nav e footer linkados ao CTA
 
 ### PRÓXIMA FASE:
-11. **Pós-simulado premium** — diagnóstico + trilha 24h/72h/7d
+20. **Lançamento público do Free** — landing page ativa, SEO, beta expandido para 20-40 testers
 
 ## Roadmap — Fase 3 (Escala e Monetização)
 1. ✅ Benchmark anônimo — comparar constância com usuários similares e mostrar percentil
@@ -148,18 +166,27 @@ src/
    - Opção de "pular" e "ver depois"
 
 ## Evolução futura — Modo Prova com banco de questões
-- **Visão**: o modo prova atual (cronômetro + registro de blocos) evoluirá para suportar questões dentro do app.
-- **Escopo**:
-  - Catálogo `questions` no Firestore com: enunciado rico (markdown), alternativas (A-E), resposta, explicação, tags (matéria, subtema, dificuldade, banca, ano).
-  - Endpoint/serviço para montar simulados parametrizados (por banca, edital, nível, quantidade).
-  - Interface de resolução com modo concentração, marcação de dúvida, revisão.
-  - Relatórios pós-prova cruzando constância × acertos por matéria/question tag.
-- **Plano para dataset**:
-  1. Começar com importação manual/CSV das listas já usadas pelo usuário (mínimo viável).
-  2. Criar ferramenta de import (CSV/JSON) com validação e deduplicação por `externalId`.
-  3. Adicionar editor interno para cadastrar/editar questões (perfis de confiança).
-  4. Fase final: scraping / integrações oficiais (quando juridicamente possível) + curadoria humana.
-- **Status**: feature planejada para depois das entregas atuais de Fase 3; manter esta evolução como última etapa.
+> **DECISAO (abril/2026): banco de questoes proprio CANCELADO. Foco na proposta central do motor de decisao. Manter apenas registro manual de questoes e simulado customizado existentes. Codigo existente de questions_bank/exams/question_attempts permanece funcional, mas nao sera expandido.**
+
+- **Status**: CANCELADO. O banco de questoes ja existente no app (simulados, caderno de erros) continua funcionando, mas nao havera investimento em pipeline de ingestao, scraping, curadoria ou expansao do banco.
+
+## Decisoes de Produto (abril/2026)
+
+### Cancelado
+- Banco de questoes proprio (pipeline de ingestao, expansao de questions_bank, scraping de provas)
+- Pos-simulado inteligente com IA (motor de regras local e suficiente)
+- Integracao de gateway de pagamento (operar manualmente no beta)
+
+### Congelado
+- Refatoracoes de arquitetura (ja madura)
+- A/B de modelos IA (volume insuficiente)
+
+### Prioridade atual
+- ✅ Fixes de UX para primeira impressao (P0/P1 da auditoria pre-lancamento) — CONCLUIDO
+- ✅ Instrumentacao de metricas de produto — CONCLUIDO (7 eventos + painel admin)
+- Expansao de beta (20-40 testers)
+- Landing page com parse de edital como hook
+- Conteudo SEO (3-4 artigos long-tail)
 
 ## Arquitetura IA (Gateway Multi-Provider) — Uso Estratégico
 
@@ -171,13 +198,11 @@ src/
 - `src/lib/ai/gateway.ts`: decide provider/model por tarefa
 - Providers: `src/lib/ai/providers/gemini.ts` e `src/lib/ai/providers/openai.ts`
 - Métricas/custo: `src/lib/ai/metrics.ts`
-- Telemetria persistida: `src/lib/server/aiUsageStore.ts`
+- Telemetria persistida canonicamente na `apps/api/src/modules/ai/ai-usage-store.ts`
 
-### API Routes IA (4 rotas):
-- `/api/chat` — Chat conversacional com Coach IA
-- `/api/parse-edital` — Importação de PDF de edital
-- `/api/weekly-mentoring` — Mentoria semanal profunda (1x/semana, cache no Firestore)
-- `/api/planner-daily` — Plano diário adaptativo + fallback robusto
+### API Routes IA
+- `apps/web` mantém rotas de compatibilidade (`/api/chat`, `/api/parse-edital`, `/api/weekly-mentoring`, `/api/planner-daily` e correlatas)
+- o runtime canônico do modelo vive na `apps/api` em `/ai/text` e `/ai/pdf`
 
 ### Rotas removidas (substituídas por regras locais):
 - ~~/api/gemini~~ — substituído por GeminiCoachCard local

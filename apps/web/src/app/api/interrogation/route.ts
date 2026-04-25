@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
-import { logAiUsageEvent, runAiText } from '@/lib/ai';
-import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
 
 const SYSTEM_INSTRUCTION = [
   'Você é um professor e mentor de estudos severo, justo e direto ao ponto.',
@@ -61,35 +60,20 @@ export async function POST(request: NextRequest) {
 
     const prompt = 'MATÉRIA ESTUDADA: ' + subject + '\n\nRESUMO DO ALUNO:\n' + summaryText;
 
-    const aiResponse = await runAiText({
-      task: 'interrogation',
-      systemInstruction: SYSTEM_INSTRUCTION,
-      prompt,
-      preferJson: true,
-      temperature: 0.2,
-      maxOutputTokens: 1024,
+    const aiResponse = await runDedicatedAiText({
+      idToken: auth.idToken,
+      payload: {
+        task: 'interrogation',
+        systemInstruction: SYSTEM_INSTRUCTION,
+        prompt,
+        preferJson: true,
+        temperature: 0.2,
+        maxOutputTokens: 1024,
+      },
     });
 
     const text = aiResponse.text?.trim() || '{}';
     const jsonStr = text.replace(/^```json/g, '').replace(/```$/g, '').trim();
-
-    // Log AI usage
-    const usageEvent = {
-      route: '/api/interrogation',
-      task: 'interrogation',
-      provider: aiResponse.provider,
-      model: aiResponse.model,
-      latencyMs: aiResponse.latencyMs,
-      inputTokens: aiResponse.usage.inputTokens,
-      outputTokens: aiResponse.usage.outputTokens,
-      totalTokens: aiResponse.usage.totalTokens,
-      estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-      success: true,
-      statusCode: 200,
-      userId: auth.uid,
-    } as const;
-    logAiUsageEvent(usageEvent);
-    void saveAiUsageEvent(usageEvent, auth.idToken);
 
     try {
       const parsedData = JSON.parse(jsonStr);

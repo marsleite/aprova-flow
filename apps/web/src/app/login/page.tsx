@@ -3,7 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { getBetaAccessMessage, isBetaAccessRestricted } from '@/lib/beta-access';
+import {
+  getBetaAccessMessage,
+  getBetaAccessStatus,
+  isBetaAccessRestricted,
+  type BetaAccessStatus,
+} from '@/lib/beta-access';
+import {
+  getStoredEntitlementScenarioUserId,
+  isEntitlementSandboxAvailable,
+} from '@/lib/entitlement-sandbox';
+import { getSandboxContextMessage } from '@/lib/stability/core-flow';
 import {
   Zap,
   Mail,
@@ -29,14 +39,80 @@ export default function LoginPage() {
   const [displayName, setDisplayName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [sandboxScenarioUserId, setSandboxScenarioUserId] = useState<string | null>(null);
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [betaAccessStatus, setBetaAccessStatus] = useState<BetaAccessStatus>('invite_only');
+
   const betaRestricted = isBetaAccessRestricted();
-  const betaMessage = getBetaAccessMessage(email);
+  const betaMessage = getBetaAccessMessage(betaAccessStatus);
+  const canRegisterWithEmail = betaAccessStatus === 'open' || betaAccessStatus === 'allowed';
+  const registrationLocked = mode === 'register' && betaRestricted && !canRegisterWithEmail;
+  const showRegistrationFields = mode === 'register' && !registrationLocked;
+
+  // Verifica status do email no Firestore com debounce de 500ms
+  useEffect(() => {
+    if (!betaRestricted || !email) {
+      setBetaAccessStatus(betaRestricted ? 'invite_only' : 'open');
+      return;
+    }
+    const timer = setTimeout(async () => {
+      const status = await getBetaAccessStatus(email);
+      setBetaAccessStatus(status);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [email, betaRestricted]);
+
+  const helperText =
+    mode === 'login'
+      ? betaRestricted
+        ? 'Entre com um email ja liberado para retomar seu fluxo Planner -> Dashboard -> Engine.'
+        : 'Retome seu fluxo Planner -> Dashboard -> Engine.'
+      : registrationLocked
+        ? 'Digite primeiro o email do convite. So depois liberamos nome e senha para ativar o acesso beta.'
+        : 'Seu convite foi reconhecido. Defina nome e senha para ativar o acesso beta com esse email.';
+
+  const submitLabel = submitting
+    ? 'Processando...'
+    : mode === 'register'
+      ? registrationLocked
+        ? betaAccessStatus === 'blocked'
+          ? 'Use um email convidado'
+          : 'Informe o email do convite'
+        : 'Ativar acesso beta'
+      : 'Acessar plataforma';
+
+  const sandboxContextMessage = getSandboxContextMessage({
+    usingSandbox: Boolean(sandboxScenarioUserId),
+    sandboxScenarioUserId,
+  });
 
   useEffect(() => {
     if (user && !loading) {
-      router.replace('/dashboard');
+      router.replace('/planner');
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!isEntitlementSandboxAvailable()) return;
+    setSandboxScenarioUserId(getStoredEntitlementScenarioUserId());
+  }, []);
+
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!waitlistEmail.trim()) return;
+    try {
+      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase/config');
+      await addDoc(collection(db, 'waitlist'), {
+        email: waitlistEmail.trim().toLowerCase(),
+        createdAt: serverTimestamp(),
+      });
+      setWaitlistSubmitted(true);
+    } catch {
+      setWaitlistSubmitted(true);
+    }
+  };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,7 +227,7 @@ export default function LoginPage() {
                 color: 'var(--primary)',
               }}
             >
-              IA de Alta Performance
+              Jornada guiada
             </span>
           </motion.div>
 
@@ -162,9 +238,9 @@ export default function LoginPage() {
             className="ds-display-1 mb-6"
             style={{ color: 'var(--foreground)' }}
           >
-            Sua jornada começa com{' '}
+            Comece no macro e{' '}
             <span className="text-primary">
-              estratégia inteligente.
+              execute melhor hoje.
             </span>
           </motion.h1>
 
@@ -175,7 +251,7 @@ export default function LoginPage() {
             className="ds-body-lg"
             style={{ color: 'var(--muted-foreground)' }}
           >
-            O AprovaMind combina IA diagnóstica, gestão multi-edital e análise preditiva para acelerar o seu tempo até a aprovação.
+            O AprovaMind organiza a sua rotina em uma ordem clara: Planner para viabilidade, Dashboard para ritmo semanal e Engine para a melhor sessão de hoje.
           </motion.p>
         </div>
 
@@ -290,6 +366,30 @@ export default function LoginPage() {
                 </div>
               )}
 
+              {sandboxContextMessage && (
+                <div
+                  className="mb-6 rounded-2xl px-4 py-3.5"
+                  style={{
+                    background: 'rgba(245, 151, 104, 0.08)',
+                    border: '1px solid rgba(245, 151, 104, 0.22)',
+                  }}
+                >
+                  <p
+                    className="text-[10px] font-medium uppercase"
+                    style={{
+                      fontFamily: 'var(--ds-font-display)',
+                      letterSpacing: 'var(--ds-letter-kicker)',
+                      color: 'var(--primary)',
+                    }}
+                  >
+                    Sandbox local
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                    {sandboxContextMessage}
+                  </p>
+                </div>
+              )}
+
               {/* Inner top shine */}
               <div
                 className="absolute top-0 left-0 w-full h-px"
@@ -302,12 +402,10 @@ export default function LoginPage() {
                   className="ds-title-1"
                   style={{ color: 'var(--foreground)' }}
                 >
-                  {mode === 'login' ? 'Acesse sua conta' : 'Crie seu acesso'}
+                  {mode === 'login' ? 'Acesse sua conta' : 'Ative seu convite beta'}
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
-                  {mode === 'login'
-                    ? 'Retome o controle da sua preparação.'
-                    : 'A IA que entende o seu ritmo de estudo.'}
+                  {helperText}
                 </p>
               </div>
 
@@ -328,7 +426,11 @@ export default function LoginPage() {
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
-                {isDisabled ? 'Conectando...' : 'Continuar com Google'}
+                {isDisabled
+                  ? 'Conectando...'
+                  : betaRestricted
+                    ? 'Continuar com Google (email convidado)'
+                    : 'Continuar com Google'}
                 <ArrowRight className="ml-auto h-4 w-4 opacity-40 transition-transform group-hover:translate-x-1" />
               </button>
 
@@ -350,7 +452,80 @@ export default function LoginPage() {
 
               {/* Form */}
               <form onSubmit={handleEmailSubmit} className="space-y-4">
-                {mode === 'register' && (
+                {mode === 'register' && registrationLocked && (
+                  <div
+                    className="rounded-2xl px-4 py-3.5"
+                    style={{
+                      background: 'rgba(253, 252, 251, 0.04)',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    <p
+                      className="text-[10px] font-medium uppercase"
+                      style={{
+                        fontFamily: 'var(--ds-font-display)',
+                        letterSpacing: 'var(--ds-letter-kicker)',
+                        color: 'var(--primary)',
+                      }}
+                    >
+                      {betaAccessStatus === 'blocked' ? 'Fila de espera' : 'Ativacao por convite'}
+                    </p>
+                    {betaAccessStatus === 'blocked' ? (
+                      <div className="mt-2">
+                        <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                          O AprovaMind esta em fase de testes com um grupo restrito.
+                          Deixe seu email para ser avisado quando abrirmos novas vagas.
+                        </p>
+                        {waitlistSubmitted ? (
+                          <div
+                            className="mt-3 rounded-xl px-4 py-3"
+                            style={{
+                              background: 'rgba(34, 197, 94, 0.1)',
+                              border: '1px solid rgba(34, 197, 94, 0.25)',
+                            }}
+                          >
+                            <p className="text-sm font-medium" style={{ color: '#4ade80' }}>
+                              Email registrado! Voce sera avisado quando o acesso for liberado.
+                            </p>
+                          </div>
+                        ) : (
+                          <form onSubmit={handleWaitlistSubmit} className="mt-3 flex gap-2">
+                            <input
+                              type="email"
+                              placeholder="seu@email.com"
+                              value={waitlistEmail}
+                              onChange={(e) => setWaitlistEmail(e.target.value)}
+                              required
+                              className="flex-1 rounded-full px-4 py-2.5 text-sm outline-none transition-all"
+                              style={{
+                                background: 'rgba(23, 20, 18, 0.6)',
+                                border: '1px solid var(--border)',
+                                color: 'var(--foreground)',
+                                backdropFilter: 'blur(8px)',
+                              }}
+                            />
+                            <button
+                              type="submit"
+                              className="shrink-0 rounded-full px-5 py-2.5 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95"
+                              style={{
+                                background: 'var(--primary)',
+                                color: 'var(--primary-foreground)',
+                              }}
+                            >
+                              Avisar-me
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                        Comece pelo email do convite. Quando ele for reconhecido, mostramos nome e senha para concluir a ativacao.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {showRegistrationFields && (
                   <div className="space-y-1.5">
                     <label
                       className="text-[11px] font-medium uppercase ml-1"
@@ -387,12 +562,12 @@ export default function LoginPage() {
                       letterSpacing: 'var(--ds-letter-kicker)',
                       color: 'var(--muted-foreground)',
                     }}
-                  >
-                    Seu Email
+                    >
+                    {mode === 'register' && betaRestricted ? 'Email do convite' : 'Seu Email'}
                   </label>
                   <input
                     type="email"
-                    placeholder="hey@aprova.mind"
+                    placeholder={mode === 'register' && betaRestricted ? 'convite@aprova.mind' : 'hey@aprova.mind'}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -416,7 +591,7 @@ export default function LoginPage() {
                         color: 'var(--muted-foreground)',
                       }}
                     >
-                      Senha Secreta
+                      {mode === 'register' ? 'Senha inicial' : 'Senha Secreta'}
                     </label>
                     {mode === 'login' && (
                       <span className="text-[11px] cursor-pointer hover:underline" style={{ color: 'var(--primary)' }}>
@@ -424,37 +599,50 @@ export default function LoginPage() {
                       </span>
                     )}
                   </div>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                      className="w-full rounded-full px-5 py-3.5 pr-12 text-sm outline-none transition-all"
+                  {mode === 'login' || showRegistrationFields ? (
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        className="w-full rounded-full px-5 py-3.5 pr-12 text-sm outline-none transition-all"
+                        style={{
+                          background: 'rgba(23, 20, 18, 0.6)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--foreground)',
+                          backdropFilter: 'blur(8px)',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors"
+                        style={{ color: 'var(--muted-foreground)' }}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      className="rounded-full px-5 py-3.5 text-sm"
                       style={{
-                        background: 'rgba(23, 20, 18, 0.6)',
-                        border: '1px solid var(--border)',
-                        color: 'var(--foreground)',
-                        backdropFilter: 'blur(8px)',
+                        background: 'rgba(23, 20, 18, 0.35)',
+                        border: '1px dashed var(--border)',
+                        color: 'var(--muted-foreground)',
                       }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors"
-                      style={{ color: 'var(--muted-foreground)' }}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
+                      A senha aparece quando o convite for reconhecido.
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-2">
                   <button
                     type="submit"
-                    disabled={isDisabled}
+                    disabled={isDisabled || registrationLocked}
                     className="flex bg-primary text-primary-foreground w-full justify-center items-center gap-2 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                     style={{
                       minHeight: '48px',
@@ -467,11 +655,7 @@ export default function LoginPage() {
                     ) : (
                       <Mail className="h-4 w-4" />
                     )}
-                    {submitting
-                      ? 'Processando...'
-                      : mode === 'register'
-                        ? 'Forjar Aprovação'
-                        : 'Acessar Plataforma'}
+                    {submitLabel}
                   </button>
                 </div>
               </form>
@@ -481,19 +665,88 @@ export default function LoginPage() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-5 rounded-2xl px-4 py-3.5 flex items-center gap-3"
-                  style={{
-                    background: 'rgba(169, 68, 66, 0.15)',
-                    border: '1px solid rgba(169, 68, 66, 0.3)',
-                  }}
+                  className="mt-5 space-y-3"
                 >
                   <div
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
-                    style={{ background: 'rgba(169, 68, 66, 0.25)' }}
+                    className="rounded-2xl px-4 py-3.5 flex items-center gap-3"
+                    style={{
+                      background: 'rgba(169, 68, 66, 0.15)',
+                      border: '1px solid rgba(169, 68, 66, 0.3)',
+                    }}
                   >
-                    <Zap className="h-3 w-3" style={{ color: 'var(--ds-color-danger)' }} />
+                    <div
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(169, 68, 66, 0.25)' }}
+                    >
+                      <Zap className="h-3 w-3" style={{ color: 'var(--ds-color-danger)' }} />
+                    </div>
+                    <p className="text-xs font-medium leading-tight" style={{ color: '#ef4444' }}>{error}</p>
                   </div>
-                  <p className="text-xs font-medium leading-tight" style={{ color: '#ef4444' }}>{error}</p>
+
+                  {/* Waitlist — aparece quando erro é de beta */}
+                  {(error.includes('beta') || error.includes('liberado')) && (
+                    <div
+                      className="rounded-2xl px-4 py-3.5"
+                      style={{
+                        background: 'rgba(253, 252, 251, 0.04)',
+                        border: '1px solid var(--border)',
+                      }}
+                    >
+                      <p
+                        className="text-[10px] font-medium uppercase"
+                        style={{
+                          fontFamily: 'var(--ds-font-display)',
+                          letterSpacing: 'var(--ds-letter-kicker)',
+                          color: 'var(--primary)',
+                        }}
+                      >
+                        Fila de espera
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                        Quer ser avisado quando abrirmos novas vagas?
+                      </p>
+                      {waitlistSubmitted ? (
+                        <div
+                          className="mt-3 rounded-xl px-4 py-3"
+                          style={{
+                            background: 'rgba(34, 197, 94, 0.1)',
+                            border: '1px solid rgba(34, 197, 94, 0.25)',
+                          }}
+                        >
+                          <p className="text-sm font-medium" style={{ color: '#4ade80' }}>
+                            Email registrado! Voce sera avisado quando o acesso for liberado.
+                          </p>
+                        </div>
+                      ) : (
+                        <form onSubmit={handleWaitlistSubmit} className="mt-3 flex gap-2">
+                          <input
+                            type="email"
+                            placeholder="seu@email.com"
+                            value={waitlistEmail}
+                            onChange={(e) => setWaitlistEmail(e.target.value)}
+                            required
+                            className="flex-1 rounded-full px-4 py-2.5 text-sm outline-none transition-all"
+                            style={{
+                              background: 'rgba(23, 20, 18, 0.6)',
+                              border: '1px solid var(--border)',
+                              color: 'var(--foreground)',
+                              backdropFilter: 'blur(8px)',
+                            }}
+                          />
+                          <button
+                            type="submit"
+                            className="shrink-0 rounded-full px-5 py-2.5 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95"
+                            style={{
+                              background: 'var(--primary)',
+                              color: 'var(--primary-foreground)',
+                            }}
+                          >
+                            Avisar-me
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
               )}
 
@@ -506,7 +759,7 @@ export default function LoginPage() {
                 }}
               >
                 <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  {mode === 'login' ? 'Novo por aqui? ' : 'Já é um estrategista? '}
+                  {mode === 'login' ? 'Recebeu um convite por email? ' : 'Ja ativou seu convite? '}
                   <button
                     onClick={() => {
                       setMode(mode === 'login' ? 'register' : 'login');
@@ -514,12 +767,12 @@ export default function LoginPage() {
                     className="font-semibold transition-colors hover:underline"
                     style={{ color: 'var(--primary)' }}
                   >
-                    {mode === 'login' ? 'Criar sua conta gratuita' : 'Faça seu login'}
+                    {mode === 'login' ? 'Ativar acesso beta' : 'Fazer login'}
                   </button>
                 </p>
                 {betaRestricted && (
                   <p className="mt-2 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
-                    Cadastro e login por email funcionam normalmente para emails já liberados no beta.
+                    O cadastro por email so fica disponivel depois que um convite valido e reconhecido.
                   </p>
                 )}
               </div>

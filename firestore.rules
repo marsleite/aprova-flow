@@ -8,7 +8,8 @@ service cloud.firestore {
       return request.auth != null 
              && request.auth.token.email in [
                'marsleite@gmail.com',
-               'graceandradeleite@gmail.com'
+               'graceandradeleite@gmail.com',
+               'marcelop3251@gmail.com'
              ];
     }
 
@@ -27,6 +28,41 @@ service cloud.firestore {
     function isPremium() {
       let plan = getUserPlan();
       return plan == 'premium' || isAdmin();
+    }
+
+    // Campos de entitlement e billing são server-side only.
+    function userStatsServerManagedFields() {
+      return [
+        'planTier',
+        'aiPlanTier',
+        'subscriptionTier',
+        'planType',
+        'tier',
+        'subscriptionStatus',
+        'billingStatus',
+        'planStatus',
+        'status',
+        'entitlementUsage',
+        'entitlementsUsage',
+        'featureUsage',
+        'featureUsageJson',
+        'entitlementUsagePeriods',
+        'entitlementsUsagePeriods',
+        'featureUsagePeriods',
+        'featureUsagePeriodsJson',
+        'subscriptionUpdatedAt'
+      ];
+    }
+
+    function userStatsCreateWithoutServerManagedFields() {
+      return !request.resource.data.keys().hasAny(userStatsServerManagedFields());
+    }
+
+    function userStatsUpdatePreservesServerManagedFields() {
+      return !request.resource.data
+        .diff(resource.data)
+        .affectedKeys()
+        .hasAny(userStatsServerManagedFields());
     }
     
     // Sessões de estudo
@@ -47,61 +83,61 @@ service cloud.firestore {
                     && resource.data.userId == request.auth.uid;
     }
 
-    // Banco de questões (leitura para todos autenticados; escrita apenas admin)
-    match /questions_bank/{questionId} {
-      allow read: if request.auth != null;
-      allow create, update, delete: if isAdmin();
-    }
-
-    // Provas oficiais (leitura para todos autenticados; escrita apenas admin)
-    match /exams/{examId} {
-      allow read: if request.auth != null;
-      allow create, update, delete: if isAdmin();
-    }
-
     // Base de conhecimento jurídico para RAG (leis são informação pública)
     match /legal_knowledge/{docId} {
       allow read: if true;  // Server-side API route precisa ler sem auth context
       allow create, update, delete: if isAdmin();
     }
 
-    // Tentativas de questões (histórico do usuário)
-    match /question_attempts/{attemptId} {
-      allow read: if request.auth != null 
-                  && resource.data.userId == request.auth.uid;
-
-      allow create: if request.auth != null 
-                    && request.resource.data.userId == request.auth.uid
-                    && request.resource.data.questionId is string
-                    && request.resource.data.selectedOption is string
-                    && request.resource.data.correct is bool
-                    && request.resource.data.timeSpentSeconds is number
-                    && request.resource.data.attemptType in ['exam', 'simulado', 'treino'];
-
-      allow delete: if false;
-      allow update: if false;
-    }
-
-    // Configurações salvas de simulados (por usuário)
-    match /simulated_configs/{configId} {
-      allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
-
-      allow create: if request.auth != null
-                    && request.resource.data.userId == request.auth.uid;
-
-      allow update: if request.auth != null
-                    && resource.data.userId == request.auth.uid
-                    && request.resource.data.userId == resource.data.userId;
-
-      allow delete: if request.auth != null
-                    && resource.data.userId == request.auth.uid;
-    }
-    
     // Configurações do usuário (meta semanal, plano ativo, etc.)
     match /user_stats/{userId} {
-      allow read, write: if request.auth != null
-                         && (request.auth.uid == userId || isAdmin());
+      allow read: if request.auth != null
+                  && (request.auth.uid == userId || isAdmin());
+
+      allow create: if request.auth != null
+                    && (
+                      isAdmin()
+                      || (
+                        request.auth.uid == userId
+                        && userStatsCreateWithoutServerManagedFields()
+                      )
+                    );
+
+      allow update: if request.auth != null
+                    && (
+                      isAdmin()
+                      || (
+                        request.auth.uid == userId
+                        && userStatsUpdatePreservesServerManagedFields()
+                      )
+                    );
+
+      allow delete: if request.auth != null
+                    && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /product_usage_events/{eventId} {
+      allow read: if request.auth != null
+                  && (
+                    request.auth.uid == resource.data.userId
+                    || request.auth.uid == resource.data.actorUserId
+                    || isAdmin()
+                  );
+
+      allow create: if request.auth != null
+                    && request.resource.data.actorUserId == request.auth.uid
+                    && request.resource.data.userId is string
+                    && request.resource.data.eventName in [
+                      'feature_blocked',
+                      'upgrade_cta_viewed',
+                      'upgrade_cta_clicked',
+                      'ai_quota_exhausted',
+                      'plan_status_changed',
+                      'tester_subscription_updated'
+                    ]
+                    && request.resource.data.createdAt is string;
+
+      allow update, delete: if false;
     }
 
     // Estado ativo do cronômetro (documento único por usuário)
@@ -190,7 +226,10 @@ service cloud.firestore {
     // Cada usuário escreve apenas seus próprios eventos.
     match /ai_usage_events/{eventId} {
       allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
+                  && (
+                    resource.data.userId == request.auth.uid
+                    || isAdmin()
+                  );
 
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid
@@ -204,7 +243,8 @@ service cloud.firestore {
                     && request.resource.data.totalTokens is number
                     && request.resource.data.estimatedCostUsd is number
                     && request.resource.data.success is bool
-                    && request.resource.data.statusCode is number;
+                    && request.resource.data.statusCode is number
+                    && request.resource.data.createdAt is string;
 
       allow update, delete: if false;
     }
@@ -324,6 +364,33 @@ service cloud.firestore {
       allow update, delete: if false;
     }
     
+    // Tokens de parse público — 1 por email (hash SHA-256), server-side via API key
+    match /edital_parse_tokens/{tokenId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    // Rate limit por IP para parse público (hash SHA-256)
+    match /edital_parse_ip_limits/{limitId} {
+      allow read, write: if true;
+      allow delete: if false;
+    }
+
+    // Beta allowlist — qualquer pessoa lê (verificar acesso), só admin escreve
+    match /beta_allowlist/{email} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Waitlist — qualquer pessoa pode criar (sem auth), ninguém lê
+    match /waitlist/{docId} {
+      allow create: if request.resource.data.email is string
+                    && request.resource.data.email.size() > 0
+                    && request.resource.data.email.size() < 256;
+      allow read, update, delete: if isAdmin();
+    }
+
     // Bloqueia tudo que não esteja permitido
     match /{document=**} {
       allow read, write: if false;

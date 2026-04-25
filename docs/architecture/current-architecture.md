@@ -1,32 +1,32 @@
 # Arquitetura Atual do AprovaMind
 
-Data de referência: 12/03/2026
+Data de referência: 2026-04-09
 
 ## Objetivo
 
-Este documento descreve a arquitetura atual do repositório depois da migração para monorepo e antes da implementação completa de billing + entitlements.
+Este documento descreve a arquitetura operacional atual do monorepo depois da ratificação da constituição e das fases iniciais de endurecimento do backend.
 
 O objetivo é registrar:
 
 - como o repositório está organizado hoje
-- qual é a responsabilidade de cada módulo
-- onde a lógica de negócio deve morar
-- quais partes já estão operacionais
-- quais partes ainda são scaffolding
+- qual é a responsabilidade de cada app e pacote
+- onde o runtime canônico já vive
+- quais transições ainda estão em andamento
+- quais limites arquiteturais não devem mais ser violados
 
 ## Visão Geral
 
 ```text
 apps/
-  web/        # Next.js: UI, páginas, rotas web e BFF temporário
-  api/        # Fastify: backend dedicado, hoje em scaffold inicial
+  web/        # Next.js: UI, páginas, sessão no browser e proxies finos de compatibilidade
+  api/        # Fastify: backend canônico para auth, entitlements, IA e engine
 
 packages/
   domain/                   # regras puras do produto
-  application/              # casos de uso, portas e mappers
+  application/              # casos de uso, portas e orquestração
   contracts/                # DTOs e contratos compartilhados
-  infrastructure-firebase/  # placeholder para adapters server-side
-  infrastructure-billing/   # placeholder para gateway de cobrança
+  infrastructure-firebase/  # adapters server-side e bridges legadas em extração
+  infrastructure-billing/   # ponto de integração para cobrança
 
 docs/
   architecture/
@@ -39,33 +39,38 @@ docs/
 Responsável por:
 
 - experiência do usuário
-- páginas e componentes React
-- rotas HTTP do produto ainda não extraídas
-- composição visual do motor e dos recursos existentes
+- páginas, layouts e componentes React
+- composição visual dos fluxos do produto
+- obtenção de sessão no browser
+- rotas de compatibilidade que apenas encaminham chamadas para a `apps/api`
+- comunicação honesta de contexto local, como sandbox de entitlement ativo e
+  ausência de edital ativo no fluxo principal
 
-Não deve concentrar no médio prazo:
+Não deve concentrar:
 
-- billing
-- webhook
-- sincronização de assinatura
+- lógica nova de negócio
 - autorização premium final
+- gateways de IA
+- runtime canônico do engine
+- mutações server-side de assinatura ou entitlement
 
 ### `apps/api`
 
 Responsável por:
 
-- backend dedicado para assinatura e permissões
-- webhook do gateway
-- entitlements
-- autorização server-side de features pagas
+- `GET /health`
+- autenticação via Firebase ID token
+- entitlements e assinatura server-side
+- operações administrativas de beta/testers
+- gateway de IA com guards e limites
+- runtime canônico do engine (`/engine/snapshot` e `/engine/portfolio`)
 
 Estado atual:
 
-- existe
-- builda
-- faz deploy separado
-- expõe `GET /health`
-- ainda não tem auth, billing nem persistência real
+- builda e deploya separado da `apps/web`
+- já autentica requests protegidos
+- já concentra rotas reais de produto
+- ainda convive com alguns proxies/bridges legados na `web`
 
 ### `packages/domain`
 
@@ -102,39 +107,78 @@ Não pode depender de implementações concretas.
 Responsável por:
 
 - DTOs e contratos compartilhados entre `web` e `api`
-- shape dos snapshots e payloads públicos entre apps
+- snapshots e payloads públicos do motor
+- shapes usados por compatibilidade entre apps
+
+### `packages/infrastructure-firebase`
+
+Responsável por:
+
+- adapters server-side para Firebase/Auth/Firestore
+- bordas legadas ainda compartilhadas enquanto a extração para a API não termina
+
+Não deve virar atalho para espalhar regra de negócio fora de `domain` e `application`.
 
 ## Fluxos Relevantes Hoje
 
-### Fluxo do motor no app web
+### Fluxo canônico do engine
 
 ```text
-Next route/component
-  -> application use case
-    -> application port
-      -> infrastructure adapter
-        -> domain services
-          -> contracts/dto
+Next page/component
+  -> rota de compatibilidade em apps/web (quando existir)
+    -> apps/api
+      -> application use case
+        -> infrastructure adapter
+          -> domain services
+            -> contracts/dto
 ```
 
-Exemplo concreto já funcional:
+Exemplo concreto:
 
 ```text
 apps/web/src/app/api/engine/snapshot/route.ts
-  -> packages/application/.../GetPlanEngineSnapshot
-  -> packages/domain/.../PlanEngine
-  -> packages/contracts/.../PlanEngineSnapshot
+  -> apps/api/src/modules/engine/routes.ts
+    -> packages/application/.../GetPlanEngineSnapshot
+      -> packages/infrastructure-firebase/.../LegacyEngineDataSource
+        -> packages/domain/.../PlanEngine
+          -> packages/contracts/.../PlanEngineSnapshot
 ```
 
-### Fluxo atual da API dedicada
+### Fluxo canônico de portfólio multi-edital
 
 ```text
-apps/api/src/app.ts
-  -> Fastify app
-    -> GET /health
+apps/web/src/app/api/engine/portfolio/route.ts
+  -> apps/api/src/modules/engine/routes.ts
+    -> packages/application/.../GetPortfolioSnapshot
+      -> packages/domain/.../PortfolioAllocator
+        -> packages/contracts/.../PortfolioSnapshot
 ```
 
-Hoje a `apps/api` ainda não executa regra de negócio do produto.
+### Fluxo de recursos protegidos
+
+```text
+Browser
+  -> apps/web
+    -> composição de prompt/contexto quando necessário
+    -> apps/api
+      -> firebase-auth plugin
+      -> feature guard / entitlement checks
+      -> gateway de IA / use case / adapter
+```
+
+Esse fluxo já vale para IA, entitlements, eventos de produto e operações administrativas.
+
+Para IA, a `apps/web` pode continuar montando contexto de produto e aplicando quota/entitlements locais, mas a execução do modelo e a persistência de `ai_usage_events` acontecem canonicamente na `apps/api`.
+
+Para sinais de produto e revisao operacional do beta, a `apps/web` usa proxies finos e cards de leitura, enquanto `product_usage_events` e o resumo admin de beta ficam centralizados na `apps/api`.
+
+Para a jornada principal, a `apps/web` agora também assume uma regra explícita
+de estabilidade:
+
+- `/login` e `/planner` precisam comunicar quando um sandbox local de
+  entitlement está ativo
+- `/dashboard` e `/engine` não seguem sem um edital ativo válido; nesses casos,
+  a interface devolve o usuário ao Planner com empty state honesto
 
 ## Regras de Dependência
 
@@ -143,7 +187,7 @@ Dependências permitidas:
 - `apps/web` -> `packages/domain`, `packages/application`, `packages/contracts`
 - `apps/api` -> `packages/domain`, `packages/application`, `packages/contracts`
 - `packages/application` -> `packages/domain`, `packages/contracts`
-- `packages/contracts` -> sem dependência do runtime dos apps
+- `packages/infrastructure-*` -> implementações concretas de borda
 
 Dependências proibidas:
 
@@ -151,44 +195,49 @@ Dependências proibidas:
 - `packages/domain` -> Firebase, Fastify, Next
 - `packages/application` -> implementação concreta do banco ou gateway
 - `apps/web` -> lógica de negócio espalhada em componente React
+- `apps/web` -> checks premium finais confiando apenas no cliente
 
 ## Estado Atual por Maturidade
 
 ### Estável
 
-- monorepo com workspaces
-- `apps/web`
+- monorepo com `apps/*` e `packages/*`
 - `packages/domain`
 - `packages/application`
 - `packages/contracts`
-- deploy do web em `apps/web`
+- deploy separado de `web` e `api`
+- autenticação server-side na `api`
+- entitlements e engine com runtime canônico na `api`
+- cadeia principal com guardas de estabilidade para CTA do Planner, sandbox
+  local visível e fallback honesto de Dashboard/Engine
 
-### Inicial, mas válido
+### Em transição, mas válido
 
-- `apps/api`
-- deploy separado da API
-- scaffold Fastify
+- proxies finos de compatibilidade em `apps/web`
+- adapters legados do engine em `packages/infrastructure-firebase`
+- operação manual de testers/beta enquanto o gateway de cobrança não entra
 
-### Ainda por implementar
+### Próximos movimentos estruturais
 
-- auth server-side na API
-- billing
-- webhooks
-- entitlements
-- adapters de infraestrutura compartilhados em `packages/infrastructure-*`
+- extrair outras rotas protegidas restantes da `web` para a `api`
+- consolidar observabilidade entre `web` e `api`
+- reduzir bridges legadas onde a `web` ainda conhece detalhes de backend
+- introduzir integração de billing sem quebrar a escada `free -> pro`
 
 ## Decisões Arquiteturais já Fechadas
 
-- Um único repositório Git
-- Monorepo com `apps/*` e `packages/*`
+- um único repositório Git
+- monorepo com `apps/*` e `packages/*`
 - `apps/web` continua em `Next.js`
-- `apps/api` será `Fastify`
+- `apps/api` é o backend dedicado em `Fastify`
 - `domain`, `application` e `contracts` são compartilhados
-- cobrança fica no gateway externo; o AprovaMind gerencia assinatura interna e permissões
+- segredos, IA e autorização premium ficam no servidor
+- o runtime canônico do engine não deve voltar para a `web`
 
-## O que ainda não deve acontecer
+## O que não deve acontecer
 
-- mover todo o backend do produto para `apps/api` de uma vez
-- duplicar domínio entre `web` e `api`
-- deixar billing nascer dentro de componentes React ou routes web antigas
-- usar a API dedicada para tudo antes de fechar auth e entitlements
+- criar lógica nova de negócio dentro de componentes React
+- recolocar checks de plano ou entitlement apenas no frontend
+- duplicar o runtime do engine entre `web` e `api`
+- usar rotas Next como backend definitivo para recursos protegidos
+- tratar `packages/infrastructure-*` como lugar de regra de produto

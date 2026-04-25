@@ -222,13 +222,13 @@ export interface StudyPlanEdital {
 
 /** Cores pré-definidas para planos */
 export const PLAN_COLORS = [
-  { hex: 'var(--primary)', name: 'Violeta' },
+  { hex: '#8b5cf6', name: 'Violeta' },
   { hex: '#06b6d4', name: 'Ciano' },
   { hex: '#f59e0b', name: 'Âmbar' },
   { hex: '#10b981', name: 'Esmeralda' },
   { hex: '#ef4444', name: 'Vermelho' },
   { hex: '#ec4899', name: 'Rosa' },
-  { hex: 'var(--primary)', name: 'Azul' },
+  { hex: '#3b82f6', name: 'Azul' },
   { hex: '#f97316', name: 'Laranja' },
 ] as const;
 

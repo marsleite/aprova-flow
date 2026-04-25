@@ -18,6 +18,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { StudyConsistency, SubjectHours, PlanVsActual, StudySession, DailyHours } from '@/types';
+import { buildAiQuotaChatMessage, readAiErrorResponse } from '@/lib/ai/quota-feedback';
 import { formatDuration } from '@/lib/utils';
 import { auth } from '@/lib/firebase/config';
 
@@ -222,8 +223,21 @@ export default function ChatPanel({
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Erro na IA');
+        const failure = await readAiErrorResponse({
+          response: res,
+          fallbackMessage: 'Erro na IA',
+        });
+        if (failure.quotaNotice) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: buildAiQuotaChatMessage(failure.quotaNotice!),
+            },
+          ]);
+          return;
+        }
+        throw new Error(failure.message);
       }
 
       const { reply } = await res.json();

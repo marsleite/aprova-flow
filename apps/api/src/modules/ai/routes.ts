@@ -13,6 +13,8 @@
 import type { FastifyInstance } from 'fastify';
 import { runAiText, runAiPdf, logAiUsageEvent } from '@aprovamind/ai-gateway';
 import type { AiTextRequest, AiPdfRequest } from '@aprovamind/ai-gateway';
+import { extractBearerToken } from '@aprovamind/infrastructure-firebase';
+import { saveAiUsageEvent } from './ai-usage-store';
 
 export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
   // ── POST /ai/text ──
@@ -43,8 +45,9 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
     try {
       const result = await runAiText(body);
       const userId = request.user?.uid;
+      const idToken = extractBearerToken(request.headers.authorization);
 
-      logAiUsageEvent({
+      const usageEvent = {
         route: '/ai/text',
         task: body.task,
         provider: result.provider,
@@ -57,7 +60,10 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
         success: true,
         statusCode: 200,
         userId,
-      });
+      } as const;
+
+      logAiUsageEvent(usageEvent);
+      void saveAiUsageEvent(usageEvent, idToken || undefined);
 
       return reply.send({
         text: result.text,
@@ -91,8 +97,9 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
     try {
       const result = await runAiPdf(body);
       const userId = request.user?.uid;
+      const idToken = extractBearerToken(request.headers.authorization);
 
-      logAiUsageEvent({
+      const usageEvent = {
         route: '/ai/pdf',
         task: body.task,
         provider: result.provider,
@@ -105,7 +112,10 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
         success: true,
         statusCode: 200,
         userId,
-      });
+      } as const;
+
+      logAiUsageEvent(usageEvent);
+      void saveAiUsageEvent(usageEvent, idToken || undefined);
 
       return reply.send({
         text: result.text,

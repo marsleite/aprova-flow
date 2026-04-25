@@ -1,6 +1,17 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import type {
+  ProductEventInput,
+  ProductEventMetadata,
+} from '@aprovamind/contracts/analytics/ProductEvents';
+import type { BetaSignalsSummary } from '@aprovamind/contracts/analytics/BetaSignals';
 import { GetUserEntitlements } from '@aprovamind/application/use-cases/billing/GetUserEntitlements';
 import type { SubscriptionStateDataSource } from '@aprovamind/application/ports/SubscriptionStateDataSource';
+import {
+  buildPlanStatusChangedEvent,
+  buildTesterSubscriptionUpdatedEvent,
+  isPublicProductEventName,
+  normalizeProductEventMetadata,
+} from '@aprovamind/contracts/analytics/ProductEvents';
 import {
   PlanCode,
   SubscriptionStatus,
@@ -27,6 +38,8 @@ import {
   normalizeSubscriptionStatus,
   toFeatureUsageMap,
 } from './subscription-state.shared';
+import { saveProductUsageEvent as persistProductUsageEvent } from './product-event-store';
+import { loadAdminBetaSignalsSummary as loadAdminBetaSignalsSummaryDefault } from './beta-signals';
 
 interface EntitlementsMeQuerystring {
   userId?: string;
@@ -37,6 +50,10 @@ interface AdminSubscriptionQuerystring {
   email?: string;
 }
 
+interface AdminBetaSignalsQuerystring {
+  windowDays?: string;
+}
+
 interface AdminSubscriptionBody {
   userId?: string;
   email?: string;
@@ -44,6 +61,18 @@ interface AdminSubscriptionBody {
   status?: string;
   usage?: FeatureUsageMap;
   resetUsage?: boolean;
+}
+
+interface PublicProductEventBody {
+  eventName?: unknown;
+  route?: unknown;
+  surface?: unknown;
+  featureCode?: unknown;
+  recommendedPlan?: unknown;
+  planTier?: unknown;
+  task?: unknown;
+  ctaHref?: unknown;
+  metadata?: unknown;
 }
 
 export interface EntitlementRouteOptions {
@@ -59,15 +88,41 @@ export interface EntitlementRouteOptions {
   verifyIdToken?: (idToken: string) => Promise<VerifiedFirebaseUser | null>;
   findUserByEmail?: (email: string) => Promise<VerifiedFirebaseUser | null>;
   isAdminIdentity?: (identity: VerifiedFirebaseUser) => boolean;
+  saveProductUsageEvent?: (
+    event: ProductEventInput,
+    idToken: string
+  ) => Promise<void> | void;
+  loadAdminBetaSignalsSummary?: (params: {
+    idToken: string;
+    windowDays: number;
+  }) => Promise<BetaSignalsSummary>;
+  allowManualScenarios?: boolean;
 }
 
 function isLikelyEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+function readOptionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
+}
+
+function readMetadata(value: unknown): ProductEventMetadata | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return normalizeProductEventMetadata(value as ProductEventMetadata);
+}
+
 function resolveRequestedUserId(
-  request: FastifyRequest<{ Querystring: EntitlementsMeQuerystring }>
+  request: FastifyRequest<{ Querystring: EntitlementsMeQuerystring }>,
+  allowManualScenarios: boolean
 ): string | null {
+  if (!allowManualScenarios) {
+    return null;
+  }
+
   const headerValue = request.headers['x-aprovamind-user-id'];
   const headerUserId =
     typeof headerValue === 'string' && headerValue.trim().length > 0
@@ -91,6 +146,12 @@ function buildUnauthorizedReply(reply: FastifyReply) {
     error: 'unauthorized',
     message: 'Envie um Authorization: Bearer <firebase-id-token> valido.',
   });
+}
+
+function readWindowDays(value: string | undefined): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return 7;
+  return Math.min(30, Math.floor(parsed));
 }
 
 function buildManualDataSource(options: EntitlementRouteOptions): SubscriptionStateDataSource {
@@ -144,7 +205,8 @@ async function resolveAuthenticatedIdentity(
 function ensureAdminIdentity(
   reply: FastifyReply,
   identity: VerifiedFirebaseUser,
-  options: EntitlementRouteOptions
+  options: EntitlementRouteOptions,
+  message = 'Somente administradores podem alterar assinatura de testers.'
 ): boolean {
   const isAdmin = options.isAdminIdentity ?? defaultIsAdminIdentity;
   if (isAdmin(identity)) {
@@ -153,7 +215,7 @@ function ensureAdminIdentity(
 
   void reply.code(403).send({
     error: 'forbidden',
-    message: 'Somente administradores podem alterar assinatura de testers.',
+    message,
   });
   return false;
 }
@@ -338,22 +400,25 @@ export async function registerEntitlementRoutes(
   options: EntitlementRouteOptions = {}
 ) {
   const manualDataSource = buildManualDataSource(options);
+  const allowManualScenarios = options.allowManualScenarios ?? process.env.NODE_ENV !== 'production';
 
-  app.get('/entitlements/scenarios', async () => {
-    return {
-      scenarios: listManualSubscriptionScenarios().map((scenario) => ({
-        userId: scenario.userId,
-        plan: scenario.plan,
-        status: scenario.status,
-        description: scenario.description,
-      })),
-    };
-  });
+  if (allowManualScenarios) {
+    app.get('/entitlements/scenarios', async () => {
+      return {
+        scenarios: listManualSubscriptionScenarios().map((scenario) => ({
+          userId: scenario.userId,
+          plan: scenario.plan,
+          status: scenario.status,
+          description: scenario.description,
+        })),
+      };
+    });
+  }
 
   app.get<{ Querystring: EntitlementsMeQuerystring }>(
     '/entitlements/me',
     async (request, reply) => {
-      const sandboxUserId = resolveRequestedUserId(request);
+      const sandboxUserId = resolveRequestedUserId(request, allowManualScenarios);
 
       if (sandboxUserId) {
         const result = await new GetUserEntitlements(manualDataSource).execute({
@@ -408,7 +473,7 @@ export async function registerEntitlementRoutes(
   app.get<{ Querystring: EntitlementsMeQuerystring }>(
     '/billing/subscription/me',
     async (request, reply) => {
-      const sandboxUserId = resolveRequestedUserId(request);
+      const sandboxUserId = resolveRequestedUserId(request, allowManualScenarios);
 
       if (sandboxUserId) {
         const result = await manualDataSource.getUserSubscriptionState({
@@ -546,6 +611,15 @@ export async function registerEntitlementRoutes(
 
       try {
         const dataSource = buildAdminDataSource(options, authenticated);
+        const currentState = await dataSource.getUserSubscriptionState({
+          userId: resolvedTarget.target.userId,
+          email: resolvedTarget.target.email,
+        });
+
+        if (!currentState.found) {
+          return sendNotFound(reply, currentState.reason);
+        }
+
         const result = await dataSource.updateUserSubscriptionState({
           userId: resolvedTarget.target.userId,
           plan: parsed.payload.plan,
@@ -556,6 +630,48 @@ export async function registerEntitlementRoutes(
 
         if (!result.found) {
           return sendNotFound(reply, result.reason);
+        }
+
+        const previousPlan = currentState.subscription.plan;
+        const previousStatus = currentState.subscription.status;
+        const nextPlan = result.subscription.plan;
+        const nextStatus = result.subscription.status;
+        const usageKeys = parsed.payload.resetUsage
+          ? []
+          : parsed.payload.usage
+            ? Object.keys(parsed.payload.usage).sort()
+            : undefined;
+        const saveProductUsageEvent =
+          options.saveProductUsageEvent ?? persistProductUsageEvent;
+
+        void saveProductUsageEvent(
+          buildTesterSubscriptionUpdatedEvent({
+            actorUserId: authenticated.identity.uid,
+            targetUserId: resolvedTarget.target.userId,
+            targetEmail: resolvedTarget.target.email,
+            nextPlan,
+            nextStatus,
+            previousPlan,
+            previousStatus,
+            resetUsage: parsed.payload.resetUsage === true,
+            usageKeys,
+          }),
+          authenticated.idToken
+        );
+
+        if (previousPlan !== nextPlan || previousStatus !== nextStatus) {
+          void saveProductUsageEvent(
+            buildPlanStatusChangedEvent({
+              actorUserId: authenticated.identity.uid,
+              targetUserId: resolvedTarget.target.userId,
+              targetEmail: resolvedTarget.target.email,
+              previousPlan,
+              nextPlan,
+              previousStatus,
+              nextStatus,
+            }),
+            authenticated.idToken
+          );
         }
 
         return {
@@ -573,6 +689,94 @@ export async function registerEntitlementRoutes(
         return reply.code(500).send({
           error: 'subscription_state_update_failed',
           message,
+        });
+      }
+    }
+  );
+
+  app.post<{ Body: PublicProductEventBody }>(
+    '/product-events',
+    async (request, reply) => {
+      const authenticated = await resolveAuthenticatedIdentity(
+        request,
+        reply,
+        options,
+        app
+      );
+      if (!authenticated) {
+        return;
+      }
+
+      const eventName = request.body?.eventName;
+      if (!isPublicProductEventName(eventName)) {
+        return reply.code(400).send({
+          error: 'invalid_event_name',
+          message: 'Evento de produto nao permitido nesta rota.',
+        });
+      }
+
+      const saveProductUsageEvent =
+        options.saveProductUsageEvent ?? persistProductUsageEvent;
+
+      await saveProductUsageEvent(
+        {
+          actorUserId: authenticated.identity.uid,
+          userId: authenticated.identity.uid,
+          eventName,
+          route: readOptionalString(request.body?.route),
+          surface: readOptionalString(request.body?.surface),
+          featureCode: readOptionalString(request.body?.featureCode),
+          recommendedPlan: readOptionalString(request.body?.recommendedPlan),
+          planTier: readOptionalString(request.body?.planTier),
+          task: readOptionalString(request.body?.task),
+          ctaHref: readOptionalString(request.body?.ctaHref),
+          metadata: readMetadata(request.body?.metadata),
+        },
+        authenticated.idToken
+      );
+
+      return reply.code(202).send({ ok: true });
+    }
+  );
+
+  app.get<{ Querystring: AdminBetaSignalsQuerystring }>(
+    '/billing/admin/beta-signals',
+    async (request, reply) => {
+      const authenticated = await resolveAuthenticatedIdentity(
+        request,
+        reply,
+        options,
+        app
+      );
+      if (!authenticated) {
+        return;
+      }
+
+      if (
+        !ensureAdminIdentity(
+          reply,
+          authenticated.identity,
+          options,
+          'Somente administradores podem revisar sinais do beta.'
+        )
+      ) {
+        return;
+      }
+
+      const windowDays = readWindowDays(request.query?.windowDays);
+      const loadAdminBetaSignalsSummary =
+        options.loadAdminBetaSignalsSummary ?? loadAdminBetaSignalsSummaryDefault;
+
+      try {
+        return await loadAdminBetaSignalsSummary({
+          idToken: authenticated.idToken,
+          windowDays,
+        });
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(500).send({
+          error: 'beta_signals_fetch_failed',
+          message: 'Nao foi possivel carregar os sinais do beta.',
         });
       }
     }

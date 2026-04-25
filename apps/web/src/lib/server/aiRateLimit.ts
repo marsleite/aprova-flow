@@ -13,6 +13,8 @@ import {
   getFirestoreDocumentWithUserToken,
   setFirestoreDocumentWithUserToken,
 } from '@/lib/server/firestoreRest';
+import { buildAiQuotaExhaustedEvent } from '@/lib/product-events/types';
+import { saveProductUsageEvent } from '@/lib/server/productEventStore';
 import { resolveUserEntitlementsSnapshot } from '@/lib/server/userEntitlements';
 
 type QuotaCheckParams = {
@@ -42,12 +44,24 @@ const ENTITLEMENT_QUOTA_TASK_FEATURES: Partial<Record<AiTask, FeatureCode>> = {
   chat: FeatureCode.ContextualAiChat,
   'weekly-mentoring': FeatureCode.WeeklyMentoring,
   'parse-edital': FeatureCode.EditalParse,
+  'planner-daily': FeatureCode.AdaptiveDailyPlan,
   'explain-answer': FeatureCode.AiExplanations,
+  'error-diagnosis': FeatureCode.ErrorGapAnalyzer,
 };
 
-function isPreconditionConflict(status?: number, error?: string): boolean {
-  if (status === 409 || status === 412) return true;
-  return status === 400 && (error || '').includes('FAILED_PRECONDITION');
+function resolveAiTaskRoute(task: AiTask): string {
+  switch (task) {
+    case 'chat':
+      return '/api/chat';
+    case 'weekly-mentoring':
+      return '/api/weekly-mentoring';
+    case 'parse-edital':
+      return '/api/parse-edital';
+    case 'explain-answer':
+      return '/api/explain-answer';
+    default:
+      return `/api/${task}`;
+  }
 }
 
 function buildWindow(now: Date, window: RateLimitWindow): {
@@ -122,13 +136,37 @@ function buildRateLimitHeaders(params: {
   };
 }
 
+function resolveQuotaRecommendedPlan(
+  planTier: PlanTier
+): 'pro' | 'premium' | undefined {
+  if (planTier === 'free') return 'pro';
+  if (planTier === 'pro') return 'premium';
+  return undefined;
+}
+
+function buildQuotaUpgradeHint(planTier: PlanTier): string | undefined {
+  if (planTier === 'free') {
+    return 'Faça upgrade para o Pro e ganhe mais folga de IA neste tipo de análise.';
+  }
+
+  if (planTier === 'pro') {
+    return 'Se essa rotina já pede mais folga de IA e coordenação, o próximo passo é o Premium.';
+  }
+
+  return undefined;
+}
+
 function buildBlockedResponse(params: {
   task: AiTask;
   planTier: PlanTier;
+  featureCode?: FeatureCode | null;
   limit: number;
   resetEpochSeconds: number;
   window: RateLimitWindow;
 }): NextResponse {
+  const recommendedPlan = resolveQuotaRecommendedPlan(params.planTier);
+  const upgradeHint = buildQuotaUpgradeHint(params.planTier);
+
   if (params.window === 'lifetime') {
     return NextResponse.json(
       {
@@ -136,12 +174,12 @@ function buildBlockedResponse(params: {
         code: 'QUOTA_EXCEEDED',
         task: params.task,
         planTier: params.planTier,
+        featureCode: params.featureCode,
+        recommendedPlan,
         limit: params.limit,
+        window: params.window,
         retryAfterSeconds: null,
-        upgradeHint:
-          params.planTier === 'free'
-            ? 'Faça upgrade para aumentar sua quota de IA.'
-            : undefined,
+        upgradeHint,
       },
       {
         status: 429,
@@ -165,9 +203,12 @@ function buildBlockedResponse(params: {
       code: 'QUOTA_EXCEEDED',
       task: params.task,
       planTier: params.planTier,
+      featureCode: params.featureCode,
+      recommendedPlan,
       limit: params.limit,
+      window: params.window,
       retryAfterSeconds: retryAfter,
-      upgradeHint: params.planTier === 'free' ? 'Faça upgrade para aumentar sua quota de IA.' : undefined,
+      upgradeHint,
     },
     {
       status: 429,
@@ -230,6 +271,7 @@ async function enforceUserStatsQuota(params: {
   task: AiTask;
   planTier: PlanTier;
   usageKey: string;
+  featureCode?: FeatureCode | null;
   limit: number;
   window: RateLimitWindow;
   bucket: string;
@@ -269,11 +311,33 @@ async function enforceUserStatsQuota(params: {
       : 0;
 
   if (currentCount >= params.limit) {
+    const retryAfterSeconds =
+      params.window === 'lifetime'
+        ? null
+        : Math.max(1, params.resetEpochSeconds - Math.floor(Date.now() / 1000));
+
+    void saveProductUsageEvent(
+      buildAiQuotaExhaustedEvent({
+        uid: params.uid,
+        task: params.task,
+        planTier: params.planTier,
+        limit: params.limit,
+        window: params.window,
+        route: resolveAiTaskRoute(params.task),
+        featureCode:
+          params.featureCode ??
+          (params.usageKey !== params.task ? params.usageKey : undefined),
+        retryAfterSeconds,
+      }),
+      params.idToken
+    );
+
     return {
       allowed: false,
       response: buildBlockedResponse({
         task: params.task,
         planTier: params.planTier,
+        featureCode: params.featureCode,
         limit: params.limit,
         resetEpochSeconds: params.resetEpochSeconds,
         window: params.window,
@@ -383,6 +447,7 @@ async function enforceEntitlementFeatureQuota(
     task: params.task,
     planTier,
     usageKey: featureCode,
+    featureCode,
     limit: feature.limit,
     window,
     bucket: currentBucket,
@@ -468,6 +533,7 @@ export async function enforceAiTaskQuota(params: QuotaCheckParams): Promise<Quot
     task: params.task,
     planTier,
     usageKey: params.task,
+    featureCode: mappedFeature,
     limit: rule.limit,
     window: rule.window,
     bucket: window.key,

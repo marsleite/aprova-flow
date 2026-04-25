@@ -27,8 +27,9 @@ import {
 import Link from 'next/link';
 
 // RDS Components
-import { KPICard, Badge, Button, Card } from '@/components';
+import { KPICard, Badge, Button, Card, EmptyState } from '@/components';
 import { fadeUp } from '@/design-system/tokens';
+import { getCoreFlowPlanContextState } from '@/lib/stability/core-flow';
 
 export default function EnginePage() {
   const showPlanEngineSnapshot =
@@ -55,6 +56,24 @@ export default function EnginePage() {
   const initialRecoveryMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('recovery') === 'true';
 
   if (!user) return null;
+
+  const planContextState = getCoreFlowPlanContextState(plans, activePlanId);
+  if (planContextState.kind === 'missing-plan') {
+    return (
+      <div className="flex flex-col gap-8 pb-10 px-8 pt-12">
+        <EmptyState
+          icon={BookOpen}
+          title={planContextState.title}
+          description={planContextState.description}
+          action={(
+            <Button asChild variant="primary">
+              <Link href="/planner">{planContextState.ctaLabel}</Link>
+            </Button>
+          )}
+        />
+      </div>
+    );
+  }
 
   const weeklyHours = consistency ? consistency.weeklyTotalSeconds / 3600 : 0;
   const canSeeFullEngine =
@@ -190,11 +209,20 @@ export default function EnginePage() {
                   <PlanEngineSnapshotCard planId={activePlanId || null} />
                 ) : (
                   <EntitlementUpgradeCard
-                    title="Destrave a leitura completa do motor"
-                    description="O plano gratuito mostra a direcao do dia, mas o score completo, a saude detalhada e as recomendacoes estruturadas ficam no Pro."
+                    title="Leitura completa do motor entra no Pro"
+                    description="O motor gratis mostra a direcao do dia. O Pro entra quando voce quer a leitura completa por materia, score detalhado e recomendacoes estruturadas do plano ativo."
                     highlight="Saude completa da materia, priority score detalhado e recomendacoes completas para o plano ativo."
                     recommendedPlan={planTier === 'free' ? 'pro' : 'premium'}
-                    ctaLabel="Comparar planos"
+                    currentPlan={planTier}
+                    surface="engine_snapshot_gate"
+                    featureCode={FeatureCode.SubjectHealthFull}
+                    eventMetadata={{
+                      blockedFeatures: [
+                        FeatureCode.SubjectHealthFull,
+                        FeatureCode.PriorityScoreFull,
+                        FeatureCode.RecommendationsFull,
+                      ].join(','),
+                    }}
                   />
                 )}
               </motion.div>

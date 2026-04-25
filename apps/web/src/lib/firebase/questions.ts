@@ -1,37 +1,24 @@
 /**
  * Serviço de Questões — Firestore
  *
- * Gerencia registro de acertos/erros por matéria.
+ * Gerencia registro manual de acertos/erros por matéria.
  * Coleção: "questions_stats"
- * Schema: { userId, subject, totalQuestions, correctAnswers, accuracy, date, createdAt }
+ * Schema: { userId, planId, subject, totalQuestions, correctAnswers, accuracy, date, createdAt }
+ *
+ * Módulo de provas/simulados/caderno-erros DEPRECADO em abril/2026.
+ * Mantidas apenas as funções que alimentam o motor de decisão.
  */
 
 import {
   collection,
-  doc,
-  getDoc,
+  addDoc,
   getDocs,
   query,
   where,
-  addDoc,
-  updateDoc,
-  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './config';
-import {
-  QuestionBankItem,
-  ExamMetadata,
-  QuestionAttempt,
-  QuestionDifficulty,
-  SimulatedConfig,
-  QuestionSession,
-  SubjectAccuracy,
-} from '@/types';
+import { QuestionSession, SubjectAccuracy } from '@/types';
 
-const QUESTIONS_COLLECTION = 'questions_bank';
-const EXAMS_COLLECTION = 'exams';
-const ATTEMPTS_COLLECTION = 'question_attempts';
-const SIMULATED_CONFIGS_COLLECTION = 'simulated_configs';
 const QUESTIONS_STATS_COLLECTION = 'questions_stats';
 
 export type AccuracyPeriod = 'month' | 'last3months' | 'all';
@@ -65,13 +52,7 @@ function aggregateAccuracyBySubject(sessions: QuestionSession[]): SubjectAccurac
 
     const normalized = normalizeSubject(s.subject);
     const key = subjectKey(normalized);
-
-    const entry = map.get(key) || {
-      label: normalized,
-      total: 0,
-      correct: 0,
-      sessions: 0,
-    };
+    const entry = map.get(key) || { label: normalized, total: 0, correct: 0, sessions: 0 };
     entry.total += total;
     entry.correct += Math.min(correct, total);
     entry.sessions += 1;
@@ -89,133 +70,6 @@ function aggregateAccuracyBySubject(sessions: QuestionSession[]): SubjectAccurac
     .sort((a, b) => b.totalQuestions - a.totalQuestions);
 }
 
-export async function getQuestionById(id: string): Promise<QuestionBankItem | null> {
-  const ref = doc(db, QUESTIONS_COLLECTION, id);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return null;
-  return { id: snap.id, ...(snap.data() as QuestionBankItem) };
-}
-
-export async function listQuestionsByFilter(filters: {
-  materias?: string[];
-  bancas?: string[];
-  dificuldades?: QuestionDifficulty[];
-  tags?: string[];
-}): Promise<QuestionBankItem[]> {
-  const q = query(collection(db, QUESTIONS_COLLECTION));
-  // Para simplificar, filtros serão aplicados pelo client (futuro: construir queries compostas)
-  const snap = await getDocs(q);
-  return snap.docs
-    .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as QuestionBankItem) }))
-    .filter((item) => {
-      if (filters.materias && filters.materias.length && !filters.materias.includes(item.materia)) {
-        return false;
-      }
-      if (filters.bancas && filters.bancas.length && item.banca && !filters.bancas.includes(item.banca)) {
-        return false;
-      }
-      if (
-        filters.dificuldades &&
-        filters.dificuldades.length &&
-        item.difficulty &&
-        !filters.dificuldades.includes(item.difficulty)
-      ) {
-        return false;
-      }
-      if (filters.tags && filters.tags.length) {
-        const hasAll = filters.tags.every((tag) => item.tags?.includes(tag));
-        if (!hasAll) return false;
-      }
-      return true;
-    });
-}
-
-export async function getExamById(id: string): Promise<ExamMetadata | null> {
-  const ref = doc(db, EXAMS_COLLECTION, id);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return null;
-  return { id: snap.id, ...(snap.data() as ExamMetadata) };
-}
-
-export async function listExamsByPlan(planId?: string | null): Promise<ExamMetadata[]> {
-  const q = planId
-    ? query(collection(db, EXAMS_COLLECTION), where('planId', '==', planId))
-    : collection(db, EXAMS_COLLECTION);
-  const snap = await getDocs(q);
-  return snap.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as ExamMetadata) }));
-}
-
-export async function saveQuestionAttempt(attempt: QuestionAttempt): Promise<string> {
-  // Strip undefined values — Firestore rejects them
-  const sanitized: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(attempt)) {
-    if (value !== undefined) sanitized[key] = value;
-  }
-  const ref = await addDoc(collection(db, ATTEMPTS_COLLECTION), {
-    ...sanitized,
-    createdAt: serverTimestamp(),
-  });
-  return ref.id;
-}
-
-export async function getRecentAttempts(userId: string, limitCount = 20): Promise<QuestionAttempt[]> {
-  // Query only by userId — avoids needing a composite index (userId + createdAt)
-  const q = query(
-    collection(db, ATTEMPTS_COLLECTION),
-    where('userId', '==', userId)
-  );
-  const snap = await getDocs(q);
-  const attempts = snap.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as QuestionAttempt) }));
-  // Sort and limit client-side (createdAt can be a Firestore Timestamp or ISO string)
-  attempts.sort((a, b) => {
-    const tA = a.createdAt && typeof a.createdAt === 'object' && 'toMillis' in (a.createdAt as Record<string, unknown>)
-      ? (a.createdAt as unknown as { toMillis: () => number }).toMillis()
-      : typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : 0;
-    const tB = b.createdAt && typeof b.createdAt === 'object' && 'toMillis' in (b.createdAt as Record<string, unknown>)
-      ? (b.createdAt as unknown as { toMillis: () => number }).toMillis()
-      : typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : 0;
-    return tB - tA;
-  });
-  return attempts.slice(0, limitCount);
-}
-
-export async function saveSimulatedConfig(config: SimulatedConfig): Promise<string> {
-  // Strip undefined values — Firestore rejects them
-  const sanitized: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(config)) {
-    if (value !== undefined) sanitized[key] = value;
-  }
-  // Also sanitize nested filters object
-  if (config.filters) {
-    const sanitizedFilters: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(config.filters)) {
-      if (value !== undefined) sanitizedFilters[key] = value;
-    }
-    sanitized.filters = sanitizedFilters;
-  }
-  const ref = await addDoc(collection(db, SIMULATED_CONFIGS_COLLECTION), {
-    ...sanitized,
-    createdAt: serverTimestamp(),
-  });
-  return ref.id;
-}
-
-export async function getSimulatedConfigs(userId: string): Promise<SimulatedConfig[]> {
-  const q = query(collection(db, SIMULATED_CONFIGS_COLLECTION), where('userId', '==', userId));
-  const snap = await getDocs(q);
-  return snap.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as SimulatedConfig) }));
-}
-
-export async function getSimulatedConfigById(id: string): Promise<SimulatedConfig | null> {
-  const ref = doc(db, SIMULATED_CONFIGS_COLLECTION, id);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return null;
-  return { id: snap.id, ...(snap.data() as SimulatedConfig) };
-}
-
-/**
- * Salva uma sessão de questões no Firestore
- */
 export async function saveQuestionSession(
   session: Omit<QuestionSession, 'id' | 'createdAt' | 'accuracy'>
 ): Promise<string> {
@@ -225,7 +79,6 @@ export async function saveQuestionSession(
       ? Math.round((session.correctAnswers / session.totalQuestions) * 100)
       : 0;
 
-  // Strip undefined values — Firestore rejects them
   const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(session)) {
     if (value !== undefined) sanitized[key] = value;
@@ -240,53 +93,26 @@ export async function saveQuestionSession(
   return docRef.id;
 }
 
-/**
- * Busca todas as sessões de questões de um usuário a partir de uma data.
- * Se planId for fornecido, filtra client-side.
- */
 export async function getQuestionSessionsFromDate(
   userId: string,
   fromDate: string,
   planId?: string,
   toDate?: string
 ): Promise<QuestionSession[]> {
-  const q = query(
-    collection(db, QUESTIONS_STATS_COLLECTION),
-    where('userId', '==', userId)
-  );
-
+  const q = query(collection(db, QUESTIONS_STATS_COLLECTION), where('userId', '==', userId));
   const snapshot = await getDocs(q);
-  let sessions = snapshot.docs.map((d) => ({
-    id: d.id,
-    ...d.data(),
-  })) as QuestionSession[];
+  let sessions = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as QuestionSession[];
 
   sessions = sessions.filter(
     (s) => typeof s.date === 'string' && s.date >= fromDate && (!toDate || s.date <= toDate)
   );
 
   if (planId) {
-    // Inclui sessões do plano ativo e sessões legadas sem planId (visão compatível).
     sessions = sessions.filter((s) => s.planId === planId || !s.planId);
   }
 
   sessions.sort((a, b) => (a.date < b.date ? 1 : -1));
-
   return sessions;
-}
-
-/**
- * Retorna a taxa de acerto agregada por matéria (mês atual)
- */
-export async function getAccuracyBySubject(
-  userId: string,
-  planId?: string,
-  period: AccuracyPeriod = 'month'
-): Promise<SubjectAccuracy[]> {
-  const analytics = await getAccuracyAnalytics(userId, planId);
-  if (period === 'all') return analytics.all;
-  if (period === 'last3months') return analytics.last3months;
-  return analytics.month;
 }
 
 export async function getAccuracyAnalytics(
@@ -298,10 +124,8 @@ export async function getAccuracyAnalytics(
   const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
   const last3MonthsStart = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-  const earliestNeeded = toISODate(last3MonthsStart);
 
-  const recentSessions = await getQuestionSessionsFromDate(userId, earliestNeeded, planId);
-
+  const recentSessions = await getQuestionSessionsFromDate(userId, toISODate(last3MonthsStart), planId);
   const monthStartISO = toISODate(monthStart);
   const previousMonthStartISO = toISODate(previousMonthStart);
   const previousMonthEndISO = toISODate(previousMonthEnd);
@@ -310,7 +134,6 @@ export async function getAccuracyAnalytics(
   const previousMonthSessions = recentSessions.filter(
     (s) => s.date >= previousMonthStartISO && s.date <= previousMonthEndISO
   );
-
   const allSessions = await getQuestionSessionsFromDate(userId, '1900-01-01', planId);
 
   return {
@@ -327,7 +150,6 @@ export function getSubjectDeltaMap(
 ): Record<string, number> {
   const previousMap = new Map(previous.map((item) => [subjectKey(item.subject), item.accuracy]));
   const delta: Record<string, number> = {};
-
   for (const item of current) {
     const key = subjectKey(item.subject);
     const prev = previousMap.get(key);
@@ -336,273 +158,4 @@ export function getSubjectDeltaMap(
     }
   }
   return delta;
-}
-
-/**
- * Carrega todas as questões de um exame na ordem correta
- */
-export async function loadExamQuestions(examId: string): Promise<QuestionBankItem[]> {
-  const exam = await getExamById(examId);
-  if (!exam || !exam.questions || exam.questions.length === 0) {
-    return [];
-  }
-
-  // Carrega questões em batch mantendo a ordem
-  const questions: QuestionBankItem[] = [];
-  for (const qId of exam.questions) {
-    const q = await getQuestionById(qId);
-    if (q) {
-      questions.push(q);
-    }
-  }
-  return questions;
-}
-
-/**
- * Busca questões aleatórias baseadas em filtros para simulados
- */
-export async function getRandomQuestions(
-  filters: {
-    materias?: string[];
-    bancas?: string[];
-    dificuldades?: QuestionDifficulty[];
-    tags?: string[];
-  },
-  count: number
-): Promise<QuestionBankItem[]> {
-  const allQuestions = await listQuestionsByFilter(filters);
-
-  // Embaralha e pega N questões
-  const shuffled = allQuestions.sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
-}
-
-/**
- * Busca questões de forma inteligente, priorizando matérias fracas do aluno.
- * Distribui `count` questões proporcionalmente ao peso: pesoEdital × (1 - acerto/100).
- * Matérias com alto peso no edital e baixa precisão recebem mais questões.
- */
-export async function getPredictiveQuestions(
-  accuracyData: SubjectAccuracy[],
-  planWeights: { subject: string; weight: number }[],
-  count: number,
-  filters?: { bancas?: string[]; dificuldades?: QuestionDifficulty[] }
-): Promise<QuestionBankItem[]> {
-  // 1. Build weight map from plan
-  const weightMap = new Map<string, number>();
-  for (const pw of planWeights) {
-    weightMap.set(subjectKey(pw.subject), pw.weight);
-  }
-
-  // 2. Build accuracy map from student data
-  const accMap = new Map<string, number>();
-  for (const acc of accuracyData) {
-    accMap.set(subjectKey(acc.subject), acc.accuracy);
-  }
-
-  // 3. Collect all subject keys (union of plan subjects + accuracy subjects)
-  const allSubjectKeys = new Set<string>([
-    ...planWeights.map(pw => subjectKey(pw.subject)),
-    ...accuracyData.map(a => subjectKey(a.subject)),
-  ]);
-
-  // 4. Calculate adjusted weight for each subject: weight × (1 - accuracy/100)
-  //    Subjects with no accuracy data get full penalty (accuracy = 0)
-  //    Subjects with no edital weight get a base weight of 1.0
-  const subjectScores: { key: string; label: string; score: number }[] = [];
-  for (const key of allSubjectKeys) {
-    const weight = weightMap.get(key) ?? 1.0;
-    const accuracy = accMap.get(key) ?? 0;
-    const score = weight * (1 - accuracy / 100);
-    const label = planWeights.find(pw => subjectKey(pw.subject) === key)?.subject
-      || accuracyData.find(a => subjectKey(a.subject) === key)?.subject
-      || key;
-    subjectScores.push({ key, label, score: Math.max(score, 0.05) }); // minimum 0.05 so no subject is fully excluded
-  }
-
-  // 5. Normalize scores into a proportion of total questions
-  const totalScore = subjectScores.reduce((sum, s) => sum + s.score, 0);
-  const distribution = subjectScores.map(s => ({
-    ...s,
-    targetCount: Math.max(1, Math.round((s.score / totalScore) * count)),
-  }));
-
-  // 6. Fetch all available questions
-  const allQuestions = await listQuestionsByFilter({
-    bancas: filters?.bancas,
-    dificuldades: filters?.dificuldades,
-  });
-
-  // 7. Group questions by subject
-  const bySubject = new Map<string, QuestionBankItem[]>();
-  for (const q of allQuestions) {
-    const key = subjectKey(q.materia || '');
-    if (!bySubject.has(key)) bySubject.set(key, []);
-    bySubject.get(key)!.push(q);
-  }
-
-  // 8. Pick questions per subject, shuffled within each
-  const selected: QuestionBankItem[] = [];
-  const usedIds = new Set<string>();
-
-  for (const dist of distribution.sort((a, b) => b.score - a.score)) {
-    const pool = (bySubject.get(dist.key) || [])
-      .filter(q => !usedIds.has(q.id || ''))
-      .sort(() => Math.random() - 0.5);
-
-    const pick = pool.slice(0, dist.targetCount);
-    for (const q of pick) {
-      selected.push(q);
-      if (q.id) usedIds.add(q.id);
-    }
-  }
-
-  // 9. If we still have room, fill remaining with random unused questions
-  if (selected.length < count) {
-    const remaining = allQuestions
-      .filter(q => !usedIds.has(q.id || ''))
-      .sort(() => Math.random() - 0.5)
-      .slice(0, count - selected.length);
-    selected.push(...remaining);
-  }
-
-  // 10. Final shuffle to mix subjects
-  return selected.sort(() => Math.random() - 0.5).slice(0, count);
-}
-
-/**
- * Salva múltiplas tentativas de questões em batch
- */
-export async function saveQuestionAttempts(attempts: QuestionAttempt[]): Promise<void> {
-  if (attempts.length === 0) return;
-
-  const promises = attempts.map(attempt => saveQuestionAttempt(attempt));
-  await Promise.all(promises);
-
-  // Integra automaticamente tentativas de prova/simulado no painel de acurácia por matéria.
-  const questionIds = Array.from(new Set(attempts.map((a) => a.questionId)));
-  const questions = await Promise.all(questionIds.map((id) => getQuestionById(id)));
-  const questionById = new Map<string, QuestionBankItem>();
-  questions.forEach((q) => {
-    if (q?.id) questionById.set(q.id, q);
-  });
-
-  type Aggregate = { subject: string; totalQuestions: number; correctAnswers: number; planId?: string };
-  const grouped = new Map<string, Aggregate>();
-
-  for (const attempt of attempts) {
-    const question = questionById.get(attempt.questionId);
-    if (!question?.materia) continue;
-
-    const subject = normalizeSubject(question.materia);
-    const aggregateKey = `${attempt.planId || ''}::${subjectKey(subject)}`;
-    const current = grouped.get(aggregateKey) || {
-      subject,
-      totalQuestions: 0,
-      correctAnswers: 0,
-      planId: attempt.planId || undefined,
-    };
-
-    current.totalQuestions += 1;
-    if (attempt.correct) current.correctAnswers += 1;
-    grouped.set(aggregateKey, current);
-  }
-
-  if (grouped.size === 0) return;
-
-  const today = new Date();
-  const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  const userId = attempts[0].userId;
-
-  await Promise.all(
-    Array.from(grouped.values()).map((item) =>
-      saveQuestionSession({
-        userId,
-        planId: item.planId,
-        subject: item.subject,
-        totalQuestions: item.totalQuestions,
-        correctAnswers: item.correctAnswers,
-        date,
-      })
-    )
-  );
-}
-
-/**
- * Retorna lista de matérias únicas disponíveis no banco de questões
- */
-export async function getAvailableSubjects(): Promise<string[]> {
-  const snapshot = await getDocs(collection(db, QUESTIONS_COLLECTION));
-  const subjects = new Set<string>();
-
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    if (data.materia) {
-      subjects.add(data.materia);
-    }
-  });
-
-  return Array.from(subjects).sort();
-}
-
-/**
- * Retorna lista de bancas únicas disponíveis no banco de questões
- */
-export async function getAvailableBancas(): Promise<string[]> {
-  const snapshot = await getDocs(collection(db, QUESTIONS_COLLECTION));
-  const bancas = new Set<string>();
-
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    if (data.banca) {
-      bancas.add(data.banca);
-    }
-  });
-
-  return Array.from(bancas).sort();
-}
-
-// ============ Caderno de Erros ============
-
-/**
- * Busca tentativas incorretas do aluno.
- * Se `includeMastered` for false (padrão), exclui as que o aluno marcou como dominadas.
- */
-export async function getWrongAttempts(
-  userId: string,
-  limitCount = 50,
-  includeMastered = false
-): Promise<QuestionAttempt[]> {
-  const q = query(
-    collection(db, ATTEMPTS_COLLECTION),
-    where('userId', '==', userId),
-    where('correct', '==', false)
-  );
-  const snap = await getDocs(q);
-  let attempts = snap.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as QuestionAttempt) }));
-
-  if (!includeMastered) {
-    attempts = attempts.filter(a => !a.mastered);
-  }
-
-  // Sort by createdAt desc (handles Firestore Timestamp or string)
-  attempts.sort((a, b) => {
-    const tA = a.createdAt && typeof a.createdAt === 'object' && 'toMillis' in (a.createdAt as Record<string, unknown>)
-      ? (a.createdAt as unknown as { toMillis: () => number }).toMillis()
-      : typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : 0;
-    const tB = b.createdAt && typeof b.createdAt === 'object' && 'toMillis' in (b.createdAt as Record<string, unknown>)
-      ? (b.createdAt as unknown as { toMillis: () => number }).toMillis()
-      : typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : 0;
-    return tB - tA;
-  });
-
-  return attempts.slice(0, limitCount);
-}
-
-/**
- * Marca ou desmarca uma tentativa como "dominada" (o aluno já entendeu o erro).
- */
-export async function markAttemptAsMastered(attemptId: string, mastered = true): Promise<void> {
-  const ref = doc(db, ATTEMPTS_COLLECTION, attemptId);
-  await updateDoc(ref, { mastered });
 }

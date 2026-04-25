@@ -1,5 +1,6 @@
 'use client';
 
+import { FeatureCode } from '@aprovamind/domain';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -24,6 +25,8 @@ import {
   getDailyAiPlanProgress,
   saveDailyAiPlanProgress,
 } from '@/lib/firebase/dailyAiPlans';
+import AiQuotaNotice from '@/components/AiQuotaNotice';
+import { readAiErrorResponse, type AiQuotaNoticeData } from '@/lib/ai/quota-feedback';
 
 interface DailyAiPlannerCardProps {
   userId: string;
@@ -81,6 +84,7 @@ export default function DailyAiPlannerCard({
   const [autoReplanning, setAutoReplanning] = useState(false);
   const [plan, setPlan] = useState<DailyPlanResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [quotaNotice, setQuotaNotice] = useState<AiQuotaNoticeData | null>(null);
   const [completedBlocks, setCompletedBlocks] = useState<number[]>([]);
   const [deferredBlocks, setDeferredBlocks] = useState<number[]>([]);
   const previousTodaySecondsRef = useRef<number | null>(null);
@@ -226,6 +230,7 @@ export default function DailyAiPlannerCard({
         setAutoReplanning(true);
       } else {
         setError(null);
+        setQuotaNotice(null);
       }
 
       try {
@@ -301,9 +306,13 @@ export default function DailyAiPlannerCard({
         });
 
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
+          const failure = await readAiErrorResponse({
+            response: res,
+            fallbackMessage: 'Não foi possível gerar o plano diário.',
+          });
           if (mode !== 'session_saved') {
-            setError(data.error || 'Não foi possível gerar o plano diário.');
+            setError(failure.message);
+            setQuotaNotice(failure.quotaNotice);
           }
           return;
         }
@@ -329,6 +338,7 @@ export default function DailyAiPlannerCard({
         });
       } catch {
         if (mode !== 'session_saved') {
+          setQuotaNotice(null);
           setError('Erro de conexão ao gerar plano diário.');
         }
       } finally {
@@ -419,7 +429,14 @@ export default function DailyAiPlannerCard({
         </div>
       )}
 
-      {error && (
+      {quotaNotice ? (
+        <AiQuotaNotice
+          notice={quotaNotice}
+          className="mb-3"
+          surface="daily_ai_planner_card"
+          featureCode={FeatureCode.AdaptiveDailyPlan}
+        />
+      ) : error && (
         <div className="mb-3 flex items-center gap-2 rounded-xl border border-am-error/30 bg-am-error/10 px-3 py-2 text-xs text-am-error">
           <AlertTriangle className="h-3.5 w-3.5" />
           {error}

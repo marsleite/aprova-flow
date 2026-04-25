@@ -1,3 +1,10 @@
+import {
+  DEFAULT_ENTITLEMENT_POLICY,
+  EntitlementMode,
+  FeatureCode,
+  PlanCode,
+} from '@aprovamind/domain';
+
 export type PlanTier = 'free' | 'pro' | 'premium' | 'admin';
 export type AiTaskKey = 'chat' | 'weekly-mentoring' | 'planner-daily' | 'parse-edital' | 'smart-schedule' | 'interrogation' | 'predictive-exam' | 'explain-answer' | 'error-diagnosis';
 export type QuotaWindow = 'hour' | 'day' | 'week' | 'month';
@@ -16,25 +23,31 @@ export interface AiQuotaRule {
 
 export type AiQuotaByTask = Record<AiTaskKey, AiQuotaRule>;
 
+function getCanonicalPlanCapabilities(planCode: PlanCode): PlanCapabilities {
+  const rules = DEFAULT_ENTITLEMENT_POLICY.plans[planCode].features;
+  const activePlans = rules[FeatureCode.ActivePlans];
+  const simulationsCustom = rules[FeatureCode.SimulationsCustom];
+  const treinoRapido = rules[FeatureCode.QuestionsPracticeBasic];
+
+  return {
+    maxStudyPlans:
+      activePlans.mode === EntitlementMode.Quota ? activePlans.limit : 0,
+    canUseCalendar: planCode !== PlanCode.Free,
+    canCreateSimulados:
+      simulationsCustom.mode === EntitlementMode.Boolean
+        ? simulationsCustom.enabled
+        : false,
+    canUseTreinoRapido:
+      treinoRapido.mode === EntitlementMode.Boolean
+        ? treinoRapido.enabled
+        : treinoRapido.limit > 0,
+  };
+}
+
 const CAPABILITIES_BY_TIER: Record<PlanTier, PlanCapabilities> = {
-  free: {
-    maxStudyPlans: 1,
-    canUseCalendar: false,
-    canCreateSimulados: false,
-    canUseTreinoRapido: true,
-  },
-  pro: {
-    maxStudyPlans: 5,
-    canUseCalendar: true,
-    canCreateSimulados: true,
-    canUseTreinoRapido: true,
-  },
-  premium: {
-    maxStudyPlans: 20,
-    canUseCalendar: true,
-    canCreateSimulados: true,
-    canUseTreinoRapido: true,
-  },
+  free: getCanonicalPlanCapabilities(PlanCode.Free),
+  pro: getCanonicalPlanCapabilities(PlanCode.Pro),
+  premium: getCanonicalPlanCapabilities(PlanCode.Premium),
   admin: {
     maxStudyPlans: -1,
     canUseCalendar: true,
@@ -103,7 +116,7 @@ export function isUnlimited(value: number): boolean {
 }
 
 export function canCreateMorePlans(planTier: PlanTier, currentPlansCount: number): boolean {
-  const maxPlans = CAPABILITIES_BY_TIER[planTier].maxStudyPlans;
+  const maxPlans = getCapabilitiesForTier(planTier).maxStudyPlans;
   if (isUnlimited(maxPlans)) return true;
   return currentPlansCount < maxPlans;
 }

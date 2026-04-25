@@ -1,10 +1,12 @@
 'use client';
 
 import { FeatureCode } from '@aprovamind/domain';
-import Link from 'next/link';
 import { useState } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useEntitlements } from '@/hooks/useEntitlements';
+import AiQuotaNotice from '@/components/AiQuotaNotice';
+import TrackedUpgradeLink from '@/components/TrackedUpgradeLink';
+import { readAiErrorResponse, type AiQuotaNoticeData } from '@/lib/ai/quota-feedback';
 import { auth } from '@/lib/firebase/config';
 import { QuestionBankItem } from '@/types';
 import { Sparkles, BookOpen, Lightbulb, Scale, Lock, Crown } from 'lucide-react';
@@ -22,10 +24,11 @@ interface ExplanationData {
 
 export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerButtonProps) {
     const { user } = useAuthContext();
-    const { hasFeature } = useEntitlements(user?.uid, user?.email);
+    const { hasFeature, planTier } = useEntitlements(user?.uid, user?.email);
     const [loading, setLoading] = useState(false);
     const [explanation, setExplanation] = useState<ExplanationData | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [quotaNotice, setQuotaNotice] = useState<AiQuotaNoticeData | null>(null);
     const canUseAiExplanations = hasFeature(FeatureCode.AiExplanations);
 
     const handleExplain = async () => {
@@ -33,6 +36,7 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
         try {
             setLoading(true);
             setError(null);
+            setQuotaNotice(null);
 
             const token = await auth.currentUser?.getIdToken();
             if (!token) throw new Error('Sessão expirada. Faça login novamente.');
@@ -58,11 +62,17 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                 })
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.error || 'Erro ao gerar explicação.');
+                const failure = await readAiErrorResponse({
+                    response,
+                    fallbackMessage: 'Erro ao gerar explicação.',
+                });
+                setError(failure.message);
+                setQuotaNotice(failure.quotaNotice);
+                return;
             }
+
+            const data = await response.json();
 
             setExplanation({
                 text: data.explanation,
@@ -70,6 +80,7 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                 tip: data.tip,
             });
         } catch (err: unknown) {
+            setQuotaNotice(null);
             if (err instanceof Error) {
                 setError(err.message);
             } else {
@@ -96,13 +107,21 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                                 No Free você continua praticando e revisando seus erros. No Pro,
                                 desbloqueia a explicação fundamentada, base legal e dica prática por questão.
                             </p>
-                            <Link
+                            <TrackedUpgradeLink
                                 href="/settings"
+                                surface="explain_answer_locked_notice"
+                                recommendedPlan="pro"
+                                currentPlan={planTier}
+                                featureCode={FeatureCode.AiExplanations}
+                                eventMetadata={{
+                                    title: 'Ver beneficios do Pro',
+                                    subject: question.materia,
+                                }}
                                 className="inline-flex items-center gap-1 text-xs font-medium text-[var(--primary)] underline underline-offset-4 hover:text-[#ffb18d]"
                             >
                                 <Crown className="h-3.5 w-3.5" />
                                 Ver benefícios do Pro
-                            </Link>
+                            </TrackedUpgradeLink>
                         </div>
                     </div>
                 </div>
@@ -128,7 +147,17 @@ export function ExplainAnswerButton({ question, studentAnswer }: ExplainAnswerBu
                 </div>
             )}
 
-            {canUseAiExplanations && error && (
+            {canUseAiExplanations && quotaNotice && (
+                <AiQuotaNotice
+                    notice={quotaNotice}
+                    className="mt-2"
+                    surface="explain_answer_button"
+                    featureCode={FeatureCode.AiExplanations}
+                    eventMetadata={{ subject: question.materia }}
+                />
+            )}
+
+            {canUseAiExplanations && error && !quotaNotice && (
                 <div className="mt-2 p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-sm text-red-400 flex flex-col gap-2">
                     <span>{error}</span>
                     <button

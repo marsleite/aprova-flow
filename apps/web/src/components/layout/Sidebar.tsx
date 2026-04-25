@@ -10,8 +10,6 @@ import {
   Timer,
   CalendarDays,
   Brain,
-  Target,
-  BookX,
   BarChart2,
   History,
   Settings,
@@ -29,40 +27,28 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 
 const NAV_ITEMS = [
   {
+    href: '/planner',
+    icon: CalendarDays,
+    label: 'Planner',
+    description: 'Macro e viabilidade',
+  },
+  {
     href: '/dashboard',
     icon: LayoutDashboard,
     label: 'Dashboard',
-    description: 'Visão geral',
+    description: 'Ritmo da semana',
   },
   {
     href: '/engine',
     icon: Timer,
-    label: 'Sessão de Estudo',
-    description: 'Timer e foco',
-  },
-  {
-    href: '/planner',
-    icon: CalendarDays,
-    label: 'Planner',
-    description: 'Multi-edital',
+    label: 'Engine',
+    description: 'Sessão de hoje',
   },
   {
     href: '/mentoring',
     icon: Brain,
     label: 'Mentoria',
     description: 'Diagnóstico e apoio',
-  },
-  {
-    href: '/simulations',
-    icon: Target,
-    label: 'Provas & Simulados',
-    description: 'Oficiais e personalizados',
-  },
-  {
-    href: '/caderno-erros',
-    icon: BookX,
-    label: 'Caderno de Erros',
-    description: 'Erros e padrões',
   },
   {
     href: '/analytics',
@@ -95,7 +81,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuthContext();
-  const { planTier, refresh, usingSandbox, sandboxScenarioUserId } = useEntitlements(
+  const { planTier, usingSandbox, sandboxScenarioUserId } = useEntitlements(
     user?.uid,
     user?.email
   );
@@ -415,14 +401,9 @@ export default function Sidebar({
       {user && (
         <AccountPlanModal
           isOpen={accountModalOpen}
-          userId={user.uid}
           currentTier={planTier}
           currentPlansCount={plans.length}
           onClose={() => setAccountModalOpen(false)}
-          onTierChanged={() => {
-            void refresh();
-            setAccountModalOpen(false);
-          }}
         />
       )}
     </>

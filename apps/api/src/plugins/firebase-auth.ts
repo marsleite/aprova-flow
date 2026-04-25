@@ -22,7 +22,7 @@ const firebaseAuthPlugin: FastifyPluginAsync<FirebaseAuthOptions> = async (app, 
   app.decorateRequest('user', null);
 
   app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
-    // 1. Sandbox Bypass (só se options.allowSandbox = true)
+    // Local sandbox only when explicitly enabled by the app.
     if (options.allowSandbox) {
       const sandboxUserId = request.headers['x-aprovamind-user-id'] as string;
       if (sandboxUserId && sandboxUserId.trim().length > 0) {
@@ -31,7 +31,7 @@ const firebaseAuthPlugin: FastifyPluginAsync<FirebaseAuthOptions> = async (app, 
       }
     }
 
-    // 2. Real Token Evaluation
+    // Real Firebase token evaluation.
     const token = extractBearerToken(request.headers.authorization);
     
     if (!token) {

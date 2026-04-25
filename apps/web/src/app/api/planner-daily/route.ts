@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
-import { logAiUsageEvent, parseJsonFromModelText, runAiText } from '@/lib/ai';
-import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { parseJsonFromModelText } from '@/lib/ai';
 import { saveDailyAiPlanSnapshot } from '@/lib/server/dailyAiPlanStore';
+import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
 import { LegacyEngineDataSource } from '@/infrastructure/legacy/LegacyEngineDataSource';
 import { GetPlanEngineSnapshot } from '@aprovamind/application/use-cases/engine/GetPlanEngineSnapshot';
 
@@ -337,12 +337,15 @@ ${engineResult.snapshot.subjects.slice(0, 5).map(s =>
       console.warn('Erro passivo ao carregar o motor:', e);
     }
 
-    const aiResponse = await runAiText({
-      task: 'planner-daily',
-      prompt: buildPlannerPrompt(body, engineAnalysis),
-      temperature: 0.35,
-      maxOutputTokens: 2200,
-      preferJson: true,
+    const aiResponse = await runDedicatedAiText({
+      idToken: auth.idToken,
+      payload: {
+        task: 'planner-daily',
+        prompt: buildPlannerPrompt(body, engineAnalysis),
+        temperature: 0.35,
+        maxOutputTokens: 2200,
+        preferJson: true,
+      },
     });
 
     const parsed = parseJsonFromModelText<Record<string, unknown>>(aiResponse.text || '');
@@ -350,23 +353,6 @@ ${engineResult.snapshot.subjects.slice(0, 5).map(s =>
     if (!parsed) {
       usedFallback = true;
       const fallbackPlan = buildFallbackPlan(body, dateISO);
-      const usageEvent = {
-        route: '/api/planner-daily',
-        task: 'planner-daily',
-        provider: aiResponse.provider,
-        model: aiResponse.model,
-        latencyMs: aiResponse.latencyMs,
-        inputTokens: aiResponse.usage.inputTokens,
-        outputTokens: aiResponse.usage.outputTokens,
-        totalTokens: aiResponse.usage.totalTokens,
-        estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-        success: false,
-        statusCode: 200,
-        userId: auth.uid,
-        errorCode: 'JSON_PARSE_FAILED_FALLBACK',
-      } as const;
-      logAiUsageEvent(usageEvent);
-      void saveAiUsageEvent(usageEvent, auth.idToken);
 
       void saveDailyAiPlanSnapshot(
         {
@@ -412,23 +398,6 @@ ${engineResult.snapshot.subjects.slice(0, 5).map(s =>
       },
       auth.idToken
     );
-
-    const usageEvent = {
-      route: '/api/planner-daily',
-      task: 'planner-daily',
-      provider: aiResponse.provider,
-      model: aiResponse.model,
-      latencyMs: aiResponse.latencyMs,
-      inputTokens: aiResponse.usage.inputTokens,
-      outputTokens: aiResponse.usage.outputTokens,
-      totalTokens: aiResponse.usage.totalTokens,
-      estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-      success: true,
-      statusCode: 200,
-      userId: auth.uid,
-    } as const;
-    logAiUsageEvent(usageEvent);
-    void saveAiUsageEvent(usageEvent, auth.idToken);
 
     return NextResponse.json(plan, {
       headers: {

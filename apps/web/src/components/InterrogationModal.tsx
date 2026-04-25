@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, X, Loader2, Target, CheckCircle2, ChevronRight, AlertTriangle } from 'lucide-react';
+import AiQuotaNotice from '@/components/AiQuotaNotice';
+import { readAiErrorResponse, type AiQuotaNoticeData } from '@/lib/ai/quota-feedback';
 import { auth } from '@/lib/firebase/config';
 
 interface InterrogationModalProps {
@@ -20,6 +22,7 @@ export default function InterrogationModal({
     const [step, setStep] = useState<'input' | 'evaluating' | 'result'>('input');
     const [result, setResult] = useState<{ score: number; strengths: string; weaknesses: string } | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [quotaNotice, setQuotaNotice] = useState<AiQuotaNoticeData | null>(null);
 
     const handleSubmit = async () => {
         if (summaryText.length < 15) {
@@ -29,6 +32,7 @@ export default function InterrogationModal({
 
         setStep('evaluating');
         setError(null);
+        setQuotaNotice(null);
 
         try {
             const token = await auth.currentUser?.getIdToken();
@@ -43,15 +47,23 @@ export default function InterrogationModal({
                 body: JSON.stringify({ subject: subjectName, summaryText })
             });
 
-            const data = await res.json();
-
             if (!res.ok) {
-                throw new Error(data.error || 'Erro na avaliação. A IA está indisponível no momento.');
+                const failure = await readAiErrorResponse({
+                    response: res,
+                    fallbackMessage: 'Erro na avaliação. A IA está indisponível no momento.',
+                });
+                setError(failure.message);
+                setQuotaNotice(failure.quotaNotice);
+                setStep('input');
+                return;
             }
+
+            const data = await res.json();
 
             setResult(data.evaluation);
             setStep('result');
         } catch (err) {
+            setQuotaNotice(null);
             setError((err as Error).message);
             setStep('input');
         }
@@ -122,7 +134,14 @@ export default function InterrogationModal({
                                     />
                                 </div>
 
-                                {error && (
+                                {quotaNotice ? (
+                                    <AiQuotaNotice
+                                        notice={quotaNotice}
+                                        className="mb-4"
+                                        surface="interrogation_modal"
+                                        eventMetadata={{ subject: subjectName }}
+                                    />
+                                ) : error && (
                                     <p className="mb-4 mt-2 flex items-center gap-2 text-xs text-red-400 bg-red-500/10 p-2 rounded-lg border border-red-500/20">
                                         <AlertTriangle className="h-4 w-4" /> {error}
                                     </p>

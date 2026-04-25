@@ -1,10 +1,3 @@
-/**
- * Hook customizado de autenticação
- * 
- * Gerencia o estado de autenticação do Firebase e fornece
- * funções para login/logout com Google.
- */
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -18,22 +11,24 @@ import {
   User,
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase/config';
-import { getBetaAccessMessage, isBetaAllowed } from '@/lib/beta-access';
+import { getBetaAccessMessage, getBetaAccessStatus, isBetaAllowed } from '@/lib/beta-access';
 import { UserProfile } from '@/types';
+
 export function useAuth() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Observa mudanças no estado de autenticação
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: User | null) => {
       if (firebaseUser) {
-        // BETA: verifica se o email está na allowlist
-        if (!isBetaAllowed(firebaseUser.email)) {
+        // BETA: verifica allowlist no Firestore
+        const allowed = await isBetaAllowed(firebaseUser.email);
+        if (!allowed) {
           await signOut(auth);
           setUser(null);
-          setError(getBetaAccessMessage(firebaseUser.email));
+          const status = await getBetaAccessStatus(firebaseUser.email);
+          setError(getBetaAccessMessage(status));
           setLoading(false);
           return;
         }
@@ -52,7 +47,6 @@ export function useAuth() {
     return () => unsubscribe();
   }, []);
 
-  // Login com Google via popup
   const signInWithGoogle = async () => {
     try {
       setError(null);
@@ -60,16 +54,16 @@ export function useAuth() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao fazer login';
       setError(message);
-      console.error('Erro no login:', err);
     }
   };
 
-  // Login com email e senha
   const signInWithEmail = async (email: string, password: string) => {
     try {
       setError(null);
-      if (!isBetaAllowed(email)) {
-        setError(getBetaAccessMessage(email));
+      const allowed = await isBetaAllowed(email);
+      if (!allowed) {
+        const status = await getBetaAccessStatus(email);
+        setError(getBetaAccessMessage(status));
         return;
       }
       await signInWithEmailAndPassword(auth, email, password);
@@ -83,21 +77,20 @@ export function useAuth() {
         'auth/too-many-requests': 'Muitas tentativas. Tente novamente em alguns minutos.',
       };
       setError(messages[code || ''] || 'Erro ao fazer login.');
-      console.error('Erro no login email:', err);
     }
   };
 
-  // Cadastro com email e senha
   const signUpWithEmail = async (email: string, password: string, displayName: string) => {
     try {
       setError(null);
-      if (!isBetaAllowed(email)) {
-        setError(getBetaAccessMessage(email));
+      const allowed = await isBetaAllowed(email);
+      if (!allowed) {
+        const status = await getBetaAccessStatus(email);
+        setError(getBetaAccessMessage(status));
         return;
       }
       const result = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(result.user, { displayName });
-      // Força refresh do user state com displayName
       setUser({
         uid: result.user.uid,
         displayName,
@@ -112,11 +105,9 @@ export function useAuth() {
         'auth/invalid-email': 'Email inválido.',
       };
       setError(messages[code || ''] || 'Erro ao criar conta.');
-      console.error('Erro no cadastro:', err);
     }
   };
 
-  // Logout
   const logout = async () => {
     try {
       setError(null);
@@ -124,7 +115,6 @@ export function useAuth() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao fazer logout';
       setError(message);
-      console.error('Erro no logout:', err);
     }
   };
 

@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Sparkles, Loader2, RefreshCw, AlertTriangle, CalendarDays, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components';
 import { StudyConsistency, SubjectWeight, SubjectAccuracy, StudyCapacityHours } from '@/types';
+import AiQuotaNotice from '@/components/AiQuotaNotice';
+import { readAiErrorResponse, type AiQuotaNoticeData } from '@/lib/ai/quota-feedback';
 import { auth } from '@/lib/firebase/config';
 import {
     buildAvailableStudyDays,
@@ -43,6 +45,7 @@ export default function SmartScheduleCard({
     const [loading, setLoading] = useState(false);
     const [schedule, setSchedule] = useState<SmartScheduleItem[] | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [quotaNotice, setQuotaNotice] = useState<AiQuotaNoticeData | null>(null);
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
     const hasContext = (planWeights?.length || 0) > 0 && (consistency?.weeklyGoalHours || 0) > 0;
@@ -61,6 +64,7 @@ export default function SmartScheduleCard({
         if (loading) return;
         setLoading(true);
         setError(null);
+        setQuotaNotice(null);
 
         try {
             const idToken = await auth.currentUser?.getIdToken();
@@ -104,8 +108,12 @@ export default function SmartScheduleCard({
             });
 
             if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                setError(data.error || 'Não foi possível gerar a rota.');
+                const failure = await readAiErrorResponse({
+                    response: res,
+                    fallbackMessage: 'Não foi possível gerar a rota.',
+                });
+                setError(failure.message);
+                setQuotaNotice(failure.quotaNotice);
                 return;
             }
 
@@ -118,6 +126,7 @@ export default function SmartScheduleCard({
             }
 
         } catch {
+            setQuotaNotice(null);
             setError('Erro de conexão ao gerar o cronograma.');
         } finally {
             setLoading(false);
@@ -183,7 +192,13 @@ export default function SmartScheduleCard({
                 </div>
             )}
 
-            {error && (
+            {quotaNotice ? (
+                <AiQuotaNotice
+                    notice={quotaNotice}
+                    className="mb-4"
+                    surface="smart_schedule_card"
+                />
+            ) : error && (
                 <div className="mb-4 flex items-center gap-2 rounded-xl border border-am-error/30 bg-am-error/10 px-4 py-3 text-sm text-am-error">
                     <AlertTriangle className="h-5 w-5" />
                     {error}

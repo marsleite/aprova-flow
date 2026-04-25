@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
-import { logAiUsageEvent, runAiText } from '@/lib/ai';
-import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
 import { searchRelevantLaw } from '@/lib/firebase/legalKnowledge';
 import { FeatureCode } from '@aprovamind/domain';
 import { requireEntitlementFeature } from '@/lib/server/userEntitlements';
@@ -191,14 +190,17 @@ export async function POST(request: NextRequest) {
         ].join('\n');
 
         // ── 4. Chamar IA ──
-        const aiResponse = await runAiText({
-            task: 'error-diagnosis',
-            systemInstruction: SYSTEM_INSTRUCTION,
-            prompt: prompt.substring(0, 6000),
-            preferJson: true,
-            temperature: 0.4,
-            maxOutputTokens: 4096,
-            thinkingBudget: 0,
+        const aiResponse = await runDedicatedAiText({
+            idToken: auth.idToken,
+            payload: {
+                task: 'error-diagnosis',
+                systemInstruction: SYSTEM_INSTRUCTION,
+                prompt: prompt.substring(0, 6000),
+                preferJson: true,
+                temperature: 0.4,
+                maxOutputTokens: 4096,
+                thinkingBudget: 0,
+            },
         });
 
         const text = aiResponse.text?.trim() || '{}';
@@ -252,25 +254,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // ── 5. Logging ──
-        const usageEvent = {
-            route: '/api/error-diagnosis',
-            task: 'error-diagnosis',
-            provider: aiResponse.provider,
-            model: aiResponse.model,
-            latencyMs: aiResponse.latencyMs,
-            inputTokens: aiResponse.usage.inputTokens,
-            outputTokens: aiResponse.usage.outputTokens,
-            totalTokens: aiResponse.usage.totalTokens,
-            estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-            success: true,
-            statusCode: 200,
-            userId: auth.uid,
-        } as const;
-        logAiUsageEvent(usageEvent);
-        void saveAiUsageEvent(usageEvent, auth.idToken);
-
-        // ── 6. Parse e retorno ──
+        // ── 5. Parse e retorno ──
         try {
             const parsed = JSON.parse(jsonStr);
 

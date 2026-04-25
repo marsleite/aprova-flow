@@ -9,8 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
-import { logAiUsageEvent, runAiText } from '@/lib/ai';
-import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
 import { LegacyEngineDataSource } from '@/infrastructure/legacy/LegacyEngineDataSource';
 import { GetPlanEngineSnapshot } from '@aprovamind/application/use-cases/engine/GetPlanEngineSnapshot';
 import { FeatureCode } from '@aprovamind/domain';
@@ -213,34 +212,20 @@ ${engineResult.snapshot.subjects.filter(s => ['critical', 'neglected', 'warning'
 
     const fullPrompt = contents.join('\n\n') + '\n\nCoach:';
 
-    const aiResponse = await runAiText({
-      task: 'chat',
-      prompt: fullPrompt,
-      temperature: 0.5,
-      maxOutputTokens: 2048,
+    const aiResponse = await runDedicatedAiText({
+      idToken: auth.idToken,
+      payload: {
+        task: 'chat',
+        prompt: fullPrompt,
+        temperature: 0.5,
+        maxOutputTokens: 2048,
+      },
     });
 
     const text = aiResponse.text?.trim() || 'Desculpe, não consegui gerar uma resposta. Tente novamente.';
 
     // Limpa prefixo "Coach:" se o modelo repetir
     const cleaned = text.replace(/^Coach:\s*/i, '').trim();
-
-    const usageEvent = {
-      route: '/api/chat',
-      task: 'chat',
-      provider: aiResponse.provider,
-      model: aiResponse.model,
-      latencyMs: aiResponse.latencyMs,
-      inputTokens: aiResponse.usage.inputTokens,
-      outputTokens: aiResponse.usage.outputTokens,
-      totalTokens: aiResponse.usage.totalTokens,
-      estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-      success: true,
-      statusCode: 200,
-      userId: auth.uid,
-    } as const;
-    logAiUsageEvent(usageEvent);
-    void saveAiUsageEvent(usageEvent, auth.idToken);
 
     return NextResponse.json(
       { reply: cleaned },

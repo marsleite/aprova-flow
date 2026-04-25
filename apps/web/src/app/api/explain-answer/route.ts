@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
-import { logAiUsageEvent, runAiText } from '@/lib/ai';
-import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
 import { searchRelevantLaw } from '@/lib/firebase/legalKnowledge';
 import { FeatureCode } from '@aprovamind/domain';
 import { requireEntitlementFeature } from '@/lib/server/userEntitlements';
@@ -104,13 +103,16 @@ export async function POST(request: NextRequest) {
             legalContext,
         ].filter(Boolean).join('\n');
 
-        const aiResponse = await runAiText({
-            task: 'explain-answer',
-            systemInstruction: SYSTEM_INSTRUCTION,
-            prompt,
-            preferJson: true,
-            temperature: 0.3,
-            maxOutputTokens: 2048,
+        const aiResponse = await runDedicatedAiText({
+            idToken: auth.idToken,
+            payload: {
+                task: 'explain-answer',
+                systemInstruction: SYSTEM_INSTRUCTION,
+                prompt,
+                preferJson: true,
+                temperature: 0.3,
+                maxOutputTokens: 2048,
+            },
         });
 
         const text = aiResponse.text?.trim() || '{}';
@@ -119,23 +121,6 @@ export async function POST(request: NextRequest) {
             .replace(/^```(?:json)?\s*/gi, '')
             .replace(/\s*```\s*$/gi, '')
             .trim();
-
-        const usageEvent = {
-            route: '/api/explain-answer',
-            task: 'explain-answer',
-            provider: aiResponse.provider,
-            model: aiResponse.model,
-            latencyMs: aiResponse.latencyMs,
-            inputTokens: aiResponse.usage.inputTokens,
-            outputTokens: aiResponse.usage.outputTokens,
-            totalTokens: aiResponse.usage.totalTokens,
-            estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-            success: true,
-            statusCode: 200,
-            userId: auth.uid,
-        } as const;
-        logAiUsageEvent(usageEvent);
-        void saveAiUsageEvent(usageEvent, auth.idToken);
 
         try {
             const parsed = JSON.parse(jsonStr);

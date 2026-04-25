@@ -49,6 +49,218 @@ function formatDateLocal(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+function getWeekStartDate(now: Date): Date {
+  const dayOfWeek = now.getDay();
+  const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - mondayOffset);
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+}
+
+export function buildStudySummaryFromSessions(
+  sessions: StudySession[],
+  now: Date = new Date()
+): StudySummary {
+  const monthStart = formatDateLocal(new Date(now.getFullYear(), now.getMonth(), 1));
+  const weekStartStr = formatDateLocal(getWeekStartDate(now));
+  const today = formatDateLocal(now);
+
+  let totalToday = 0;
+  let totalWeek = 0;
+  let totalMonth = 0;
+
+  for (const session of sessions) {
+    if (!session.date) continue;
+
+    if (session.date >= monthStart) {
+      totalMonth += session.duration;
+    }
+
+    if (session.date >= weekStartStr) {
+      totalWeek += session.duration;
+    }
+
+    if (session.date === today) {
+      totalToday += session.duration;
+    }
+  }
+
+  return { totalToday, totalWeek, totalMonth };
+}
+
+export function buildSubjectHoursFromSessions(
+  sessions: StudySession[]
+): SubjectHours[] {
+  const subjectMap = new Map<string, number>();
+
+  for (const session of sessions) {
+    const current = subjectMap.get(session.subject) || 0;
+    subjectMap.set(session.subject, current + session.duration);
+  }
+
+  return Array.from(subjectMap.entries()).map(([subject, seconds]) => ({
+    subject,
+    hours: Math.round((seconds / 3600) * 100) / 100,
+  }));
+}
+
+export function buildWeeklyHoursFromSessions(
+  sessions: StudySession[],
+  now: Date = new Date()
+): DailyHours[] {
+  const monday = getWeekStartDate(now);
+  const today = getTodayISO();
+  const weekStartStr = formatDateLocal(monday);
+
+  const dayMap = new Map<string, number>();
+  for (const session of sessions) {
+    if (session.date < weekStartStr) continue;
+
+    const current = dayMap.get(session.date) || 0;
+    dayMap.set(session.date, current + session.duration);
+  }
+
+  const result: DailyHours[] = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    const dateStr = formatDateLocal(date);
+    const seconds = dayMap.get(dateStr) || 0;
+
+    result.push({
+      day: getDayName(date),
+      date: dateStr,
+      hours: Math.round((seconds / 3600) * 100) / 100,
+      isToday: dateStr === today,
+    });
+  }
+
+  return result;
+}
+
+export function buildStudyConsistencyFromSessions(params: {
+  sessions: StudySession[];
+  weeklyGoalHours: number;
+  now?: Date;
+}): StudyConsistency {
+  const now = params.now ?? new Date();
+  const weeklyData = buildWeeklyHoursFromSessions(params.sessions, now);
+  const weeklyTotalSeconds = weeklyData.reduce(
+    (acc, day) => acc + Math.round(day.hours * 3600),
+    0
+  );
+  const weeklyGoalSeconds = params.weeklyGoalHours * 3600;
+  const weeklyProgressPercent = Math.min(
+    100,
+    Math.round((weeklyTotalSeconds / weeklyGoalSeconds) * 100)
+  );
+  const remainingSeconds = Math.max(0, weeklyGoalSeconds - weeklyTotalSeconds);
+  const daysStudiedThisWeek = weeklyData.filter((d) => d.hours > 0).length;
+
+  const dateSet = new Set(params.sessions.map((s) => s.date));
+  const sortedDates = Array.from(dateSet).sort();
+
+  let bestStreak = 0;
+  let runningBest = 0;
+  let prevDate: Date | null = null;
+  for (const dateStr of sortedDates) {
+    const current = new Date(`${dateStr}T00:00:00`);
+    if (!prevDate) {
+      runningBest = 1;
+    } else {
+      const diffDays = Math.round(
+        (current.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      runningBest = diffDays === 1 ? runningBest + 1 : 1;
+    }
+    bestStreak = Math.max(bestStreak, runningBest);
+    prevDate = current;
+  }
+
+  const todayStr = formatDateLocal(now);
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = formatDateLocal(yesterday);
+
+  let cursor: Date | null = null;
+  if (dateSet.has(todayStr)) {
+    cursor = new Date(`${todayStr}T00:00:00`);
+  } else if (dateSet.has(yesterdayStr)) {
+    cursor = new Date(`${yesterdayStr}T00:00:00`);
+  }
+
+  let currentStreak = 0;
+  while (cursor) {
+    const key = formatDateLocal(cursor);
+    if (!dateSet.has(key)) break;
+    currentStreak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return {
+    currentStreak,
+    bestStreak,
+    daysStudiedThisWeek,
+    weeklyGoalHours: params.weeklyGoalHours,
+    weeklyTotalSeconds,
+    weeklyProgressPercent,
+    remainingSeconds,
+  };
+}
+
+export function buildPlanVsActualFromInputs(
+  planSubjects: SubjectWeight[],
+  subjectHours: SubjectHours[]
+): PlanVsActual[] {
+  if (planSubjects.length === 0) return [];
+
+  const totalHours = subjectHours.reduce((acc, s) => acc + s.hours, 0);
+  const hoursMap = new Map(subjectHours.map((s) => [s.subject, s.hours]));
+  const plannedKeys = new Set(
+    planSubjects.map((pw) => pw.subject.trim().toLocaleLowerCase('pt-BR'))
+  );
+
+  const plannedSubjects = planSubjects.map((pw) => {
+    const actualHours = hoursMap.get(pw.subject) || 0;
+    const actualPercent = totalHours > 0
+      ? Math.round((actualHours / totalHours) * 100)
+      : 0;
+    const deviation = actualPercent - pw.weight;
+    const status: PlanVsActual['status'] =
+      deviation < -10 ? 'neglected' : deviation > 15 ? 'over' : 'ok';
+
+    return {
+      subject: pw.subject,
+      plannedPercent: pw.weight,
+      actualPercent,
+      actualHours,
+      deviation,
+      status,
+    };
+  });
+
+  const extraSubjects = subjectHours
+    .filter((item) => !plannedKeys.has(item.subject.trim().toLocaleLowerCase('pt-BR')))
+    .map((item) => {
+      const actualPercent = totalHours > 0
+        ? Math.round((item.hours / totalHours) * 100)
+        : 0;
+
+      return {
+        subject: item.subject,
+        plannedPercent: 0,
+        actualPercent,
+        actualHours: item.hours,
+        deviation: actualPercent,
+        status: 'ok' as const,
+      };
+    })
+    .sort((a, b) => b.actualHours - a.actualHours);
+
+  return [...plannedSubjects, ...extraSubjects];
+}
+
 /**
  * Salva uma nova sessão de estudo no Firestore
  */
@@ -127,39 +339,9 @@ export async function getSessionsFromDate(
  */
 export async function getStudySummary(userId: string, planId?: string): Promise<StudySummary> {
   const now = new Date();
-  
-  // Data de início do mês atual (YYYY-MM-01)
   const monthStart = formatDateLocal(new Date(now.getFullYear(), now.getMonth(), 1));
-
-  // Busca todas as sessões do mês
   const sessions = await getSessionsFromDate(userId, monthStart, planId);
-
-  const today = formatDateLocal(now);
-  
-  // Calcula início da semana (segunda-feira)
-  const dayOfWeek = now.getDay();
-  const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  const weekStart = new Date(now);
-  weekStart.setDate(now.getDate() - mondayOffset);
-  const weekStartStr = formatDateLocal(weekStart);
-
-  let totalToday = 0;
-  let totalWeek = 0;
-  let totalMonth = 0;
-
-  for (const session of sessions) {
-    totalMonth += session.duration;
-    
-    if (session.date >= weekStartStr) {
-      totalWeek += session.duration;
-    }
-    
-    if (session.date === today) {
-      totalToday += session.duration;
-    }
-  }
-
-  return { totalToday, totalWeek, totalMonth };
+  return buildStudySummaryFromSessions(sessions, now);
 }
 
 /**
@@ -170,20 +352,7 @@ export async function getHoursBySubject(userId: string, planId?: string): Promis
   const monthStart = formatDateLocal(new Date(now.getFullYear(), now.getMonth(), 1));
 
   const sessions = await getSessionsFromDate(userId, monthStart, planId);
-
-  // Agrupa duração por matéria
-  const subjectMap = new Map<string, number>();
-  
-  for (const session of sessions) {
-    const current = subjectMap.get(session.subject) || 0;
-    subjectMap.set(session.subject, current + session.duration);
-  }
-
-  // Converte para array de horas
-  return Array.from(subjectMap.entries()).map(([subject, seconds]) => ({
-    subject,
-    hours: Math.round((seconds / 3600) * 100) / 100, // 2 casas decimais
-  }));
+  return buildSubjectHoursFromSessions(sessions);
 }
 
 /**
@@ -191,41 +360,9 @@ export async function getHoursBySubject(userId: string, planId?: string): Promis
  */
 export async function getWeeklyHours(userId: string, planId?: string): Promise<DailyHours[]> {
   const now = new Date();
-  const today = getTodayISO();
-
-  // Calcula segunda-feira da semana atual
-  const dayOfWeek = now.getDay();
-  const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - mondayOffset);
-
-  const weekStartStr = formatDateLocal(monday);
+  const weekStartStr = formatDateLocal(getWeekStartDate(now));
   const sessions = await getSessionsFromDate(userId, weekStartStr, planId);
-
-  // Mapa de data → duração total
-  const dayMap = new Map<string, number>();
-  for (const session of sessions) {
-    const current = dayMap.get(session.date) || 0;
-    dayMap.set(session.date, current + session.duration);
-  }
-
-  // Gera os 7 dias da semana
-  const result: DailyHours[] = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    const dateStr = formatDateLocal(d);
-    const seconds = dayMap.get(dateStr) || 0;
-
-    result.push({
-      day: getDayName(d),
-      date: dateStr,
-      hours: Math.round((seconds / 3600) * 100) / 100,
-      isToday: dateStr === today,
-    });
-  }
-
-  return result;
+  return buildWeeklyHoursFromSessions(sessions, now);
 }
 
 /**
@@ -297,84 +434,21 @@ export async function setWeeklyGoal(
  * - progresso da meta semanal
  */
 export async function getStudyConsistency(userId: string, planId?: string, planGoalHours?: number): Promise<StudyConsistency> {
-  const [goal, weeklyData] = await Promise.all([
+  const [goal, sessions] = await Promise.all([
     getWeeklyGoal(userId),
-    getWeeklyHours(userId, planId),
+    (() => {
+      const from = new Date();
+      from.setFullYear(from.getFullYear() - 1);
+      const fromDate = formatDateLocal(from);
+      return getSessionsFromDate(userId, fromDate, planId);
+    })(),
   ]);
 
-  // Usa goal do plano se fornecido, senão usa goal global
   const effectiveGoalHours = planGoalHours ?? goal.weeklyGoalHours;
-
-  const weeklyTotalSeconds = weeklyData.reduce(
-    (acc, day) => acc + Math.round(day.hours * 3600),
-    0
-  );
-  const weeklyGoalSeconds = effectiveGoalHours * 3600;
-  const weeklyProgressPercent = Math.min(
-    100,
-    Math.round((weeklyTotalSeconds / weeklyGoalSeconds) * 100)
-  );
-  const remainingSeconds = Math.max(0, weeklyGoalSeconds - weeklyTotalSeconds);
-  const daysStudiedThisWeek = weeklyData.filter((d) => d.hours > 0).length;
-
-  // Busca sessões do último ano para cálculo de streak
-  const from = new Date();
-  from.setFullYear(from.getFullYear() - 1);
-  const fromDate = formatDateLocal(from);
-  const sessions = await getSessionsFromDate(userId, fromDate, planId);
-
-  const dateSet = new Set(sessions.map((s) => s.date));
-  const sortedDates = Array.from(dateSet).sort();
-
-  // Melhor streak histórico
-  let bestStreak = 0;
-  let runningBest = 0;
-  let prevDate: Date | null = null;
-  for (const dateStr of sortedDates) {
-    const current = new Date(`${dateStr}T00:00:00`);
-    if (!prevDate) {
-      runningBest = 1;
-    } else {
-      const diffDays = Math.round(
-        (current.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      runningBest = diffDays === 1 ? runningBest + 1 : 1;
-    }
-    bestStreak = Math.max(bestStreak, runningBest);
-    prevDate = current;
-  }
-
-  // Streak atual: conta de hoje; se não houver hoje, começa de ontem
-  const today = new Date();
-  const todayStr = formatDateLocal(today);
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = formatDateLocal(yesterday);
-
-  let cursor: Date | null = null;
-  if (dateSet.has(todayStr)) {
-    cursor = new Date(`${todayStr}T00:00:00`);
-  } else if (dateSet.has(yesterdayStr)) {
-    cursor = new Date(`${yesterdayStr}T00:00:00`);
-  }
-
-  let currentStreak = 0;
-  while (cursor) {
-    const key = formatDateLocal(cursor);
-    if (!dateSet.has(key)) break;
-    currentStreak += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-
-  return {
-    currentStreak,
-    bestStreak,
-    daysStudiedThisWeek,
+  return buildStudyConsistencyFromSessions({
+    sessions,
     weeklyGoalHours: effectiveGoalHours,
-    weeklyTotalSeconds,
-    weeklyProgressPercent,
-    remainingSeconds,
-  };
+  });
 }
 
 // ==========================================================
@@ -428,53 +502,7 @@ export async function getPlanVsActual(
     planSubjects ? Promise.resolve({ subjects: planSubjects }) : getStudyPlan(userId),
     getHoursBySubject(userId, planId),
   ]);
-
-  if (plan.subjects.length === 0) return [];
-
-  const totalHours = subjectHours.reduce((acc, s) => acc + s.hours, 0);
-  const hoursMap = new Map(subjectHours.map((s) => [s.subject, s.hours]));
-  const plannedKeys = new Set(
-    plan.subjects.map((pw) => pw.subject.trim().toLocaleLowerCase('pt-BR'))
-  );
-
-  const plannedSubjects = plan.subjects.map((pw) => {
-    const actualHours = hoursMap.get(pw.subject) || 0;
-    const actualPercent = totalHours > 0
-      ? Math.round((actualHours / totalHours) * 100)
-      : 0;
-    const deviation = actualPercent - pw.weight;
-    const status: PlanVsActual['status'] =
-      deviation < -10 ? 'neglected' : deviation > 15 ? 'over' : 'ok';
-
-    return {
-      subject: pw.subject,
-      plannedPercent: pw.weight,
-      actualPercent,
-      actualHours,
-      deviation,
-      status,
-    };
-  });
-
-  const extraSubjects = subjectHours
-    .filter((item) => !plannedKeys.has(item.subject.trim().toLocaleLowerCase('pt-BR')))
-    .map((item) => {
-      const actualPercent = totalHours > 0
-        ? Math.round((item.hours / totalHours) * 100)
-        : 0;
-
-      return {
-        subject: item.subject,
-        plannedPercent: 0,
-        actualPercent,
-        actualHours: item.hours,
-        deviation: actualPercent,
-        status: 'ok' as const,
-      };
-    })
-    .sort((a, b) => b.actualHours - a.actualHours);
-
-  return [...plannedSubjects, ...extraSubjects];
+  return buildPlanVsActualFromInputs(plan.subjects, subjectHours);
 }
 
 // ==========================================================

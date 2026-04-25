@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import {
   PlanCapabilities,
@@ -38,16 +38,4 @@ export async function getUserEntitlements(userId: string, email?: string | null)
     planTier: tier,
     capabilities: getCapabilitiesForTier(tier),
   };
-}
-
-export async function setUserPlanTier(userId: string, planTier: PlanTier): Promise<void> {
-  const ref = doc(db, USER_STATS_COLLECTION, userId);
-  await setDoc(
-    ref,
-    {
-      planTier,
-      updatedAt: new Date().toISOString(),
-    },
-    { merge: true }
-  );
 }
