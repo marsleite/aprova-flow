@@ -409,6 +409,19 @@ service cloud.firestore {
       allow update, delete: if false;
     }
     
+    // Tokens de parse público — 1 por email (hash SHA-256), server-side via API key
+    match /edital_parse_tokens/{tokenId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    // Rate limit por IP para parse público (hash SHA-256)
+    match /edital_parse_ip_limits/{limitId} {
+      allow read, write: if true;
+      allow delete: if false;
+    }
+
     // Beta allowlist — qualquer pessoa lê (verificar acesso), só admin escreve
     match /beta_allowlist/{email} {
       allow read: if true;

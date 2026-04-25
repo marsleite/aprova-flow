@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Target, Brain, TrendingUp, ChevronRight, Zap, LayoutDashboard, Timer, CalendarDays, AlertTriangle, FileText, Users, Clock } from 'lucide-react';
-import { EditalParseSection } from '@/components/landing/EditalParseSection';
 
 export const metadata: Metadata = {
   title: 'AprovaMind | Plataforma de Estudo para Concursos Públicos',
@@ -94,11 +93,11 @@ export default function LandingPage() {
                   <ChevronRight className="w-4 h-4" />
                 </Link>
                 <a
-                  href="#parse-edital"
+                  href="#features"
                   className="px-8 py-5 uppercase hover:bg-foreground hover:text-background transition-all duration-300 text-xs font-semibold text-muted-foreground tracking-widest border-border border flex items-center gap-2"
                 >
-                  Analisar meu edital
-                  <FileText className="w-4 h-4" />
+                  Conhecer o Motor
+                  <ChevronRight className="w-4 h-4" />
                 </a>
               </div>
             </div>
@@ -265,24 +264,70 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Parse Edital — Hook de Conversão */}
+        {/* Parse Edital — Demo estático */}
         <section id="parse-edital" className="border-b border-border py-32 bg-background">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex justify-center items-center gap-4 text-xs font-medium tracking-widest uppercase mb-6 text-primary">
               <span className="w-8 h-[1px] bg-primary"></span>
-              Análise Grátis do Seu Edital
+              Importação de Edital
             </div>
             <div className="max-w-2xl mx-auto text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground mb-6">
-                Faça upload do edital.<br />
-                Veja o plano em segundos.
+                Importe o edital.<br />
+                O plano se monta sozinho.
               </h2>
               <p className="text-muted-foreground font-light text-lg leading-relaxed">
-                Nossa IA extrai as matérias, estima pesos e sugere uma meta semanal realista.
-                Sem criar conta. Sem cartão de crédito.
+                A IA extrai matérias, estima pesos e sugere sua meta semanal a partir do PDF do edital. Disponível para todos os usuários.
               </p>
             </div>
-            <EditalParseSection />
+
+            <div className="max-w-2xl mx-auto">
+              <div className="border border-border bg-card rounded-sm overflow-hidden">
+                <div className="p-6 border-b border-border bg-muted/10 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-widest text-primary mb-1">Exemplo — Edital Analisado</p>
+                    <h3 className="text-lg font-medium text-foreground">PGE-SP 2026 — Procurador do Estado</h3>
+                    <p className="text-xs text-muted-foreground mt-1">12 matérias encontradas</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-xs text-muted-foreground uppercase tracking-widest">Meta semanal</p>
+                    <p className="text-2xl font-medium text-primary">22h</p>
+                  </div>
+                </div>
+                <div className="p-6 flex flex-col gap-3">
+                  {[
+                    { subject: 'Direito Constitucional', weight: 18 },
+                    { subject: 'Direito Administrativo', weight: 15 },
+                    { subject: 'Direito Civil', weight: 12 },
+                    { subject: 'Direito Processual Civil', weight: 10 },
+                    { subject: 'Direito Tributário', weight: 9 },
+                  ].map((s) => (
+                    <div key={s.subject}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm text-foreground">{s.subject}</span>
+                        <span className="text-xs font-medium text-primary">{s.weight}%</span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full" style={{ width: `${s.weight}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="mt-3 flex items-center gap-3 border border-border p-3 bg-muted/10">
+                    <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <p className="text-xs text-muted-foreground">+ 7 matérias adicionais no plano completo</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-8 text-center">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-widest hover:opacity-90 transition-opacity shadow-lg shadow-primary/20"
+                >
+                  Criar conta e importar meu edital
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
 

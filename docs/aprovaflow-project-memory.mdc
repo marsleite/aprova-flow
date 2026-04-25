@@ -39,6 +39,8 @@ src/
 
 ## Firestore Schema
 - **sessions/{id}** — userId, planId, subject, subtopic, startTime, endTime, duration, date, createdAt
+- **edital_parse_tokens/{sha256(email)}** — emailHash, usedAt (ISO). 1 por email, server-side only
+- **edital_parse_ip_limits/{sha256(ip)}** — count, windowStart. Rate limit 3/h por IP, server-side only
 - **study_plans/{id}** — userId, name, subjects[], weeklyGoalHours, color, isDefault, createdAt, updatedAt
 - **user_stats/{userId}** — weeklyGoalHours, planSubjects[], activePlanId, planUpdatedAt, updatedAt
 - **questions_stats/{id}** — userId, planId, subject, totalQuestions, correctAnswers, accuracy, date, createdAt
@@ -139,7 +141,7 @@ src/
 15. ✅ Instrumentação de métricas de produto: 7 eventos (`feature_blocked`, `upgrade_cta_viewed`, `upgrade_cta_clicked`, `ai_quota_exhausted`, `simulation_completed`, `plan_status_changed`, `tester_subscription_updated`) + painel admin BetaSignalsCard com janelas 7/14/30d
 16. ✅ Corte estratégico: banco de questões próprio cancelado, plano de provas arquivado em `docs/archive/`
 
-17. ✅ Landing page pública — seção de parse de edital como hook de conversão, social proof, SEO meta tags, endpoint público `/api/public/parse-edital-preview` (rate limit 3/h por IP, preview truncado em 5 matérias)
+17. ✅ Landing page pública — demo estático PGE-SP, seção de parse com email-gate (1/lifetime por email via SHA-256 + Firestore), rate limit 3/h por IP, preview 5 matérias, social proof, SEO, endpoint `/api/public/parse-edital-preview`
 18. ✅ Limpeza de legado — `LoginScreen.tsx` deletado (era stub deprecated sem imports)
 19. ✅ Blog SEO — 3 páginas long-tail com conteúdo original 800-1200 palavras, links internos e meta tags:
     - `/blog/como-montar-plano-estudo-concurso`
