@@ -236,8 +236,8 @@ function FullRadarChart({ data }: { data: SubjectHours[] }) {
           <PolarGrid stroke="var(--color-am-border-default)" strokeDasharray="3 3" />
           <PolarAngleAxis
             dataKey="abbr"
-            tick={(props: RadarTickProps) => (
-              <CustomTick {...props} total={chartData.length} />
+            tick={(props) => (
+              <CustomTick {...(props as RadarTickProps)} total={chartData.length} />
             )}
           />
           <PolarRadiusAxis
