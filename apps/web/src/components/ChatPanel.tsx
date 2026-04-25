@@ -232,7 +232,7 @@ export default function ChatPanel({
             ...prev,
             {
               role: 'assistant',
-              content: buildAiQuotaChatMessage(failure.quotaNotice),
+              content: buildAiQuotaChatMessage(failure.quotaNotice!),
             },
           ]);
           return;
