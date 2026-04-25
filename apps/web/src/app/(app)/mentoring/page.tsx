@@ -26,6 +26,7 @@ import WeeklyMentoringCard from '@/components/WeeklyMentoringCard';
 import MentorCard from '@/components/MentorCard';
 import ChatPanel from '@/components/ChatPanel';
 import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
+import TrackedUpgradeLink from '@/components/TrackedUpgradeLink';
 import {
   Brain,
   Sparkles,
@@ -37,7 +38,6 @@ import {
   ChevronRight,
   Target,
 } from 'lucide-react';
-import Link from 'next/link';
 
 // RDS Components
 import { KPICard, ChartCard, Skeleton, Button, Badge } from '@/components';
@@ -261,11 +261,19 @@ export default function MentoringPage() {
               </>
             ) : (
               <EntitlementUpgradeCard
-                title="Mentoria semanal fica do Pro para cima"
-                description="No free, voce sente o motor e acompanha a execucao. No Pro, entram o diagnostico semanal e a leitura orientada do seu plano."
+                title="Mentoria semanal entra no Pro"
+                description="No Free voce sente o motor e acompanha a execucao. O Pro entra quando voce quer diagnostico semanal, leitura orientada e uma camada mais analitica da sua rotina."
                 highlight="Diagnostico semanal, leitura estrategica da semana, orientacoes acionaveis e acompanhamento mais profundo."
                 recommendedPlan={recommendedPlanForMentoring}
-                ctaLabel="Comparar planos"
+                currentPlan={planTier}
+                surface="mentoring_weekly_gate"
+                featureCode={FeatureCode.WeeklyMentoring}
+                eventMetadata={{
+                  blockedFeatures: [
+                    FeatureCode.WeeklyDiagnostic,
+                    FeatureCode.WeeklyMentoring,
+                  ].join(','),
+                }}
               />
             )}
 
@@ -295,9 +303,16 @@ export default function MentoringPage() {
                   </Button>
                 ) : (
                   <Button asChild variant="outline" className="w-full">
-                    <Link href="/settings">
-                      <MessageCircle className="h-4 w-4 mr-2" /> Destravar Mentor IA
-                    </Link>
+                    <TrackedUpgradeLink
+                      href="/settings"
+                      surface="mentoring_chat_locked_cta"
+                      recommendedPlan="pro"
+                      currentPlan={planTier}
+                      featureCode={FeatureCode.ContextualAiChat}
+                      eventMetadata={{ title: 'Entender o Pro' }}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" /> Entender o Pro
+                    </TrackedUpgradeLink>
                   </Button>
                 )}
               </div>

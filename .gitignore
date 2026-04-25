@@ -23,12 +23,21 @@ node_modules/
 # production
 /build
 /apps/**/build
+/dist
+/apps/**/dist
+/packages/**/dist
 /apps/api/dist
 
 # misc
 .DS_Store
+Thumbs.db
 *.pem
+*.tmp
+*.swp
+*.log
 /.codex/
+.vscode/
+.idea/
 
 # debug
 npm-debug.log*

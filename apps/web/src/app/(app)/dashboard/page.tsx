@@ -18,7 +18,6 @@ import {
   SubjectHours,
   DailyHours,
   StudyConsistency,
-  PlanVsActual,
   StudyInsight,
   SubjectAccuracy,
 } from '@/types';
@@ -26,7 +25,6 @@ import SubjectRadarChart from '@/components/SubjectRadarChart';
 import ActivityHeatmap from '@/components/ActivityHeatmap';
 import SmartScheduleCard from '@/components/SmartScheduleCard';
 import InsightsPanel from '@/components/InsightsPanel';
-import PlanSelector from '@/components/PlanSelector';
 import PortfolioOverviewCard from '@/components/engine/PortfolioOverviewCard';
 import StudyJourneyCard from '@/components/StudyJourneyCard';
 import {
@@ -39,8 +37,10 @@ import {
 } from 'lucide-react';
 
 // New RDS Components
-import { KPICard, ChartCard, Skeleton, Button, Badge } from '@/components';
+import { KPICard, ChartCard, Button, Badge, EmptyState } from '@/components';
 import { fadeUp } from '@/design-system/tokens';
+import { getCoreFlowPlanContextState } from '@/lib/stability/core-flow';
+import Link from 'next/link';
 
 import {
   AreaChart,
@@ -54,13 +54,12 @@ import {
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
-  const { plans, activePlanId, activePlan, onPlanChange } = usePlanContext();
+  const { plans, activePlanId, activePlan } = usePlanContext();
 
   const [summary, setSummary] = useState<StudySummary>({ totalToday: 0, totalWeek: 0, totalMonth: 0 });
   const [subjectData, setSubjectData] = useState<SubjectHours[]>([]);
   const [weeklyData, setWeeklyData] = useState<DailyHours[]>([]);
   const [consistency, setConsistency] = useState<StudyConsistency | null>(null);
-  const [planVsActual, setPlanVsActual] = useState<PlanVsActual[]>([]);
   const [insights, setInsights] = useState<StudyInsight[]>([]);
   const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,7 +88,6 @@ export default function DashboardPage() {
           getPlanVsActual(user.uid, activePlanId ?? undefined, activePlan?.subjects),
         ]);
         setConsistency(consistencyRes);
-        setPlanVsActual(pvaRes);
         const insightsRes = await generateInsights(user.uid, consistencyRes, pvaRes);
         setInsights(insightsRes);
       } catch {
@@ -114,6 +112,24 @@ export default function DashboardPage() {
   }, [fetchData, user]);
 
   if (!user) return null;
+
+  const planContextState = getCoreFlowPlanContextState(plans, activePlanId);
+  if (planContextState.kind === 'missing-plan') {
+    return (
+      <div className="flex flex-col gap-6 pb-10 px-6 pt-8">
+        <EmptyState
+          icon={LayoutDashboard}
+          title={planContextState.title}
+          description={planContextState.description}
+          action={(
+            <Button asChild variant="primary">
+              <Link href="/planner">{planContextState.ctaLabel}</Link>
+            </Button>
+          )}
+        />
+      </div>
+    );
+  }
 
   const avgAccuracy = accuracyData.length
     ? Math.round(accuracyData.reduce((acc, s) => acc + s.accuracy, 0) / accuracyData.length)

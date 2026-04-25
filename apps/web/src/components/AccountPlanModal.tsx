@@ -1,122 +1,23 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, ChevronDown, ChevronUp, Crown, Loader2, X } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Crown, Info, X } from 'lucide-react';
+import { PlanTier } from '@/lib/entitlements';
 import {
-  PlanTier,
-} from '@/lib/entitlements';
-import { setUserPlanTier } from '@/lib/firebase/entitlements';
+  BETA_PLAN_META,
+  BETA_PLAN_ORDER,
+  getBetaPlanDisplay,
+  getCurrentPlanUsageLabel,
+  toDisplayTier,
+} from '@/lib/beta-plan-presentation';
 
 interface AccountPlanModalProps {
   isOpen: boolean;
-  userId: string;
   currentTier: PlanTier;
   currentPlansCount: number;
   onClose: () => void;
-  onTierChanged?: (tier: PlanTier) => void;
-}
-
-type PlanCard = {
-  tier: PlanTier;
-  label: string;
-  priceLabel: string;
-  description: string;
-  highlight?: string;
-  accentClass: string;
-  borderClass: string;
-};
-
-type DisplayPlanTier = Exclude<PlanTier, 'admin'>;
-
-type PlanDisplay = {
-  activePlansLabel: string;
-  simulationsLabel: string;
-  healthLabel: string;
-  weeklyDiagnosticLabel: string;
-  mentoringLabel: string;
-  editalParseLabel: string;
-  aiExplanationsLabel: string;
-  contextualChatLabel: string;
-  multiEditalLabel: string;
-  adaptivePlanLabel: string;
-};
-
-const PLAN_CARDS: PlanCard[] = [
-  {
-    tier: 'free',
-    label: 'Free',
-    priceLabel: 'R$ 0/mês',
-    description: 'Para começar',
-    accentClass: 'text-foreground',
-    borderClass: 'border-border',
-  },
-  {
-    tier: 'pro',
-    label: 'Pro',
-    priceLabel: 'R$ 34,90/mês',
-    description: 'Para constância diária',
-    highlight: 'Mais escolhido',
-    accentClass: 'text-primary',
-    borderClass: 'border-am-brand-primary/30',
-  },
-  {
-    tier: 'premium',
-    label: 'Premium',
-    priceLabel: 'R$ 64,90/mês',
-    description: 'Para máxima performance',
-    accentClass: 'text-foreground',
-    borderClass: 'border-am-brand-secondary/30',
-  },
-];
-
-const PLAN_DISPLAY: Record<DisplayPlanTier, PlanDisplay> = {
-  free: {
-    activePlansLabel: '1 plano ativo',
-    simulationsLabel: 'Simulados limitados',
-    healthLabel: 'Saude basica',
-    weeklyDiagnosticLabel: 'Nao',
-    mentoringLabel: 'Nao',
-    editalParseLabel: '1 credito inicial',
-    aiExplanationsLabel: '3/mês',
-    contextualChatLabel: '5/mês',
-    multiEditalLabel: 'Nao',
-    adaptivePlanLabel: 'Nao',
-  },
-  pro: {
-    activePlansLabel: '1 plano ativo',
-    simulationsLabel: 'Simulados completos',
-    healthLabel: 'Saude completa',
-    weeklyDiagnosticLabel: 'Incluido',
-    mentoringLabel: '4/mês',
-    editalParseLabel: '3/mês',
-    aiExplanationsLabel: '120/mês',
-    contextualChatLabel: '60/mês',
-    multiEditalLabel: 'Nao',
-    adaptivePlanLabel: 'Nao',
-  },
-  premium: {
-    activePlansLabel: '3 planos ativos',
-    simulationsLabel: 'Simulados completos',
-    healthLabel: 'Saude completa',
-    weeklyDiagnosticLabel: 'Incluido',
-    mentoringLabel: '8/mês',
-    editalParseLabel: '10/mês',
-    aiExplanationsLabel: '300/mês',
-    contextualChatLabel: '150/mês',
-    multiEditalLabel: 'Incluido',
-    adaptivePlanLabel: 'Incluido',
-  },
-};
-
-function dispatchEntitlementsUpdated() {
-  if (typeof window === 'undefined') return;
-  window.dispatchEvent(new Event('aprova:entitlements-updated'));
-}
-
-function toDisplayTier(tier: PlanTier): DisplayPlanTier {
-  return tier === 'admin' ? 'premium' : tier;
 }
 
 type ComparisonRow = {
@@ -127,65 +28,74 @@ type ComparisonRow = {
 const COMPARISON_ROWS: ComparisonRow[] = [
   {
     label: 'Planos ativos',
-    value: (tier) => PLAN_DISPLAY[tier].activePlansLabel,
+    value: (tier) => getBetaPlanDisplay(tier).activePlansLabel,
   },
   {
     label: 'Simulados',
-    value: (tier) => PLAN_DISPLAY[tier].simulationsLabel,
+    value: (tier) => getBetaPlanDisplay(tier).simulationsLabel,
   },
   {
     label: 'Saúde por matéria',
-    value: (tier) => PLAN_DISPLAY[tier].healthLabel,
+    value: (tier) => getBetaPlanDisplay(tier).healthLabel,
   },
   {
     label: 'Diagnóstico semanal',
-    value: (tier) => PLAN_DISPLAY[tier].weeklyDiagnosticLabel,
+    value: (tier) => getBetaPlanDisplay(tier).weeklyDiagnosticLabel,
   },
   {
     label: 'Mentoria recorrente',
-    value: (tier) => PLAN_DISPLAY[tier].mentoringLabel,
+    value: (tier) => getBetaPlanDisplay(tier).mentoringLabel,
   },
   {
     label: 'Parse de edital',
-    value: (tier) => PLAN_DISPLAY[tier].editalParseLabel,
+    value: (tier) => getBetaPlanDisplay(tier).editalParseLabel,
   },
   {
     label: 'IA explicativa',
-    value: (tier) => PLAN_DISPLAY[tier].aiExplanationsLabel,
+    value: (tier) => getBetaPlanDisplay(tier).aiExplanationsLabel,
   },
   {
     label: 'Chat contextual',
-    value: (tier) => PLAN_DISPLAY[tier].contextualChatLabel,
+    value: (tier) => getBetaPlanDisplay(tier).contextualChatLabel,
   },
   {
     label: 'Multi-edital',
-    value: (tier) => PLAN_DISPLAY[tier].multiEditalLabel,
+    value: (tier) => getBetaPlanDisplay(tier).multiEditalLabel,
+  },
+  {
+    label: 'Recovery plan',
+    value: (tier) => getBetaPlanDisplay(tier).recoveryPlanLabel,
   },
   {
     label: 'Plano adaptativo',
-    value: (tier) => PLAN_DISPLAY[tier].adaptivePlanLabel,
+    value: (tier) => getBetaPlanDisplay(tier).adaptivePlanLabel,
+  },
+  {
+    label: 'Pos-simulado inteligente',
+    value: (tier) => getBetaPlanDisplay(tier).postSimuladoLabel,
   },
 ];
 
 export default function AccountPlanModal({
   isOpen,
-  userId,
   currentTier,
   currentPlansCount,
   onClose,
-  onTierChanged,
 }: AccountPlanModalProps) {
-  const [mounted, setMounted] = useState(false);
-  const [savingTier, setSavingTier] = useState<PlanTier | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [showComparison, setShowComparison] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
-  const visiblePlans = useMemo(() => PLAN_CARDS, []);
   const currentDisplayTier = toDisplayTier(currentTier);
+  const currentPlanMeta = BETA_PLAN_META[currentDisplayTier];
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const closeFromEffect = useEffectEvent(() => {
+    setShowComparison(false);
+    onClose();
+  });
+
+  const handleClose = () => {
+    setShowComparison(false);
+    onClose();
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -194,13 +104,13 @@ export default function AccountPlanModal({
     document.body.style.overflow = 'hidden';
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') closeFromEffect();
     }
 
     function handleMouseDown(e: MouseEvent) {
       if (!modalRef.current) return;
       if (!modalRef.current.contains(e.target as Node)) {
-        onClose();
+        closeFromEffect();
       }
     }
 
@@ -212,32 +122,9 @@ export default function AccountPlanModal({
       document.removeEventListener('mousedown', handleMouseDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen, onClose]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setShowComparison(false);
-    }
   }, [isOpen]);
 
-  const handleChangeTier = async (tier: PlanTier) => {
-    if (!userId || savingTier) return;
-    if (tier === currentTier) return;
-
-    setError(null);
-    setSavingTier(tier);
-    try {
-      await setUserPlanTier(userId, tier);
-      dispatchEntitlementsUpdated();
-      onTierChanged?.(tier);
-    } catch {
-      setError('Não foi possível atualizar o plano agora. Tente novamente.');
-    } finally {
-      setSavingTier(null);
-    }
-  };
-
-  if (!mounted) return null;
+  if (typeof document === 'undefined') return null;
 
   return createPortal(
     <AnimatePresence>
@@ -260,12 +147,12 @@ export default function AccountPlanModal({
               <div>
                 <p className="ds-kicker inline-flex items-center gap-2 text-primary">
                   <Crown className="h-3.5 w-3.5" />
-                  Conta e Plano
+                  Conta e Acesso
                 </p>
-                <h2 className="font-sans text-lg font-bold tracking-tight text-foreground">Gerenciar assinatura</h2>
+                <h2 className="font-sans text-lg font-bold tracking-tight text-foreground">Entender acesso no beta</h2>
               </div>
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-muted-foreground"
               >
                 <X className="h-5 w-5" />
@@ -275,7 +162,7 @@ export default function AccountPlanModal({
             <div className="space-y-4 overflow-y-auto p-5">
               {currentTier === 'admin' && (
                 <div className="rounded-md border border-am-success/30 bg-green-500/10 px-3 py-2 text-sm text-green-500">
-                  Conta em modo <span className="font-semibold">ADMIN</span>. Escolha um plano abaixo para simular a experiência do usuário.
+                  Conta em modo <span className="font-semibold">ADMIN</span>. A gestão real de testers segue pelo painel interno da área de configurações.
                 </div>
               )}
 
@@ -285,41 +172,56 @@ export default function AccountPlanModal({
                     Plano atual: <span className="font-semibold uppercase text-foreground">{currentTier}</span>
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Editais usados: {currentPlansCount}
+                    {getCurrentPlanUsageLabel(currentDisplayTier, currentPlansCount)}
                   </p>
                 </div>
                 <div className="rounded-md border border-border bg-muted p-3 text-sm">
-                  <p className="text-muted-foreground">Acesso atual</p>
+                  <p className="text-muted-foreground">Camada atual do beta</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {PLAN_DISPLAY[currentDisplayTier].activePlansLabel}
+                    {currentPlanMeta.focusLabel}
                   </p>
                 </div>
               </div>
 
-              {error && (
-                <div className="rounded-md border border-am-error/30 bg-am-error/10 px-3 py-2 text-sm text-am-error">
-                  {error}
+              <div className="flex items-start gap-3 rounded-md border border-primary/20 bg-primary/5 px-3 py-3 text-sm text-muted-foreground">
+                <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                <div>
+                  <p className="font-medium text-foreground">Beta com operação manual</p>
+                  <p className="mt-1">
+                    Durante o beta, mudanças de plano, upgrade e qualquer ajuste comercial são liberados manualmente pela equipe.
+                    Esta tela é informativa e não altera a sua assinatura.
+                  </p>
                 </div>
-              )}
+              </div>
 
               <div className="grid gap-3 md:grid-cols-3">
-                {visiblePlans.map((plan) => {
-                  const isCurrent = plan.tier === currentTier;
-                  const isSaving = savingTier === plan.tier;
-                  const display = PLAN_DISPLAY[toDisplayTier(plan.tier)];
+                {BETA_PLAN_ORDER.map((tier) => {
+                  const plan = BETA_PLAN_META[tier];
+                  const isCurrent = plan.tier === currentDisplayTier;
+                  const display = getBetaPlanDisplay(plan.tier);
+                  const accentClass =
+                    plan.tier === 'pro' ? 'text-primary' : 'text-foreground';
+                  const borderClass =
+                    plan.tier === 'pro'
+                      ? 'border-am-brand-primary/30'
+                      : plan.tier === 'premium'
+                        ? 'border-am-brand-secondary/30'
+                        : 'border-border';
 
                   return (
                     <div
                       key={plan.tier}
-                      className={`flex min-h-[420px] flex-col rounded-lg border bg-card p-4 backdrop-blur-sm ${plan.borderClass} ${
+                      className={`flex min-h-[420px] flex-col rounded-lg border bg-card p-4 backdrop-blur-sm ${borderClass} ${
                         isCurrent ? 'ring-1 ring-am-brand-primary/40' : ''
                       }`}
                     >
                       <div className="mb-3 flex items-start justify-between gap-2">
                         <div>
-                          <h3 className={`font-sans text-base font-bold tracking-tight ${plan.accentClass}`}>{plan.label}</h3>
+                          <h3 className={`font-sans text-base font-bold tracking-tight ${accentClass}`}>{plan.label}</h3>
                           <p className="text-sm text-muted-foreground">{plan.description}</p>
-                          <p className="mt-0.5 font-sans whitespace-nowrap text-[28px] font-bold leading-none text-foreground">{plan.priceLabel}</p>
+                          <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                            {plan.focusLabel}
+                          </p>
                         </div>
                         {plan.highlight && (
                           <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
@@ -343,11 +245,11 @@ export default function AccountPlanModal({
                         </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-green-500" />
-                          {display.simulationsLabel}
+                          Simulados: {display.simulationsLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-green-500" />
-                          {display.healthLabel}
+                          Saude por materia: {display.healthLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-green-500" />
@@ -375,21 +277,28 @@ export default function AccountPlanModal({
                         </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-green-500" />
+                          Recovery plan: {display.recoveryPlanLabel}
+                        </li>
+                        <li className="inline-flex items-center gap-1.5">
+                          <Check className="h-3.5 w-3.5 text-green-500" />
                           Plano adaptativo: {display.adaptivePlanLabel}
+                        </li>
+                        <li className="inline-flex items-center gap-1.5">
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                          Pos-simulado inteligente: {display.postSimuladoLabel}
                         </li>
                       </ul>
 
                       <button
-                        onClick={() => void handleChangeTier(plan.tier)}
-                        disabled={isCurrent || Boolean(savingTier)}
+                        type="button"
+                        disabled
                         className={`mt-auto flex w-full items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                           isCurrent
                             ? 'bg-muted text-muted-foreground'
-                            : 'bg-am-brand-gradient text-white hover:brightness-110 shadow-lg shadow-primary/20'
+                            : 'border border-border bg-card text-muted-foreground'
                         } disabled:cursor-not-allowed disabled:opacity-70`}
                       >
-                        {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                        {isCurrent ? 'Plano atual' : 'Escolher plano'}
+                        {isCurrent ? 'Plano atual' : 'Liberacao manual no beta'}
                       </button>
                     </div>
                   );
@@ -436,7 +345,7 @@ export default function AccountPlanModal({
               </div>
 
               <p className="text-xs text-muted-foreground">
-                Fluxo de cobrança pode ser conectado aqui na próxima fase com Stripe/Pagar.me.
+                Gateway e cobranca real entram numa fase posterior, depois da calibracao do beta e da esteira de valor free to pro.
               </p>
             </div>
           </motion.div>

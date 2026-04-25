@@ -1,10 +1,13 @@
 'use client';
 
+import { FeatureCode } from '@aprovamind/domain';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { saveSimulatedConfig, getRandomQuestions, getPredictiveQuestions, getAccuracyBySubject } from '@/lib/firebase/questions';
+import { getBetaUpgradeNarrative } from '@/lib/beta-plan-presentation';
 import { useEntitlements } from '@/hooks/useEntitlements';
+import TrackedUpgradeLink from '@/components/TrackedUpgradeLink';
 import { QuestionDifficulty, DEFAULT_SUBJECTS } from '@/types';
 import { ArrowLeft, Play, Lock, Brain, Shuffle, Zap, Sparkles, Target } from 'lucide-react';
 import Link from 'next/link';
@@ -21,7 +24,7 @@ const fadeUp = {
 export default function CriarSimuladoPage() {
   const router = useRouter();
   const { user } = useAuthContext();
-  const { capabilities } = useEntitlements(user?.uid, user?.email);
+  const { capabilities, planTier } = useEntitlements(user?.uid, user?.email);
 
   const [questionCount, setQuestionCount] = useState(20);
   const [durationMinutes, setDurationMinutes] = useState(60);
@@ -113,6 +116,8 @@ export default function CriarSimuladoPage() {
   }
 
   if (!capabilities.canCreateSimulados) {
+    const proUpgrade = getBetaUpgradeNarrative('pro');
+
     return (
       <div className="flex flex-col gap-8 pb-10">
         
@@ -124,21 +129,37 @@ export default function CriarSimuladoPage() {
               </Link>
               <div>
                 <h1 className="font-sans font-sans text-am-h3 md:text-3xl font-bold text-foreground tracking-tight leading-[1.1]">Criar Simulado</h1>
-                <p className="text-am-body-sm text-muted-foreground mt-4 max-w-xl leading-relaxed font-mono">Recurso Pro/Premium</p>
+                <p className="text-am-body-sm text-muted-foreground mt-4 max-w-xl leading-relaxed font-mono">Camada Pro em diante</p>
               </div>
             </div>
             <div className="rounded-2xl border border-[var(--primary)]/20 p-10 text-center" >
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15">
                 <Lock className="h-7 w-7 text-primary" />
               </div>
-              <p className="font-sans text-lg font-semibold text-foreground">Simulados personalizados — Pro/Premium</p>
+              <p className="font-sans text-lg font-semibold text-foreground">Simulados personalizados entram no Pro</p>
               <p className="mt-2 text-am-body-sm text-muted-foreground mt-4 max-w-xl leading-relaxed max-w-md mx-auto">
-                Você pode continuar usando provas oficiais na seção Provas &amp; Simulados.
+                {proUpgrade.bridgeCopy}
               </p>
-              <Link href="/provas" className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-muted px-5 py-2.5 text-am-body-sm text-muted-foreground mt-4 max-w-xl leading-relaxed transition-all hover:bg-muted-foreground/10 hover:text-foreground font-mono">
-                <ArrowLeft className="h-4 w-4" />
-                Voltar para Provas
-              </Link>
+              <p className="mt-3 text-am-body-sm text-muted-foreground max-w-md mx-auto">
+                Enquanto isso, voce pode continuar usando provas oficiais no hub de Provas.
+              </p>
+              <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <TrackedUpgradeLink
+                  href="/settings"
+                  surface="criar_simulado_locked_cta"
+                  recommendedPlan="pro"
+                  currentPlan={planTier}
+                  featureCode={FeatureCode.SimulationsCustom}
+                  eventMetadata={{ title: proUpgrade.ctaLabel }}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-am-body-sm text-primary transition-all hover:bg-primary/10 font-mono"
+                >
+                  {proUpgrade.ctaLabel}
+                </TrackedUpgradeLink>
+                <Link href="/provas" className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-5 py-2.5 text-am-body-sm text-muted-foreground transition-all hover:bg-muted-foreground/10 hover:text-foreground font-mono">
+                  <ArrowLeft className="h-4 w-4" />
+                  Voltar para Provas
+                </Link>
+              </div>
             </div>
           </div>
         </div>

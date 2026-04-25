@@ -14,8 +14,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
-import { logAiUsageEvent, parseJsonFromModelText, runAiText } from '@/lib/ai';
-import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { parseJsonFromModelText } from '@/lib/ai';
+import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
 import { FeatureCode } from '@aprovamind/domain';
 import { requireEntitlementFeature } from '@/lib/server/userEntitlements';
 
@@ -173,34 +173,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const aiResponse = await runAiText({
-      task: 'weekly-mentoring',
-      prompt: buildPrompt(body),
-      temperature: 0.4,
-      maxOutputTokens: 4096,
-      preferJson: true,
+    const aiResponse = await runDedicatedAiText({
+      idToken: auth.idToken,
+      payload: {
+        task: 'weekly-mentoring',
+        prompt: buildPrompt(body),
+        temperature: 0.4,
+        maxOutputTokens: 4096,
+        preferJson: true,
+      },
     });
 
     const parsed = parseJsonFromModelText<Record<string, unknown>>(aiResponse.text || '');
     if (!parsed) {
       console.error('[weekly-mentoring] JSON inválido:', (aiResponse.text || '').slice(0, 500));
-      const usageEvent = {
-        route: '/api/weekly-mentoring',
-        task: 'weekly-mentoring',
-        provider: aiResponse.provider,
-        model: aiResponse.model,
-        latencyMs: aiResponse.latencyMs,
-        inputTokens: aiResponse.usage.inputTokens,
-        outputTokens: aiResponse.usage.outputTokens,
-        totalTokens: aiResponse.usage.totalTokens,
-        estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-        success: false,
-        statusCode: 422,
-        userId: auth.uid,
-        errorCode: 'JSON_PARSE_FAILED',
-      } as const;
-      logAiUsageEvent(usageEvent);
-      void saveAiUsageEvent(usageEvent, auth.idToken);
       return NextResponse.json(
         { error: 'Não foi possível gerar a mentoria. Tente novamente.' },
         { status: 422 }
@@ -216,23 +202,6 @@ export async function POST(request: NextRequest) {
       suggestedGoals: Array.isArray(parsed.suggestedGoals) ? parsed.suggestedGoals : [],
       motivationalClose: typeof parsed.motivationalClose === 'string' ? parsed.motivationalClose : 'Continue firme. A vaga é sua.',
     };
-
-    const usageEvent = {
-      route: '/api/weekly-mentoring',
-      task: 'weekly-mentoring',
-      provider: aiResponse.provider,
-      model: aiResponse.model,
-      latencyMs: aiResponse.latencyMs,
-      inputTokens: aiResponse.usage.inputTokens,
-      outputTokens: aiResponse.usage.outputTokens,
-      totalTokens: aiResponse.usage.totalTokens,
-      estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-      success: true,
-      statusCode: 200,
-      userId: auth.uid,
-    } as const;
-    logAiUsageEvent(usageEvent);
-    void saveAiUsageEvent(usageEvent, auth.idToken);
 
     return NextResponse.json(result, {
       headers: {

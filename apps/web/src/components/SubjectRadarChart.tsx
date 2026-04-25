@@ -27,6 +27,14 @@ interface SubjectRadarChartProps {
   loading?: boolean;
 }
 
+interface RadarTickProps {
+  payload: { value: string };
+  x: number;
+  y: number;
+  textAnchor?: string;
+  total?: number;
+}
+
 // ============================
 // Helpers
 // ============================
@@ -87,8 +95,8 @@ function getSubjectColor(subject: string): string {
 // Sub-components
 // ============================
 
-function CustomTick(props: any) {
-  const { payload, x, y, textAnchor, index, total } = props;
+function CustomTick(props: RadarTickProps) {
+  const { payload, x, y, textAnchor, total = 0 } = props;
   
   // Dynamic font size based on subject count
   let fontSize = 11;
@@ -228,7 +236,9 @@ function FullRadarChart({ data }: { data: SubjectHours[] }) {
           <PolarGrid stroke="var(--color-am-border-default)" strokeDasharray="3 3" />
           <PolarAngleAxis
             dataKey="abbr"
-            tick={(props: any) => <CustomTick {...props} total={chartData.length} />}
+            tick={(props: RadarTickProps) => (
+              <CustomTick {...props} total={chartData.length} />
+            )}
           />
           <PolarRadiusAxis
             tick={{ fill: 'var(--color-am-text-tertiary)', fontSize: 10 }}

@@ -15,6 +15,17 @@ export interface FirestoreDocumentResult {
   data?: Record<string, Primitive>;
 }
 
+export interface FirestoreCollectionResult {
+  ok: boolean;
+  status?: number;
+  error?: string;
+  documents?: Array<{
+    id: string;
+    updateTime?: string;
+    data: Record<string, Primitive>;
+  }>;
+}
+
 export interface VerifiedFirebaseUser {
   uid: string;
   email?: string | null;
@@ -221,6 +232,53 @@ function buildDocumentUrl(
   )}`;
 }
 
+export async function createFirestoreDocumentWithUserToken(params: {
+  collection: string;
+  data: Record<string, Primitive>;
+  idToken: string;
+}): Promise<FirestoreWriteResult> {
+  const projectId = getResolvedProjectId(params.idToken);
+
+  if (!projectId) {
+    return { ok: false, error: 'FIREBASE_PROJECT_ID não configurado.' };
+  }
+
+  const url = buildCollectionUrl(projectId, params.collection);
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${params.idToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        fields: toFirestoreFields(params.data),
+      }),
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      return {
+        ok: false,
+        status: res.status,
+        error: errText || 'Falha ao escrever documento no Firestore.',
+      };
+    }
+
+    return { ok: true, status: res.status };
+  } catch (error) {
+    return {
+      ok: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Erro de rede ao escrever no Firestore.',
+    };
+  }
+}
+
 export async function getFirestoreDocumentWithUserToken(params: {
   collection: string;
   documentId: string;
@@ -276,6 +334,80 @@ export async function getFirestoreDocumentWithUserToken(params: {
         error instanceof Error
           ? error.message
           : 'Erro de rede ao ler no Firestore.',
+    };
+  }
+}
+
+export async function listFirestoreDocumentsWithUserToken(params: {
+  collection: string;
+  idToken: string;
+  pageSize?: number;
+}): Promise<FirestoreCollectionResult> {
+  const projectId = getResolvedProjectId(params.idToken);
+
+  if (!projectId) {
+    return { ok: false, error: 'FIREBASE_PROJECT_ID não configurado.' };
+  }
+
+  const searchParams = new URLSearchParams();
+  if (params.pageSize && Number.isFinite(params.pageSize) && params.pageSize > 0) {
+    searchParams.set('pageSize', String(Math.floor(params.pageSize)));
+  }
+
+  const baseUrl = buildCollectionUrl(projectId, params.collection);
+  const url = searchParams.toString() ? `${baseUrl}?${searchParams.toString()}` : baseUrl;
+
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${params.idToken}`,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      return {
+        ok: false,
+        status: res.status,
+        error: errText || 'Falha ao listar documentos no Firestore.',
+      };
+    }
+
+    const body = (await res.json()) as {
+      documents?: Array<{
+        name?: string;
+        updateTime?: string;
+        fields?: Record<string, unknown>;
+      }>;
+    };
+
+    const documents = (body.documents || []).flatMap((document) => {
+      if (!document?.name) return [];
+      const rawId = document.name.split('/').pop();
+      if (!rawId) return [];
+
+      return [{
+        id: decodeURIComponent(rawId),
+        updateTime: document.updateTime,
+        data: fromFirestoreFields(document.fields),
+      }];
+    });
+
+    return {
+      ok: true,
+      status: res.status,
+      documents,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Erro de rede ao listar documentos no Firestore.',
     };
   }
 }

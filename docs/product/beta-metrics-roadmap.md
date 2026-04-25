@@ -21,7 +21,8 @@ Sim, a base atual já pode ficar na `main` durante o beta, desde que:
 
 O grande bloco que ainda falta antes de cobrança real é:
 
-- instrumentação de eventos de produto para upgrade, bloqueio e quota
+- calibrar a escada `free -> pro` com base nos bloqueios, quotas e cliques que
+  o beta já está coletando
 
 ## O que já medimos hoje
 
@@ -44,8 +45,9 @@ O que já conseguimos observar:
 
 Arquivos principais:
 
-- [metrics.ts](/Users/marleite/workspace/aprova-flow/apps/web/src/lib/ai/metrics.ts)
-- [aiUsageStore.ts](/Users/marleite/workspace/aprova-flow/apps/web/src/lib/server/aiUsageStore.ts)
+- [metrics.ts](/Users/marleite/workspace/aprova-flow/packages/ai-gateway/src/metrics.ts)
+- [routes.ts](/Users/marleite/workspace/aprova-flow/apps/api/src/modules/ai/routes.ts)
+- [ai-usage-store.ts](/Users/marleite/workspace/aprova-flow/apps/api/src/modules/ai/ai-usage-store.ts)
 - [aiUsage.ts](/Users/marleite/workspace/aprova-flow/apps/web/src/lib/firebase/aiUsage.ts)
 
 ### 2. Uso de quotas por entitlement
@@ -90,30 +92,55 @@ Isso já ajuda a responder perguntas como:
 
 ### 1. Eventos de produto ligados a billing e conversão
 
-Ainda não existe instrumentação consistente para:
+Agora já existe uma baseline consistente para:
 
 - `feature_blocked`
 - `upgrade_cta_viewed`
 - `upgrade_cta_clicked`
 - `ai_quota_exhausted`
+- `simulation_completed`
 - `plan_status_changed`
 - `tester_subscription_updated`
 
-Esses eventos são os mais importantes para aprender com o beta antes do gateway.
+Esses eventos já sustentam a leitura operacional do beta antes do gateway.
+
+O que ainda falta nesta camada:
+
+- consolidar comparações entre janelas (`7d`, `14d`, `30d`)
+- observar quais sinais puxam mais `free -> pro` versus `pro -> premium`
+- ligar melhor bloqueio e clique com recorrência real de uso do produto
 
 ### 2. Funil real de upgrade
 
-Hoje ainda não temos um fluxo claro para responder:
+Hoje já conseguimos responder melhor:
 
 - em qual tela o usuário sentiu falta do `Pro`
 - em qual tela o usuário sentiu falta do `Premium`
 - qual bloqueio gerou clique de upgrade
-- qual feature realmente puxou desejo de mudança de plano
+
+O que ainda não está totalmente claro:
+
+- qual feature realmente puxou mudança manual de plano com mais frequência
+- quais bloqueios sinalizam curiosidade e quais realmente antecipam upgrade
+- qual recorte de quota deve ser recalibrado antes do gateway
+- quantas vezes `dashboard` e `engine` ainda devolvem o usuário ao Planner por
+  falta de contexto real de edital
 
 ### 3. Painel consolidado de produto
 
-Os dados existem em partes, mas ainda não estão organizados em um painel claro
-de beta.
+Os dados agora já estão organizados em um painel admin claro de beta.
+
+Atualizacao de implementacao:
+
+- existe um painel admin em `/settings` consolidando `product_usage_events` e
+  `ai_usage_events` na janela de 7 dias
+- esse painel agora le os dados via `/api/admin/beta-signals` ->
+  `/billing/admin/beta-signals`, sem depender de leitura direta do Firestore no
+  navegador
+- o painel agora tambem segmenta a escada `free -> pro` versus
+  `pro -> premium`, pressao de quota por tarefa e mudancas recentes de plano
+- o objetivo agora deixa de ser "criar um primeiro painel" e passa a ser
+  calibrar quais cortes e comparacoes realmente ajudam na revisao semanal
 
 ## Recomendação de Merge
 
@@ -170,13 +197,19 @@ Esses itens podem entrar depois do beta ou no meio dele, com mais segurança.
 
 ### Etapa 1 — Instrumentação mínima
 
-Adicionar eventos para:
+Manter os eventos atuais confiáveis para:
 
 - `feature_blocked`
 - `upgrade_cta_viewed`
 - `upgrade_cta_clicked`
 - `ai_quota_exhausted`
 - `tester_subscription_updated`
+
+E reforçar:
+
+- consistência dos payloads (`recommendedPlan`, `planTier`, `surface`)
+- disciplina de uso do painel admin nas revisões semanais
+- cobertura gradual de mais marcos reais de retenção além dos gates
 
 ### Etapa 2 — Revisão operacional semanal
 
@@ -194,6 +227,8 @@ Com base no beta:
 - revisar quotas
 - revisar copy de upgrade
 - revisar o que fica em `free`, `pro` e `premium`
+- revisar se os bloqueios puxam mais `free -> pro` ou `pro -> premium`
+- revisar quais tarefas de IA estao concentrando a pressao de quota
 
 ### Etapa 4 — Gateway real
 

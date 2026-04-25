@@ -11,6 +11,7 @@
 'use client';
 
 import { FeatureCode } from '@aprovamind/domain';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -41,8 +42,11 @@ import {
   updateStudyPlan,
   deleteStudyPlan,
 } from '@/lib/firebase/plans';
+import AiQuotaNotice from '@/components/AiQuotaNotice';
+import TrackedUpgradeLink from '@/components/TrackedUpgradeLink';
+import { readAiErrorResponse, type AiQuotaNoticeData } from '@/lib/ai/quota-feedback';
+import { getBetaUpgradeNarrative } from '@/lib/beta-plan-presentation';
 import { auth } from '@/lib/firebase/config';
-import Link from 'next/link';
 import {
   buildDefaultStudyCapacityHours,
   normalizeStudyCapacityHours,
@@ -199,7 +203,8 @@ export default function PlanManager({
   onClose,
 }: PlanManagerProps) {
   const isEditing = !!editPlan?.id;
-  const { hasFeature } = useEntitlements(userId);
+  const { hasFeature, planTier } = useEntitlements(userId);
+  const pathname = usePathname();
 
   const [name, setName] = useState('');
   const [color, setColor] = useState<string>(PLAN_COLORS[0].hex);
@@ -218,6 +223,7 @@ export default function PlanManager({
   // PDF Import
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [importQuotaNotice, setImportQuotaNotice] = useState<AiQuotaNoticeData | null>(null);
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -253,6 +259,7 @@ export default function PlanManager({
     }
     setConfirmDelete(false);
     setImportError(null);
+    setImportQuotaNotice(null);
     setImportSuccess(null);
   }, [editPlan, isOpen]);
 
@@ -282,6 +289,7 @@ export default function PlanManager({
 
     setImporting(true);
     setImportError(null);
+    setImportQuotaNotice(null);
     setImportSuccess(null);
 
     try {
@@ -313,8 +321,13 @@ export default function PlanManager({
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Erro ao processar o edital.');
+        const failure = await readAiErrorResponse({
+          response: res,
+          fallbackMessage: 'Erro ao processar o edital.',
+        });
+        setImportQuotaNotice(failure.quotaNotice);
+        setImportError(failure.message);
+        return;
       }
 
       const data = await res.json();
@@ -344,6 +357,7 @@ export default function PlanManager({
 
       setTimeout(() => setImportSuccess(null), 5000);
     } catch (err) {
+      setImportQuotaNotice(null);
       setImportError(
         err instanceof Error ? err.message : 'Erro ao processar o edital.'
       );
@@ -541,7 +555,7 @@ export default function PlanManager({
                 <div className="flex flex-wrap gap-2">
                   {PLAN_COLORS.map((c) => (
                     <button
-                      key={c.hex}
+                      key={`${c.name}-${c.hex}`}
                       onClick={() => setColor(c.hex)}
                       className={`h-8 w-8 rounded-full border-2 transition-all ${
                         color === c.hex
@@ -724,14 +738,28 @@ export default function PlanManager({
                   {/* Mensagens de erro/sucesso */}
                   <AnimatePresence>
                     {importError && (
-                      <motion.p
+                      <motion.div
                         initial={{ opacity: 0, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
-                        className="mt-2 rounded-lg bg-red-500/10 px-3 py-2 text-center text-xs text-red-400"
+                        className="mt-2"
                       >
-                        {importError}
-                      </motion.p>
+                        {importQuotaNotice ? (
+                          <AiQuotaNotice
+                            notice={importQuotaNotice}
+                            surface="plan_manager_parse_edital_notice"
+                            featureCode={FeatureCode.EditalParse}
+                            eventMetadata={{
+                              title: 'Importar edital (PDF)',
+                              entryRoute: pathname,
+                            }}
+                          />
+                        ) : (
+                          <p className="rounded-lg bg-red-500/10 px-3 py-2 text-center text-xs text-red-400">
+                            {importError}
+                          </p>
+                        )}
+                      </motion.div>
                     )}
                     {importSuccess && (
                       <motion.p
@@ -754,17 +782,27 @@ export default function PlanManager({
                     <FileUp className="h-4 w-4 text-[var(--primary)]" />
                   </div>
                   <p className="text-sm font-medium text-foreground">
-                    Importacao de edital bloqueada neste plano
+                    Importacao de edital entra no Pro
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    O parse de edital por IA entra a partir do plano pago e ganha mais folga de uso nos niveis superiores.
+                    O parse de edital por IA entra no Pro para estudo serio e ganha mais folga no Premium.
                   </p>
-                  <Link
+                  <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+                    {getBetaUpgradeNarrative('pro').bridgeCopy}
+                  </p>
+                  <TrackedUpgradeLink
                     href="/settings"
+                    surface="plan_manager_edital_parse_locked"
+                    recommendedPlan="pro"
+                    currentPlan={planTier}
+                    featureCode={FeatureCode.EditalParse}
+                    eventMetadata={{
+                      title: 'Importacao de edital entra no Pro',
+                    }}
                     className="mt-3 inline-flex items-center gap-2 rounded-full border border-border/50/30 bg-card px-4 py-2 text-xs font-medium text-primary transition hover:bg-primary/10"
                   >
-                    Ver planos
-                  </Link>
+                    {getBetaUpgradeNarrative('pro').ctaLabel}
+                  </TrackedUpgradeLink>
                 </div>
               )}
 

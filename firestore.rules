@@ -8,7 +8,8 @@ service cloud.firestore {
       return request.auth != null 
              && request.auth.token.email in [
                'marsleite@gmail.com',
-               'graceandradeleite@gmail.com'
+               'graceandradeleite@gmail.com',
+               'marcelop3251@gmail.com'
              ];
     }
 
@@ -27,6 +28,41 @@ service cloud.firestore {
     function isPremium() {
       let plan = getUserPlan();
       return plan == 'premium' || isAdmin();
+    }
+
+    // Campos de entitlement e billing são server-side only.
+    function userStatsServerManagedFields() {
+      return [
+        'planTier',
+        'aiPlanTier',
+        'subscriptionTier',
+        'planType',
+        'tier',
+        'subscriptionStatus',
+        'billingStatus',
+        'planStatus',
+        'status',
+        'entitlementUsage',
+        'entitlementsUsage',
+        'featureUsage',
+        'featureUsageJson',
+        'entitlementUsagePeriods',
+        'entitlementsUsagePeriods',
+        'featureUsagePeriods',
+        'featureUsagePeriodsJson',
+        'subscriptionUpdatedAt'
+      ];
+    }
+
+    function userStatsCreateWithoutServerManagedFields() {
+      return !request.resource.data.keys().hasAny(userStatsServerManagedFields());
+    }
+
+    function userStatsUpdatePreservesServerManagedFields() {
+      return !request.resource.data
+        .diff(resource.data)
+        .affectedKeys()
+        .hasAny(userStatsServerManagedFields());
     }
     
     // Sessões de estudo
@@ -100,8 +136,53 @@ service cloud.firestore {
     
     // Configurações do usuário (meta semanal, plano ativo, etc.)
     match /user_stats/{userId} {
-      allow read, write: if request.auth != null
-                         && (request.auth.uid == userId || isAdmin());
+      allow read: if request.auth != null
+                  && (request.auth.uid == userId || isAdmin());
+
+      allow create: if request.auth != null
+                    && (
+                      isAdmin()
+                      || (
+                        request.auth.uid == userId
+                        && userStatsCreateWithoutServerManagedFields()
+                      )
+                    );
+
+      allow update: if request.auth != null
+                    && (
+                      isAdmin()
+                      || (
+                        request.auth.uid == userId
+                        && userStatsUpdatePreservesServerManagedFields()
+                      )
+                    );
+
+      allow delete: if request.auth != null
+                    && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /product_usage_events/{eventId} {
+      allow read: if request.auth != null
+                  && (
+                    request.auth.uid == resource.data.userId
+                    || request.auth.uid == resource.data.actorUserId
+                    || isAdmin()
+                  );
+
+      allow create: if request.auth != null
+                    && request.resource.data.actorUserId == request.auth.uid
+                    && request.resource.data.userId is string
+                    && request.resource.data.eventName in [
+                      'feature_blocked',
+                      'upgrade_cta_viewed',
+                      'upgrade_cta_clicked',
+                      'ai_quota_exhausted',
+                      'plan_status_changed',
+                      'tester_subscription_updated'
+                    ]
+                    && request.resource.data.createdAt is string;
+
+      allow update, delete: if false;
     }
 
     // Estado ativo do cronômetro (documento único por usuário)
@@ -190,7 +271,10 @@ service cloud.firestore {
     // Cada usuário escreve apenas seus próprios eventos.
     match /ai_usage_events/{eventId} {
       allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
+                  && (
+                    resource.data.userId == request.auth.uid
+                    || isAdmin()
+                  );
 
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid
@@ -204,7 +288,8 @@ service cloud.firestore {
                     && request.resource.data.totalTokens is number
                     && request.resource.data.estimatedCostUsd is number
                     && request.resource.data.success is bool
-                    && request.resource.data.statusCode is number;
+                    && request.resource.data.statusCode is number
+                    && request.resource.data.createdAt is string;
 
       allow update, delete: if false;
     }

@@ -38,6 +38,8 @@ import {
   saveWeeklyMentoring,
   getCurrentWeekStart,
 } from '@/lib/firebase/sessions';
+import AiQuotaNotice from '@/components/AiQuotaNotice';
+import { readAiErrorResponse, type AiQuotaNoticeData } from '@/lib/ai/quota-feedback';
 import { auth } from '@/lib/firebase/config';
 import { Button } from '@/components/primitives/Button';
 
@@ -80,6 +82,7 @@ export default function WeeklyMentoringCard({
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [quotaNotice, setQuotaNotice] = useState<AiQuotaNoticeData | null>(null);
   const [expanded, setExpanded] = useState(true);
   const [cachedWeek, setCachedWeek] = useState<string | null>(null);
 
@@ -118,6 +121,7 @@ export default function WeeklyMentoringCard({
 
     setGenerating(true);
     setError(null);
+    setQuotaNotice(null);
 
     try {
       const idToken = await auth.currentUser?.getIdToken();
@@ -169,12 +173,12 @@ export default function WeeklyMentoringCard({
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        if (res.status === 429) {
-          setError('Limite da IA atingido. Tente novamente mais tarde.');
-        } else {
-          setError(data.error || 'Erro ao gerar mentoria.');
-        }
+        const failure = await readAiErrorResponse({
+          response: res,
+          fallbackMessage: 'Erro ao gerar mentoria.',
+        });
+        setError(failure.message);
+        setQuotaNotice(failure.quotaNotice);
         return;
       }
 
@@ -185,6 +189,7 @@ export default function WeeklyMentoringCard({
       // Salva no Firestore (cache)
       await saveWeeklyMentoring(userId, result, planId).catch(() => { });
     } catch {
+      setQuotaNotice(null);
       setError('Erro de conexão. Tente novamente.');
     } finally {
       setGenerating(false);
@@ -287,7 +292,12 @@ export default function WeeklyMentoringCard({
         {/* Botão de gerar (quando não tem conteúdo) */}
         {!content && (
           <div className="space-y-3">
-            {error && (
+            {quotaNotice ? (
+              <AiQuotaNotice
+                notice={quotaNotice}
+                surface="weekly_mentoring_card"
+              />
+            ) : error && (
               <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-400" />
                 <p className="text-xs text-red-300">{error}</p>

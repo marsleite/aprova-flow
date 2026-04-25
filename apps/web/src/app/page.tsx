@@ -36,16 +36,16 @@ export default function LandingPage() {
                         </span>
                     </div>
                     <h1 className="text-6xl md:text-8xl font-medium tracking-tighter leading-[0.9] text-foreground mb-8 text-glow transition-colors">
-                        Estudo<br/>
-                        <span className="text-primary">Cirúrgico</span><br/>
-                        e Implacável
+                        Planeje no<br/>
+                        <span className="text-primary">macro</span><br/>
+                        e execute melhor hoje
                     </h1>
                     <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed mb-10 font-light transition-colors">
-                        O primeiro sistema de performance guiado por IA que diagnostica suas fraquezas e traça a rota exata até a aprovação.
+                        Planeje no Planner, ajuste a semana no Dashboard e execute o dia com contexto real no Engine. O AprovaMind conecta a jornada inteira em uma ordem só.
                     </p>
                     <div className="flex flex-col sm:flex-row items-start gap-6">
                         <Link href="/login" className="px-8 py-5 text-primary-foreground text-xs font-semibold uppercase tracking-widest transition-all duration-300 shadow-lg bg-primary hover:opacity-90 shadow-primary/20 hover:shadow-primary/40 flex items-center gap-2">
-                            Criar Meu Plano
+                            Começar pelo Planner
                             <ChevronRight className="w-4 h-4" />
                         </Link>
                         <Link href="#features" className="px-8 py-5 uppercase hover:bg-foreground hover:text-background transition-all duration-300 text-xs font-semibold text-muted-foreground tracking-widest border-border border flex items-center gap-2">
@@ -60,13 +60,13 @@ export default function LandingPage() {
                         <div className="border-r border-border p-6 flex flex-col gap-6 bg-muted/20">
                             <div className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4">Navegação</div>
                             <div className="flex items-center gap-3 text-sm text-foreground group cursor-pointer group-hover:text-primary transition-colors">
-                                <LayoutDashboard className="w-4 h-4 text-primary" /> <span className="font-medium">Dashboard</span>
+                                <CalendarDays className="w-4 h-4 text-primary" /> <span className="font-medium">Planner</span>
                             </div>
                             <div className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                                <Timer className="w-4 h-4" /> <span>Sessão Estudo</span>
+                                <LayoutDashboard className="w-4 h-4" /> <span>Dashboard</span>
                             </div>
                             <div className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                                <Brain className="w-4 h-4" /> <span>Mentoria IA</span>
+                                <Timer className="w-4 h-4" /> <span>Engine</span>
                             </div>
                         </div>
                         <div className="md:col-span-3 p-8 md:p-12 relative flex flex-col">

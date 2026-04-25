@@ -3,8 +3,10 @@
 import { FeatureCode } from '@aprovamind/domain';
 import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { usePlanContext } from '@/contexts/PlanContext';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import AccountPlanModal from '@/components/AccountPlanModal';
+import BetaSignalsCard from '@/components/BetaSignalsCard';
 import EntitlementSandboxCard from '@/components/EntitlementSandboxCard';
 import TesterSubscriptionManagerCard from '@/components/TesterSubscriptionManagerCard';
 import { useState } from 'react';
@@ -26,7 +28,8 @@ import { isAdminIdentity } from '@/lib/admin';
 
 export default function SettingsPage() {
   const { user, logout } = useAuthContext();
-  const { planTier, refresh, sandboxScenarioUserId, hasFeature, getFeature } = useEntitlements(
+  const { plans } = usePlanContext();
+  const { planTier, sandboxScenarioUserId, hasFeature, getFeature } = useEntitlements(
     user?.uid,
     user?.email
   );
@@ -66,7 +69,7 @@ export default function SettingsPage() {
             Conta e Configurações
           </h1>
           <p className="text-am-caption text-muted-foreground mt-1">
-            Gerenciamento de perfil, assinaturas e segurança do sistema.
+            Gerenciamento de perfil, acesso beta e segurança do sistema.
           </p>
         </div>
       </div>
@@ -79,6 +82,12 @@ export default function SettingsPage() {
         {canManageTesters && (
           <motion.div custom={0.5} variants={fadeUp} initial="hidden" animate="show">
             <TesterSubscriptionManagerCard />
+          </motion.div>
+        )}
+
+        {canManageTesters && (
+          <motion.div custom={0.75} variants={fadeUp} initial="hidden" animate="show">
+            <BetaSignalsCard />
           </motion.div>
         )}
 
@@ -123,7 +132,7 @@ export default function SettingsPage() {
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Crown className="h-5 w-5 text-primary" />
-                    <h2 className="font-sans text-am-body font-bold text-foreground tracking-wide">Plano e Licenças</h2>
+                    <h2 className="font-sans text-am-body font-bold text-foreground tracking-wide">Escada de Acesso</h2>
                   </div>
                   <Badge variant="ai" className="shadow-[0_0_12px_var(--color-am-ai-glow)]">
                     {planTier}
@@ -131,7 +140,7 @@ export default function SettingsPage() {
                 </div>
 
                 <p className="text-am-body-sm text-muted-foreground mb-4 leading-relaxed">
-                  O AprovaMind sobe de valor em três camadas: Free para ativação, Pro para estudo sério no single-plan e Premium para coordenação avançada da rotina.
+                  O AprovaMind sobe de valor em tres camadas: Free para ativacao, Pro para estudo serio no single-plan e Premium para coordenacao avancada da rotina. No beta atual, upgrades e mudancas comerciais ainda sao operados manualmente.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/50 p-4 rounded-md border border-am-border-subtle">
@@ -154,7 +163,7 @@ export default function SettingsPage() {
                 onClick={() => setAccountModalOpen(true)}
                 className="w-full justify-between border-border/50/40 text-primary hover:bg-primary/10"
               >
-                <span className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> Gerenciar Faturamento</span>
+                <span className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> Comparar acessos do beta</span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -199,14 +208,9 @@ export default function SettingsPage() {
 
       <AccountPlanModal
         isOpen={accountModalOpen}
-        userId={user.uid}
         currentTier={planTier}
-        currentPlansCount={0}
+        currentPlansCount={plans.length}
         onClose={() => setAccountModalOpen(false)}
-        onTierChanged={() => {
-          void refresh();
-          setAccountModalOpen(false);
-        }}
       />
     </div>
   );

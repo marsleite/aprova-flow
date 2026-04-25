@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { FeatureCode } from '@aprovamind/domain';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import { loadExamQuestions, getExamById, saveQuestionAttempts, getSimulatedConfigById, getQuestionById } from '@/lib/firebase/questions';
+import { trackClientProductEvent } from '@/lib/product-events/client';
 import { ExamMetadata, QuestionBankItem, QuestionAttempt } from '@/types';
 import { Clock, ChevronLeft, ChevronRight, Flag } from 'lucide-react';
 
@@ -115,9 +118,13 @@ export default function ExecutarProvaPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthContext();
+  const { planTier } = useEntitlements(user?.uid, user?.email);
   const examId = params.id as string;
 
   const [exam, setExam] = useState<ExamMetadata | null>(null);
+  const [completionSurface, setCompletionSurface] = useState<
+    'official_exam_completion' | 'custom_simulation_completion'
+  >('official_exam_completion');
   const [questions, setQuestions] = useState<QuestionState[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
@@ -143,6 +150,7 @@ export default function ExecutarProvaPage() {
 
         if (examData) {
           // É um exame oficial
+          setCompletionSurface('official_exam_completion');
           questionsData = await loadExamQuestions(examId);
         } else {
           // Tenta como simulado personalizado
@@ -151,6 +159,7 @@ export default function ExecutarProvaPage() {
             router.push('/provas');
             return;
           }
+          setCompletionSurface('custom_simulation_completion');
 
           // Carrega questões individuais
           const loadedQuestions = await Promise.all(
@@ -299,8 +308,31 @@ export default function ExecutarProvaPage() {
         timeSpentSeconds: timePerQuestion,
       }));
 
+    const correctCount = attempts.filter((attempt) => attempt.correct).length;
+    const answeredCount = attempts.length;
+    const accuracyPercent =
+      answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+
     try {
       await saveQuestionAttempts(attempts);
+      await trackClientProductEvent({
+        eventName: 'simulation_completed',
+        route: `/provas/${examId}/executar`,
+        surface: completionSurface,
+        featureCode:
+          completionSurface === 'custom_simulation_completion'
+            ? FeatureCode.SimulationsCustom
+            : FeatureCode.SimulationsBasic,
+        planTier,
+        metadata: {
+          examId,
+          examName: exam.name,
+          answeredCount,
+          totalQuestions: questions.length,
+          accuracyPercent,
+          elapsedSeconds,
+        },
+      });
       window.localStorage.removeItem(getExamProgressStorageKey(user.uid, examId));
       if (exam.durationMinutes && exam.durationMinutes > 0) {
         window.localStorage.removeItem(getExamTimerStorageKey(user.uid, examId));
@@ -312,7 +344,7 @@ export default function ExecutarProvaPage() {
       console.error('Erro ao salvar resultado:', error);
       isFinishingRef.current = false;
     }
-  }, [user, exam, questions, timeRemaining, examId, router, timerDeadlineMs]);
+  }, [user, exam, questions, timeRemaining, examId, router, timerDeadlineMs, completionSurface, planTier]);
 
   // Timer countdown por deadline persistida
   useEffect(() => {

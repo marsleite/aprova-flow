@@ -10,9 +10,25 @@ import { featureGuard } from './plugins/feature-guard';
 
 export interface CreateAppOptions {
   entitlements?: EntitlementRouteOptions;
+  allowSandboxAuth?: boolean;
+  allowManualScenarios?: boolean;
+}
+
+function resolveDevOnlyFlag(value: boolean | undefined): boolean {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  return process.env.NODE_ENV !== 'production';
 }
 
 export function createApp(options: CreateAppOptions = {}) {
+  const allowSandboxAuth = resolveDevOnlyFlag(options.allowSandboxAuth);
+  const allowManualScenarios = resolveDevOnlyFlag(options.allowManualScenarios);
+  const allowHeaders = allowSandboxAuth
+    ? 'Content-Type, Authorization, x-aprovamind-user-id'
+    : 'Content-Type, Authorization';
+
   const app = Fastify({
     logger: true,
   });
@@ -29,7 +45,7 @@ export function createApp(options: CreateAppOptions = {}) {
     reply.header('access-control-allow-methods', 'GET,POST,OPTIONS');
     reply.header(
       'access-control-allow-headers',
-      'Content-Type, Authorization, x-aprovamind-user-id'
+      allowHeaders
     );
     reply.header('vary', 'Origin');
     return payload;
@@ -40,7 +56,9 @@ export function createApp(options: CreateAppOptions = {}) {
       service: 'aprovamind-api',
       status: 'ok',
       message:
-        'Use /health, /entitlements/me?userId=free-user, /billing/subscription/me ou /billing/admin/subscription.',
+        allowManualScenarios
+          ? 'Use /health, /entitlements/scenarios, /entitlements/me?userId=free-user, /billing/subscription/me ou /billing/admin/subscription.'
+          : 'Use /health, /entitlements/me, /billing/subscription/me ou /billing/admin/subscription.',
     };
   });
 
@@ -51,10 +69,16 @@ export function createApp(options: CreateAppOptions = {}) {
     };
   });
 
-  app.register(firebaseAuth, { allowSandbox: true });
+  app.register(firebaseAuth, {
+    allowSandbox: allowSandboxAuth,
+    verifyIdToken: options.entitlements?.verifyIdToken,
+  });
   app.register(featureGuard);
 
-  void registerEntitlementRoutes(app, options.entitlements);
+  void registerEntitlementRoutes(app, {
+    ...options.entitlements,
+    allowManualScenarios,
+  });
 
   // AI and Engine routes depend on app.authenticate (from firebase-auth plugin).
   // Registering them as plugins ensures they run after the decorator is available.

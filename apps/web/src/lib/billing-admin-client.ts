@@ -1,3 +1,4 @@
+import type { BetaSignalsSummary } from '@aprovamind/contracts/analytics/BetaSignals';
 import type {
   FeatureUsageMap,
   PlanCode,
@@ -93,4 +94,25 @@ export async function updateAdminSubscriptionState(params: {
   }
 
   return (await response.json()) as AdminSubscriptionStateResponse;
+}
+
+export async function fetchAdminBetaSignals(params: {
+  idToken: string;
+  windowDays?: number;
+}): Promise<BetaSignalsSummary> {
+  const query = params.windowDays ? `?windowDays=${params.windowDays}` : '';
+  const response = await fetch(`/api/admin/beta-signals${query}`, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${params.idToken}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw await parseAdminError(response, 'beta_signals_fetch_failed');
+  }
+
+  return (await response.json()) as BetaSignalsSummary;
 }

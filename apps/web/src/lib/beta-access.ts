@@ -5,6 +5,8 @@ const BETA_ALLOWLIST: string[] = [
   'marcelop3251@gmail.com',
 ];
 
+export type BetaAccessStatus = 'open' | 'invite_only' | 'allowed' | 'blocked';
+
 export function isBetaAccessRestricted(): boolean {
   return BETA_ALLOWLIST.length > 0;
 }
@@ -14,16 +16,35 @@ export function isBetaAllowed(email: string | null | undefined): boolean {
   return !!email && BETA_ALLOWLIST.includes(email.toLowerCase());
 }
 
-export function getBetaAccessMessage(email?: string | null): string {
+export function getBetaAccessStatus(email?: string | null): BetaAccessStatus {
   if (!isBetaAccessRestricted()) {
-    return '';
+    return 'open';
   }
 
-  if (email && !isBetaAllowed(email)) {
-    return 'Seu email ainda não foi liberado para o beta. Fale com a equipe do AprovaMind para receber acesso.';
+  if (!email) {
+    return 'invite_only';
   }
 
-  return 'O acesso ao beta está sendo liberado por convite. Se o seu email ainda não foi habilitado, fale com a equipe do AprovaMind.';
+  return isBetaAllowed(email) ? 'allowed' : 'blocked';
+}
+
+export function canSelfRegisterInBeta(email?: string | null): boolean {
+  const status = getBetaAccessStatus(email);
+  return status === 'open' || status === 'allowed';
+}
+
+export function getBetaAccessMessage(email?: string | null): string {
+  const status = getBetaAccessStatus(email);
+
+  if (status === 'open') return '';
+  if (status === 'allowed') {
+    return 'Seu email ja esta liberado para o beta. Voce pode entrar ou ativar o acesso com este convite.';
+  }
+  if (status === 'blocked') {
+    return 'Seu email ainda nao foi liberado para o beta. Fale com a equipe do AprovaMind para receber um convite valido.';
+  }
+
+  return 'O acesso ao beta esta sendo liberado por convite. Digite um email ja habilitado para entrar ou ativar o seu acesso.';
 }
 
 export function getBetaAllowlistCount(): number {

@@ -13,8 +13,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
-import { logAiUsageEvent, parseJsonFromModelText, runAiPdf } from '@/lib/ai';
-import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { parseJsonFromModelText } from '@/lib/ai';
+import { runDedicatedAiPdf } from '@/lib/server/dedicatedAi';
 import { FeatureCode } from '@aprovamind/domain';
 import { requireEntitlementFeature } from '@/lib/server/userEntitlements';
 
@@ -130,13 +130,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const aiResponse = await runAiPdf({
-      task: 'parse-edital',
-      pdfBase64,
-      prompt: 'Analise este edital de concurso público e extraia as matérias cobradas conforme as instruções.',
-      temperature: 0.2,
-      maxOutputTokens: 8192,
-      systemInstruction: SYSTEM_PROMPT,
+    const aiResponse = await runDedicatedAiPdf({
+      idToken: auth.idToken,
+      payload: {
+        task: 'parse-edital',
+        pdfBase64,
+        prompt: 'Analise este edital de concurso público e extraia as matérias cobradas conforme as instruções.',
+        temperature: 0.2,
+        maxOutputTokens: 8192,
+        systemInstruction: SYSTEM_PROMPT,
+      },
     });
 
     const raw = aiResponse.text?.trim() || '';
@@ -159,23 +162,6 @@ export async function POST(req: NextRequest) {
         'Resposta do modelo não é JSON válido:',
         raw.slice(0, 1000)
       );
-      const usageEvent = {
-        route: '/api/parse-edital',
-        task: 'parse-edital',
-        provider: aiResponse.provider,
-        model: aiResponse.model,
-        latencyMs: aiResponse.latencyMs,
-        inputTokens: aiResponse.usage.inputTokens,
-        outputTokens: aiResponse.usage.outputTokens,
-        totalTokens: aiResponse.usage.totalTokens,
-        estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-        success: false,
-        statusCode: 422,
-        userId: auth.uid,
-        errorCode: 'JSON_PARSE_FAILED',
-      } as const;
-      logAiUsageEvent(usageEvent);
-      void saveAiUsageEvent(usageEvent, auth.idToken);
       return NextResponse.json(
         {
           error:
@@ -238,23 +224,6 @@ export async function POST(req: NextRequest) {
         ? parsed.examDate
         : null;
     parsed.totalSubjectsFound = parsed.subjects.length;
-
-    const usageEvent = {
-      route: '/api/parse-edital',
-      task: 'parse-edital',
-      provider: aiResponse.provider,
-      model: aiResponse.model,
-      latencyMs: aiResponse.latencyMs,
-      inputTokens: aiResponse.usage.inputTokens,
-      outputTokens: aiResponse.usage.outputTokens,
-      totalTokens: aiResponse.usage.totalTokens,
-      estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-      success: true,
-      statusCode: 200,
-      userId: auth.uid,
-    } as const;
-    logAiUsageEvent(usageEvent);
-    void saveAiUsageEvent(usageEvent, auth.idToken);
 
     return NextResponse.json(parsed, {
       headers: {

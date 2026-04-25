@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
-import { logAiUsageEvent, runAiText, parseJsonFromModelText } from '@/lib/ai';
-import { saveAiUsageEvent } from '@/lib/server/aiUsageStore';
+import { parseJsonFromModelText } from '@/lib/ai';
+import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
 
 export interface SmartScheduleRequest {
     userName: string;
@@ -112,35 +112,21 @@ export async function POST(request: NextRequest) {
 
         const fullPrompt = `${systemPrompt}\n\nGere o cronograma completo abaixo.`;
 
-        const aiResponse = await runAiText({
-            task: 'smart-schedule',
-            prompt: fullPrompt,
-            temperature: 0.2, // Baixa temperatura para manter a estrutura JSON previsível
-            maxOutputTokens: 2048,
-            preferJson: true,
+        const aiResponse = await runDedicatedAiText({
+            idToken: auth.idToken,
+            payload: {
+                task: 'smart-schedule',
+                prompt: fullPrompt,
+                temperature: 0.2, // Baixa temperatura para manter a estrutura JSON previsível
+                maxOutputTokens: 2048,
+                preferJson: true,
+            },
         });
 
         const text = aiResponse.text?.trim() || '[]';
         const jsonStr = text.replace(/^```json/g, '').replace(/```$/g, '').trim();
         const parsedSchedule = parseJsonFromModelText<SmartScheduleItem[]>(jsonStr) || [];
         const sanitizedSchedule = sanitizeSchedule(parsedSchedule, normalizedAvailableSchedule);
-
-        const usageEvent = {
-            route: '/api/smart-schedule',
-            task: 'smart-schedule',
-            provider: aiResponse.provider,
-            model: aiResponse.model,
-            latencyMs: aiResponse.latencyMs,
-            inputTokens: aiResponse.usage.inputTokens,
-            outputTokens: aiResponse.usage.outputTokens,
-            totalTokens: aiResponse.usage.totalTokens,
-            estimatedCostUsd: aiResponse.usage.estimatedCostUsd,
-            success: true,
-            statusCode: 200,
-            userId: auth.uid,
-        } as const;
-        logAiUsageEvent(usageEvent);
-        void saveAiUsageEvent(usageEvent, auth.idToken);
 
         if (!sanitizedSchedule || sanitizedSchedule.length === 0) {
             console.error("Falha ao parsear JSON no smart-schedule", jsonStr);

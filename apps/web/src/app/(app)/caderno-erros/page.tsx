@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { auth } from '@/lib/firebase/config';
-import { getWrongAttempts, getQuestionById, markAttemptAsMastered } from '@/lib/firebase/questions';
+import { getWrongAttempts, getQuestionsByIds, markAttemptAsMastered } from '@/lib/firebase/questions';
 import { QuestionAttempt, QuestionBankItem } from '@/types';
 import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
 import { ExplainAnswerButton } from '@/components/ExplainAnswerButton';
@@ -23,7 +23,7 @@ import {
     Eye,
     EyeOff,
 } from 'lucide-react';
-import { KPICard, ChartCard, Button, Badge } from '@/components';
+import { KPICard, Button, Badge } from '@/components';
 
 interface ErrorEntry {
     attempt: QuestionAttempt;
@@ -123,7 +123,7 @@ function FlashcardItem({ card }: { card: Flashcard }) {
 
 export default function CadernoErrosPage() {
     const { user } = useAuthContext();
-    const { hasFeature } = useEntitlements(user?.uid, user?.email);
+    const { hasFeature, planTier } = useEntitlements(user?.uid, user?.email);
     const [errors, setErrors] = useState<ErrorEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -142,22 +142,23 @@ export default function CadernoErrosPage() {
         try {
             setLoading(true);
             const attempts = await getWrongAttempts(user.uid, 200, showMastered);
+            const questions = await getQuestionsByIds(
+                attempts.map((attempt) => attempt.questionId)
+            );
+            const questionById = new Map<string, QuestionBankItem>();
 
-            const entries: ErrorEntry[] = [];
-            const questionCache = new Map<string, QuestionBankItem | null>();
-
-            for (const attempt of attempts) {
-                if (!questionCache.has(attempt.questionId)) {
-                    const q = await getQuestionById(attempt.questionId);
-                    questionCache.set(attempt.questionId, q);
-                }
-                const question = questionCache.get(attempt.questionId);
-                if (question) {
-                    entries.push({ attempt, question });
+            for (const question of questions) {
+                if (question.id) {
+                    questionById.set(question.id, question);
                 }
             }
 
-            setErrors(entries);
+            setErrors(
+                attempts.flatMap((attempt) => {
+                    const question = questionById.get(attempt.questionId);
+                    return question ? [{ attempt, question }] : [];
+                })
+            );
         } catch (err) {
             console.error('Erro ao carregar caderno de erros:', err);
             setErrors([]);
@@ -364,11 +365,13 @@ export default function CadernoErrosPage() {
 
                         {!canUseGapAnalyzer && (
                             <EntitlementUpgradeCard
-                                title="O Gap Analyzer IA fica no Premium"
-                                description="O caderno de erros continua disponivel, mas a leitura estrategica dos padroes de erro, gaps ocultos e flashcards gerados por IA faz parte da camada premium."
-                                highlight="Diagnostico profundo, gaps por dimensao e transformacao do erro em recuperacao estrategica."
+                                title="Gap Analyzer IA entra no Premium"
+                                description="O caderno de erros segue disponivel, mas a leitura estrategica dos padroes, gaps ocultos e a transformacao do erro em recuperacao mais profunda entram na camada Premium."
+                                highlight="Diagnostico profundo, gaps por dimensao, recovery orientado e flashcards gerados por IA."
                                 recommendedPlan="premium"
-                                ctaLabel="Ver beneficios do Premium"
+                                currentPlan={planTier}
+                                surface="error_notebook_gap_analyzer_gate"
+                                featureCode={FeatureCode.ErrorGapAnalyzer}
                             />
                         )}
 
@@ -510,7 +513,7 @@ export default function CadernoErrosPage() {
                                 <h2 className="font-sans text-am-h5 font-bold text-foreground mb-2">Registro Limpo!</h2>
                                 <p className="text-am-body-sm text-muted-foreground mb-6 max-w-sm mx-auto">Continue evoluindo na resolução de baterias. O seu algoritmo mapeará atritos automaticamente.</p>
                                 <Button asChild variant="primary">
-                                    <a href="/simulations">Realizar Bateria</a>
+                                    <a href="/provas">Realizar Bateria</a>
                                 </Button>
                             </div>
                         ) : (

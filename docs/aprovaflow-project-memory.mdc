@@ -171,13 +171,11 @@ src/
 - `src/lib/ai/gateway.ts`: decide provider/model por tarefa
 - Providers: `src/lib/ai/providers/gemini.ts` e `src/lib/ai/providers/openai.ts`
 - Métricas/custo: `src/lib/ai/metrics.ts`
-- Telemetria persistida: `src/lib/server/aiUsageStore.ts`
+- Telemetria persistida canonicamente na `apps/api/src/modules/ai/ai-usage-store.ts`
 
-### API Routes IA (4 rotas):
-- `/api/chat` — Chat conversacional com Coach IA
-- `/api/parse-edital` — Importação de PDF de edital
-- `/api/weekly-mentoring` — Mentoria semanal profunda (1x/semana, cache no Firestore)
-- `/api/planner-daily` — Plano diário adaptativo + fallback robusto
+### API Routes IA
+- `apps/web` mantém rotas de compatibilidade (`/api/chat`, `/api/parse-edital`, `/api/weekly-mentoring`, `/api/planner-daily` e correlatas)
+- o runtime canônico do modelo vive na `apps/api` em `/ai/text` e `/ai/pdf`
 
 ### Rotas removidas (substituídas por regras locais):
 - ~~/api/gemini~~ — substituído por GeminiCoachCard local

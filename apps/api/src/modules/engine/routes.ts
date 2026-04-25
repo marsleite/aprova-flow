@@ -10,6 +10,8 @@
 
 import type { FastifyInstance } from 'fastify';
 import { GetPlanEngineSnapshot } from '@aprovamind/application/use-cases/engine/GetPlanEngineSnapshot';
+import { GetPortfolioSnapshot } from '@aprovamind/application/use-cases/engine/GetPortfolioSnapshot';
+import { extractBearerToken } from '@aprovamind/infrastructure-firebase';
 import { LegacyEngineDataSource } from '@aprovamind/infrastructure-firebase/LegacyEngineDataSource';
 
 interface SnapshotRequestBody {
@@ -17,8 +19,16 @@ interface SnapshotRequestBody {
   maxRecommendations?: number;
 }
 
+interface PortfolioQuerystring {
+  globalWeeklyBudget?: string;
+}
+
 function getServerTodayIso(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function resolveEffectiveToken(authorizationHeader?: string): string {
+  return extractBearerToken(authorizationHeader) ?? 'sandbox-token';
 }
 
 export async function registerEngineRoutes(app: FastifyInstance): Promise<void> {
@@ -58,15 +68,8 @@ export async function registerEngineRoutes(app: FastifyInstance): Promise<void> 
     }
 
     try {
-      // Extract the bearer token from the Authorization header for Firestore REST calls
-      const authHeader = request.headers.authorization || '';
-      const idToken = authHeader.replace(/^Bearer\s/i, '').trim();
-
-      // Sandbox mode: use a placeholder token when using x-aprovamind-user-id
-      const effectiveToken = idToken || 'sandbox-token';
-
       const useCase = new GetPlanEngineSnapshot(
-        new LegacyEngineDataSource(effectiveToken)
+        new LegacyEngineDataSource(resolveEffectiveToken(request.headers.authorization))
       );
 
       const result = await useCase.execute({
@@ -84,6 +87,57 @@ export async function registerEngineRoutes(app: FastifyInstance): Promise<void> 
       return reply.code(500).send({
         error: 'engine_error',
         message: 'Erro ao carregar o snapshot do motor.',
+      });
+    }
+  });
+
+  // ── GET /engine/portfolio ──
+  app.get<{ Querystring: PortfolioQuerystring }>('/engine/portfolio', {
+    preHandler: [app.authenticate],
+  }, async (request, reply) => {
+    const user = request.user;
+    if (!user) {
+      return reply.code(401).send({
+        error: 'unauthorized',
+        message: 'Usuário não autenticado.',
+      });
+    }
+
+    const rawBudget = request.query.globalWeeklyBudget;
+    const globalWeeklyBudget =
+      typeof rawBudget === 'string' && rawBudget.trim().length > 0
+        ? Number(rawBudget)
+        : 30;
+
+    if (
+      !Number.isInteger(globalWeeklyBudget) ||
+      globalWeeklyBudget <= 0
+    ) {
+      return reply.code(400).send({
+        error: 'bad_request',
+        message: 'Query "globalWeeklyBudget" deve ser um inteiro maior que zero.',
+      });
+    }
+
+    try {
+      const useCase = new GetPortfolioSnapshot(
+        new LegacyEngineDataSource(resolveEffectiveToken(request.headers.authorization))
+      );
+
+      const result = await useCase.execute({
+        userId: user.uid,
+        today: getServerTodayIso(),
+        globalWeeklyBudget,
+      });
+
+      return reply
+        .header('Cache-Control', 'no-store')
+        .send(result);
+    } catch (error) {
+      request.log.error(error);
+      return reply.code(500).send({
+        error: 'engine_error',
+        message: 'Erro ao carregar o portfólio multi-edital.',
       });
     }
   });

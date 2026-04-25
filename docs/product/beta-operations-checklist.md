@@ -21,6 +21,8 @@ Antes de iniciar a bateria com testers reais:
 - a rota `GET /entitlements/me` deve responder com auth real
 - o admin deve conseguir abrir `/settings`
 - o card `Operacao de Testers` deve aparecer para admin
+- o `Sandbox de Entitlements` deve estar em `Usuario real` antes de validar
+  comportamento de tester real
 
 ## Operação Manual de Testers
 
@@ -76,7 +78,7 @@ Telas mínimas:
 
 - `/engine`
 - `/caderno-erros`
-- `/simulations`
+- `/provas`
 - `/planner`
 - `/mentoring`
 
@@ -95,7 +97,7 @@ Telas mínimas:
 
 - `/engine`
 - `/mentoring`
-- `/simulations`
+- `/provas`
 - fluxo de parse de edital
 
 ### Premium
@@ -112,9 +114,10 @@ Validar:
 Telas mínimas:
 
 - `/planner`
-- `/simulations`
+- `/provas`
 - `/caderno-erros`
 - fluxos de IA premium
+- criação de novo edital no topo do Planner
 
 ## Cenários de Status
 
@@ -145,6 +148,10 @@ Toda semana, validar pelo menos:
 5. `expired` faz fallback corretamente
 6. reset manual de usage funciona
 7. `GET /entitlements/me` reflete o estado atual do tester
+8. `login -> planner -> dashboard -> engine` continua navegável com usuário real
+9. quando houver sandbox local ativo, login e Planner deixam isso explícito
+10. `dashboard` e `engine` voltam ao Planner de forma honesta quando falta
+    edital ativo
 
 ## Registro de Feedback
 

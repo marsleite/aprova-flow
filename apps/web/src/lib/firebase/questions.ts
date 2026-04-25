@@ -96,6 +96,35 @@ export async function getQuestionById(id: string): Promise<QuestionBankItem | nu
   return { id: snap.id, ...(snap.data() as QuestionBankItem) };
 }
 
+export async function getQuestionsByIds(ids: string[]): Promise<QuestionBankItem[]> {
+  const normalizedIds = ids
+    .map((id) => id.trim())
+    .filter((id) => id.length > 0);
+
+  if (normalizedIds.length === 0) {
+    return [];
+  }
+
+  const uniqueIds = Array.from(new Set(normalizedIds));
+  const loadedQuestions = await Promise.all(
+    uniqueIds.map(async (id) => ({
+      id,
+      question: await getQuestionById(id),
+    }))
+  );
+
+  const questionById = new Map<string, QuestionBankItem>();
+  for (const item of loadedQuestions) {
+    if (item.question?.id) {
+      questionById.set(item.id, item.question);
+    }
+  }
+
+  return normalizedIds
+    .map((id) => questionById.get(id))
+    .filter((question): question is QuestionBankItem => question !== undefined);
+}
+
 export async function listQuestionsByFilter(filters: {
   materias?: string[];
   bancas?: string[];
@@ -347,15 +376,7 @@ export async function loadExamQuestions(examId: string): Promise<QuestionBankIte
     return [];
   }
 
-  // Carrega questões em batch mantendo a ordem
-  const questions: QuestionBankItem[] = [];
-  for (const qId of exam.questions) {
-    const q = await getQuestionById(qId);
-    if (q) {
-      questions.push(q);
-    }
-  }
-  return questions;
+  return getQuestionsByIds(exam.questions);
 }
 
 /**
@@ -481,7 +502,7 @@ export async function saveQuestionAttempts(attempts: QuestionAttempt[]): Promise
 
   // Integra automaticamente tentativas de prova/simulado no painel de acurácia por matéria.
   const questionIds = Array.from(new Set(attempts.map((a) => a.questionId)));
-  const questions = await Promise.all(questionIds.map((id) => getQuestionById(id)));
+  const questions = await getQuestionsByIds(questionIds);
   const questionById = new Map<string, QuestionBankItem>();
   questions.forEach((q) => {
     if (q?.id) questionById.set(q.id, q);

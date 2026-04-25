@@ -10,33 +10,38 @@ import {
   deleteStudyPlan,
 } from '@/lib/firebase/plans';
 import {
-  getStudySummary,
+  buildPlanVsActualFromInputs,
+  buildStudyConsistencyFromSessions,
+  buildStudySummaryFromSessions,
+  buildSubjectHoursFromSessions,
   getPlanVsActual,
+  getSessionsFromDate,
   getStudyConsistency,
   getFilteredSessions,
+  getWeeklyGoal,
   generateInsights
 } from '@/lib/firebase/sessions';
-import { getAccuracyAnalytics } from '@/lib/firebase/questions';
 import { getTodayISO, formatDuration } from '@/lib/utils';
-import { StudyPlanEdital, PlanVsActual, StudyInsight, StudySession, StudyConsistency, SubjectAccuracy } from '@/types';
+import { StudyPlanEdital, PlanVsActual, StudyInsight, StudySession } from '@/types';
 import PlanManager from '@/components/PlanManager';
 import PlanCoverageProjectionCard from '@/components/PlanCoverageProjectionCard';
 import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
 import StudyJourneyCard from '@/components/StudyJourneyCard';
 import EntitlementUpgradeCard from '@/components/EntitlementUpgradeCard';
+import TrackedUpgradeLink from '@/components/TrackedUpgradeLink';
 import { useEntitlements } from '@/hooks/useEntitlements';
-import { canCreateMorePlans } from '@/lib/entitlements';
+import {
+  getPlannerCreateEditalState,
+  getSandboxContextMessage,
+} from '@/lib/stability/core-flow';
 import {
   CalendarDays,
   Plus,
-  TrendingUp,
-  Clock,
-  AlertTriangle,
+  Lock,
   CheckCircle2,
   Edit2,
   Trash2,
   MoreVertical,
-  BarChart2,
   Zap,
   Play,
   Calendar,
@@ -46,7 +51,7 @@ import {
 import Link from 'next/link';
 
 // RDS Components
-import { KPICard, ChartCard, Skeleton, Button, Badge } from '@/components';
+import { ChartCard, Skeleton, Button, Badge } from '@/components';
 import { fadeUp } from '@/design-system/tokens';
 
 interface PlanStats {
@@ -65,9 +70,29 @@ const URGENCY_CONFIG = {
   low: { label: 'BAIXO', bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-am-success/20' },
 };
 
+function groupSessionsByPlanId(sessions: StudySession[]): Map<string, StudySession[]> {
+  const grouped = new Map<string, StudySession[]>();
+
+  for (const session of sessions) {
+    const key = session.planId || '';
+    const current = grouped.get(key);
+    if (current) {
+      current.push(session);
+      continue;
+    }
+
+    grouped.set(key, [session]);
+  }
+
+  return grouped;
+}
+
 export default function PlannerPage() {
   const { user } = useAuthContext();
-  const { planTier, capabilities, hasFeature } = useEntitlements(user?.uid, user?.email);
+  const { planTier, hasFeature, usingSandbox, sandboxScenarioUserId } = useEntitlements(
+    user?.uid,
+    user?.email
+  );
   const { plans, activePlanId, activePlan, onPlanChange } = usePlanContext();
 
   const [planStats, setPlanStats] = useState<PlanStats[]>([]);
@@ -80,11 +105,18 @@ export default function PlannerPage() {
   // Daily Data
   const [todaySessions, setTodaySessions] = useState<StudySession[]>([]);
   const [insights, setInsights] = useState<StudyInsight[]>([]);
-  const [consistency, setConsistency] = useState<StudyConsistency | null>(null);
-  const [accuracyData, setAccuracyData] = useState<SubjectAccuracy[]>([]);
 
-  const canCreate = canCreateMorePlans(planTier, plans.length);
   const canUseMultiEdital = hasFeature(FeatureCode.MultiEdital);
+  const createEditalState = getPlannerCreateEditalState({
+    planTier,
+    currentPlansCount: plans.length,
+    canUseMultiEdital,
+  });
+  const showMultiEditalUpgrade = createEditalState.kind === 'upgrade';
+  const sandboxContextMessage = getSandboxContextMessage({
+    usingSandbox,
+    sandboxScenarioUserId,
+  });
 
   useEffect(() => {
     if (!selectedPlanId && plans.length > 0) {
@@ -99,49 +131,69 @@ export default function PlannerPage() {
       const today = getTodayISO();
 
       // Load current plan's specific daily info
-      const [todayRes, consRes, pvaRes, accRes] = await Promise.all([
+      const [todayRes, consRes, pvaRes] = await Promise.all([
         getFilteredSessions(user.uid, { dateFrom: today, dateTo: today, planId: activePlanId ?? undefined }),
         getStudyConsistency(user.uid, activePlanId ?? undefined, activePlan?.weeklyGoalHours),
         getPlanVsActual(user.uid, activePlanId ?? undefined, activePlan?.subjects),
-        getAccuracyAnalytics(user.uid, activePlanId ?? undefined).catch(() => ({ month: [] }))
       ]);
 
       setTodaySessions(todayRes);
-      setConsistency(consRes);
-      setAccuracyData(accRes.month || []);
 
       const insightsRes = await generateInsights(user.uid, consRes, pvaRes);
       setInsights(insightsRes);
 
-      // Load all plans stats for the manager
-      const statsArr: PlanStats[] = await Promise.all(
-        plans.map(async (plan) => {
-          try {
-            const [summary, pva, cons] = await Promise.all([
-              getStudySummary(user.uid, plan.id),
-              getPlanVsActual(user.uid, plan.id, plan.subjects),
-              getStudyConsistency(user.uid, plan.id),
-            ]);
-            const totalHours = summary.totalMonth / 3600;
-            const neglectedCount = pva.filter((p) => p.status === 'neglected').length;
-            const urgency: 'critical' | 'medium' | 'low' =
-              cons.currentStreak === 0 && totalHours < 2 ? 'critical'
-                : neglectedCount > 1 ? 'medium'
-                  : 'low';
-            return {
-              planId: plan.id || '',
-              totalHoursMonth: totalHours,
-              accuracy: null,
-              progress: Math.min(100, Math.round((summary.totalMonth / (plan.weeklyGoalHours * 4 * 3600)) * 100)),
-              planVsActual: pva,
-              lastStudied: null,
-              urgency,
-            };
-          } catch {
-            return { planId: plan.id || '', totalHoursMonth: 0, accuracy: null, progress: 0, planVsActual: [], lastStudied: null, urgency: 'low' as const };
-          }
-        })
-      );
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+        .toISOString()
+        .split('T')[0];
+      const yearStartDate = new Date(now);
+      yearStartDate.setFullYear(yearStartDate.getFullYear() - 1);
+      const yearStart = yearStartDate.toISOString().split('T')[0];
+
+      const [globalGoal, monthSessions, yearSessions] = await Promise.all([
+        getWeeklyGoal(user.uid),
+        getSessionsFromDate(user.uid, monthStart),
+        getSessionsFromDate(user.uid, yearStart),
+      ]);
+
+      const monthSessionsByPlan = groupSessionsByPlanId(monthSessions);
+      const yearSessionsByPlan = groupSessionsByPlanId(yearSessions);
+
+      const statsArr: PlanStats[] = plans.map((plan) => {
+        try {
+          const planKey = plan.id || '';
+          const planMonthSessions = monthSessionsByPlan.get(planKey) || [];
+          const planYearSessions = yearSessionsByPlan.get(planKey) || [];
+          const summary = buildStudySummaryFromSessions(planYearSessions, now);
+          const pva = buildPlanVsActualFromInputs(
+            plan.subjects,
+            buildSubjectHoursFromSessions(planMonthSessions)
+          );
+          const cons = buildStudyConsistencyFromSessions({
+            sessions: planYearSessions,
+            weeklyGoalHours: plan.weeklyGoalHours ?? globalGoal.weeklyGoalHours,
+            now,
+          });
+          const totalHours = summary.totalMonth / 3600;
+          const neglectedCount = pva.filter((p) => p.status === 'neglected').length;
+          const urgency: 'critical' | 'medium' | 'low' =
+            cons.currentStreak === 0 && totalHours < 2 ? 'critical'
+              : neglectedCount > 1 ? 'medium'
+                : 'low';
+
+          return {
+            planId: planKey,
+            totalHoursMonth: totalHours,
+            accuracy: null,
+            progress: Math.min(100, Math.round((summary.totalMonth / (plan.weeklyGoalHours * 4 * 3600)) * 100)),
+            planVsActual: pva,
+            lastStudied: null,
+            urgency,
+          };
+        } catch {
+          return { planId: plan.id || '', totalHoursMonth: 0, accuracy: null, progress: 0, planVsActual: [], lastStudied: null, urgency: 'low' as const };
+        }
+      });
       setPlanStats(statsArr);
     } catch { /* */ } finally {
       setLoading(false);
@@ -184,10 +236,50 @@ export default function PlannerPage() {
             Centro de decisão imediata e planejamento
           </p>
         </div>
-        <div className="flex items-center gap-3 mt-2 sm:mt-0">
-          <Button onClick={() => canCreate ? (setEditingPlan(null), setPlanManagerOpen(true)) : null} disabled={!canCreate} variant="secondary" className="rounded-full">
-            <Plus className="h-4 w-4 mr-2" /> Novo Edital
-          </Button>
+        <div className="mt-2 flex flex-col items-start gap-2 sm:mt-0 sm:items-end">
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            <Badge variant="outline">{planTier === 'admin' ? 'ADMIN' : `Acesso ${planTier.toUpperCase()}`}</Badge>
+            {sandboxContextMessage && <Badge variant="warning">Sandbox ativo</Badge>}
+          </div>
+
+          {createEditalState.kind === 'create' ? (
+            <Button
+              onClick={() => {
+                setEditingPlan(null);
+                setPlanManagerOpen(true);
+              }}
+              variant="secondary"
+              className="rounded-full"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Novo Edital
+            </Button>
+          ) : showMultiEditalUpgrade ? (
+            <Button asChild variant="secondary" className="rounded-full">
+              <TrackedUpgradeLink
+                href="/settings"
+                surface="planner_new_edital_topbar_locked"
+                recommendedPlan="premium"
+                currentPlan={planTier}
+                featureCode={FeatureCode.MultiEdital}
+                eventMetadata={{
+                  title: 'Novo Edital',
+                  currentPlans: plans.length,
+                }}
+              >
+                <Lock className="mr-2 h-4 w-4" /> {createEditalState.buttonLabel}
+              </TrackedUpgradeLink>
+            </Button>
+          ) : (
+            <Button disabled variant="secondary" className="rounded-full">
+              <Plus className="mr-2 h-4 w-4" /> {createEditalState.buttonLabel}
+            </Button>
+          )}
+
+          {createEditalState.helperText && (
+            <p className="max-w-xs text-right text-[11px] leading-relaxed text-muted-foreground">
+              {createEditalState.helperText}
+            </p>
+          )}
         </div>
       </div>
 
@@ -196,14 +288,29 @@ export default function PlannerPage() {
           <StudyJourneyCard current="planner" />
         </motion.div>
 
+        {sandboxContextMessage && (
+          <motion.div custom={0.1} variants={fadeUp} initial="hidden" animate="show">
+            <div className="rounded-xl border border-am-warning/20 bg-am-warning/5 px-4 py-3 text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">Sandbox de entitlements:</span>{' '}
+              {sandboxContextMessage}{' '}
+              <Link href="/settings" className="font-semibold text-primary hover:underline">
+                Voltar para o usuário real
+              </Link>
+              .
+            </div>
+          </motion.div>
+        )}
+
         {!canUseMultiEdital && (
           <motion.div custom={0.2} variants={fadeUp} initial="hidden" animate="show">
             <EntitlementUpgradeCard
-              title="Multi-edital fica no Premium"
-              description="O Pro resolve muito bem o caso single-plan. O Premium entra quando voce quer coordenar varios editais, reequilibrar foco e ganhar uma camada adaptativa mais forte."
-              highlight="Mais editais ativos, recovery plan, adaptive daily plan e a experiencia completa do AprovaMind."
+              title="Multi-edital entra no Premium"
+              description="O planner continua funcionando muito bem para um edital por vez. Quando a rotina pede coordenacao entre varios editais, o proximo passo natural e a camada Premium."
+              highlight="3 editais ativos, recovery plan, plano adaptativo e coordenacao mais forte da rotina."
               recommendedPlan="premium"
-              ctaLabel="Ver beneficios do Premium"
+              currentPlan={planTier}
+              surface="planner_multi_edital_gate"
+              featureCode={FeatureCode.MultiEdital}
             />
           </motion.div>
         )}
@@ -349,7 +456,7 @@ export default function PlannerPage() {
                 <CalendarDays className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
                 <p className="text-sm font-medium text-muted-foreground">Nenhum edital configurado</p>
                 <button
-                  onClick={() => canCreate ? (setEditingPlan(null), setPlanManagerOpen(true)) : null}
+                  onClick={() => createEditalState.kind === 'create' ? (setEditingPlan(null), setPlanManagerOpen(true)) : null}
                   className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary/10 px-4 py-2 text-sm text-primary font-semibold transition-colors"
                 >
                   <Plus className="h-4 w-4" />
@@ -365,7 +472,7 @@ export default function PlannerPage() {
                 </div>
 
                 <div className="divide-y divide-border bg-card">
-                  {plans.map((plan, i) => {
+                  {plans.map((plan) => {
                     const stats = planStats.find((s) => s.planId === plan.id);
                     const urgency = stats?.urgency || 'low';
                     const uc = URGENCY_CONFIG[urgency];
