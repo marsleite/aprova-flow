@@ -1,27 +1,29 @@
 import { describe, expect, it } from 'vitest';
 import {
-  canSelfRegisterInBeta,
   getBetaAccessMessage,
-  getBetaAccessStatus,
-  isBetaAllowed,
+  isBetaAccessRestricted,
+  type BetaAccessStatus,
 } from '@/lib/beta-access';
 
 describe('beta access helpers', () => {
-  it('recognizes invited emails from the current beta allowlist', () => {
-    expect(isBetaAllowed('marsleite@gmail.com')).toBe(true);
-    expect(isBetaAllowed('MARSLEITE@GMAIL.COM')).toBe(true);
-    expect(isBetaAllowed('nao-liberado@example.com')).toBe(false);
+  it('beta is invite-only while BETA_INVITE_ONLY=true', () => {
+    expect(isBetaAccessRestricted()).toBe(true);
   });
 
-  it('exposes invite-only, allowed, and blocked states', () => {
-    expect(getBetaAccessStatus()).toBe('invite_only');
-    expect(getBetaAccessStatus('marsleite@gmail.com')).toBe('allowed');
-    expect(getBetaAccessStatus('nao-liberado@example.com')).toBe('blocked');
+  it('getBetaAccessMessage returns empty string for open status', () => {
+    expect(getBetaAccessMessage('open')).toBe('');
   });
 
-  it('only allows self-registration for open or invited emails', () => {
-    expect(canSelfRegisterInBeta('marsleite@gmail.com')).toBe(true);
-    expect(canSelfRegisterInBeta('nao-liberado@example.com')).toBe(false);
-    expect(getBetaAccessMessage('nao-liberado@example.com')).toContain('ainda nao foi liberado');
+  it('getBetaAccessMessage returns correct messages per status', () => {
+    expect(getBetaAccessMessage('allowed')).toContain('liberado para o beta');
+    expect(getBetaAccessMessage('blocked')).toContain('ainda nao foi liberado');
+    expect(getBetaAccessMessage('invite_only')).toContain('por convite');
+  });
+
+  it('getBetaAccessMessage covers all BetaAccessStatus values', () => {
+    const statuses: BetaAccessStatus[] = ['open', 'invite_only', 'allowed', 'blocked'];
+    for (const status of statuses) {
+      expect(() => getBetaAccessMessage(status)).not.toThrow();
+    }
   });
 });

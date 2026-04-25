@@ -11,18 +11,19 @@ e criterio de encerramento, seguindo o contrato em
 - `cycle_id`: `cycle-01`
 - `target_scope`: `login -> planner -> dashboard -> engine`
 - `target_bug_priorities`: `P1`, `P2`
-- `current_state`: fluxo principal corrigido no codigo e coberto por guards,
-  aguardando smoke manual final para encerrar os bugs P1 como `closed`
+- `current_state`: fluxo principal validado no smoke manual final de
+  `2026-04-21`; bugs P1 encerrados como `closed` com evidencias em
+  `validation/core-flow-smoke.md` e `validation/closure-log.md`
 
 ## Ordem Priorizada
 
 | bug_id | title | affected_flow | ownership_layer | severity | priority | status | owner | dependencies |
 |---|---|---|---|---|---|---|---|---|
-| `STAB-001` | CTA de novo edital parecia quebrado quando o limite do plano era atingido | `planner` | `auth-entitlement-gating` | `blocker` | `P1` | `fixed-awaiting-validation` | `web` | `-` |
-| `STAB-002` | `PlanManager` gerava warning de chave duplicada ao renderizar as cores | `planner` | `ui-render-state` | `high` | `P1` | `fixed-awaiting-validation` | `web` | `-` |
-| `STAB-003` | Login e Planner escondiam que o navegador estava em sandbox local de entitlement | `login` | `auth-entitlement-gating` | `high` | `P1` | `fixed-awaiting-validation` | `web` | `-` |
-| `STAB-004` | Dashboard sem edital ativo caia em estado vazio contraditorio | `dashboard` | `ui-render-state` | `high` | `P1` | `fixed-awaiting-validation` | `web` | `-` |
-| `STAB-005` | Engine sem edital ativo nao devolvia o usuario para o Planner com contexto honesto | `engine` | `cross-layer` | `high` | `P1` | `fixed-awaiting-validation` | `web` + `api` | `STAB-004` |
+| `STAB-001` | CTA de novo edital parecia quebrado quando o limite do plano era atingido | `planner` | `auth-entitlement-gating` | `blocker` | `P1` | `closed` | `web` | `-` |
+| `STAB-002` | `PlanManager` gerava warning de chave duplicada ao renderizar as cores | `planner` | `ui-render-state` | `high` | `P1` | `closed` | `web` | `-` |
+| `STAB-003` | Login e Planner escondiam que o navegador estava em sandbox local de entitlement | `login` | `auth-entitlement-gating` | `high` | `P1` | `closed` | `web` | `-` |
+| `STAB-004` | Dashboard sem edital ativo caia em estado vazio contraditorio | `dashboard` | `ui-render-state` | `high` | `P1` | `closed` | `web` | `-` |
+| `STAB-005` | Engine sem edital ativo nao devolvia o usuario para o Planner com contexto honesto | `engine` | `cross-layer` | `high` | `P1` | `closed` | `web` + `api` | `STAB-004` |
 | `STAB-006` | `/entitlements/me` ainda aceita `x-aprovamind-user-id` quando cenarios manuais estao ligados, mesmo com sandbox auth desligado | `cross-flow` | `cross-layer` | `high` | `P2` | `triaged` | `api` | `-` |
 | `STAB-007` | Superficies secundarias ainda dependem de smoke manual para confirmar coerencia de gates apos sandbox e tier changes | `secondary-surface` | `auth-entitlement-gating` | `medium` | `P2` | `identified` | `web` | `STAB-003` |
 | `STAB-008` | O repositorio nao tem smoke autenticado automatizado da cadeia `login -> planner -> dashboard -> engine` | `cross-flow` | `observability-test-gap` | `medium` | `P2` | `batched` | `qa` | `STAB-001`, `STAB-004`, `STAB-005` |
@@ -65,7 +66,7 @@ e criterio de encerramento, seguindo o contrato em
     `/apps/web/tests/stability/core-flow-regression.test.ts`
   - smoke manual em
     `/specs/002-app-stabilization/validation/core-flow-smoke.md`
-- `status`: `fixed-awaiting-validation`
+- `status`: `closed`
 
 ### `STAB-002` - `PlanManager` gerava warning de chave duplicada ao renderizar as cores
 
@@ -97,7 +98,7 @@ e criterio de encerramento, seguindo o contrato em
   - guarda automatizado em
     `/apps/web/tests/stability/ui-safety.test.ts`
   - revalidacao manual leve no modal do Planner
-- `status`: `fixed-awaiting-validation`
+- `status`: `closed`
 
 ### `STAB-003` - Login e Planner escondiam que o navegador estava em sandbox local de entitlement
 
@@ -130,7 +131,7 @@ e criterio de encerramento, seguindo o contrato em
     `/apps/web/tests/stability/ui-safety.test.ts`
   - smoke manual de usuario real vs sandbox em
     `/specs/002-app-stabilization/validation/core-flow-smoke.md`
-- `status`: `fixed-awaiting-validation`
+- `status`: `closed`
 
 ### `STAB-004` - Dashboard sem edital ativo caia em estado vazio contraditorio
 
@@ -161,7 +162,7 @@ e criterio de encerramento, seguindo o contrato em
   - guarda automatizado em
     `/apps/web/tests/stability/core-flow-regression.test.ts`
   - smoke manual em `CORE-FLOW-01`
-- `status`: `fixed-awaiting-validation`
+- `status`: `closed`
 
 ### `STAB-005` - Engine sem edital ativo nao devolvia o usuario para o Planner com contexto honesto
 
@@ -194,7 +195,7 @@ e criterio de encerramento, seguindo o contrato em
     `/apps/web/tests/stability/core-flow-regression.test.ts`
   - contrato API em `/apps/api/src/core-flow.stability.test.ts`
   - smoke manual em `CORE-FLOW-01`
-- `status`: `fixed-awaiting-validation`
+- `status`: `closed`
 
 ### `STAB-006` - `/entitlements/me` ainda aceita `x-aprovamind-user-id` quando cenarios manuais estao ligados, mesmo com sandbox auth desligado
 

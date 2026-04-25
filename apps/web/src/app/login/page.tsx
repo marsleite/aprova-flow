@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
 import {
-  canSelfRegisterInBeta,
   getBetaAccessMessage,
   getBetaAccessStatus,
   isBetaAccessRestricted,
+  type BetaAccessStatus,
 } from '@/lib/beta-access';
 import {
   getStoredEntitlementScenarioUserId,
@@ -40,12 +40,28 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [sandboxScenarioUserId, setSandboxScenarioUserId] = useState<string | null>(null);
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [betaAccessStatus, setBetaAccessStatus] = useState<BetaAccessStatus>('invite_only');
+
   const betaRestricted = isBetaAccessRestricted();
-  const betaAccessStatus = getBetaAccessStatus(email);
-  const betaMessage = getBetaAccessMessage(email);
-  const canRegisterWithEmail = canSelfRegisterInBeta(email);
+  const betaMessage = getBetaAccessMessage(betaAccessStatus);
+  const canRegisterWithEmail = betaAccessStatus === 'open' || betaAccessStatus === 'allowed';
   const registrationLocked = mode === 'register' && betaRestricted && !canRegisterWithEmail;
   const showRegistrationFields = mode === 'register' && !registrationLocked;
+
+  // Verifica status do email no Firestore com debounce de 500ms
+  useEffect(() => {
+    if (!betaRestricted || !email) {
+      setBetaAccessStatus(betaRestricted ? 'invite_only' : 'open');
+      return;
+    }
+    const timer = setTimeout(async () => {
+      const status = await getBetaAccessStatus(email);
+      setBetaAccessStatus(status);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [email, betaRestricted]);
 
   const helperText =
     mode === 'login'
@@ -81,6 +97,22 @@ export default function LoginPage() {
     if (!isEntitlementSandboxAvailable()) return;
     setSandboxScenarioUserId(getStoredEntitlementScenarioUserId());
   }, []);
+
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!waitlistEmail.trim()) return;
+    try {
+      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase/config');
+      await addDoc(collection(db, 'waitlist'), {
+        email: waitlistEmail.trim().toLowerCase(),
+        createdAt: serverTimestamp(),
+      });
+      setWaitlistSubmitted(true);
+    } catch {
+      setWaitlistSubmitted(true);
+    }
+  };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -436,13 +468,60 @@ export default function LoginPage() {
                         color: 'var(--primary)',
                       }}
                     >
-                      Ativacao por convite
+                      {betaAccessStatus === 'blocked' ? 'Fila de espera' : 'Ativacao por convite'}
                     </p>
-                    <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
-                      {betaAccessStatus === 'blocked'
-                        ? 'Esse email ainda nao esta liberado. Troque para um email convidado ou fale com a equipe antes de ativar o cadastro.'
-                        : 'Comece pelo email do convite. Quando ele for reconhecido, mostramos nome e senha para concluir a ativacao.'}
-                    </p>
+                    {betaAccessStatus === 'blocked' ? (
+                      <div className="mt-2">
+                        <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                          O AprovaMind esta em fase de testes com um grupo restrito.
+                          Deixe seu email para ser avisado quando abrirmos novas vagas.
+                        </p>
+                        {waitlistSubmitted ? (
+                          <div
+                            className="mt-3 rounded-xl px-4 py-3"
+                            style={{
+                              background: 'rgba(34, 197, 94, 0.1)',
+                              border: '1px solid rgba(34, 197, 94, 0.25)',
+                            }}
+                          >
+                            <p className="text-sm font-medium" style={{ color: '#4ade80' }}>
+                              Email registrado! Voce sera avisado quando o acesso for liberado.
+                            </p>
+                          </div>
+                        ) : (
+                          <form onSubmit={handleWaitlistSubmit} className="mt-3 flex gap-2">
+                            <input
+                              type="email"
+                              placeholder="seu@email.com"
+                              value={waitlistEmail}
+                              onChange={(e) => setWaitlistEmail(e.target.value)}
+                              required
+                              className="flex-1 rounded-full px-4 py-2.5 text-sm outline-none transition-all"
+                              style={{
+                                background: 'rgba(23, 20, 18, 0.6)',
+                                border: '1px solid var(--border)',
+                                color: 'var(--foreground)',
+                                backdropFilter: 'blur(8px)',
+                              }}
+                            />
+                            <button
+                              type="submit"
+                              className="shrink-0 rounded-full px-5 py-2.5 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95"
+                              style={{
+                                background: 'var(--primary)',
+                                color: 'var(--primary-foreground)',
+                              }}
+                            >
+                              Avisar-me
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                        Comece pelo email do convite. Quando ele for reconhecido, mostramos nome e senha para concluir a ativacao.
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -586,19 +665,88 @@ export default function LoginPage() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-5 rounded-2xl px-4 py-3.5 flex items-center gap-3"
-                  style={{
-                    background: 'rgba(169, 68, 66, 0.15)',
-                    border: '1px solid rgba(169, 68, 66, 0.3)',
-                  }}
+                  className="mt-5 space-y-3"
                 >
                   <div
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
-                    style={{ background: 'rgba(169, 68, 66, 0.25)' }}
+                    className="rounded-2xl px-4 py-3.5 flex items-center gap-3"
+                    style={{
+                      background: 'rgba(169, 68, 66, 0.15)',
+                      border: '1px solid rgba(169, 68, 66, 0.3)',
+                    }}
                   >
-                    <Zap className="h-3 w-3" style={{ color: 'var(--ds-color-danger)' }} />
+                    <div
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(169, 68, 66, 0.25)' }}
+                    >
+                      <Zap className="h-3 w-3" style={{ color: 'var(--ds-color-danger)' }} />
+                    </div>
+                    <p className="text-xs font-medium leading-tight" style={{ color: '#ef4444' }}>{error}</p>
                   </div>
-                  <p className="text-xs font-medium leading-tight" style={{ color: '#ef4444' }}>{error}</p>
+
+                  {/* Waitlist — aparece quando erro é de beta */}
+                  {(error.includes('beta') || error.includes('liberado')) && (
+                    <div
+                      className="rounded-2xl px-4 py-3.5"
+                      style={{
+                        background: 'rgba(253, 252, 251, 0.04)',
+                        border: '1px solid var(--border)',
+                      }}
+                    >
+                      <p
+                        className="text-[10px] font-medium uppercase"
+                        style={{
+                          fontFamily: 'var(--ds-font-display)',
+                          letterSpacing: 'var(--ds-letter-kicker)',
+                          color: 'var(--primary)',
+                        }}
+                      >
+                        Fila de espera
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
+                        Quer ser avisado quando abrirmos novas vagas?
+                      </p>
+                      {waitlistSubmitted ? (
+                        <div
+                          className="mt-3 rounded-xl px-4 py-3"
+                          style={{
+                            background: 'rgba(34, 197, 94, 0.1)',
+                            border: '1px solid rgba(34, 197, 94, 0.25)',
+                          }}
+                        >
+                          <p className="text-sm font-medium" style={{ color: '#4ade80' }}>
+                            Email registrado! Voce sera avisado quando o acesso for liberado.
+                          </p>
+                        </div>
+                      ) : (
+                        <form onSubmit={handleWaitlistSubmit} className="mt-3 flex gap-2">
+                          <input
+                            type="email"
+                            placeholder="seu@email.com"
+                            value={waitlistEmail}
+                            onChange={(e) => setWaitlistEmail(e.target.value)}
+                            required
+                            className="flex-1 rounded-full px-4 py-2.5 text-sm outline-none transition-all"
+                            style={{
+                              background: 'rgba(23, 20, 18, 0.6)',
+                              border: '1px solid var(--border)',
+                              color: 'var(--foreground)',
+                              backdropFilter: 'blur(8px)',
+                            }}
+                          />
+                          <button
+                            type="submit"
+                            className="shrink-0 rounded-full px-5 py-2.5 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95"
+                            style={{
+                              background: 'var(--primary)',
+                              color: 'var(--primary-foreground)',
+                            }}
+                          >
+                            Avisar-me
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
               )}
 

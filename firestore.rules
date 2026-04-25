@@ -409,6 +409,20 @@ service cloud.firestore {
       allow update, delete: if false;
     }
     
+    // Beta allowlist — qualquer pessoa lê (verificar acesso), só admin escreve
+    match /beta_allowlist/{email} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Waitlist — qualquer pessoa pode criar (sem auth), ninguém lê
+    match /waitlist/{docId} {
+      allow create: if request.resource.data.email is string
+                    && request.resource.data.email.size() > 0
+                    && request.resource.data.email.size() < 256;
+      allow read, update, delete: if isAdmin();
+    }
+
     // Bloqueia tudo que não esteja permitido
     match /{document=**} {
       allow read, write: if false;

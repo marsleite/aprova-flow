@@ -3,9 +3,12 @@
 ## Status Atual do Ciclo
 
 - `batch_id`: `BATCH-01`
-- `status`: `pending-manual-execution`
-- `reason`: nao ha harness autenticado ponta a ponta no repositorio; o smoke
-  final precisa ser executado manualmente em browser local ou ambiente beta
+- `status`: `passed`
+- `executed_at`: `2026-04-21`
+- `environment`: browser local em `localhost:3000` com API local em
+  `127.0.0.1:3001`
+- `reason`: smoke manual final executado no fluxo real e no sandbox local para
+  encerrar o ciclo de validacao do lote
 
 ## `CORE-FLOW-01`
 
@@ -26,6 +29,16 @@
   action ou estado contraditorio
 - `evidence_capture`: gravar resultado em
   `/specs/002-app-stabilization/validation/closure-log.md`
+- `result`: `pass`
+- `observed_evidence`:
+  - `/login` em `localhost:3000/login` sem callout de sandbox depois do retorno
+    para `usuario real`
+  - autenticacao via Google concluida com conta real e redirecionamento para o
+    `/planner`
+  - `/planner` exibiu badge coerente de acesso e o CTA `Novo Edital` abriu o
+    modal `Novo Edital`
+  - `/dashboard` carregou com contexto ativo `Sessao Livre`
+  - `/engine` abriu a etapa `Sessao` com `CONTEXTO ATIVO: Sessao Livre`
 
 ## `CORE-FLOW-02`
 
@@ -42,6 +55,12 @@
 - `expected_outcome`: o usuario entende que os gates atuais refletem um cenario
   local e nao o plano real
 - `evidence_capture`: screenshot ou anotacao curta no `closure-log.md`
+- `result`: `pass`
+- `observed_evidence`:
+  - `/login` exibiu o bloco `SANDBOX LOCAL` com o contexto
+    `premium-user`
+  - `/planner` exibiu chip `SANDBOX · PREMIUM-USER`
+  - o callout de sandbox orientou voltar ao usuario real em `/settings`
 
 ## `CORE-FLOW-03`
 
@@ -57,3 +76,10 @@
 - `expected_outcome`: Dashboard e Engine falham de forma honesta, sem seguir
   silenciosamente sem contexto
 - `evidence_capture`: anotacao manual no `closure-log.md`
+- `result`: `pass`
+- `observed_evidence`:
+  - seletor de contexto ajustado para `Todos os Editais`, removendo edital ativo
+  - `/dashboard` exibiu empty state `Selecione um edital ativo no Planner` com
+    CTA `Gerenciar Editais`
+  - `/engine` exibiu empty state equivalente com a mesma orientacao para o
+    Planner

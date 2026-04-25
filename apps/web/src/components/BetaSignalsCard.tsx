@@ -5,14 +5,40 @@ import {
   AlertTriangle,
   BarChart2,
   Brain,
+  Mail,
   MousePointerClick,
   RefreshCw,
   Users,
 } from 'lucide-react';
-import { auth } from '@/lib/firebase/config';
+import { collection, deleteDoc, doc, getDocs, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase/config';
 import { fetchAdminBetaSignals } from '@/lib/billing-admin-client';
 import type { BetaSignalsSummary } from '@/lib/firebase/betaSignals';
 import { Badge, Button, Card } from '@/components';
+
+interface WaitlistEntry {
+  id: string;
+  email: string;
+  createdAt: string;
+}
+
+interface AllowlistEntry {
+  email: string;
+  addedAt: string;
+}
+
+async function loadAllowlist(): Promise<AllowlistEntry[]> {
+  const snap = await getDocs(collection(db, 'beta_allowlist'));
+  return snap.docs.map((d) => {
+    const data = d.data();
+    const raw = data.addedAt;
+    let addedAt = '';
+    if (raw && typeof raw.toDate === 'function') {
+      addedAt = raw.toDate().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    return { email: d.id, addedAt };
+  }).sort((a, b) => a.email.localeCompare(b.email));
+}
 
 const WINDOW_OPTIONS = [7, 14, 30] as const;
 
@@ -70,11 +96,82 @@ function EmptyState({ text }: { text: string }) {
   );
 }
 
+async function loadWaitlist(): Promise<WaitlistEntry[]> {
+  const snap = await getDocs(collection(db, 'waitlist'));
+  return snap.docs
+    .map((d) => {
+      const data = d.data();
+      const raw = data.createdAt;
+      let createdAt = '';
+      let createdAtMs = 0;
+      if (raw && typeof raw.toDate === 'function') {
+        const date = raw.toDate() as Date;
+        createdAtMs = date.getTime();
+        createdAt = date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+      } else if (typeof raw === 'string') {
+        createdAt = raw;
+      }
+      return { id: d.id, email: data.email ?? d.id, createdAt, createdAtMs };
+    })
+    .sort((a, b) => b.createdAtMs - a.createdAtMs)
+    .slice(0, 50)
+    .map(({ id, email, createdAt }) => ({ id, email, createdAt }));
+}
+
 export default function BetaSignalsCard() {
   const [summary, setSummary] = useState<BetaSignalsSummary | null>(null);
   const [windowDays, setWindowDays] = useState<(typeof WINDOW_OPTIONS)[number]>(7);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
+  const [waitlistLoading, setWaitlistLoading] = useState(true);
+  const [allowlist, setAllowlist] = useState<AllowlistEntry[]>([]);
+  const [allowlistLoading, setAllowlistLoading] = useState(true);
+  const [actionPending, setActionPending] = useState<string | null>(null);
+  const [manualEmail, setManualEmail] = useState('');
+  const [manualPending, setManualPending] = useState(false);
+
+  async function handleManualGrant(e: React.FormEvent) {
+    e.preventDefault();
+    const email = manualEmail.toLowerCase().trim();
+    if (!email) return;
+    setManualPending(true);
+    try {
+      await setDoc(doc(db, 'beta_allowlist', email), {
+        addedAt: serverTimestamp(),
+        grantedByAdmin: true,
+      });
+      const updated = await loadAllowlist();
+      setAllowlist(updated);
+      setManualEmail('');
+    } finally {
+      setManualPending(false);
+    }
+  }
+
+  async function handleGrant(email: string) {
+    setActionPending(email);
+    try {
+      await setDoc(doc(db, 'beta_allowlist', email.toLowerCase().trim()), {
+        addedAt: serverTimestamp(),
+        grantedByAdmin: true,
+      });
+      const updated = await loadAllowlist();
+      setAllowlist(updated);
+    } finally {
+      setActionPending(null);
+    }
+  }
+
+  async function handleRevoke(email: string) {
+    setActionPending(email);
+    try {
+      await deleteDoc(doc(db, 'beta_allowlist', email.toLowerCase().trim()));
+      setAllowlist((prev) => prev.filter((e) => e.email !== email));
+    } finally {
+      setActionPending(null);
+    }
+  }
 
   async function handleRefresh() {
     setLoading(true);
@@ -114,17 +211,30 @@ export default function BetaSignalsCard() {
 
       try {
         const next = await loadAdminBetaSummary(7);
-        if (!cancelled) {
-          setSummary(next);
-        }
+        if (!cancelled) setSummary(next);
       } catch (err) {
-        if (!cancelled) {
-          setError(formatError(err));
-        }
+        if (!cancelled) setError(formatError(err));
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
+      }
+
+      // Waitlist e allowlist carregam independentemente
+      try {
+        const wl = await loadWaitlist();
+        if (!cancelled) setWaitlist(wl);
+      } catch (err) {
+        console.error('[BetaSignalsCard] loadWaitlist error:', err);
+      } finally {
+        if (!cancelled) setWaitlistLoading(false);
+      }
+
+      try {
+        const al = await loadAllowlist();
+        if (!cancelled) setAllowlist(al);
+      } catch (err) {
+        console.error('[BetaSignalsCard] loadAllowlist error:', err);
+      } finally {
+        if (!cancelled) setAllowlistLoading(false);
       }
     }
 
@@ -406,6 +516,127 @@ export default function BetaSignalsCard() {
             <EmptyState text="Nenhum uso de IA encontrado na janela atual." />
           )}
         </div>
+      </div>
+
+      {/* Gestão de acesso beta */}
+      <div className="mt-8 border-t border-am-border-subtle pt-6 grid gap-6 xl:grid-cols-2">
+
+        {/* Fila de espera */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-primary" />
+              <h3 className="font-sans text-am-body font-bold text-foreground">Fila de espera</h3>
+            </div>
+            {!waitlistLoading && (
+              <Badge variant="outline">{waitlist.length} email{waitlist.length !== 1 ? 's' : ''}</Badge>
+            )}
+          </div>
+
+          {waitlistLoading ? (
+            <EmptyState text="Carregando..." />
+          ) : waitlist.length === 0 ? (
+            <EmptyState text="Nenhum email na fila de espera ainda." />
+          ) : (
+            <div className="space-y-2">
+              {waitlist.map((entry) => {
+                const alreadyGranted = allowlist.some((a) => a.email === entry.email);
+                const isPending = actionPending === entry.email;
+                return (
+                  <div
+                    key={entry.id}
+                    className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-2.5 gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-am-body-sm text-foreground truncate">{entry.email}</p>
+                      <p className="text-am-caption text-muted-foreground">{entry.createdAt}</p>
+                    </div>
+                    {alreadyGranted ? (
+                      <Badge variant="outline" className="shrink-0 text-green-500 border-green-500/30">
+                        Liberado
+                      </Badge>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        disabled={isPending}
+                        onClick={() => void handleGrant(entry.email)}
+                        className="shrink-0"
+                      >
+                        {isPending ? 'Liberando...' : 'Liberar'}
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+              {waitlist.length === 50 && (
+                <p className="text-am-caption text-muted-foreground pt-1">Mostrando os 50 mais recentes.</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Allowlist ativa */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" />
+              <h3 className="font-sans text-am-body font-bold text-foreground">Acesso liberado</h3>
+            </div>
+            {!allowlistLoading && (
+              <Badge variant="outline">{allowlist.length} ativo{allowlist.length !== 1 ? 's' : ''}</Badge>
+            )}
+          </div>
+
+          <form onSubmit={(e) => void handleManualGrant(e)} className="flex gap-2">
+            <input
+              type="email"
+              placeholder="email@exemplo.com"
+              value={manualEmail}
+              onChange={(e) => setManualEmail(e.target.value)}
+              required
+              className="flex-1 rounded-md border border-border bg-muted/40 px-3 py-2 text-am-body-sm text-foreground outline-none focus:border-primary/50 transition-colors"
+            />
+            <Button type="submit" size="sm" variant="primary" disabled={manualPending || !manualEmail}>
+              {manualPending ? 'Adicionando...' : 'Adicionar'}
+            </Button>
+          </form>
+
+          {allowlistLoading ? (
+            <EmptyState text="Carregando..." />
+          ) : allowlist.length === 0 ? (
+            <EmptyState text="Nenhum email com acesso ativo." />
+          ) : (
+            <div className="space-y-2">
+              {allowlist.map((entry) => {
+                const isPending = actionPending === entry.email;
+                return (
+                  <div
+                    key={entry.email}
+                    className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-2.5 gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-am-body-sm text-foreground truncate">{entry.email}</p>
+                      {entry.addedAt && (
+                        <p className="text-am-caption text-muted-foreground">desde {entry.addedAt}</p>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={isPending}
+                      onClick={() => void handleRevoke(entry.email)}
+                      className="shrink-0 text-destructive border-destructive/30 hover:bg-destructive/10"
+                    >
+                      {isPending ? 'Revogando...' : 'Revogar'}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
       </div>
 
       {!loading && summary && (
