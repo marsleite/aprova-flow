@@ -44,6 +44,7 @@ interface StudyContext {
 interface ChatRequest {
   messages: ChatMessage[];
   context: StudyContext;
+  activePlanName?: string | null;
 }
 
 // ============================================================
@@ -192,31 +193,32 @@ ${engineResult.snapshot.subjects.filter(s => ['critical', 'neglected', 'warning'
       console.warn('Motor indisponível para o chat', e);
     }
 
-    // Monta o histórico de conversa com system prompt embutido
+    // Monta system prompt como instrução nativa do Gemini (não embutido no prompt)
     const systemPrompt = buildSystemPrompt(context, engineContext);
 
-    // Constrói contents para a API: system + histórico + última mensagem
-    const contents: string[] = [];
-
-    // Adiciona system prompt como contexto inicial
-    contents.push(`[INSTRUÇÕES DO SISTEMA — NÃO MOSTRAR AO USUÁRIO]\n${systemPrompt}\n[FIM DAS INSTRUÇÕES]\n`);
-
-    // Adiciona histórico formatado
-    for (const msg of messages) {
+    // Constrói o prompt com histórico formatado de forma limpa
+    // O system prompt vai separado via systemInstruction (mais eficaz no Gemini)
+    const historyParts: string[] = [];
+    for (const msg of messages.slice(0, -1)) {
       if (msg.role === 'user') {
-        contents.push(`Estudante: ${msg.content}`);
+        historyParts.push(`Estudante: ${msg.content}`);
       } else {
-        contents.push(`Coach: ${msg.content}`);
+        historyParts.push(`Coach: ${msg.content}`);
       }
     }
 
-    const fullPrompt = contents.join('\n\n') + '\n\nCoach:';
+    // Última mensagem do usuário é o prompt principal
+    const lastMessage = messages[messages.length - 1];
+    const prompt = historyParts.length > 0
+      ? `${historyParts.join('\n\n')}\n\nEstudante: ${lastMessage.content}`
+      : lastMessage.content;
 
     const aiResponse = await runDedicatedAiText({
       idToken: auth.idToken,
       payload: {
         task: 'chat',
-        prompt: fullPrompt,
+        prompt,
+        systemInstruction: systemPrompt,
         temperature: 0.5,
         maxOutputTokens: 2048,
       },
@@ -224,8 +226,10 @@ ${engineResult.snapshot.subjects.filter(s => ['critical', 'neglected', 'warning'
 
     const text = aiResponse.text?.trim() || 'Desculpe, não consegui gerar uma resposta. Tente novamente.';
 
-    // Limpa prefixo "Coach:" se o modelo repetir
-    const cleaned = text.replace(/^Coach:\s*/i, '').trim();
+    // Limpa prefixos se o modelo repetir ("Coach:", "Estudante:", etc.)
+    const cleaned = text
+      .replace(/^(Coach|Estudante|Assistant|User):\s*/i, '')
+      .trim();
 
     return NextResponse.json(
       { reply: cleaned },

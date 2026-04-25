@@ -104,20 +104,50 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Nenhum dia disponível foi informado.' }, { status: 400 });
         }
 
-        const systemPrompt = `Você é o Algoritmo Preditivo do AprovaMind.\nSua função é gerar o cronograma ideal de estudos da semana para o usuário, mapeando as horas de estudo por dia da semana.\n\nREGRAS ABSOLUTAS:\n1. O total de horas sugeridas na semana DEVE ficar EXATAMENTE ou muito próximo da meta semanal (${weeklyGoalHours}h), sem ultrapassar a capacidade real declarada.\n2. Distribua as horas SOMENTE nos dias disponíveis e respeite o teto de cada dia informado.\n3. Matérias com maior peso e baixa precisão (accuracy) DEVEM receber mais horas.\n4. Se o status da cobertura estiver em "attention" ou "critical", aumente o foco nas matérias nucleares e concentre mais horas nos dias com maior disponibilidade.\n5. NÃO gere texto livre. Retorne APENAS um JSON estrito no seguinte formato:\n\n[\n  {\n    "day": "Nome do Dia",\n    "totalHours": number,\n    "subjects": [{ "name": "Materia", "hours": number, "reason": "motivo curto" }]\n  }\n]\n\nCONTEXTO DO PLANO:\n- Plano ativo: ${activePlanName || 'Visao Geral'}\n- Prova: ${examDate || 'nao informada'}\n- Carga estimada do material: ${materialWorkloadHours ?? 'nao informada'}h\n- Ritmo semanal necessario: ${requiredWeeklyHours ?? 'nao calculado'}h\n- Status de cobertura: ${coverageStatus || 'desconhecido'}\n\nJANELA REAL DISPONIVEL NA SEMANA:\n${normalizedAvailableSchedule
-            .map((day) => `- ${day.day}: até ${day.availableHours}h`)
-            .join('\n')}\n\nDADOS DO ALUNO (${userName}):\n${planSubjects
-            .map((s) => `- ${s.subject} (Peso: ${s.weight} | Estudado: ${s.hoursStudied}h | Precisão: ${s.accuracy}%)`)
-            .join('\n')}`;
+        const systemInstruction = [
+            'Você é o Algoritmo Preditivo do AprovaMind.',
+            'Sua função é gerar o cronograma ideal de estudos da semana para o usuário, mapeando as horas de estudo por dia da semana.',
+            '',
+            'REGRAS ABSOLUTAS:',
+            `1. O total de horas sugeridas na semana DEVE ficar EXATAMENTE ou muito próximo da meta semanal (${weeklyGoalHours}h), sem ultrapassar a capacidade real declarada.`,
+            '2. Distribua as horas SOMENTE nos dias disponíveis e respeite o teto de cada dia informado.',
+            '3. Matérias com maior peso e baixa precisão (accuracy) DEVEM receber mais horas.',
+            '4. Se o status da cobertura estiver em "attention" ou "critical", aumente o foco nas matérias nucleares e concentre mais horas nos dias com maior disponibilidade.',
+            '5. NÃO gere texto livre. Retorne APENAS um JSON estrito no seguinte formato:',
+            '',
+            '[',
+            '  {',
+            '    "day": "Nome do Dia",',
+            '    "totalHours": number,',
+            '    "subjects": [{ "name": "Materia", "hours": number, "reason": "motivo curto" }]',
+            '  }',
+            ']',
+        ].join('\n');
 
-        const fullPrompt = `${systemPrompt}\n\nGere o cronograma completo abaixo.`;
+        const prompt = [
+            'CONTEXTO DO PLANO:',
+            `- Plano ativo: ${activePlanName || 'Visão Geral'}`,
+            `- Prova: ${examDate || 'não informada'}`,
+            `- Carga estimada do material: ${materialWorkloadHours ?? 'não informada'}h`,
+            `- Ritmo semanal necessário: ${requiredWeeklyHours ?? 'não calculado'}h`,
+            `- Status de cobertura: ${coverageStatus || 'desconhecido'}`,
+            '',
+            'JANELA REAL DISPONÍVEL NA SEMANA:',
+            ...normalizedAvailableSchedule.map((day) => `- ${day.day}: até ${day.availableHours}h`),
+            '',
+            `DADOS DO ALUNO (${userName}):`,
+            ...planSubjects.map((s) => `- ${s.subject} (Peso: ${s.weight} | Estudado: ${s.hoursStudied}h | Precisão: ${s.accuracy}%)`),
+            '',
+            'Gere o cronograma completo.',
+        ].join('\n');
 
         const aiResponse = await runDedicatedAiText({
             idToken: auth.idToken,
             payload: {
                 task: 'smart-schedule',
-                prompt: fullPrompt,
-                temperature: 0.2, // Baixa temperatura para manter a estrutura JSON previsível
+                systemInstruction,
+                prompt,
+                temperature: 0.2,
                 maxOutputTokens: 2048,
                 preferJson: true,
             },

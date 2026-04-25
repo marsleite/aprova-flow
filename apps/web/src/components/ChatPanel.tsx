@@ -38,6 +38,7 @@ interface ChatPanelProps {
   totalTodaySeconds: number;
   weeklyData: DailyHours[];
   recentSessions: StudySession[];
+  activePlanName?: string | null;
 }
 
 const MAX_HISTORY = 10; // Últimas mensagens enviadas à API
@@ -53,11 +54,13 @@ export default function ChatPanel({
   totalTodaySeconds,
   weeklyData,
   recentSessions,
+  activePlanName,
 }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [greeted, setGreeted] = useState(false);
+  const [quota, setQuota] = useState<{ remaining: number; limit: number } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -109,8 +112,9 @@ export default function ChatPanel({
         date: s.date,
         startTime: s.startTime,
       })),
+      activePlanName: activePlanName || null,
     };
-  }, [userName, consistency, subjectHours, planVsActual, todaySessions, totalTodaySeconds, weeklyData, recentSessions]);
+  }, [userName, consistency, subjectHours, planVsActual, todaySessions, totalTodaySeconds, weeklyData, recentSessions, activePlanName]);
 
   // ================================================
   // Saudação inteligente ao abrir o chat
@@ -228,6 +232,9 @@ export default function ChatPanel({
           fallbackMessage: 'Erro na IA',
         });
         if (failure.quotaNotice) {
+          if (failure.quotaNotice.limit) {
+            setQuota({ limit: failure.quotaNotice.limit, remaining: 0 });
+          }
           setMessages((prev) => [
             ...prev,
             {
@@ -238,6 +245,16 @@ export default function ChatPanel({
           return;
         }
         throw new Error(failure.message);
+      }
+
+      // Captura quota restante dos headers
+      const rlLimit = res.headers.get('x-ratelimit-limit');
+      const rlRemaining = res.headers.get('x-ratelimit-remaining');
+      if (rlLimit && rlRemaining) {
+        setQuota({
+          limit: parseInt(rlLimit, 10),
+          remaining: parseInt(rlRemaining, 10),
+        });
       }
 
       const { reply } = await res.json();
@@ -296,7 +313,22 @@ export default function ChatPanel({
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">Coach IA</h3>
-                  <p className="text-[11px] text-muted-foreground">Powered by Gemini</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[11px] text-muted-foreground">Powered by Gemini</p>
+                    {quota && (
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                          quota.remaining <= 2
+                            ? 'bg-red-500/20 text-red-400'
+                            : quota.remaining <= Math.ceil(quota.limit * 0.3)
+                              ? 'bg-yellow-500/20 text-yellow-400'
+                              : 'bg-primary/15 text-primary'
+                        }`}
+                      >
+                        {quota.remaining}/{quota.limit}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-1">

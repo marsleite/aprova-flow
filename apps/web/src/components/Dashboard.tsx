@@ -788,6 +788,7 @@ export default function Dashboard() {
         totalTodaySeconds={summary.totalToday}
         weeklyData={weeklyData}
         recentSessions={recentData}
+        activePlanName={activePlanObj?.name || null}
       />
 
       {/* PlanManager (modal CRUD de editais) */}

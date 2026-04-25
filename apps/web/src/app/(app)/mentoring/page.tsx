@@ -333,6 +333,7 @@ export default function MentoringPage() {
           totalTodaySeconds={recentSessions.filter((s) => s.date === new Date().toISOString().split('T')[0]).reduce((a, b) => a + b.duration, 0)}
           weeklyData={weeklyData}
           recentSessions={recentSessions}
+          activePlanName={activePlanObj?.name || null}
         />
       )}
     </div>
