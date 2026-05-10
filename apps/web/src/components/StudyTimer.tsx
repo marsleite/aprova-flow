@@ -371,6 +371,7 @@ export default function StudyTimer({
     setSelectedSubject,
     setMode,
     play,
+    startSubject,
     pause,
     stop,
     skipPhase,
@@ -443,12 +444,12 @@ export default function StudyTimer({
       const custom = event as CustomEvent<{ subject?: string }>;
       const subject = custom.detail?.subject;
       if (!subject || typeof subject !== 'string') return;
-      setSelectedSubject(subject);
+      startSubject(subject);
     }
 
     window.addEventListener('aprova:start-subject', handleStartSubject as EventListener);
     return () => window.removeEventListener('aprova:start-subject', handleStartSubject as EventListener);
-  }, [setSelectedSubject]);
+  }, [startSubject]);
 
   // ========================================
   // Interrogation Mode State

@@ -69,6 +69,8 @@ interface UseStudyTimerReturn {
   setMode: (mode: TimerMode) => void;
   /** Inicia ou retoma o cronômetro */
   play: () => void;
+  /** Seleciona a matéria e inicia ou retoma o cronômetro na mesma operação */
+  startSubject: (subject: string) => void;
   /** Pausa manualmente o cronômetro */
   pause: () => void;
   /** Para o cronômetro e salva a sessão */
@@ -704,6 +706,70 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
     });
   }, [hasControl, mutateTimerState, planId, remoteState.selectedSubject]);
 
+  const startSubject = useCallback(
+    (subject: string) => {
+      if (!hasControl) return;
+      const normalized = subject.trim().replace(/\s+/g, ' ');
+      if (!normalized) return;
+
+      void mutateTimerState((current, nowIso) => {
+        if (current.status === 'running') {
+          return {
+            ...current,
+            selectedSubject: normalized,
+            planId: planId || null,
+          };
+        }
+
+        if (current.status === 'paused') {
+          return {
+            ...current,
+            status: 'running',
+            selectedSubject: normalized,
+            planId: planId || null,
+            runningAnchorAt: nowIso,
+          };
+        }
+
+        if (current.status !== 'idle' && current.status !== 'stopped') return null;
+
+        if (current.mode === 'freeform') {
+          return {
+            ...current,
+            status: 'running',
+            selectedSubject: normalized,
+            planId: planId || null,
+            startTime: nowIso,
+            runningAnchorAt: nowIso,
+            accumulatedSeconds: 0,
+            totalFocusSeconds: 0,
+            pomodoroPhase: null,
+            phaseSecondsLeft: 0,
+            currentCycle: 1,
+          };
+        }
+
+        const config = POMODORO_PRESETS[current.mode as PomodoroMode];
+        return {
+          ...current,
+          status: 'running',
+          selectedSubject: normalized,
+          planId: planId || null,
+          startTime: nowIso,
+          runningAnchorAt: nowIso,
+          accumulatedSeconds: 0,
+          totalFocusSeconds: 0,
+          pomodoroPhase: 'focus',
+          phaseSecondsLeft: config.focusMinutes * 60,
+          currentCycle: 1,
+        };
+      }).catch((error) => {
+        console.error('Erro ao iniciar timer pela matéria do plano diário:', error);
+      });
+    },
+    [hasControl, mutateTimerState, planId]
+  );
+
   const pause = useCallback(() => {
     if (!hasControl) return;
     void mutateTimerState((current, _nowIso, nowMs) => {
@@ -858,6 +924,7 @@ export function useStudyTimer({ userId, planId }: UseStudyTimerOptions): UseStud
     setSelectedSubject,
     setMode,
     play,
+    startSubject,
     pause,
     stop,
     skipPhase,
