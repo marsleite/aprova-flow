@@ -6,7 +6,7 @@
 |---|---|---|---|
 | CON-01 | business | Retention, recurrence, and continuous routine are the primary tie-breakers for this roadmap. | Improvements that do not strengthen repeated usage should not outrank the core journey. |
 | CON-02 | business | The roadmap must optimize for beginners, intermediate users, and advanced users without dropping the hybrid public already assumed by the spec. | Packaging and UX cannot overfit only the advanced multi-edital case. |
-| CON-03 | business | `free -> pro` is the main commercial ladder; `premium` should come after the core ladder is clearer and more trustworthy. | Prevents premature premium expansion and keeps the roadmap anchored in the current commercial strategy. |
+| CON-03 | business | `free -> pro` is the main commercial ladder; `pro` should come after the core ladder is clearer and more trustworthy. | Prevents premature pro expansion and keeps the roadmap anchored in the current commercial strategy. |
 | CON-04 | business | The audit starts with `onboarding -> planner -> dashboard -> engine`, and adjacent areas should be interpreted from that core path first. | Avoids producing recommendations disconnected from the main product loop. |
 
 ## Operational Constraints
@@ -36,7 +36,7 @@
 
 - No roadmap phase should recommend real gateway rollout before blocked-feature
   events, upgrade CTAs, and quota exhaustion signals are measurable.
-- No roadmap phase should recommend deeper premium expansion before the core
+- No roadmap phase should recommend deeper pro expansion before the core
   `planner -> dashboard -> engine` path becomes easier to discover and follow.
 - No roadmap phase should treat current commercial or entitlement signals as
   trustworthy while end users can still influence entitlement state directly or

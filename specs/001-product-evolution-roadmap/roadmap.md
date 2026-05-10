@@ -14,11 +14,11 @@
 |---|---|---|
 | Jornada principal `onboarding -> planner -> dashboard -> engine` | O login redireciona para `/dashboard`; a barra lateral ordena `Dashboard -> Sessao de Estudo -> Planner`; o `StudyJourneyCard` explica `Planner -> Dashboard -> Engine`. | O produto ja sabe qual historia quer contar, mas ainda nao a introduz do jeito mais coerente no shell principal. |
 | Proposta de valor | README, landing e login vendem performance, IA e multi-edital; planner, dashboard e engine ja entregam uma espinha dorsal real de decisao e execucao. | O valor existe e e percebivel, mas a embalagem ainda acelera a promessa de sofisticacao antes de consolidar a rotina central. |
-| UX/UI e fluxos principais | As telas principais sao intencionais, com contexto visual forte e CTAs claros; simulados vivem em `/simulations` como overview e em `/provas` como hub operacional. | A experiencia parece premium, mas ainda custa mais navegacao e mais interpretacao do que deveria. |
+| UX/UI e fluxos principais | As telas principais sao intencionais, com contexto visual forte e CTAs claros; simulados vivem em `/simulations` como overview e em `/provas` como hub operacional. | A experiencia parece pro, mas ainda custa mais navegacao e mais interpretacao do que deveria. |
 | Onboarding e retencao | Beta access e hardcoded por allowlist; login e cadastro ficam expostos antes do bloqueio; nao existe um caminho explicito de "primeiro plano -> primeira leitura semanal -> primeira sessao". | A primeira experiencia ainda depende demais de contexto externo ou de explicacao manual. |
 | Arquitetura e organizacao do codigo | O monorepo compartilha `domain`, `application` e `contracts`; `apps/api` ja expone AI, engine e entitlements; `apps/web` ainda hospeda varias rotas server-side equivalentes. | A base arquitetural e melhor do que um app monolitico simples, mas a fronteira de ownership ainda esta em consolidacao. |
 | Qualidade tecnica e testabilidade | Ha cobertura boa para regras de dominio, use cases e entitlements no backend; as paginas e fluxos visiveis do produto tem menos cobertura automatizada. | O nucleo de regras esta relativamente protegido, mas a experiencia mais importante para o usuario ainda pode regredir com mais facilidade. |
-| Performance | `caderno-erros` resolve questoes erradas em serie; planner monta estatisticas com fetches repetidos por plano. | O beta pequeno suporta o desenho atual, mas as areas de maior valor premium ja mostram pontos de desgaste para escala. |
+| Performance | `caderno-erros` resolve questoes erradas em serie; planner monta estatisticas com fetches repetidos por plano. | O beta pequeno suporta o desenho atual, mas as areas de maior valor pro ja mostram pontos de desgaste para escala. |
 | Observabilidade e metricas | IA ja tem `ai_usage_events`, custo estimado e quota headers; os docs do beta listam como faltantes eventos de bloqueio, CTA de upgrade e mudanca de status. | Hoje o produto mede melhor custo e uso de IA do que ativacao, retencao e desejo real de upgrade. |
 | Monetizacao | A matriz de entitlements esta bem pensada, upgrade cards sao contextuais, e o beta e manual; ao mesmo tempo, o modal de "faturamento" escreve `planTier` pelo cliente e `user_stats` permite escrita do proprio usuario. | A estrategia comercial e boa no papel, mas a confiabilidade operacional/comercial atual ainda e insuficiente. |
 | Escalabilidade futura | O beta depende de operacao manual, docs semanais e review constante; a API dedicada ainda aceita sandbox bypass e o web ainda concentra parte do backend funcional. | Antes de ampliar cohortes ou colocar gateway real, o produto precisa de uma base mais confiavel de auth, entitlement e ownership server-side. |
@@ -47,11 +47,11 @@
 | `critical` | A API dedicada esta com sandbox bypass habilitado (`x-aprovamind-user-id`) em rotas protegidas. | Protected routes podem ser acessadas sem auth real se essa superficie estiver exposta como esta. | `apps/api/src/app.ts`, `apps/api/src/plugins/firebase-auth.ts` |
 | `high` | A jornada principal e contada de um jeito e navegada de outro. | Ativacao e recorrencia sofrem porque o produto nao reforca a mesma narrativa desde a entrada. | `login/page.tsx`, `Sidebar.tsx`, `StudyJourneyCard.tsx` |
 | `high` | Ownership server-side esta duplicado entre `apps/web` e `apps/api`. | Auth, observabilidade, deploy e evolucao ficam mais caros e mais confusos. | `apps/web/src/app/api/*`, `apps/api/src/modules/*`, `current-architecture.md` |
-| `high` | Ainda faltam eventos de produto para bloqueio, CTA e funil de upgrade. | O time nao consegue dizer com seguranca o que realmente vende `pro` ou `premium`. | `beta-metrics-roadmap.md`, `beta-test-plan.md` |
+| `high` | Ainda faltam eventos de produto para bloqueio, CTA e funil de upgrade. | O time nao consegue dizer com seguranca o que realmente vende `pro` ou `pro`. | `beta-metrics-roadmap.md`, `beta-test-plan.md` |
 | `high` | O onboarding beta ainda se parece com cadastro aberto antes do bloqueio por convite. | Primeira impressao fraca, ruido operacional e confianca menor logo no inicio. | `useAuth.ts`, `beta-access.ts`, `login/page.tsx` |
 | `medium` | Simulados ainda exigem navegao entre overview e hub operacional. | A descoberta e boa, mas a execucao ainda pede contexto demais. | `simulations/page.tsx`, `provas/page.tsx` |
 | `medium` | Front-end principal tem menos cobertura automatizada do que dominio/backend. | Regressao de UX e gates pode escapar mesmo com regras centrais corretas. | `apps/web/tests`, paginas em `apps/web/src/app/(app)/` |
-| `medium` | Planner e caderno de erros tem fan-out que envelhece mal com crescimento. | Areas premium e multi-edital podem sofrer latencia justo onde o valor e maior. | `planner/page.tsx`, `caderno-erros/page.tsx` |
+| `medium` | Planner e caderno de erros tem fan-out que envelhece mal com crescimento. | Areas pro e multi-edital podem sofrer latencia justo onde o valor e maior. | `planner/page.tsx`, `caderno-erros/page.tsx` |
 | `medium` | README e parte da documentacao descrevem um estado arquitetural anterior. | Onboarding tecnico e decisoes futuras ficam mais lentos e mais ambigos. | `README.md`, `current-architecture.md`, `components/Dashboard.tsx` |
 
 ## 4. Quick wins
@@ -81,7 +81,7 @@
 | ID | Oportunidade | Impact | Effort | Risk | Dependency | Por que ainda nao e o primeiro movimento |
 |---|---|---|---|---|---|---|
 | `SG-01` | Calibrar `free -> pro` com base em valor bloqueado real | `high` | `high` | `medium` | `ST-01`, `ST-03`, jornada mais coerente | Sem medicao de bloqueio e desejo de upgrade, gateway vira aposta cedo demais. |
-| `SG-02` | Reposicionar `premium` como coordenacao de rotina complexa | `high` | `high` | `medium` | `SG-01` | O produto ainda precisa provar melhor o que sustenta `pro` antes de sofisticar `premium`. |
+| `SG-02` | Reposicionar `pro` como coordenacao de rotina complexa | `high` | `high` | `medium` | `SG-01` | O produto ainda precisa provar melhor o que sustenta `pro` antes de sofisticar `pro`. |
 | `SG-03` | Fechar o loop adaptativo planner -> dashboard -> engine -> provas -> erros | `high` | `high` | `high` | `ST-02`, `ST-03`, `SG-01` | Uma camada adaptativa mais profunda sem ownership e metricas maduras aumenta rework. |
 | `SG-04` | Escalar beta somente depois da base estabilizada | `medium` | `medium` | `medium` | `ST-01`, `QW-01`..`QW-06`, `ST-03` | Crescer cedo demais amplia ruido, nao aprendizado util. |
 
@@ -90,7 +90,7 @@
 ### Phase 0 - Trust boundary hardening
 
 - Objetivo: restaurar confianca operacional e comercial antes de tirar
-  conclusoes sobre upgrade, quota ou uso premium.
+  conclusoes sobre upgrade, quota ou uso pro.
 - Inclui: `ST-01`, `QW-05`
 - Sinais de saida:
   - nao existe mais caminho cliente-direto para alterar plano/usage
@@ -134,13 +134,13 @@
   - o time sabe quais bloqueios e momentos puxam upgrade de forma confiavel
   - copy e quotas estao calibradas para o proposito real do beta
 
-### Phase 5 - Premium differentiation and adaptive intelligence
+### Phase 5 - Pro differentiation and adaptive intelligence
 
-- Objetivo: aprofundar a camada premium e a inteligencia adaptativa sem diluir
+- Objetivo: aprofundar a camada pro e a inteligencia adaptativa sem diluir
   o foco central do produto.
 - Inclui: `SG-02`, `SG-03`, `SG-04`
 - Sinais de saida:
-  - `premium` passa a significar coordenacao de rotina complexa
+  - `pro` passa a significar coordenacao de rotina complexa
   - o loop entre planejamento, execucao e diagnostico fica mais integrado
   - a ampliacao do beta acontece sobre uma base mais confiavel
 
@@ -168,7 +168,7 @@
   vende `pro`, entao gateway e recalibracao comercial ficam precipitados.
 - `ST-02` e `ST-05` devem servir a uma pergunta de produto mais clara, e nao
   rodar como refatoracao cega.
-- `premium` e loop adaptativo so devem crescer depois que o nucleo single-plan e
+- `pro` e loop adaptativo so devem crescer depois que o nucleo single-plan e
   a escada `free -> pro` ficarem mais confiaveis.
 
 ### Custo de executar fora de ordem
@@ -177,6 +177,6 @@
   - gera cobranca com aprendizado comercial fraco
 - Escalar beta antes de `ST-01`
   - amplia ruido e risco de abuso, nao confianca
-- Investir em `premium` antes de `SG-01`
+- Investir em `pro` antes de `SG-01`
   - reforca dispersao estrategica e pode atrasar a consolidacao do plano
     principal

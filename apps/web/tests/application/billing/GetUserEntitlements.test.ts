@@ -55,9 +55,9 @@ describe('GetUserEntitlements', () => {
     });
     expect(result.entitlements.features[FeatureCode.ContextualAiChat]).toMatchObject({
       mode: 'quota',
-      limit: 60,
+      limit: 150,
       used: 12,
-      remaining: 48,
+      remaining: 138,
       enabled: true,
     });
   });
@@ -82,7 +82,7 @@ describe('GetUserEntitlements', () => {
       found: true,
       subscription: {
         userId,
-        plan: PlanCode.Premium,
+        plan: PlanCode.Pro,
         status: SubscriptionStatus.Expired,
       },
     }));
@@ -93,7 +93,7 @@ describe('GetUserEntitlements', () => {
     expect(result.found).toBe(true);
     if (!result.found) return;
 
-    expect(result.entitlements.catalogPlan).toBe(PlanCode.Premium);
+    expect(result.entitlements.catalogPlan).toBe(PlanCode.Pro);
     expect(result.entitlements.effectivePlan).toBe(PlanCode.Free);
     expect(result.entitlements.accessState).toBe(AccessState.FreeFallback);
     expect(result.entitlements.features[FeatureCode.MultiEdital]).toEqual({

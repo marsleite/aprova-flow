@@ -11,7 +11,7 @@ interface TrackedUpgradeLinkProps
   extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>,
     LinkProps {
   surface: string;
-  recommendedPlan: 'pro' | 'premium';
+  recommendedPlan: 'pro';
   currentPlan?: PlanTier;
   featureCode?: string;
   eventMetadata?: ProductEventMetadata;

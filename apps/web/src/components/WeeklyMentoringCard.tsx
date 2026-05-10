@@ -5,7 +5,7 @@
  * Se já existe: mostra conteúdo salvo (zero requests).
  * Se não existe: mostra botão "Gerar Mentoria Semanal" (1 request).
  *
- * Visual premium com seções expandíveis.
+ * Visual principal com seções expandíveis.
  */
 
 'use client';

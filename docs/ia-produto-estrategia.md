@@ -25,7 +25,7 @@ Pontos fortes:
 
 Gaps de produto (oportunidade):
 - IA está mais reativa do que executiva (responde, mas não conduz rotina diária).
-- Valor premium ainda não está ancorado em "ganho de desempenho mensurável".
+- Valor pro ainda não está ancorado em "ganho de desempenho mensurável".
 - Falta loop diário de decisão: "o que estudar agora e por quê".
 
 Gaps técnicos:
@@ -54,7 +54,7 @@ Observação:
 ### 3.2 Decisão por caso de uso
 
 - Parse de edital (PDF multimodal): manter Gemini 2.5 Flash inicialmente.
-- Chat premium e mentoria textual: A/B entre GPT-5 mini e Gemini 2.5 Flash.
+- Chat pro e mentoria textual: A/B entre GPT-5 mini e Gemini 2.5 Flash.
 - Classificação/sumarização barata: GPT-5 nano ou Gemini Flash-Lite.
 
 ### 3.3 Escolha padrão inicial sugerida
@@ -83,9 +83,9 @@ Conclusão:
 - O principal gargalo não é custo de token, é captura de valor de produto.
 - O maior retorno vem de funcionalidades que aumentam retenção e assinatura.
 
-## 5) Funcionalidades de IA que geram assinatura premium
+## 5) Funcionalidades de IA que geram assinatura pro
 
-### 5.1 Feature âncora premium
+### 5.1 Feature âncora pro
 
 Plano de Aprovação Adaptativo (diário):
 - "Próxima melhor sessão" com matéria + duração + objetivo.
@@ -93,7 +93,7 @@ Plano de Aprovação Adaptativo (diário):
 - Plano de recuperação de 7 dias ao detectar desvio de meta.
 - Priorização por edital + risco por matéria.
 
-### 5.2 Feature premium de alto impacto
+### 5.2 Feature pro de alto impacto
 
 Pós-Simulado Inteligente:
 - Diagnóstico por matéria (causa raiz: conhecimento x execução x tempo).
@@ -179,7 +179,7 @@ Checklist:
 - [x] Substituir parse manual de JSON por schema/parse estruturado resiliente.
 - [x] Migrar rate limit para armazenamento compartilhado.
 
-### Fase 2 — Produto premium diário (3 semanas)
+### Fase 2 — Produto pro diário (3 semanas)
 
 Objetivo:
 - Criar loop diário de valor.
@@ -195,7 +195,7 @@ Checklist:
 - [x] Salvar histórico de planos executados.
 - [x] Replanejamento automático após sessão salva (com contexto de execução).
 
-### Fase 3 — Pós-simulado premium (3 semanas)
+### Fase 3 — Pós-simulado pro (3 semanas)
 
 Objetivo:
 - Conectar IA diretamente à evolução de nota.
@@ -216,14 +216,14 @@ Objetivo:
 - Converter mais usuários para plano pago.
 
 Entregáveis:
-- Limites por plano (Free / Pro / Premium).
+- Limites por plano (Free / Pro).
 - Paywall contextual com valor claro.
-- Trial de 7 dias para recursos premium de IA.
+- Trial de 7 dias para recursos pro de IA.
 
 Checklist:
 - [x] Definir quotas por recurso (não só por mensagens de chat).
 - [ ] Exibir ganho de resultado no paywall.
-- [ ] Instrumentar conversão por feature premium.
+- [ ] Instrumentar conversão por feature pro.
 
 ### Fase 5 — Otimização contínua (contínuo)
 
@@ -246,7 +246,7 @@ Produto:
 - WAU/MAU
 - Retenção D7 e D30
 - % usuários que seguem plano diário
-- Conversão para Pro/Premium
+- Conversão para Pro
 
 IA:
 - Custo por usuário ativo

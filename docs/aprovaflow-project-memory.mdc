@@ -103,7 +103,7 @@ src/
 9. Insights automáticos (motor de regras local)
 10. Histórico com filtros + exportar CSV
 11. Resumo diário automático
-12. UI premium: framer-motion, anel SVG, glow, animações staggered
+12. UI pro: framer-motion, anel SVG, glow, animações staggered
 
 ### Fase 2 (COMPLETA)
 1. ✅ Integração Google Gemini — API Route server-side, prompt grounded, Coach card

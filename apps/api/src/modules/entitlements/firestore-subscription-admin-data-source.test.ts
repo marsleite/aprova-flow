@@ -28,7 +28,7 @@ test('FirestoreSubscriptionAdminDataSource updates plan, status and usage in use
 
   const result = await dataSource.updateUserSubscriptionState({
     userId: 'user-1',
-    plan: PlanCode.Premium,
+    plan: PlanCode.Pro,
     status: SubscriptionStatus.PastDue,
     usage: {
       ai_explanations: 12,
@@ -39,7 +39,7 @@ test('FirestoreSubscriptionAdminDataSource updates plan, status and usage in use
   assert.equal(result.found, true);
   assert.ok(savedPayload);
   const payload = savedPayload as Record<string, string>;
-  assert.equal(payload.planTier, 'premium');
+  assert.equal(payload.planTier, 'pro');
   assert.equal(payload.subscriptionStatus, 'past_due');
   assert.equal(
     payload.entitlementUsage,

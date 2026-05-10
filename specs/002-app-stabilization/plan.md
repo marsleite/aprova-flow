@@ -32,7 +32,7 @@ camadas e validacao de regressao.
 **Target Platform**: Aplicacao web em browser, `apps/web` e `apps/api` com deploy separado, e ambiente local de debug para reproduzir bugs reais  
 **Project Type**: Monorepo com `apps/web`, `apps/api`, pacotes compartilhados e documentacao de arquitetura/produto  
 **Performance Goals**: Eliminar bloqueios funcionais e erros de runtime na jornada principal, remover botoes e gates que parecem quebrados, e evitar regressao de fan-out, refetch ou estados contraditorios em `planner`, `dashboard` e `engine`  
-**Constraints**: Enforcement final de authz, entitlements, billing e IA permanece server-side; o beta ainda opera com escada manual `free -> pro -> premium`; o sandbox de entitlements pode distorcer a leitura do usuario real; dados Firestore podem chegar ausentes ou parciais; `web` e `api` continuam deployando separadas  
+**Constraints**: Enforcement final de authz, entitlements, billing e IA permanece server-side; o beta ainda opera com escada manual `free -> pro`; o sandbox de entitlements pode distorcer a leitura do usuario real; dados Firestore podem chegar ausentes ou parciais; `web` e `api` continuam deployando separadas  
 **Scale/Scope**: Primeiro ciclo de estabilizacao cobre `login -> planner -> dashboard -> engine`, bugs visiveis que mascaram valor do produto, e causas raiz cross-layer diretamente ligadas a esses fluxos; areas secundarias entram depois, salvo quando forem a origem de uma quebra P1
 
 ## Constitution Check

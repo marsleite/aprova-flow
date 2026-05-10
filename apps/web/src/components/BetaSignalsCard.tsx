@@ -72,7 +72,6 @@ function formatUsd(value: number): string {
 
 function formatLadderLabel(plan: string): string {
   if (plan === 'pro') return 'Free -> Pro';
-  if (plan === 'premium') return 'Pro -> Premium';
   return plan;
 }
 

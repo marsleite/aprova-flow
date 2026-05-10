@@ -1,5 +1,4 @@
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
 
 export type BetaAccessStatus = 'open' | 'invite_only' | 'allowed' | 'blocked';
 
@@ -27,6 +26,7 @@ export async function isBetaAllowed(email: string | null | undefined): Promise<b
   if (ADMIN_EMAILS.includes(normalized)) return true;
 
   try {
+    const { db } = await import('@/lib/firebase/config');
     const snap = await getDoc(doc(db, 'beta_allowlist', normalized));
     return snap.exists();
   } catch {

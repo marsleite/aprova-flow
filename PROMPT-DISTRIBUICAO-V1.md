@@ -28,7 +28,7 @@ Stack: Firebase Auth (Google), Cloud Firestore, Gemini 2.5 Flash / OpenAI via AI
 - `docs/product/beta-test-plan.md` — plano de beta em 3 fases
 - `docs/product/beta-metrics-roadmap.md` — eventos e métricas de produto
 - `docs/product/beta-operations-checklist.md` — operação manual de testers
-- `docs/product/entitlements-matrix.md` — matriz Free/Pro/Premium
+- `docs/product/entitlements-matrix.md` — matriz Free/Pro
 - `docs/product/billing-pricing-market-study.md` — estudo de pricing
 - `AGENTS.md` — guidelines de desenvolvimento
 
@@ -50,7 +50,7 @@ Stack: Firebase Auth (Google), Cloud Firestore, Gemini 2.5 Flash / OpenAI via AI
 
 4. **Congelar A/B de modelos IA.** Volume é baixo demais. Manter Gemini 2.5 Flash como padrão e OpenAI como fallback conforme AI Gateway já configurado.
 
-5. **Congelar pós-simulado inteligente com IA.** O motor de regras local é suficiente. Não criar rota `/api/post-simulado` nem UI premium de diagnóstico IA pós-prova.
+5. **Congelar pós-simulado inteligente com IA.** O motor de regras local é suficiente. Não criar rota `/api/post-simulado` nem UI pro de diagnóstico IA pós-prova.
 
 6. **Foco nos próximos 30 dias: UX de primeira impressão + instrumentação + preparação para beta expandido.**
 
@@ -73,7 +73,7 @@ Ações:
 #### 1.2 Atualizar roadmap na memória do projeto
 
 No `docs/aprovaflow-project-memory.mdc`, atualizar:
-- Na seção "PRÓXIMA FASE", trocar `Pós-simulado premium` por: `Expansão de beta e preparação para lançamento público`
+- Na seção "PRÓXIMA FASE", trocar `Pós-simulado pro` por: `Expansão de beta e preparação para lançamento público`
 - Adicionar nova seção após "Roadmap — Fase Final":
 
 ```markdown
@@ -111,7 +111,7 @@ Referência: `docs/product/pre-launch-audit.md`
 - `apps/web/src/hooks/useAuth.ts`
 
 **O que fazer:**
-- Na `LoginScreen.tsx`, adicionar um banner ou texto visível **antes** do botão de login que comunique claramente: "O AprovaMind está em beta fechado. Acesso por convite." (ou linguagem similar, respeitando o tom dark/premium do app)
+- Na `LoginScreen.tsx`, adicionar um banner ou texto visível **antes** do botão de login que comunique claramente: "O AprovaMind está em beta fechado. Acesso por convite." (ou linguagem similar, respeitando o tom dark/pro do app)
 - Se o usuário não estiver na allowlist após o auth, mostrar tela específica de "Você está na fila de espera" em vez de erro genérico. Incluir campo de email para notificação quando o acesso for liberado (pode ser apenas visual por agora, sem backend de waitlist — o importante é a experiência não parecer quebrada)
 - Manter o fluxo atual de allowlist funcionando como está; a mudança é apenas de comunicação visual
 

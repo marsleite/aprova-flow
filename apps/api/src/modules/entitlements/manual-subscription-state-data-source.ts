@@ -43,19 +43,6 @@ const MANUAL_SCENARIOS: ManualScenarioDefinition[] = [
     description: 'Usuario pro com motor completo single-plan.',
   },
   {
-    userId: 'premium-user',
-    plan: PlanCode.Premium,
-    status: SubscriptionStatus.Active,
-    usage: {
-      [FeatureCode.SimulationsBasic]: 6,
-      [FeatureCode.AiExplanations]: 48,
-      [FeatureCode.ContextualAiChat]: 31,
-      [FeatureCode.WeeklyMentoring]: 2,
-      [FeatureCode.PostSimuladoInteligente]: 1,
-    },
-    description: 'Usuario premium com experiencia completa e multi-edital.',
-  },
-  {
     userId: 'past-due-user',
     plan: PlanCode.Pro,
     status: SubscriptionStatus.PastDue,
@@ -67,9 +54,9 @@ const MANUAL_SCENARIOS: ManualScenarioDefinition[] = [
   },
   {
     userId: 'expired-user',
-    plan: PlanCode.Premium,
+    plan: PlanCode.Pro,
     status: SubscriptionStatus.Expired,
-    description: 'Usuario premium expirado, caindo para free fallback.',
+    description: 'Usuario pro expirado, caindo para free fallback.',
   },
 ];
 

@@ -140,7 +140,7 @@ export default function SettingsPage() {
                 </div>
 
                 <p className="text-am-body-sm text-muted-foreground mb-4 leading-relaxed">
-                  O AprovaMind sobe de valor em tres camadas: Free para ativacao, Pro para estudo serio no single-plan e Premium para coordenacao avancada da rotina. No beta atual, upgrades e mudancas comerciais ainda sao operados manualmente.
+                  O AprovaMind sobe de valor em duas camadas no beta atual: Free para ativacao e Pro para liberar multi-edital, IA completa, plano adaptativo e recovery. Upgrades e mudancas comerciais ainda sao operados manualmente.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/50 p-4 rounded-md border border-am-border-subtle">

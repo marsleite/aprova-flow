@@ -122,7 +122,7 @@ export default function BlogPlanoEstudo() {
             3. Defina uma meta semanal realista em horas líquidas
           </h2>
           <p>
-            "Horas líquidas" são as horas em que você está realmente estudando — sem distrações, sem o celular ao lado, com foco total. Esse conceito é central para qualquer plano de estudo eficiente.
+            &quot;Horas líquidas&quot; são as horas em que você está realmente estudando — sem distrações, sem o celular ao lado, com foco total. Esse conceito é central para qualquer plano de estudo eficiente.
           </p>
           <p className="mt-4">
             Uma sessão de 2 horas com o celular na mesa pode gerar apenas 45 minutos de horas líquidas. É por isso que rastrear horas brutas não basta — você precisa medir o tempo de foco real.
@@ -150,7 +150,7 @@ export default function BlogPlanoEstudo() {
             4. Estruture ciclos de estudo, não dias fixos por matéria
           </h2>
           <p>
-            O modelo "segunda-feira é dia de Português, terça é Direito Civil" parece organizado mas é frágil. Se você perder uma segunda-feira, o Português fica descoberto por uma semana inteira.
+            O modelo &quot;segunda-feira é dia de Português, terça é Direito Civil&quot; parece organizado mas é frágil. Se você perder uma segunda-feira, o Português fica descoberto por uma semana inteira.
           </p>
           <p className="mt-4">
             A alternativa mais eficiente é trabalhar com <strong className="text-foreground">ciclos de estudo</strong>: listas de matérias que você percorre na sequência, reiniciando quando termina. Dentro de cada ciclo, você aloca horas proporcionalmente ao peso de cada disciplina.

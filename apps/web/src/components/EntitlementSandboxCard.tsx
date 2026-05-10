@@ -81,7 +81,7 @@ export default function EntitlementSandboxCard({
             </h2>
           </div>
           <p className="mt-2 text-am-body-sm text-muted-foreground">
-            {'Troque o cenario do plano para validar a jornada `free -> pro -> premium` no navegador sem gateway.'}
+            {'Troque o cenario do plano para validar a jornada `free -> pro` no navegador sem gateway.'}
           </p>
         </div>
         <Badge variant="outline">Local</Badge>

@@ -785,7 +785,7 @@ export default function PlanManager({
                     Importacao de edital entra no Pro
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    O parse de edital por IA entra no Pro para estudo serio e ganha mais folga no Premium.
+                    O parse de edital por IA entra no Pro junto da IA completa e das capacidades avancadas do beta.
                   </p>
                   <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
                     {getBetaUpgradeNarrative('pro').bridgeCopy}

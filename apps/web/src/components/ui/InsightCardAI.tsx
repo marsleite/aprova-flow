@@ -43,7 +43,7 @@ export function InsightCardAI({ diagnosis, recommendation, confidence, ctaText, 
 
             {ctaText && ctaHref && !loading && (
                 <div className="pt-2 mt-auto">
-                    <Button asChild variant="premium" className="w-full">
+                    <Button asChild variant="primary" className="w-full">
                         <Link href={ctaHref}>
                             <Sparkles className="mr-2 h-4 w-4" />
                             {ctaText}

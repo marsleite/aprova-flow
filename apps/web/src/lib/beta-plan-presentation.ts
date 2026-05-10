@@ -32,7 +32,7 @@ export interface BetaPlanDisplay {
 }
 
 export interface BetaUpgradeNarrative {
-  recommendedPlan: 'pro' | 'premium';
+  recommendedPlan: 'pro';
   planLabel: string;
   focusLabel: string;
   ctaLabel: string;
@@ -51,36 +51,22 @@ export const BETA_PLAN_META: Record<DisplayPlanTier, BetaPlanMeta> = {
   pro: {
     tier: 'pro',
     label: 'Pro',
-    focusLabel: 'Plano principal',
-    description: 'Para estudo serio no single-plan, com leitura completa do motor.',
-    highlight: 'Mais aderente ao beta',
-  },
-  premium: {
-    tier: 'premium',
-    label: 'Premium',
-    focusLabel: 'Rotina complexa',
-    description: 'Para coordenacao avancada, recovery e varios editais.',
+    focusLabel: 'Plano completo',
+    description: 'Tudo liberado: multi-edital, IA completa, plano adaptativo e recovery.',
+    highlight: 'Recomendado',
   },
 };
 
-export const BETA_PLAN_ORDER: DisplayPlanTier[] = ['free', 'pro', 'premium'];
+export const BETA_PLAN_ORDER: DisplayPlanTier[] = ['free', 'pro'];
 
-const BETA_UPGRADE_NARRATIVES: Record<'pro' | 'premium', BetaUpgradeNarrative> = {
+const BETA_UPGRADE_NARRATIVES: Record<'pro', BetaUpgradeNarrative> = {
   pro: {
     recommendedPlan: 'pro',
     planLabel: 'Pro',
     focusLabel: BETA_PLAN_META.pro.focusLabel,
     ctaLabel: 'Entender o Pro',
     bridgeCopy:
-      'O Free ajuda a ativar o motor. O Pro entra quando voce quer estudar com mais constancia, leitura completa e treino direcionado.',
-  },
-  premium: {
-    recommendedPlan: 'premium',
-    planLabel: 'Premium',
-    focusLabel: BETA_PLAN_META.premium.focusLabel,
-    ctaLabel: 'Entender o Premium',
-    bridgeCopy:
-      'O Pro resolve bem um edital por vez. O Premium entra quando a rotina pede multi-edital, recovery e uma camada adaptativa mais forte.',
+      'O Free ajuda a ativar o motor. O Pro libera tudo: multi-edital, IA completa, plano adaptativo e recovery.',
   },
 };
 
@@ -169,11 +155,12 @@ function formatHealthLabel(plan: DisplayPlanTier): string {
 }
 
 export function toDisplayTier(tier: PlanTier): DisplayPlanTier {
-  return tier === 'admin' ? 'premium' : tier;
+  if (tier === 'admin') return 'pro';
+  return tier;
 }
 
 export function getBetaUpgradeNarrative(
-  recommendedPlan: 'pro' | 'premium'
+  recommendedPlan: 'pro'
 ): BetaUpgradeNarrative {
   return BETA_UPGRADE_NARRATIVES[recommendedPlan];
 }

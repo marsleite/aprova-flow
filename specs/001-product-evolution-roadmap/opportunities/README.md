@@ -25,12 +25,12 @@
 ## Sequencing Rules
 
 1. Protect trust boundaries before trusting any monetization or quota signal.
-2. Improve journey coherence before opening more scope or heavier premium
+2. Improve journey coherence before opening more scope or heavier pro
    packaging.
 3. Instrument blocked value and upgrade desire before deciding gateway rollout.
 4. Consolidate runtime ownership before deepening performance work that spans
    both runtimes.
-5. Reposition `premium` only after the `free -> pro` ladder becomes clearer in
+5. Reposition `pro` only after the `free -> pro` ladder becomes clearer in
    real usage.
 
 ## Consolidated Tradeoffs
@@ -44,7 +44,7 @@
 ### Tradeoff 2 - Coherence before feature expansion
 
 - The product already has breadth.
-- Adding more premium surface area before fixing the core narrative would
+- Adding more pro surface area before fixing the core narrative would
   increase the current feeling of dispersion.
 
 ### Tradeoff 3 - Instrument before charging

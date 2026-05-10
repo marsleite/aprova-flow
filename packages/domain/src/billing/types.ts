@@ -8,7 +8,6 @@
 export const PlanCode = {
     Free: 'free',
     Pro: 'pro',
-    Premium: 'premium',
 } as const;
 
 export type PlanCode = (typeof PlanCode)[keyof typeof PlanCode];

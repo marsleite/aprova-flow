@@ -11,7 +11,7 @@ Autor: Análise independente a pedido de Marcelo Leite
 
 AprovaMind é uma plataforma de gestão inteligente de rotina de estudo para concurseiros brasileiros. Não ensina matéria — funciona como um **coach de execução** que rastreia horas líquidas, gerencia múltiplos editais simultaneamente, visualiza progresso por matéria e entrega feedback estratégico com IA (Gemini/OpenAI).
 
-O produto já está em **beta com testers reais**, com um monorepo maduro (Next.js + Fastify), arquitetura de entitlements definida e três tiers planejados (Free/Pro/Premium).
+O produto já está em **beta com testers reais**, com um monorepo maduro (Next.js + Fastify), arquitetura de entitlements definida e três tiers planejados (Free/Pro).
 
 ### Problema que resolve
 
@@ -106,23 +106,23 @@ Alto. O concurseiro estuda meses ou anos. Se o AprovaMind se tornar parte da rot
 
 ### Avaliação do modelo proposto
 
-A estratégia Free/Pro/Premium com os preços de teste (R$ 0 / R$ 34,90 / R$ 64,90) está **bem calibrada** para o mercado. Observações:
+A estratégia Free/Pro com os preços de teste (R$ 0 / R$ 34,90 / R$ 64,90) está **bem calibrada** para o mercado. Observações:
 
 **O que está bem:**
 - Free que mostra valor do motor sem entregar tudo — correto.
 - Pro como plano principal, não como tier intermediário fraco — correto.
-- Premium vendendo coordenação (multi-edital, adaptativo), não apenas "mais mensagens de chat" — correto.
+- Pro vendendo coordenação (multi-edital, adaptativo), não apenas "mais mensagens de chat" — correto.
 - Preço abaixo dos gigantes de conteúdo — posicionamento inteligente.
 
 **O que precisa de atenção:**
-- A distância de valor entre Pro (R$ 35) e Premium (R$ 65) precisa ser muito clara. Se o multi-edital sozinho justifica +R$ 30, ok. Se não, o Premium pode ter conversão muito baixa.
+- A distância de valor entre Pro (R$ 35) e Pro (R$ 65) precisa ser muito clara. Se o multi-edital sozinho justifica +R$ 30, ok. Se não, o Pro pode ter conversão muito baixa.
 - O Free com 5 msgs de chat e 3 explicações IA por mês pode ser generoso demais — ou de menos. Vai depender do teste. Recomendo medir quantos usuários free esgotam quota.
 
 ### Fontes de receita adicionais
 
 1. **B2B para cursinhos** — licenciar o motor de decisão como ferramenta complementar a plataformas de conteúdo. Cursinho já tem alunos; falta gestão de execução.
 2. **Parceria com QConcursos/Tec** — integrar banco de questões deles com motor de decisão do AprovaMind. Ganha-ganha: eles ganham retenção, AprovaMind ganha conteúdo.
-3. **Coaching Premium** — camada humana sobre o motor. Coach real usa AprovaMind para orientar aluno. Marketplace de coaches dentro do app.
+3. **Coaching Pro** — camada humana sobre o motor. Coach real usa AprovaMind para orientar aluno. Marketplace de coaches dentro do app.
 4. **Dados anônimos de mercado** — relatórios para bancas, instituições, editoras sobre padrões de estudo (longo prazo, com volume).
 
 ---
@@ -225,7 +225,7 @@ O monorepo com domain, application, contracts, infrastructure separados, Fastify
 - Parse de edital como feature viral de porta de entrada
 
 **Longo prazo (5-12 meses): ESCALA**
-- Premium com multi-edital
+- Pro com multi-edital
 - Parcerias com micro-influencers
 - B2B pilot com 1-2 cursinhos
 - Banco de questões expandido (se dados de beta justificarem)
@@ -260,7 +260,7 @@ O monorepo com domain, application, contracts, infrastructure separados, Fastify
 ### Como aumentar receita
 
 - **Converter mais Free → Pro**: o gatilho mais forte é o momento em que o usuário descobre que está negligenciando uma matéria e quer ver o diagnóstico completo. Esse é o paywall natural.
-- **Aumentar ticket com Premium**: multi-edital precisa ser percebido como "impossível gerenciar sem". Se a maioria dos concurseiros sérios estuda para 2+ editais, o Premium se paga.
+- **Aumentar ticket com Pro**: multi-edital precisa ser percebido como "impossível gerenciar sem". Se a maioria dos concurseiros sérios estuda para 2+ editais, o Pro se paga.
 - **Annual subscription com desconto**: oferecer ~20% off para pagamento anual. O concurseiro que compra anual está comprometido e o CAC se dilui.
 
 ### Como reduzir custos

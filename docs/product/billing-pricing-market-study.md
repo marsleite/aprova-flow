@@ -113,7 +113,7 @@ Na página oficial de assinatura ilimitada recente:
 Nas páginas oficiais recentes:
 
 - Básica 1 ano promocional em torno de `12x R$ 99,00`
-- Premium 1 ano promocional em torno de `12x R$ 159,00`
+- Pro 1 ano promocional em torno de `12x R$ 159,00`
 
 O upgrade de valor vem de:
 
@@ -137,7 +137,7 @@ Isso significa:
 - não vale tentar precificar como “mais uma biblioteca de curso”
 - faz sentido cobrar pelo ganho de execução, clareza e priorização
 - free precisa mostrar inteligência real
-- premium precisa resolver rotina, não só liberar “mais chat”
+- pro precisa resolver rotina, não só liberar “mais chat”
 
 ## 5. O que deve ser grátis
 
@@ -168,7 +168,7 @@ Se o plano grátis não mostrar o diferencial do motor, o usuário não entende 
 - mentoria recorrente
 - parse de edital recorrente
 - alto volume de uso de IA
-- recursos premium que dependem de autorização real
+- recursos pro que dependem de autorização real
 
 ## 6. O que deve ser pago
 
@@ -231,7 +231,7 @@ Perfil:
 - quer direção e clareza
 - ainda não precisa da camada mais pesada de automação
 
-### Premium
+### Pro
 
 Objetivo:
 
@@ -246,7 +246,7 @@ Recursos:
 - pós-simulado inteligente
 - quotas maiores de IA
 - mentoria/assistência mais rica
-- recursos premium de autorização server-side
+- recursos pro de autorização server-side
 - coordenação mais inteligente, não apenas mais volume
 
 Perfil:
@@ -277,7 +277,7 @@ Ao mesmo tempo, eu evitaria preço muito baixo, porque:
 - faixa de teste: `R$ 29` a `R$ 39/mês`
 - anual efetivo: `R$ 24` a `R$ 32/mês`
 
-#### Premium
+#### Pro
 
 - faixa de teste: `R$ 59` a `R$ 79/mês`
 - anual efetivo: `R$ 49` a `R$ 65/mês`
@@ -290,18 +290,18 @@ Se o objetivo for lançar simples e aprender rápido:
 
 - Free
 - Pro
-- Premium
+- Pro
 
 ### Preço inicial sugerido para teste
 
 - Free: `R$ 0`
 - Pro: `R$ 34,90/mês`
-- Premium: `R$ 64,90/mês`
+- Pro: `R$ 64,90/mês`
 
 Motivo:
 
 - Pro fica competitivo contra plataformas de ferramenta
-- Premium ainda cabe abaixo da percepção de “curso gigante”
+- Pro ainda cabe abaixo da percepção de “curso gigante”
 - preserva espaço para subir preço depois com mais valor entregue
 
 ## 10. O que eu não faria
@@ -311,7 +311,7 @@ Motivo:
 - não deixar o free tão forte a ponto de matar conversão
 - não cobrar caro como se o AprovaMind já tivesse a mesma biblioteca de Estratégia ou Gran
 - não criar plano demais no começo
-- não deixar “fazer provas” apenas no Premium
+- não deixar “fazer provas” apenas no Pro
 
 ## 11. Estratégia de teste antes de travar o preço
 
@@ -333,7 +333,7 @@ Na prática comercial:
 
 - o `Free` prova valor
 - o `Pro` resolve o caso principal
-- o `Premium` vende coordenação, adaptação e inteligência operacional
+- o `Pro` vende coordenação, adaptação e inteligência operacional
 
 Não como:
 
@@ -351,4 +351,4 @@ Não como:
 - [Gran — Assinatura Ilimitada](https://www.grancursosonline.com.br/assinatura-ilimitada)
 - [Gran — Reinvenção 2026](https://reinvencao.grancursosonline.com.br/)
 - [Estratégia Concursos — Assinaturas](https://www.estrategiaconcursos.com.br/assinaturas/)
-- [Estratégia Concursos — Assinatura Premium](https://www.estrategiaconcursos.com.br/cursosPorConcurso/assinatura-premium/)
+- [Estratégia Concursos — Assinatura Pro](https://www.estrategiaconcursos.com.br/cursosPorConcurso/assinatura-pro/)

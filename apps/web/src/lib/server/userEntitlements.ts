@@ -60,7 +60,6 @@ type ServerEntitlementContext = {
 function normalizePlanCode(value: string | null | undefined): PlanCode {
   const normalized = (value || '').trim().toLowerCase();
 
-  if (normalized === PlanCode.Premium) return PlanCode.Premium;
   if (normalized === PlanCode.Pro) return PlanCode.Pro;
 
   return PlanCode.Free;
@@ -225,7 +224,7 @@ class FirestoreSubscriptionStateDataSource
         found: true,
         subscription: {
           userId: params.userId,
-          plan: PlanCode.Premium,
+          plan: PlanCode.Pro,
           status: SubscriptionStatus.Active,
         },
       };
@@ -296,7 +295,7 @@ function inferRequiredPlan(featureCode: FeatureCodeValue): PlanCode {
     case FeatureCode.MultiEdital:
     case FeatureCode.AdaptiveDailyPlan:
     case FeatureCode.RecoveryPlan:
-      return PlanCode.Premium;
+      return PlanCode.Pro;
     default:
       return PlanCode.Pro;
   }

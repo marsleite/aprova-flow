@@ -48,7 +48,7 @@ export default function BlogCronometro() {
           Cronômetro de Estudo e Horas Líquidas: Por que Medir o Foco Real Muda Tudo
         </h1>
         <p className="text-lg text-muted-foreground font-light leading-relaxed">
-          Você já ficou 3 horas "estudando" e no final percebeu que não absorveu quase nada? O problema não é a sua capacidade — é que você estava medindo a coisa errada.
+          Você já ficou 3 horas &quot;estudando&quot; e no final percebeu que não absorveu quase nada? O problema não é a sua capacidade — é que você estava medindo a coisa errada.
         </p>
       </header>
 
@@ -77,7 +77,7 @@ export default function BlogCronometro() {
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-muted-foreground/60 mt-0.5">09:10</span>
-                <span>Pausa de 20 minutos ("só vou checar uma coisa no celular").</span>
+                <span>Pausa de 20 minutos (&quot;só vou checar uma coisa no celular&quot;).</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-muted-foreground/60 mt-0.5">09:30</span>
@@ -98,7 +98,7 @@ export default function BlogCronometro() {
             </div>
           </div>
           <p>
-            Esse candidato acredita que estudou 3 horas. Na prática, estudou menos de 2. Multiplicado por semanas de preparação, esse desvio pode representar dezenas de horas de estudo "perdidas" que não existiram de fato.
+            Esse candidato acredita que estudou 3 horas. Na prática, estudou menos de 2. Multiplicado por semanas de preparação, esse desvio pode representar dezenas de horas de estudo &quot;perdidas&quot; que não existiram de fato.
           </p>
         </section>
 
@@ -107,7 +107,7 @@ export default function BlogCronometro() {
             Por que a maioria dos candidatos subestima esse problema
           </h2>
           <p>
-            O cérebro humano é péssimo para estimar o próprio nível de atenção retrospectivamente. Quando você olha para trás e pensa "estudei das 8 às 11", você lembra da sensação de estar estudando — não das 20 interrupções no meio do caminho.
+            O cérebro humano é péssimo para estimar o próprio nível de atenção retrospectivamente. Quando você olha para trás e pensa &quot;estudei das 8 às 11&quot;, você lembra da sensação de estar estudando — não das 20 interrupções no meio do caminho.
           </p>
           <p className="mt-4">
             Isso cria um viés sistemático: candidatos consistentemente superestimam quantas horas líquidas estão dedicando. A consequência é planejamento errado: você acha que está progredindo mais do que está, o que só aparece quando chega a hora da prova.
@@ -122,7 +122,7 @@ export default function BlogCronometro() {
             Como o método Pomodoro se encaixa nas horas líquidas
           </h2>
           <p>
-            O método Pomodoro — blocos de 25 minutos de foco seguidos de 5 minutos de pausa — é uma das formas mais testadas de maximizar horas líquidas. Mas ele só funciona se você respeitar os blocos de foco completamente: sem celular, sem notificações, sem "só um minutinho".
+            O método Pomodoro — blocos de 25 minutos de foco seguidos de 5 minutos de pausa — é uma das formas mais testadas de maximizar horas líquidas. Mas ele só funciona se você respeitar os blocos de foco completamente: sem celular, sem notificações, sem &quot;só um minutinho&quot;.
           </p>
           <p className="mt-4">
             A variação mais eficiente para candidatos experientes é o bloco 50/10: 50 minutos de foco intenso seguidos de 10 minutos de pausa real. Esse ritmo reduz o custo de mudança de contexto — o tempo que o cérebro leva para entrar no modo de foco após uma interrupção.

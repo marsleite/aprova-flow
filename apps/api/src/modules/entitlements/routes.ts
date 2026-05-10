@@ -291,7 +291,7 @@ function parseAdminSubscriptionBody(
         valid: false,
         statusCode: 400,
         error: 'invalid_plan',
-        message: 'plan precisa ser free, pro ou premium.',
+        message: 'plan precisa ser free ou pro.',
       };
     }
     payload.plan = normalizePlanCode(body?.plan);

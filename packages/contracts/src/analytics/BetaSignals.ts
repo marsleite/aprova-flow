@@ -114,8 +114,7 @@ function readMetadataJson(value?: string): Record<string, unknown> | null {
 function getPlanSortWeight(plan: string): number {
   const normalized = plan.trim().toLowerCase();
   if (normalized === 'pro') return 0;
-  if (normalized === 'premium') return 1;
-  return 2;
+  return 1;
 }
 
 export function buildBetaSignalsSummary(

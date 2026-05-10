@@ -19,7 +19,7 @@
 - Q: Qual e o publico-alvo primario desta reavaliacao? → A: Publico hibrido, de iniciante a avancado, com prioridade equivalente.
 - Q: Qual e a proposta de valor central que deve orientar a reavaliacao? → A: Motor de priorizacao estrategica que diz o que estudar, quanto e por que.
 - Q: Qual funcionalidade atual deve ser tratada como espinha dorsal do produto? → A: A jornada macro -> semana -> hoje (`planner -> dashboard -> engine`).
-- Q: Qual direcao de monetizacao deve orientar o roadmap? → A: Consolidar `free -> pro` como escada principal primeiro; `premium` vem depois mais bem justificado.
+- Q: Qual direcao de monetizacao deve orientar o roadmap? → A: Consolidar `free -> pro` como escada principal primeiro; `pro` vem depois mais bem justificado.
 - Q: Qual e a principal dor percebida hoje? → A: Coerencia de experiencia, com foco em descoberta, navegacao e encadeamento entre `planner -> dashboard -> engine`.
 - Q: Qual prioridade de negocio deve desempatar o roadmap? → A: Maximizar retencao, recorrencia e uso continuo da rotina.
 - Q: Qual area deve ser auditada primeiro? → A: A jornada principal e a coerencia entre onboarding, planner, dashboard e engine.
@@ -178,7 +178,7 @@ cada uma.
   orienta o usuario do plano macro ate a execucao diaria.
 - **FR-017**: O roadmap MUST priorizar a consolidacao da escada `free -> pro`
   como eixo principal de monetizacao e aprendizado comercial. Iniciativas para
-  fortalecer `premium` devem ser avaliadas depois de a proposta principal,
+  fortalecer `pro` devem ser avaliadas depois de a proposta principal,
   os bloqueios e a progressao de valor entre `free` e `pro` estarem mais
   claras e confiaveis.
 - **FR-018**: O roadmap MUST tratar como dor prioritaria a coerencia de

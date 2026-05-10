@@ -83,11 +83,11 @@
     movement
   - quotas and upgrade copy are calibrated enough for gateway planning
 
-## Phase 5 - Premium Differentiation And Adaptive Intelligence
+## Phase 5 - Pro Differentiation And Adaptive Intelligence
 
 - Phase ID: `PH-05`
 - Objective: deepen the product where complexity and coordination genuinely
-  justify a premium layer.
+  justify a pro layer.
 - Entry criteria:
   - `free -> pro` ladder is clearer
   - runtime ownership and instrumentation are stable enough to support larger
@@ -97,7 +97,7 @@
   - `SG-03`
   - `SG-04`
 - Exit signals:
-  - premium is framed around complex-routine coordination
+  - pro is framed around complex-routine coordination
   - the product loop feels more unified across planner, dashboard, engine,
     simulations, and error notebook
   - broader beta expansion happens on top of a more trustworthy base

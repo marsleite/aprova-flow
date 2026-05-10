@@ -19,7 +19,7 @@
   - `/apps/web/tests/stability/core-flow-regression.test.ts`
   - `/specs/002-app-stabilization/validation/core-flow-smoke.md`
 - `reopen_rule`: reabrir se o CTA principal do Planner voltar a parecer
-  quebrado para `pro` ou `premium`
+  quebrado para `pro` ou `pro`
 
 ### `STAB-002`
 
@@ -77,7 +77,7 @@
 
 - `status`: `pass`
 - `notes`: login e Planner deixaram explicito o cenario local
-  `premium-user`, com orientacao visivel para voltar ao usuario real em
+  `pro-user`, com orientacao visivel para voltar ao usuario real em
   `/settings`
 
 ### `CORE-FLOW-03`

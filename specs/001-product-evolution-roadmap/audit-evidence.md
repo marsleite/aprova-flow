@@ -17,7 +17,7 @@
 | AREA-01 | ux-flows | Is the core journey coherent enough to create routine? | 1 | `evidence/core-journey.md`, `Sidebar.tsx`, `StudyJourneyCard.tsx` |
 | AREA-02 | product-value | Does the current packaging reinforce the real core value? | 2 | `README.md`, landing/login pages, planner/dashboard/engine pages |
 | AREA-03 | onboarding-retention | Does the first-run path lead users into repeated use? | 3 | login flow, beta access code, beta test docs |
-| AREA-04 | monetization | Is the `free -> pro -> premium` ladder clear and trustworthy today? | 4 | entitlements matrix, settings/account modal, beta ops docs, rules |
+| AREA-04 | monetization | Is the `free -> pro` ladder clear and trustworthy today? | 4 | entitlements matrix, settings/account modal, beta ops docs, rules |
 | AREA-05 | architecture | Are runtime boundaries and ownership clear enough for safe evolution? | 5 | current architecture doc, web API routes, Fastify modules |
 | AREA-06 | technical-quality | Is the codebase maintainable and testable enough for iteration? | 6 | shared packages, tests, legacy surfaces |
 | AREA-07 | performance | Are there obvious growth bottlenecks in high-value flows? | 7 | planner page, caderno-erros page |
@@ -202,7 +202,7 @@
   attempt, which will age poorly with larger beta volume.
 - Affected personas: `intermediario`, `avancado`
 - Impacted journey: `caderno-erros`
-- Why it matters: Slower premium surfaces directly hurt perceived product
+- Why it matters: Slower pro surfaces directly hurt perceived product
   quality and upgrade willingness.
 - Evidence: `CODE-05`
 

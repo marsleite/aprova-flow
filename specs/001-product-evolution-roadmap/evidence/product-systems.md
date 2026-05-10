@@ -8,7 +8,7 @@
   content-teaching app.
 - `/Users/marleite/workspace/aprova-flow/apps/web/src/app/page.tsx` and
   `/Users/marleite/workspace/aprova-flow/apps/web/src/app/login/page.tsx`
-  present a premium-feeling product with a strong performance-oriented visual
+  present a pro-feeling product with a strong performance-oriented visual
   identity.
 - The app surface is already broader than a timer: planner, dashboard, engine,
   mentoring, simulations, and error notebook are live.
@@ -66,7 +66,7 @@
 ### Strengths
 
 - `/Users/marleite/workspace/aprova-flow/docs/product/entitlements-matrix.md`
-  is precise about what belongs to `free`, `pro`, and `premium`.
+  is precise about what belongs to `free`, `pro`, and `pro`.
 - `EntitlementUpgradeCard` is used across planner, simulations, mentoring, and
   error notebook with context-specific copy.
 - `/Users/marleite/workspace/aprova-flow/docs/product/beta-operations-checklist.md`

@@ -5,7 +5,7 @@ import {
   PlanCode,
 } from '@aprovamind/domain';
 
-export type PlanTier = 'free' | 'pro' | 'premium' | 'admin';
+export type PlanTier = 'free' | 'pro' | 'admin';
 export type AiTaskKey = 'chat' | 'weekly-mentoring' | 'planner-daily' | 'parse-edital' | 'smart-schedule' | 'interrogation' | 'predictive-exam' | 'explain-answer' | 'error-diagnosis';
 export type QuotaWindow = 'hour' | 'day' | 'week' | 'month';
 
@@ -47,13 +47,24 @@ function getCanonicalPlanCapabilities(planCode: PlanCode): PlanCapabilities {
 const CAPABILITIES_BY_TIER: Record<PlanTier, PlanCapabilities> = {
   free: getCanonicalPlanCapabilities(PlanCode.Free),
   pro: getCanonicalPlanCapabilities(PlanCode.Pro),
-  premium: getCanonicalPlanCapabilities(PlanCode.Premium),
   admin: {
     maxStudyPlans: -1,
     canUseCalendar: true,
     canCreateSimulados: true,
     canUseTreinoRapido: true,
   },
+};
+
+const PRO_QUOTAS: AiQuotaByTask = {
+  chat: { limit: 150, window: 'month' },
+  'weekly-mentoring': { limit: 8, window: 'month' },
+  'planner-daily': { limit: 80, window: 'day' },
+  'parse-edital': { limit: 30, window: 'week' },
+  'smart-schedule': { limit: 60, window: 'week' },
+  'interrogation': { limit: 100, window: 'day' },
+  'predictive-exam': { limit: 50, window: 'day' },
+  'explain-answer': { limit: 300, window: 'month' },
+  'error-diagnosis': { limit: 15, window: 'day' },
 };
 
 const AI_QUOTAS_BY_TIER: Record<Exclude<PlanTier, 'admin'>, AiQuotaByTask> = {
@@ -68,28 +79,7 @@ const AI_QUOTAS_BY_TIER: Record<Exclude<PlanTier, 'admin'>, AiQuotaByTask> = {
     'explain-answer': { limit: 3, window: 'month' },
     'error-diagnosis': { limit: 0, window: 'day' },
   },
-  pro: {
-    chat: { limit: 60, window: 'month' },
-    'weekly-mentoring': { limit: 4, window: 'month' },
-    'planner-daily': { limit: 30, window: 'day' },
-    'parse-edital': { limit: 15, window: 'week' },
-    'smart-schedule': { limit: 30, window: 'week' },
-    'interrogation': { limit: 50, window: 'day' },
-    'predictive-exam': { limit: 20, window: 'day' },
-    'explain-answer': { limit: 120, window: 'month' },
-    'error-diagnosis': { limit: 5, window: 'day' },
-  },
-  premium: {
-    chat: { limit: 150, window: 'month' },
-    'weekly-mentoring': { limit: 8, window: 'month' },
-    'planner-daily': { limit: 80, window: 'day' },
-    'parse-edital': { limit: 30, window: 'week' },
-    'smart-schedule': { limit: 60, window: 'week' },
-    'interrogation': { limit: 100, window: 'day' },
-    'predictive-exam': { limit: 50, window: 'day' },
-    'explain-answer': { limit: 300, window: 'month' },
-    'error-diagnosis': { limit: 15, window: 'day' },
-  },
+  pro: PRO_QUOTAS,
 };
 
 const TIER_CANDIDATE_FIELDS = ['planTier', 'aiPlanTier', 'subscriptionTier', 'planType', 'tier'] as const;
@@ -97,7 +87,6 @@ const TIER_CANDIDATE_FIELDS = ['planTier', 'aiPlanTier', 'subscriptionTier', 'pl
 export function normalizePlanTier(value: string | undefined | null): PlanTier {
   const normalized = (value || '').trim().toLowerCase();
   if (normalized === 'admin') return 'admin';
-  if (normalized === 'premium') return 'premium';
   if (normalized === 'pro') return 'pro';
   return 'free';
 }

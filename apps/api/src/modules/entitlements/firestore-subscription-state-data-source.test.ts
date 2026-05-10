@@ -36,7 +36,7 @@ test('FirestoreSubscriptionStateDataSource maps plan, status and usage from user
       exists: true,
       status: 200,
       data: {
-        planTier: 'premium',
+        planTier: 'pro',
         subscriptionStatus: 'past_due',
         entitlementUsage: JSON.stringify({
           ai_explanations: 7,
@@ -63,7 +63,7 @@ test('FirestoreSubscriptionStateDataSource maps plan, status and usage from user
   assert.equal(result.found, true);
   if (!result.found) return;
 
-  assert.equal(result.subscription.plan, PlanCode.Premium);
+  assert.equal(result.subscription.plan, PlanCode.Pro);
   assert.equal(result.subscription.status, SubscriptionStatus.PastDue);
   assert.deepEqual(result.subscription.usage, {
     ai_explanations: 7,
@@ -106,7 +106,7 @@ test('FirestoreSubscriptionStateDataSource ignores stale monthly usage buckets',
   assert.deepEqual(result.subscription.usage, undefined);
 });
 
-test('FirestoreSubscriptionStateDataSource grants premium active access to admin identities', async () => {
+test('FirestoreSubscriptionStateDataSource grants pro active access to admin identities', async () => {
   const dataSource = new FirestoreSubscriptionStateDataSource({
     idToken: 'token',
     identity: { uid: 'admin-user', email: 'admin@example.com' },
@@ -124,6 +124,6 @@ test('FirestoreSubscriptionStateDataSource grants premium active access to admin
   assert.equal(result.found, true);
   if (!result.found) return;
 
-  assert.equal(result.subscription.plan, PlanCode.Premium);
+  assert.equal(result.subscription.plan, PlanCode.Pro);
   assert.equal(result.subscription.status, SubscriptionStatus.Active);
 });

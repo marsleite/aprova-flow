@@ -1,4 +1,4 @@
-# Matriz de Entitlements — Free, Pro e Premium
+# Matriz de Entitlements — Free e Pro
 
 Data de referência: 12/03/2026
 
@@ -38,7 +38,7 @@ Objetivo:
 - ser o plano principal de quem estuda com consistência
 - entregar o motor completo single-plan
 
-### Premium
+### Pro
 
 Objetivo:
 
@@ -51,7 +51,7 @@ Objetivo:
 ### PlanCode
 
 ```ts
-type PlanCode = 'free' | 'pro' | 'premium';
+type PlanCode = 'free' | 'pro' | 'pro';
 ```
 
 ### SubscriptionStatus
@@ -103,7 +103,7 @@ type EntitlementMode = 'boolean' | 'quota';
 
 ## Matriz principal
 
-| Feature | Free | Pro | Premium | Tipo |
+| Feature | Free | Pro | Pro | Tipo |
 |---|---|---|---|---|
 | `study_timer` | sim | sim | sim | boolean |
 | `dashboard_basic` | sim | sim | sim | boolean |
@@ -174,9 +174,9 @@ Por isso o Pro recebe:
 - diagnóstico semanal
 - quotas relevantes de IA
 
-### O que o Premium precisa justificar
+### O que o Pro precisa justificar
 
-O Premium só faz sentido se resolver problemas que o Pro ainda não resolve:
+O Pro só faz sentido se resolver problemas que o Pro ainda não resolve:
 
 - rotina complexa
 - múltiplos objetivos
@@ -206,7 +206,7 @@ Essas quotas são hipóteses de lançamento, não compromisso comercial final.
 - `contextual_ai_chat`: `60/mês`
 - `weekly_mentoring`: `4/mês`
 
-### Premium
+### Pro
 
 - `active_plans`: `3`
 - `simulations_basic`: `ilimitado`
@@ -269,7 +269,7 @@ Recomendação inicial:
 
 - manter acesso por curto período apenas a features não críticas de continuidade
 - manter o núcleo de estudo e simulados básicos do plano vigente por curto prazo
-- restringir features caras ou premium-first, como `contextual_ai_chat`, `weekly_mentoring`, `adaptive_daily_plan` e `post_simulado_inteligente`
+- restringir features caras ou pro-first, como `contextual_ai_chat`, `weekly_mentoring`, `adaptive_daily_plan` e `post_simulado_inteligente`
 - preparar migração para `grace_period`
 
 ### `grace_period`
@@ -289,18 +289,18 @@ Recomendação inicial:
 
 ## Regras de downgrade
 
-Se o usuário sair de `premium` para `pro`:
+Se o usuário sair de `pro` para `pro`:
 
 - perde `multi_edital`
 - perde `adaptive_daily_plan`
 - perde `recovery_plan`
 - perde `post_simulado_inteligente`
-- mantém histórico, mas perde uso da feature premium
+- mantém histórico, mas perde uso da feature pro
 
 Se o usuário cair para `free`:
 
 - mantém dados históricos
-- perde recursos premium
+- perde recursos pro
 - volta aos limites do `free`
 
 ## Regras de UX recomendadas
@@ -314,7 +314,7 @@ Gatilhos de upgrade mais naturais:
 - tentou abrir diagnóstico semanal
 - bateu limite de IA
 
-### Pro -> Premium
+### Free -> Pro
 
 Gatilhos de upgrade mais naturais:
 
@@ -330,7 +330,7 @@ Pontos para validar em produto antes de congelar:
 - se `edital_parse` no free deve ser `1 crédito inicial` ou apenas `1 trial assistido`
 - se o `weekly_mentoring` no Pro deve permanecer em `4/mês` ou cair para `2/mês`
 - se `contextual_ai_chat` no Free deve ficar em `5/mês` ou virar apenas trial controlado
-- se `active_plans` no Premium deve ser `3` ou “ilimitado prático”
+- se `active_plans` no Pro deve ser `3` ou “ilimitado prático”
 
 ## Recomendação de lançamento
 
@@ -350,7 +350,7 @@ Se a prioridade for simplicidade:
 - provas e simulados completos
 - melhor relação entre valor e conversão
 
-### Premium
+### Pro
 
 - upgrade real por complexidade de rotina
 - vende coordenação e inteligência sobre desempenho
@@ -372,7 +372,7 @@ Se a prioridade for simplicidade:
 - criação de simulados customizados
 - diagnóstico semanal e mentoria recorrente básica
 
-### Premium
+### Pro
 
 - tudo do Pro
 - multi-edital

@@ -88,7 +88,6 @@ export function defaultIsAdminIdentity(identity: AdminIdentity): boolean {
 export function normalizePlanCode(value: string | null | undefined): PlanCode {
   const normalized = (value || '').trim().toLowerCase();
 
-  if (normalized === PlanCode.Premium) return PlanCode.Premium;
   if (normalized === PlanCode.Pro) return PlanCode.Pro;
 
   return PlanCode.Free;

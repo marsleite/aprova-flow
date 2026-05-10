@@ -2,7 +2,7 @@ import { FeatureCode } from '@aprovamind/domain';
 import { getBetaUpgradeNarrative } from '@/lib/beta-plan-presentation';
 import type { AiTask } from '@/lib/ai/types';
 
-type RecommendedPlan = 'pro' | 'premium';
+type RecommendedPlan = 'pro';
 type QuotaWindow = 'hour' | 'day' | 'week' | 'month' | 'lifetime' | 'none';
 
 const AI_TASK_FEATURE_CODES: Partial<Record<AiTask, string>> = {
@@ -43,8 +43,8 @@ export interface AiQuotaNoticeData {
 }
 
 function normalizeRecommendedPlan(value: string | null | undefined): RecommendedPlan | undefined {
-  if (value === 'pro' || value === 'premium') {
-    return value;
+  if (value === 'pro') {
+    return 'pro';
   }
 
   return undefined;
@@ -129,9 +129,7 @@ export function extractAiQuotaNotice(
   const title =
     normalizedPlanTier === 'free'
       ? 'Quota de IA do Free atingida'
-      : normalizedPlanTier === 'pro'
-        ? 'Quota de IA do Pro atingida'
-        : 'Quota de IA atingida';
+      : 'Quota de IA do Pro atingida';
 
   const detailParts: string[] = [];
 

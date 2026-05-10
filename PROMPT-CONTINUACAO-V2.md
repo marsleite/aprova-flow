@@ -10,7 +10,7 @@ O AprovaMind é uma plataforma de estudo para concursos públicos brasileiros. E
 - Firebase Auth (Google + Email/Senha) com beta allowlist
 - Cloud Firestore para dados
 - AI Gateway multi-provider (Gemini 2.5 Flash + OpenAI) com roteamento por tarefa
-- Entitlements system com Free/Pro/Premium tiers (sandbox mode para beta)
+- Entitlements system com Free/Pro tiers (sandbox mode para beta)
 - Tailwind CSS + Lucide React + framer-motion
 - Design system dark mode com paleta warm/orange (Sitetrip-inspired)
 
@@ -126,7 +126,7 @@ Após cada bloco concluído, atualizar `docs/aprovaflow-project-memory.mdc`:
 | `apps/web/src/app/api/parse-edital/route.ts` | API de parse de edital (Gemini) |
 | `firestore.rules` | Regras de segurança do Firestore |
 | `docs/product/beta-metrics-roadmap.md` | Roadmap de métricas |
-| `docs/product/entitlements-matrix.md` | Matriz de entitlements Free/Pro/Premium |
+| `docs/product/entitlements-matrix.md` | Matriz de entitlements Free/Pro |
 
 ## Convenções
 

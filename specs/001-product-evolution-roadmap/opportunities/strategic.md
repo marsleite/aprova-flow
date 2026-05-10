@@ -15,11 +15,11 @@
 - Expected signal: clareza sobre quais features e bloqueios sustentam o desejo
   de upgrade para `pro`.
 
-## SG-02 - Reposicionar `premium` como coordenacao de rotina complexa
+## SG-02 - Reposicionar `pro` como coordenacao de rotina complexa
 
 - Category: `strategic`
 - Related findings: `F-PV-02`, `F-MON-01`
-- Expected user value: `premium` deixa de parecer apenas "mais IA" ou "mais
+- Expected user value: `pro` deixa de parecer apenas "mais IA" ou "mais
   volume" e vira a camada para rotina realmente complexa.
 - Business goal: aumentar diferenciacao sem diluir a proposta principal do
   plano `pro`.
@@ -27,7 +27,7 @@
 - Effort: `high`
 - Risk: `medium`
 - Dependencies: `SG-01`.
-- Expected signal: o discurso e os recursos premium convergem para multi-edital,
+- Expected signal: o discurso e os recursos pro convergem para multi-edital,
   recovery e coordenacao adaptativa, nao apenas para quantidade adicional.
 
 ## SG-03 - Fechar o loop adaptativo do produto inteiro

@@ -80,7 +80,7 @@ describe('enforceAiTaskQuota', () => {
       limit: 8,
       window: 'day',
       upgradeHint:
-        'Faça upgrade para o Pro e ganhe mais folga de IA neste tipo de análise.',
+        'Faça upgrade para o Pro e tenha acesso completo a todas as features de IA.',
     });
     expect(setFirestoreDocumentWithUserToken).not.toHaveBeenCalled();
     expect(saveProductUsageEvent).toHaveBeenCalledWith(

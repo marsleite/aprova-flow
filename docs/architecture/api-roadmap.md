@@ -25,7 +25,7 @@ Hoje ela ainda não entrega:
 - billing
 - webhook
 - entitlements
-- autorização premium
+- autorização pro
 - acesso a banco server-side
 
 ## O que já existe
@@ -39,7 +39,7 @@ Responsabilidade atual:
 
 - provar que o runtime Fastify separado está saudável
 - servir como ponto de entrada para o backend dedicado
-- permitir teste manual da matriz `free / pro / premium` antes do gateway
+- permitir teste manual da matriz `free / pro` antes do gateway
 
 ## O que a API NÃO deve fazer agora
 
@@ -138,7 +138,7 @@ Entrega:
 - persistência do status da assinatura
 - recálculo de entitlements
 
-### Fase 6 — Autorização Premium
+### Fase 6 — Autorização Pro
 
 Objetivo:
 
@@ -157,7 +157,7 @@ Entrega:
 4. entitlements
 5. checkout
 6. webhooks
-7. autorização premium
+7. autorização pro
 
 ## O que fica no `apps/web` por enquanto
 
@@ -179,4 +179,4 @@ A `apps/api` deixa de ser apenas fundação quando cumprir os quatro pontos abai
 1. auth server-side funcionando
 2. endpoint de entitlements funcional
 3. webhook validado e idempotente
-4. pelo menos uma feature premium dependendo da API para autorização real
+4. pelo menos uma feature pro dependendo da API para autorização real
