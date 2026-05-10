@@ -9,6 +9,21 @@ import { listFirestoreDocumentsWithUserToken } from '@aprovamind/infrastructure-
 const PRODUCT_USAGE_COLLECTION = 'product_usage_events';
 const AI_USAGE_COLLECTION = 'ai_usage_events';
 
+type FirestoreListResult = Awaited<ReturnType<typeof listFirestoreDocumentsWithUserToken>>;
+
+function collectDocumentsOrWarn(
+  result: FirestoreListResult,
+  collection: string,
+  warnings: string[]
+) {
+  if (result.ok) {
+    return result.documents || [];
+  }
+
+  warnings.push(`${collection}_unavailable`);
+  return [];
+}
+
 export async function loadAdminBetaSignalsSummary(params: {
   idToken: string;
   windowDays?: number;
@@ -30,20 +45,31 @@ export async function loadAdminBetaSignalsSummary(params: {
     }),
   ]);
 
-  if (!productResult.ok) {
-    throw new Error(productResult.error || 'Nao foi possivel listar product_usage_events.');
-  }
+  const dataWarnings: string[] = [];
 
-  if (!aiResult.ok) {
-    throw new Error(aiResult.error || 'Nao foi possivel listar ai_usage_events.');
-  }
-
-  const productEvents = (productResult.documents || []).map(
+  const productEvents = collectDocumentsOrWarn(
+    productResult,
+    PRODUCT_USAGE_COLLECTION,
+    dataWarnings
+  ).map(
     ({ id, data }) => ({ id, ...(data as unknown as BetaProductEventDoc) })
   );
-  const aiEvents = (aiResult.documents || []).map(
+  const aiEvents = collectDocumentsOrWarn(
+    aiResult,
+    AI_USAGE_COLLECTION,
+    dataWarnings
+  ).map(
     ({ id, data }) => ({ id, ...(data as unknown as BetaAiUsageEventDoc) })
   );
 
-  return buildBetaSignalsSummary(productEvents, aiEvents, now, windowDays);
+  const summary = buildBetaSignalsSummary(productEvents, aiEvents, now, windowDays);
+
+  if (dataWarnings.length > 0) {
+    return {
+      ...summary,
+      dataWarnings,
+    };
+  }
+
+  return summary;
 }

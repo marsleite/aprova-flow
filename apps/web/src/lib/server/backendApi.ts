@@ -54,12 +54,28 @@ export async function proxyRequestToBackendApi(params: {
     params.request.method !== 'OPTIONS';
   const body = hasBody ? await params.request.text() : undefined;
 
-  const response = await fetch(targetUrl, {
-    method: params.request.method,
-    headers,
-    body,
-    cache: 'no-store',
-  });
+  let response: Response;
+  try {
+    response = await fetch(targetUrl, {
+      method: params.request.method,
+      headers,
+      body,
+      cache: 'no-store',
+    });
+  } catch (error) {
+    console.error('[backendApi] dedicated API request failed', {
+      targetPath: params.targetPath,
+      message: error instanceof Error ? error.message : String(error),
+    });
+
+    return NextResponse.json(
+      {
+        error: 'backend_api_fetch_failed',
+        message: 'API dedicada indisponível no momento.',
+      },
+      { status: 502 }
+    );
+  }
 
   const payload = await response.text();
   const responseHeaders = new Headers();

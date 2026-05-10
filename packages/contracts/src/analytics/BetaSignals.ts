@@ -60,6 +60,7 @@ export interface BetaPlanTransitionSummary {
 
 export interface BetaSignalsSummary {
   windowDays: number;
+  dataWarnings?: string[];
   activeUsers: number;
   productEventUsers: number;
   aiUsers: number;

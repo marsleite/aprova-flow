@@ -70,6 +70,20 @@ function formatUsd(value: number): string {
   return `$${value.toFixed(4)}`;
 }
 
+function formatDataWarnings(warnings: string[] | undefined): string | null {
+  if (!warnings || warnings.length === 0) return null;
+
+  const sources = warnings
+    .map((warning) => {
+      if (warning === 'product_usage_events_unavailable') return 'eventos de produto';
+      if (warning === 'ai_usage_events_unavailable') return 'eventos de IA';
+      return warning.replace(/_/g, ' ');
+    })
+    .join(', ');
+
+  return `Algumas fontes nao puderam ser lidas neste ambiente (${sources}). O painel segue carregado com os sinais disponiveis.`;
+}
+
 function formatLadderLabel(plan: string): string {
   if (plan === 'pro') return 'Free -> Pro';
   return plan;
@@ -288,6 +302,12 @@ export default function BetaSignalsCard() {
       {error && (
         <div className="mb-4 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-am-body-sm text-amber-700">
           {error}
+        </div>
+      )}
+
+      {!error && formatDataWarnings(summary?.dataWarnings) && (
+        <div className="mb-4 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-am-body-sm text-amber-700">
+          {formatDataWarnings(summary?.dataWarnings)}
         </div>
       )}
 

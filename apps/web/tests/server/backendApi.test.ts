@@ -121,4 +121,37 @@ describe('backendApi', () => {
       message: 'API dedicada não configurada para este ambiente.',
     });
   });
+
+  it('returns a JSON 502 when the dedicated API request fails', async () => {
+    process.env.API_BASE_URL = 'https://api.aprovamind.test';
+    const fetchMock = vi.fn().mockRejectedValue(new Error('network down'));
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new NextRequest('https://app.aprovamind.com/api/admin/beta-signals', {
+      method: 'GET',
+      headers: {
+        authorization: 'Bearer token-1',
+      },
+    });
+
+    const response = await proxyRequestToBackendApi({
+      request,
+      targetPath: '/billing/admin/beta-signals',
+    });
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toEqual({
+      error: 'backend_api_fetch_failed',
+      message: 'API dedicada indisponível no momento.',
+    });
+    expect(consoleError).toHaveBeenCalledWith(
+      '[backendApi] dedicated API request failed',
+      expect.objectContaining({
+        targetPath: '/billing/admin/beta-signals',
+        message: 'network down',
+      })
+    );
+  });
 });
