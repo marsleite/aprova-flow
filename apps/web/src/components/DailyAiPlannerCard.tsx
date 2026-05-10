@@ -16,6 +16,8 @@ import {
   Clock4,
 } from 'lucide-react';
 import { StudyConsistency, SubjectHours, PlanVsActual, SubjectAccuracy } from '@/types';
+import { resolveDailyPlanEligibility } from '@aprovamind/application/use-cases/planner/ResolveDailyPlanEligibility';
+import type { DailyPlanEligibility } from '@aprovamind/contracts';
 import { auth } from '@/lib/firebase/config';
 import {
   buildDailyPlanSignature,
@@ -87,14 +89,45 @@ export default function DailyAiPlannerCard({
   const [quotaNotice, setQuotaNotice] = useState<AiQuotaNoticeData | null>(null);
   const [completedBlocks, setCompletedBlocks] = useState<number[]>([]);
   const [deferredBlocks, setDeferredBlocks] = useState<number[]>([]);
+  const [manualQuestionActivityCount, setManualQuestionActivityCount] = useState(0);
   const previousTodaySecondsRef = useRef<number | null>(null);
   const lastAutoReplanAtRef = useRef<number>(0);
 
   const todayISO = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
-  const hasContext = useMemo(() => {
-    return (subjectHours?.length || 0) > 0 || (planVsActual?.length || 0) > 0 || (consistency?.weeklyTotalSeconds || 0) > 0;
-  }, [subjectHours, planVsActual, consistency]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleQuestionSaved = () => {
+      setManualQuestionActivityCount((value) => value + 1);
+    };
+
+    window.addEventListener('aprova:question-session-saved', handleQuestionSaved);
+    return () => window.removeEventListener('aprova:question-session-saved', handleQuestionSaved);
+  }, []);
+
+  const activitySummary = useMemo(() => {
+    const totalQuestions = (accuracyData || []).reduce((acc, item) => acc + (item.totalQuestions || 0), 0);
+    const studyMinutes = Math.round((consistency?.weeklyTotalSeconds || 0) / 60) + Math.round(totalTodaySeconds / 60);
+
+    return {
+      totalQuestions: totalQuestions + manualQuestionActivityCount,
+      correctAnswers: 0,
+      studyMinutes,
+      subjectCount: Math.max(subjectHours?.length || 0, planVsActual?.length || 0),
+    };
+  }, [accuracyData, consistency, totalTodaySeconds, manualQuestionActivityCount, subjectHours, planVsActual]);
+
+  const eligibility: DailyPlanEligibility = useMemo(
+    () =>
+      resolveDailyPlanEligibility({
+        activity: activitySummary,
+        evaluatedAt: `${todayISO}T00:00:00.000Z`,
+      }),
+    [activitySummary, todayISO]
+  );
+
+  const hasContext = eligibility.canGenerate || eligibility.canGenerateFallback;
 
   const planSignature = useMemo(() => {
     if (!plan) return '';
@@ -178,7 +211,8 @@ export default function DailyAiPlannerCard({
       hasTriggeredRecoveryRef.current = true;
       void generatePlan('recovery');
     }
-  }, [initialRecoveryMode, hasContext]); // Excluded generatePlan from deps intentionaly to run once
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- recovery mode should auto-run only once on mount.
+  }, [initialRecoveryMode, hasContext]);
 
   const persistProgress = async (nextCompleted: number[], nextDeferred: number[]) => {
     if (!userId || !plan || !planSignature) return;
@@ -294,6 +328,8 @@ export default function DailyAiPlannerCard({
               accuracy: a.accuracy,
               totalQuestions: a.totalQuestions,
             })),
+            localManualQuestionActivityCount: manualQuestionActivityCount,
+            forceFallback: !eligibility.canGenerate && eligibility.canGenerateFallback,
             gapInsights,
             executionContext: previousPlan
               ? {
@@ -363,6 +399,8 @@ export default function DailyAiPlannerCard({
       planVsActual,
       accuracyData,
       userId,
+      manualQuestionActivityCount,
+      eligibility,
     ]
   );
 
@@ -425,7 +463,13 @@ export default function DailyAiPlannerCard({
 
       {!hasContext && !initialRecoveryMode && (
         <div className="rounded-xl border border-am-warning/30 bg-am-warning/10 px-3 py-2 text-xs text-am-warning">
-          Registre sessões para a IA montar um plano diário personalizado.
+          {eligibility.missingRequirements[0] || 'Registre sessões ou questões para montar um plano diário personalizado.'}
+        </div>
+      )}
+
+      {hasContext && !plan && !loading && (
+        <div className="mb-3 rounded-xl border border-primary/25 bg-primary/10 px-3 py-2 text-xs text-primary">
+          Já tenho dados suficientes para montar um plano de hoje. Se a IA não responder, gero um plano resiliente sem perder seus registros.
         </div>
       )}
 
@@ -461,6 +505,9 @@ export default function DailyAiPlannerCard({
         <div className="space-y-3">
           <div className="rounded-xl border border-border bg-muted p-3">
             <p className="text-sm text-muted-foreground">{plan.rationale}</p>
+            {plan.userMessage && (
+              <p className="mt-2 text-xs text-primary">{plan.userMessage}</p>
+            )}
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1">
                 <Clock3 className="h-3.5 w-3.5" />

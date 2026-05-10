@@ -14,6 +14,7 @@ import { LegacyEngineDataSource } from '@/infrastructure/legacy/LegacyEngineData
 import { GetPlanEngineSnapshot } from '@aprovamind/application/use-cases/engine/GetPlanEngineSnapshot';
 import { FeatureCode } from '@aprovamind/domain';
 import { requireEntitlementFeature } from '@/lib/server/userEntitlements';
+import { resolveAiFailureState } from '@aprovamind/application/use-cases/ai/ResolveAiCapabilityState';
 
 // ============================================================
 // Tipos
@@ -245,8 +246,15 @@ ${engineResult.snapshot.subjects.filter(s => ['critical', 'neglected', 'warning'
     );
   } catch (error) {
     console.error('Erro no chat:', error);
+    const failure = resolveAiFailureState({
+      capability: 'chat',
+      error,
+    });
     return NextResponse.json(
-      { error: 'Erro ao consultar IA. Tente novamente.' },
+      {
+        error: failure.message,
+        aiCapability: failure,
+      },
       { status: 500 }
     );
   }

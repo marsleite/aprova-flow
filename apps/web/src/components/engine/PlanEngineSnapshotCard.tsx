@@ -102,9 +102,9 @@ function emptyStateCopy(reason: 'no_active_plan' | 'plan_not_found') {
   }
 
   return {
-    title: 'Nenhum edital ativo',
+    title: 'Selecione um edital ativo no Planner',
     description:
-      'O snapshot do motor precisa de um plano ativo para calcular prioridade e recomendações do dia.',
+      'O motor precisa de um edital ativo para calcular prioridade, Revisão Geral e recomendações do dia.',
   };
 }
 
@@ -255,7 +255,7 @@ export default function PlanEngineSnapshotCard({
           </p>
           <Button asChild variant="outline" size="sm" className="mt-4">
             <Link href="/planner">
-              Ir para o Planner
+              Gerenciar editais
               <ChevronRight className="ml-1 h-3 w-3" />
             </Link>
           </Button>

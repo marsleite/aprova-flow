@@ -18,6 +18,7 @@ import { parseJsonFromModelText } from '@/lib/ai';
 import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
 import { FeatureCode } from '@aprovamind/domain';
 import { requireEntitlementFeature } from '@/lib/server/userEntitlements';
+import { resolveAiFailureState } from '@aprovamind/application/use-cases/ai/ResolveAiCapabilityState';
 
 // ============================================================
 // Tipos
@@ -187,8 +188,12 @@ export async function POST(request: NextRequest) {
     const parsed = parseJsonFromModelText<Record<string, unknown>>(aiResponse.text || '');
     if (!parsed) {
       console.error('[weekly-mentoring] JSON inválido:', (aiResponse.text || '').slice(0, 500));
+      const failure = resolveAiFailureState({
+        capability: 'weekly_mentoring',
+        error: new Error('invalid_json'),
+      });
       return NextResponse.json(
-        { error: 'Não foi possível gerar a mentoria. Tente novamente.' },
+        { error: failure.message, aiCapability: failure },
         { status: 422 }
       );
     }
@@ -219,14 +224,22 @@ export async function POST(request: NextRequest) {
     const isQuota = errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('RESOURCE_EXHAUSTED');
 
     if (isQuota) {
+      const failure = resolveAiFailureState({
+        capability: 'weekly_mentoring',
+        error,
+      });
       return NextResponse.json(
-        { error: 'Limite da API atingido. Tente novamente mais tarde.', code: 'QUOTA_EXCEEDED' },
+        { error: failure.message, code: 'QUOTA_EXCEEDED', aiCapability: failure },
         { status: 429 }
       );
     }
 
+    const failure = resolveAiFailureState({
+      capability: 'weekly_mentoring',
+      error,
+    });
     return NextResponse.json(
-      { error: 'Erro ao gerar mentoria semanal. Tente novamente.' },
+      { error: failure.message, aiCapability: failure },
       { status: 500 }
     );
   }

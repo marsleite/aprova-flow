@@ -129,6 +129,18 @@ export default function QuestionTrackerCard({
         setTotalQuestions('');
         setCorrectAnswers('');
       }, 3500);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('aprova:question-session-saved', {
+            detail: {
+              subject: finalSubject,
+              totalQuestions: total,
+              correctAnswers: correct,
+              accuracy: pct,
+            },
+          })
+        );
+      }
       onSaved?.();
     } catch (err) {
       console.error('Erro ao salvar questões:', err);

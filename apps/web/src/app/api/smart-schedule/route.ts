@@ -3,6 +3,7 @@ import { requireAuthenticatedUser } from '@/lib/server/apiGuard';
 import { enforceAiTaskQuota } from '@/lib/server/aiRateLimit';
 import { parseJsonFromModelText } from '@/lib/ai';
 import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
+import { resolveAiFailureState } from '@aprovamind/application/use-cases/ai/ResolveAiCapabilityState';
 
 export interface SmartScheduleRequest {
     userName: string;
@@ -160,7 +161,13 @@ export async function POST(request: NextRequest) {
 
         if (!sanitizedSchedule || sanitizedSchedule.length === 0) {
             console.error("Falha ao parsear JSON no smart-schedule", jsonStr);
-            return NextResponse.json({ error: 'Erro gerando cronograma' }, { status: 500 });
+            return NextResponse.json({
+                error: 'Não consegui montar o cronograma agora. Tente novamente ou distribua os blocos manualmente.',
+                aiCapability: resolveAiFailureState({
+                    capability: 'smart_schedule',
+                    error: new Error('invalid_json'),
+                }),
+            }, { status: 500 });
         }
 
         return NextResponse.json(
@@ -176,8 +183,12 @@ export async function POST(request: NextRequest) {
         );
     } catch (error) {
         console.error('Erro na rota /smart-schedule:', error);
+        const failure = resolveAiFailureState({
+            capability: 'smart_schedule',
+            error,
+        });
         return NextResponse.json(
-            { error: 'Erro interno ao consultar IA.' },
+            { error: failure.message, aiCapability: failure },
             { status: 500 }
         );
     }

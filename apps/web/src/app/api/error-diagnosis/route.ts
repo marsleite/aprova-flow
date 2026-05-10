@@ -5,6 +5,7 @@ import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
 import { searchRelevantLaw } from '@/lib/firebase/legalKnowledge';
 import { FeatureCode } from '@aprovamind/domain';
 import { requireEntitlementFeature } from '@/lib/server/userEntitlements';
+import { resolveAiFailureState } from '@aprovamind/application/use-cases/ai/ResolveAiCapabilityState';
 
 // ── Prompt avançado: Gap Analyzer PhD ──
 
@@ -296,15 +297,23 @@ export async function POST(request: NextRequest) {
             );
         } catch {
             console.error('[GapAnalyzer] Falha ao parsear JSON:', jsonStr);
+            const failure = resolveAiFailureState({
+                capability: 'error_diagnosis',
+                error: new Error('invalid_json'),
+            });
             return NextResponse.json(
-                { error: 'A IA retornou formato inválido.' },
+                { error: failure.message, aiCapability: failure },
                 { status: 500 }
             );
         }
     } catch (error) {
         console.error('Erro na rota /error-diagnosis:', error);
+        const failure = resolveAiFailureState({
+            capability: 'error_diagnosis',
+            error,
+        });
         return NextResponse.json(
-            { error: 'Erro interno ao consultar IA.' },
+            { error: failure.message, aiCapability: failure },
             { status: 500 }
         );
     }

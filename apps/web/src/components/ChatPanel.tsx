@@ -259,12 +259,15 @@ export default function ChatPanel({
 
       const { reply } = await res.json();
       setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
-    } catch {
+    } catch (err) {
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: 'Desculpe, não consegui responder agora. Tente novamente.',
+          content:
+            err instanceof Error && err.message
+              ? err.message
+              : 'Não consegui responder agora. Seus dados foram preservados; tente novamente ou use o Plano Diário.',
         },
       ]);
     } finally {

@@ -55,6 +55,16 @@ export async function registerEngineRoutes(app: FastifyInstance): Promise<void> 
 
     const maxRecommendations = body.maxRecommendations ?? 3;
 
+    if (planId === null) {
+      return reply
+        .header('Cache-Control', 'no-store')
+        .send({
+          found: false,
+          reason: 'no_active_plan',
+          message: 'Selecione um edital ativo no Planner para usar o Engine.',
+        });
+    }
+
     if (
       typeof maxRecommendations !== 'number' ||
       !Number.isInteger(maxRecommendations) ||

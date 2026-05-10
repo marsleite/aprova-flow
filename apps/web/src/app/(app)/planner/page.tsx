@@ -220,7 +220,10 @@ export default function PlannerPage() {
   // Compute Daily Recommendations
   const activeStats = planStats.find(s => s.planId === activePlanId);
   const neglectedSubjects = activeStats?.planVsActual.filter(p => p.status === 'neglected').sort((a, b) => a.deviation - b.deviation) || [];
-  const nextBestSubject = neglectedSubjects[0]?.subject || activePlan?.subjects?.[0]?.subject || 'Revisão Geral';
+  const hasActivePlanContext = Boolean(activePlanId && activePlan);
+  const nextBestSubject = hasActivePlanContext
+    ? neglectedSubjects[0]?.subject || activePlan?.subjects?.[0]?.subject || 'Revisão Geral'
+    : 'Selecione um edital ativo';
 
   const todayTotalHours = todaySessions.reduce((acc, s) => acc + s.duration, 0) / 3600;
 
@@ -335,15 +338,17 @@ export default function PlannerPage() {
                 </h2>
 
                 <p className="text-am-body-sm text-muted-foreground max-w-md leading-relaxed">
-                  Baseado no seu mapa de calor e edital ativo, você está com um déficit nesta matéria. Uma sessão agora maximizará sua curva de retenção.
+                  {hasActivePlanContext
+                    ? 'Baseado no seu mapa de calor e edital ativo, você está com um déficit nesta matéria. Uma sessão agora maximizará sua curva de retenção.'
+                    : 'A Revisão Geral precisa de um edital ativo para recomendar a próxima sessão sem cair em uma tela vazia.'}
                 </p>
               </div>
 
               <div className="mt-8 flex items-center gap-4">
                 <Button asChild variant="primary" size="lg" className="shadow-[0_4px_24px_var(--color-am-ai-glow)]">
-                  <a href="/engine">
-                    <Play className="mr-2 h-5 w-5" /> Iniciar Otimização
-                  </a>
+                  <Link href={hasActivePlanContext ? '/engine' : '/planner'}>
+                    <Play className="mr-2 h-5 w-5" /> {hasActivePlanContext ? 'Iniciar Otimização' : 'Gerenciar Editais'}
+                  </Link>
                 </Button>
               </div>
             </div>
