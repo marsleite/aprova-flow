@@ -6,6 +6,7 @@ import { saveDailyAiPlanSnapshot } from '@/lib/server/dailyAiPlanStore';
 import { runDedicatedAiText } from '@/lib/server/dedicatedAi';
 import { LegacyEngineDataSource } from '@/infrastructure/legacy/LegacyEngineDataSource';
 import { GetPlanEngineSnapshot } from '@aprovamind/application/use-cases/engine/GetPlanEngineSnapshot';
+import { resolveDailyPlanEligibility } from '@aprovamind/application/use-cases/planner/ResolveDailyPlanEligibility';
 
 interface PlannerDailyRequest {
   userName: string;
@@ -40,6 +41,8 @@ interface PlannerDailyRequest {
       priority: 'alta' | 'media' | 'baixa';
     }[];
   };
+  localManualQuestionActivityCount?: number;
+  forceFallback?: boolean;
 }
 
 interface DailyPlanBlock {
@@ -56,6 +59,10 @@ interface PlannerDailyResponse {
   blocks: DailyPlanBlock[];
   contingencies: string[];
   estimatedTotalMinutes: number;
+  status?: 'ready' | 'fallback_ready' | 'failed_recoverable';
+  generationMode?: 'ai_generated' | 'deterministic_fallback' | 'manual_guided';
+  userMessage?: string;
+  fallbackUsed?: boolean;
 }
 
 function buildFallbackPlan(ctx: PlannerDailyRequest, dateISO: string): PlannerDailyResponse {
@@ -108,6 +115,10 @@ function buildFallbackPlan(ctx: PlannerDailyRequest, dateISO: string): PlannerDa
       'Se sobrar tempo, faça revisão ativa de erros do último simulado.',
     ],
     estimatedTotalMinutes,
+    status: 'fallback_ready',
+    generationMode: 'deterministic_fallback',
+    userMessage: 'Montei um plano seguro sem depender da IA ao vivo. Seus registros foram preservados.',
+    fallbackUsed: true,
   };
 }
 
@@ -288,9 +299,14 @@ function sanitizePlan(raw: Record<string, unknown>, fallbackDateISO: string): Pl
 }
 
 export async function POST(request: NextRequest) {
+  let authContext: Awaited<ReturnType<typeof requireAuthenticatedUser>> | null = null;
+  let body: PlannerDailyRequest | null = null;
+  let dateISO = new Date().toISOString().slice(0, 10);
+
   try {
     const auth = await requireAuthenticatedUser(request);
     if ('response' in auth) return auth.response;
+    authContext = auth;
 
     const quota = await enforceAiTaskQuota({
       uid: auth.uid,
@@ -300,12 +316,39 @@ export async function POST(request: NextRequest) {
     });
     if (!quota.allowed) return quota.response;
 
-    const body = (await request.json()) as PlannerDailyRequest;
+    body = (await request.json()) as PlannerDailyRequest;
     if (!body?.userName || !Number.isFinite(body.weeklyGoalHours)) {
       return NextResponse.json({ error: 'Dados inválidos para gerar plano diário.' }, { status: 400 });
     }
 
-    const dateISO = body.dateISO || new Date().toISOString().slice(0, 10);
+    dateISO = body.dateISO || dateISO;
+
+    const eligibility = resolveDailyPlanEligibility({
+      activity: {
+        totalQuestions:
+          (body.accuracyBySubject || []).reduce((acc, item) => acc + (item.totalQuestions || 0), 0) +
+          (body.localManualQuestionActivityCount || 0),
+        studyMinutes: body.todayTotalMinutes + Math.round((body.weeklyTotalHours || 0) * 60),
+        subjectCount: Math.max(body.subjectHours.length, body.planVsActual.length),
+      },
+      evaluatedAt: `${dateISO}T00:00:00.000Z`,
+    });
+
+    if (!eligibility.canGenerate && !eligibility.canGenerateFallback) {
+      return NextResponse.json(
+        {
+          error: eligibility.missingRequirements[0] || 'Registre sessões ou questões antes de gerar o plano diário.',
+          eligibility,
+        },
+        { status: 400, headers: quota.headers }
+      );
+    }
+
+    if (body.forceFallback) {
+      return NextResponse.json(buildFallbackPlan(body, dateISO), {
+        headers: { ...quota.headers, 'x-ai-fallback': 'true' },
+      });
+    }
 
     let engineAnalysis = '';
     try {
@@ -369,7 +412,7 @@ ${engineResult.snapshot.subjects.slice(0, 5).map(s =>
       );
 
       return NextResponse.json(
-        { ...fallbackPlan, fallbackUsed: true },
+        fallbackPlan,
         {
           headers: {
             ...quota.headers,
@@ -383,7 +426,13 @@ ${engineResult.snapshot.subjects.slice(0, 5).map(s =>
       );
     }
 
-    const plan = sanitizePlan(parsed, dateISO);
+    const plan = {
+      ...sanitizePlan(parsed, dateISO),
+      status: 'ready' as const,
+      generationMode: 'ai_generated' as const,
+      userMessage: 'Plano gerado com IA a partir dos seus dados de estudo.',
+      fallbackUsed: false,
+    };
 
     void saveDailyAiPlanSnapshot(
       {
@@ -411,6 +460,25 @@ ${engineResult.snapshot.subjects.slice(0, 5).map(s =>
     });
   } catch (error) {
     console.error('[planner-daily] Erro:', error);
+    if (body && authContext && !('response' in authContext)) {
+      const fallbackPlan = buildFallbackPlan(body, dateISO);
+      void saveDailyAiPlanSnapshot(
+        {
+          userId: authContext.uid,
+          dateISO: fallbackPlan.dateISO,
+          estimatedTotalMinutes: fallbackPlan.estimatedTotalMinutes,
+          blocksCount: fallbackPlan.blocks.length,
+          rationale: fallbackPlan.rationale,
+          planJson: JSON.stringify(fallbackPlan),
+          provider: 'fallback',
+          model: 'deterministic',
+        },
+        authContext.idToken
+      );
+      return NextResponse.json(fallbackPlan, {
+        headers: { 'x-ai-fallback': 'true' },
+      });
+    }
     return NextResponse.json({ error: 'Erro ao gerar plano diário.' }, { status: 500 });
   }
 }

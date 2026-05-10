@@ -9,3 +9,5 @@ export * from './mappers/toUserEntitlementsSnapshot';
 export * from './use-cases/billing/GetUserEntitlements';
 export * from './use-cases/engine/GetPlanEngineSnapshot';
 export * from './use-cases/engine/GetPortfolioSnapshot';
+export * from './use-cases/ai/ResolveAiCapabilityState';
+export * from './use-cases/planner/ResolveDailyPlanEligibility';

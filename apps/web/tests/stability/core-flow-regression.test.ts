@@ -75,7 +75,7 @@ describe('core flow regression helpers', () => {
       reason: 'missing-active-plan',
       title: 'Selecione um edital ativo no Planner',
       description:
-        'O Dashboard e o Engine precisam de um edital ativo para mostrar a semana certa e a próxima melhor sessão.',
+        'O Dashboard, o Engine e a Revisão Geral precisam de um edital ativo para mostrar a semana certa e a próxima melhor sessão sem cair em uma tela vazia.',
       ctaLabel: 'Gerenciar editais',
     });
   });

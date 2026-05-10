@@ -15,6 +15,18 @@ import { runAiText, runAiPdf, logAiUsageEvent } from '@aprovamind/ai-gateway';
 import type { AiTextRequest, AiPdfRequest } from '@aprovamind/ai-gateway';
 import { extractBearerToken } from '@aprovamind/infrastructure-firebase';
 import { saveAiUsageEvent } from './ai-usage-store';
+import { resolveAiFailureState } from '@aprovamind/application/use-cases/ai/ResolveAiCapabilityState';
+import type { AiCapability } from '@aprovamind/contracts';
+
+function toAiCapability(task: string): AiCapability {
+  if (task === 'planner-daily') return 'daily_plan';
+  if (task === 'smart-schedule') return 'smart_schedule';
+  if (task === 'weekly-mentoring') return 'weekly_mentoring';
+  if (task === 'error-diagnosis') return 'error_diagnosis';
+  if (task === 'explain-answer') return 'explain_answer';
+  if (task === 'chat') return 'chat';
+  return 'next_session';
+}
 
 export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
   // ── POST /ai/text ──
@@ -74,9 +86,14 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
       });
     } catch (err) {
       request.log.error(err);
+      const aiCapability = resolveAiFailureState({
+        capability: toAiCapability(body.task),
+        error: err,
+      });
       return reply.code(500).send({
         error: 'ai_error',
-        message: 'Erro ao processar requisição de IA.',
+        message: aiCapability.message,
+        aiCapability,
       });
     }
   });
@@ -126,9 +143,14 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
       });
     } catch (err) {
       request.log.error(err);
+      const aiCapability = resolveAiFailureState({
+        capability: 'next_session',
+        error: err,
+      });
       return reply.code(500).send({
         error: 'ai_error',
-        message: 'Erro ao processar PDF.',
+        message: aiCapability.message,
+        aiCapability,
       });
     }
   });

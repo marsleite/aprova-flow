@@ -15,6 +15,10 @@ export interface DailyPlanResponse {
   blocks: DailyPlanBlock[];
   contingencies: string[];
   estimatedTotalMinutes: number;
+  status?: 'ready' | 'fallback_ready' | 'failed_recoverable';
+  generationMode?: 'ai_generated' | 'deterministic_fallback' | 'manual_guided';
+  userMessage?: string;
+  fallbackUsed?: boolean;
 }
 
 interface DailyAiPlanDoc {
