@@ -14,7 +14,7 @@ interface EntitlementUpgradeCardProps {
   title: string;
   description: string;
   highlight: string;
-  recommendedPlan: 'pro' | 'premium';
+  recommendedPlan: 'pro';
   ctaHref?: string;
   ctaLabel?: string;
   currentPlan?: PlanTier;
@@ -132,7 +132,7 @@ export default function EntitlementUpgradeCard({
       </div>
 
       <div className="relative z-10 mt-5">
-        <Button asChild variant="premium">
+        <Button asChild variant="primary">
           <Link href={ctaHref} onClick={handleCtaClick}>
             <Crown className="mr-2 h-4 w-4" />
             {resolvedCtaLabel}

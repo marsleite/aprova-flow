@@ -53,17 +53,17 @@ function buildAdminFeatureSnapshot(
     };
   }
 
-  const premiumRule =
-    DEFAULT_ENTITLEMENT_POLICY.plans[PlanCode.Premium].features[featureCode];
+  const proRule =
+    DEFAULT_ENTITLEMENT_POLICY.plans[PlanCode.Pro].features[featureCode];
 
-  if (premiumRule.mode === EntitlementMode.Quota) {
+  if (proRule.mode === EntitlementMode.Quota) {
     return {
       mode: 'quota',
       enabled: true,
-      limit: premiumRule.limit,
+      limit: proRule.limit,
       used: 0,
-      remaining: premiumRule.limit,
-      period: premiumRule.period,
+      remaining: proRule.limit,
+      period: proRule.period,
     };
   }
 

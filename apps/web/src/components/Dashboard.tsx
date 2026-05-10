@@ -744,7 +744,7 @@ export default function Dashboard() {
             <div className="rounded-xl border border-[var(--primary)]/30 bg-[var(--primary)]/10 p-6">
               <h3 className="text-lg font-semibold text-foreground">Calendário avançado</h3>
               <p className="mt-2 text-sm text-blue-100/90">
-                Disponível nos planos Pro e Premium para organizar sessões com agenda mensal.
+                Disponível no Pro para organizar sessões com agenda mensal.
               </p>
             </div>
           )}

@@ -43,9 +43,9 @@ Estados que precisamos conseguir simular:
 
 - `free + active`
 - `pro + active`
-- `premium + active`
+- `pro + active`
 - `pro + past_due`
-- `premium + expired`
+- `pro + expired`
 
 ## Checklist de Preparação por Tester
 
@@ -72,7 +72,7 @@ Validar:
 - leitura básica do motor
 - questões e simulados básicos
 - explicação por IA com degustação controlada
-- bloqueio justo para features `Pro` e `Premium`
+- bloqueio justo para features `Pro` e `Pro`
 
 Telas mínimas:
 
@@ -91,7 +91,7 @@ Validar:
 - mentoria semanal
 - explicação por IA com quota real de uso
 - parse de edital disponível
-- ausência correta de recursos `Premium`
+- ausência correta de recursos `Pro`
 
 Telas mínimas:
 
@@ -100,7 +100,7 @@ Telas mínimas:
 - `/provas`
 - fluxo de parse de edital
 
-### Premium
+### Pro
 
 Validar:
 
@@ -116,7 +116,7 @@ Telas mínimas:
 - `/planner`
 - `/provas`
 - `/caderno-erros`
-- fluxos de IA premium
+- fluxos de IA pro
 - criação de novo edital no topo do Planner
 
 ## Cenários de Status
@@ -134,7 +134,7 @@ Validar:
 Validar:
 
 - fallback para comportamento equivalente a `free`
-- remoção de capacidades `pro/premium`
+- remoção de capacidades `pro`
 - ausência de vazamento entre UI e backend
 
 ## Checklist de Regressão Semanal
@@ -143,7 +143,7 @@ Toda semana, validar pelo menos:
 
 1. `free-user` ainda vê valor no primeiro uso
 2. `pro-user` continua sentindo produto principal
-3. `premium-user` continua sentindo experiência completa
+3. `pro-user` continua sentindo experiência completa
 4. `past_due` restringe sem quebrar a conta
 5. `expired` faz fallback corretamente
 6. reset manual de usage funciona
@@ -180,7 +180,7 @@ Toda semana consolidar:
 
 Só considerar a entrada do gateway real quando:
 
-- a escada `free -> pro -> premium` estiver estável
+- a escada `free -> pro` estiver estável
 - não houver divergência recorrente entre UI e backend
 - a equipe souber operar `plan`, `status` e `usage` sem improviso
 - as quotas mais caras estiverem calibradas

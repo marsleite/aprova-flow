@@ -13,7 +13,7 @@ import {
 } from '@aprovamind/domain/billing/usage-periods';
 
 describe('Billing entitlements', () => {
-  it('keeps free focused on activation and blocks premium-only features', () => {
+  it('keeps free focused on activation and blocks paid features', () => {
     const entitlements = resolveUserEntitlements({
       plan: PlanCode.Free,
       status: SubscriptionStatus.Active,
@@ -83,48 +83,21 @@ describe('Billing entitlements', () => {
     });
     expect(entitlements.features[FeatureCode.ErrorGapAnalyzer]).toEqual({
       mode: 'boolean',
-      enabled: false,
+      enabled: true,
     });
     expect(entitlements.features[FeatureCode.MultiEdital]).toEqual({
       mode: 'boolean',
-      enabled: false,
-    });
-  });
-
-  it('unlocks multi-edital and adaptive features for premium', () => {
-    const entitlements = resolveUserEntitlements({
-      plan: PlanCode.Premium,
-      status: SubscriptionStatus.Active,
-    });
-
-    expect(entitlements.effectivePlan).toBe(PlanCode.Premium);
-    expect(entitlements.features[FeatureCode.MultiEdital]).toEqual({
-      mode: 'boolean',
-      enabled: true,
-    });
-    expect(entitlements.features[FeatureCode.AdaptiveDailyPlan]).toEqual({
-      mode: 'boolean',
-      enabled: true,
-    });
-    expect(entitlements.features[FeatureCode.ErrorGapAnalyzer]).toEqual({
-      mode: 'boolean',
-      enabled: true,
-    });
-    expect(entitlements.features[FeatureCode.PostSimuladoInteligente]).toMatchObject({
-      mode: 'quota',
-      limit: 8,
-      remaining: 8,
       enabled: true,
     });
   });
 
   it('falls back to free when the subscription expires', () => {
     const entitlements = resolveUserEntitlements({
-      plan: PlanCode.Premium,
+      plan: PlanCode.Pro,
       status: SubscriptionStatus.Expired,
     });
 
-    expect(entitlements.catalogPlan).toBe(PlanCode.Premium);
+    expect(entitlements.catalogPlan).toBe(PlanCode.Pro);
     expect(entitlements.effectivePlan).toBe(PlanCode.Free);
     expect(entitlements.accessState).toBe(AccessState.FreeFallback);
     expect(entitlements.features[FeatureCode.MultiEdital]).toEqual({

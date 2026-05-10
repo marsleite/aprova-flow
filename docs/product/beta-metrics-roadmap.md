@@ -107,7 +107,7 @@ Esses eventos já sustentam a leitura operacional do beta antes do gateway.
 O que ainda falta nesta camada:
 
 - consolidar comparações entre janelas (`7d`, `14d`, `30d`)
-- observar quais sinais puxam mais `free -> pro` versus `pro -> premium`
+- observar quais sinais puxam mais `free -> pro` versus `pro -> pro`
 - ligar melhor bloqueio e clique com recorrência real de uso do produto
 
 ### 2. Funil real de upgrade
@@ -115,7 +115,7 @@ O que ainda falta nesta camada:
 Hoje já conseguimos responder melhor:
 
 - em qual tela o usuário sentiu falta do `Pro`
-- em qual tela o usuário sentiu falta do `Premium`
+- em qual tela o usuário sentiu falta do `Pro`
 - qual bloqueio gerou clique de upgrade
 
 O que ainda não está totalmente claro:
@@ -138,7 +138,7 @@ Atualizacao de implementacao:
   `/billing/admin/beta-signals`, sem depender de leitura direta do Firestore no
   navegador
 - o painel agora tambem segmenta a escada `free -> pro` versus
-  `pro -> premium`, pressao de quota por tarefa e mudancas recentes de plano
+  `pro -> pro`, pressao de quota por tarefa e mudancas recentes de plano
 - o objetivo agora deixa de ser "criar um primeiro painel" e passa a ser
   calibrar quais cortes e comparacoes realmente ajudam na revisao semanal
 
@@ -184,7 +184,7 @@ Esses itens podem entrar depois do beta ou no meio dele, com mais segurança.
 
 - `free` precisa ser útil
 - `pro` precisa parecer o plano principal
-- `premium` precisa parecer a experiência completa
+- `pro` precisa parecer a experiência completa
 
 ### 3. Time precisa revisar o beta semanalmente
 
@@ -226,8 +226,8 @@ Com base no beta:
 
 - revisar quotas
 - revisar copy de upgrade
-- revisar o que fica em `free`, `pro` e `premium`
-- revisar se os bloqueios puxam mais `free -> pro` ou `pro -> premium`
+- revisar o que fica em `free`, `pro` e `pro`
+- revisar se os bloqueios puxam mais `free -> pro` ou `pro -> pro`
 - revisar quais tarefas de IA estao concentrando a pressao de quota
 
 ### Etapa 4 — Gateway real

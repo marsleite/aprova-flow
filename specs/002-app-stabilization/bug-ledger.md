@@ -44,7 +44,7 @@ e criterio de encerramento, seguindo o contrato em
   plano permite novo edital, ou virar CTA de upgrade honesto quando o limite do
   tier foi atingido.
 - `actual_behavior`: a tela podia aparentar “botao quebrado”, principalmente
-  em cenarios com apenas um edital ativo e gate premium.
+  em cenarios com apenas um edital ativo e gate pro.
 - `evidence`:
   - `/specs/002-app-stabilization/bugs/core-flow-login-planner.md#stab-001`
   - `/apps/web/src/app/(app)/planner/page.tsx`
@@ -106,7 +106,7 @@ e criterio de encerramento, seguindo o contrato em
 - `ownership_layer`: `auth-entitlement-gating`
 - `severity`: `high`
 - `priority`: `P1`
-- `user_impact`: o usuario podia acreditar que era `premium` real, quando na
+- `user_impact`: o usuario podia acreditar que era `pro` real, quando na
   verdade a tela ainda refletia um cenario local de sandbox gravado no browser.
 - `expected_behavior`: sempre que um cenario local estiver ativo, login e
   Planner devem explicar que os gates refletem o sandbox ate o retorno ao

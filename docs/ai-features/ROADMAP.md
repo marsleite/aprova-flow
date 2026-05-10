@@ -39,7 +39,7 @@ Este documento rastreia a implementação das funcionalidades baseadas em Inteli
 |---|---|
 | Free | 15/dia |
 | Pro | 50/dia |
-| Premium | 100/dia |
+| Pro | 100/dia |
 
 ---
 
@@ -63,7 +63,7 @@ Este documento rastreia a implementação das funcionalidades baseadas em Inteli
 |---|---|---|
 | Free | 5/dia | ❌ Bloqueado |
 | Pro | 20/dia | 30/dia |
-| Premium | 50/dia | 80/dia |
+| Pro | 50/dia | 80/dia |
 
 ---
 
@@ -89,4 +89,4 @@ Este documento rastreia a implementação das funcionalidades baseadas em Inteli
 |---|---|
 | Free | ❌ Bloqueado |
 | Pro | 5/dia |
-| Premium | 15/dia |
+| Pro | 15/dia |

@@ -8,7 +8,7 @@ Durante o beta, queremos responder cinco perguntas:
 
 1. O plano `free` entrega valor real logo no primeiro uso?
 2. O plano `pro` parece claramente o plano principal para estudo sério?
-3. O plano `premium` parece a experiência completa, e não apenas "mais limite"?
+3. O plano `pro` parece a experiência completa, e não apenas "mais limite"?
 4. Os gates de feature parecem justos e compreensíveis?
 5. Quais features realmente puxam desejo de upgrade?
 
@@ -33,7 +33,7 @@ Durante o beta, queremos responder cinco perguntas:
 
 - estabilizar fluxo
 - encontrar bugs de entitlement
-- validar clareza da escada `free -> pro -> premium`
+- validar clareza da escada `free -> pro`
 - entender se as mensagens de upgrade fazem sentido
 
 ### O que observar
@@ -47,7 +47,7 @@ Durante o beta, queremos responder cinco perguntas:
 ### Critério de saída da fase
 
 - sem bugs críticos de bloqueio/liberação
-- sem divergência entre UI e backend em features premium
+- sem divergência entre UI e backend em features pro
 - feedback qualitativo suficiente para revisar copy dos planos
 
 ## Fase 2 — Beta de Uso Real
@@ -78,7 +78,7 @@ Durante o beta, queremos responder cinco perguntas:
 ### Critério de saída da fase
 
 - clareza de quais features sustentam `pro`
-- clareza de quais features sustentam `premium`
+- clareza de quais features sustentam `pro`
 - quotas iniciais calibradas o suficiente para seguir
 
 ## Fase 3 — Hardening Pré-Billing
@@ -96,7 +96,7 @@ Durante o beta, queremos responder cinco perguntas:
 ### O que observar
 
 - usuários que bateram no limite de IA
-- usuários que tentaram usar recursos premium com frequência
+- usuários que tentaram usar recursos pro com frequência
 - fricção em billing/settings/upgrades
 - consistência dos estados `active`, `past_due` e `expired`
 
@@ -146,13 +146,13 @@ Checklist:
 ### Bateria 4 — Desejo de Upgrade
 
 Objetivo:
-- medir se a escada `free -> pro -> premium` está saudável
+- medir se a escada `free -> pro` está saudável
 
 Checklist:
 - qual feature bloqueada mais incomodou
 - em qual tela o upgrade pareceu justo
 - `pro` parece suficiente para estudo single-plan
-- `premium` parece valioso para rotina complexa
+- `pro` parece valioso para rotina complexa
 
 ### Bateria 5 — IA
 
@@ -162,8 +162,8 @@ Objetivo:
 Checklist:
 - explicação por IA ajuda mesmo?
 - mentoria semanal ajuda mesmo?
-- gap analyzer parece premium?
-- pós-simulado inteligente parece premium?
+- gap analyzer parece pro?
+- pós-simulado inteligente parece pro?
 
 ## Métricas Mínimas
 
@@ -203,7 +203,7 @@ Checklist:
 
 4. O plano atual parece suficiente para o seu momento?
 5. O que faria você assinar o `Pro`?
-6. O que faria você assinar o `Premium`?
+6. O que faria você assinar o `Pro`?
 
 ### Bloco 3 — Fricção
 
@@ -229,7 +229,7 @@ Checklist:
 - revisar quotas de IA
 - revisar o que está no `free`
 - revisar se o `pro` está forte o suficiente
-- revisar se o `premium` continua parecendo completo
+- revisar se o `pro` continua parecendo completo
 
 ## Operação Manual no Beta
 
@@ -244,7 +244,7 @@ Enquanto não houver gateway real:
 Fluxos úteis:
 
 - promover usuário `free -> pro`
-- promover usuário `pro -> premium`
+- promover usuário `pro -> pro`
 - simular `past_due`
 - simular `expired`
 - resetar usage
@@ -255,6 +255,6 @@ Só avançar para gateway real quando:
 
 - a matriz de entitlements estiver estável
 - os gates estiverem coerentes entre UI e backend
-- a equipe souber exatamente o que entra em `free`, `pro` e `premium`
+- a equipe souber exatamente o que entra em `free`, `pro` e `pro`
 - as quotas estiverem razoavelmente calibradas
 - o beta tiver mostrado quais recursos puxam upgrade de verdade

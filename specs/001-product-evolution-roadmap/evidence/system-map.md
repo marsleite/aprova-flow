@@ -38,7 +38,7 @@
   - Official exam hub and execution paths (`/provas`, `/provas/criar-simulado`,
     `/provas/[id]/executar`, `/provas/[id]/resultado`).
 - `/(app)/caderno-erros`
-  - Error notebook, premium gap analysis, and flashcard generation.
+  - Error notebook, pro gap analysis, and flashcard generation.
 - `/(app)/settings`
   - Account, plan summary, beta sandbox, and tester operations.
 

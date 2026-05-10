@@ -15,15 +15,15 @@ describe('ui safety guardrails', () => {
     expect(
       getSandboxContextMessage({
         usingSandbox: false,
-        sandboxScenarioUserId: 'premium-user',
+        sandboxScenarioUserId: 'pro-user',
       })
     ).toBeNull();
 
     expect(
       getSandboxContextMessage({
         usingSandbox: true,
-        sandboxScenarioUserId: 'premium-user',
+        sandboxScenarioUserId: 'pro-user',
       })
-    ).toContain('premium-user');
+    ).toContain('pro-user');
   });
 });

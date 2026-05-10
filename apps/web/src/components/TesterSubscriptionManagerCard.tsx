@@ -11,7 +11,7 @@ import {
 } from '@/lib/billing-admin-client';
 import { Button, Card, Badge } from '@/components';
 
-const PLAN_OPTIONS = [PlanCode.Free, PlanCode.Pro, PlanCode.Premium] as const;
+const PLAN_OPTIONS = [PlanCode.Free, PlanCode.Pro] as const;
 const STATUS_OPTIONS = [
   SubscriptionStatus.Trialing,
   SubscriptionStatus.Active,
@@ -166,7 +166,7 @@ export default function TesterSubscriptionManagerCard() {
 
       <div className="space-y-4">
         <p className="text-am-body-sm text-muted-foreground leading-relaxed">
-          Use este painel interno para simular free, pro, premium, past due ou expiração sem gateway de pagamento.
+          Use este painel interno para simular free, pro, past due ou expiração sem gateway de pagamento.
         </p>
 
         <div className="grid gap-3 md:grid-cols-[1.4fr_auto]">

@@ -1,5 +1,5 @@
 /**
- * Componente StudyTimer — Premium + Pomodoro
+ * Componente StudyTimer — Pro + Pomodoro
  *
  * Cronômetro com anel circular SVG, glow pulsante, e suporte a:
  * - Modo livre (stopwatch)

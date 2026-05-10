@@ -69,7 +69,7 @@ trust boundary da aplicacao.
 
 ## Conclusao Operacional
 
-- o maior risco residual nao e mais “acesso premium pelo cliente”, e sim
+- o maior risco residual nao e mais “acesso pro pelo cliente”, e sim
   ambiguidade operacional entre usuario real, sandbox local e cenarios manuais
 - a proxima rodada de endurecimento deve esclarecer a semantica de toggles da
   API e adicionar um passe manual curto para `settings` e superficies

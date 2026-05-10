@@ -67,7 +67,7 @@
 - Related findings: `F-PERF-01`, `F-PERF-02`
 - Expected user value: planner multi-edital e caderno de erros ficam mais
   responsivos conforme o volume cresce.
-- Business goal: ampliar beta e uso premium sem degradar as areas de maior
+- Business goal: ampliar beta e uso pro sem degradar as areas de maior
   valor percebido.
 - Impact: `medium`
 - Effort: `medium`

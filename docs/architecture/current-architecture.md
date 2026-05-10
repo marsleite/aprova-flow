@@ -49,7 +49,7 @@ Responsável por:
 Não deve concentrar:
 
 - lógica nova de negócio
-- autorização premium final
+- autorização pro final
 - gateways de IA
 - runtime canônico do engine
 - mutações server-side de assinatura ou entitlement
@@ -195,7 +195,7 @@ Dependências proibidas:
 - `packages/domain` -> Firebase, Fastify, Next
 - `packages/application` -> implementação concreta do banco ou gateway
 - `apps/web` -> lógica de negócio espalhada em componente React
-- `apps/web` -> checks premium finais confiando apenas no cliente
+- `apps/web` -> checks pro finais confiando apenas no cliente
 
 ## Estado Atual por Maturidade
 
@@ -231,7 +231,7 @@ Dependências proibidas:
 - `apps/web` continua em `Next.js`
 - `apps/api` é o backend dedicado em `Fastify`
 - `domain`, `application` e `contracts` são compartilhados
-- segredos, IA e autorização premium ficam no servidor
+- segredos, IA e autorização pro ficam no servidor
 - o runtime canônico do engine não deve voltar para a `web`
 
 ## O que não deve acontecer

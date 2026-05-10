@@ -65,7 +65,7 @@ Para cada problema relevante:
 
 - Comecar pelo que aumenta coerencia, retencao e recorrencia da rotina
 - Tratar monetizacao atual como beta manual de aprendizado
-- Adiar gateway real e movimentos premium dependentes de fundacao comercial
+- Adiar gateway real e movimentos pro dependentes de fundacao comercial
 - Nao abrir frentes arquiteturais mais profundas sem esclarecer ownership entre
   `apps/web`, `apps/api` e `packages/*`
 

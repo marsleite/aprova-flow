@@ -58,7 +58,7 @@
 - `result`: `pass`
 - `observed_evidence`:
   - `/login` exibiu o bloco `SANDBOX LOCAL` com o contexto
-    `premium-user`
+    `pro-user`
   - `/planner` exibiu chip `SANDBOX · PREMIUM-USER`
   - o callout de sandbox orientou voltar ao usuario real em `/settings`
 

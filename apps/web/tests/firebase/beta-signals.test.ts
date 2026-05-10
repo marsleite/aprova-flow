@@ -42,7 +42,6 @@ describe('beta signals summary', () => {
         userId: 'u-2',
         actorUserId: 'u-2',
         task: 'chat',
-        recommendedPlan: 'premium',
         planTier: 'pro',
         createdAt: '2026-04-06T08:00:00.000Z',
       },
@@ -153,15 +152,6 @@ describe('beta signals summary', () => {
         views: 1,
         clicks: 1,
         ctrPercent: 100,
-        uniqueUsers: 1,
-      },
-      {
-        recommendedPlan: 'premium',
-        blocked: 0,
-        quotaExhausted: 1,
-        views: 0,
-        clicks: 0,
-        ctrPercent: 0,
         uniqueUsers: 1,
       },
     ]);

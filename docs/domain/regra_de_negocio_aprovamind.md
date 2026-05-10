@@ -629,7 +629,7 @@ As decisões abaixo são consideradas **oficiais e vigentes** até revisão form
 | 3 | **Horas líquidas são a métrica fundamental de esforço** | Diferencial do produto. Page Visibility API garante confiabilidade |
 | 4 | **A IA recebe outputs do Engine como input, não dados brutos** | Reduz alucinação, garante consistência, mantém a IA como camada de explicação |
 | 5 | **Cada plano/edital é um universo independente** | O dashboard, motor e recomendações operam no escopo do plano ativo |
-| 6 | **O planner diário é o feature âncora premium** | É o output de maior valor: "o que estudar agora". Free users veem insights simples |
+| 6 | **O planner diário é o feature âncora pro** | É o output de maior valor: "o que estudar agora". Free users veem insights simples |
 | 7 | **StudySession com `duration < 60s` é descartada** | Sessões acidentais ou de teste não devem poluir dados |
 | 8 | **O sistema deve funcionar com dados parciais** | Falta de questões → `efficiencyScore = unknown`. Falta de pesos → pesos iguais. O motor nunca trava |
 | 9 | **PlanningWindow com examDate é obrigatório para modo sprint** | Sem data, sem urgência. Incentivo para preenchimento |

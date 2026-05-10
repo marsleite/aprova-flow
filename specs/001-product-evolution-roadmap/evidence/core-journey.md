@@ -34,7 +34,7 @@
   already frames the page as "Agenda Estrategica" and includes:
   - plan creation and active-plan management
   - next-best-session guidance
-  - multi-edital premium messaging
+  - multi-edital pro messaging
   - `StudyJourneyCard current="planner"`
 - The planner page actively links the next action toward `/engine`.
 

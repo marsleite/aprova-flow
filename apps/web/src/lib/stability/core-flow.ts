@@ -19,7 +19,7 @@ export type PlannerCreateEditalState =
       kind: 'upgrade';
       buttonLabel: string;
       helperText: string;
-      recommendedPlan: 'premium';
+      recommendedPlan: 'pro';
     }
   | {
       kind: 'disabled';
@@ -47,9 +47,9 @@ export function getPlannerCreateEditalState({
   if (!canUseMultiEdital && currentPlansCount > 0) {
     return {
       kind: 'upgrade',
-      buttonLabel: 'Novo edital no Premium',
-      helperText: 'Seu acesso atual libera 1 edital ativo. Multi-edital entra no Premium.',
-      recommendedPlan: 'premium',
+      buttonLabel: 'Novo edital no Pro',
+      helperText: 'O Pro libera multi-edital, IA completa, plano adaptativo e recovery.',
+      recommendedPlan: 'pro',
     };
   }
 

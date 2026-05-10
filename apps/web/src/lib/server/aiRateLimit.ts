@@ -138,19 +138,14 @@ function buildRateLimitHeaders(params: {
 
 function resolveQuotaRecommendedPlan(
   planTier: PlanTier
-): 'pro' | 'premium' | undefined {
+): 'pro' | undefined {
   if (planTier === 'free') return 'pro';
-  if (planTier === 'pro') return 'premium';
   return undefined;
 }
 
 function buildQuotaUpgradeHint(planTier: PlanTier): string | undefined {
   if (planTier === 'free') {
-    return 'Faça upgrade para o Pro e ganhe mais folga de IA neste tipo de análise.';
-  }
-
-  if (planTier === 'pro') {
-    return 'Se essa rotina já pede mais folga de IA e coordenação, o próximo passo é o Premium.';
+    return 'Faça upgrade para o Pro e tenha acesso completo a todas as features de IA.';
   }
 
   return undefined;

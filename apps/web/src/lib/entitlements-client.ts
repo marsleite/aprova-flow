@@ -14,7 +14,7 @@ import {
 
 export interface EntitlementScenarioSummary {
   userId: string;
-  plan: 'free' | 'pro' | 'premium';
+  plan: 'free' | 'pro';
   status: string;
   description: string;
 }

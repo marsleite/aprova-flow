@@ -153,9 +153,7 @@ export function buildAiQuotaExhaustedEvent(params: {
   const recommendedPlan =
     normalizedPlanTier === 'free'
       ? 'pro'
-      : normalizedPlanTier === 'pro'
-        ? 'premium'
-        : undefined;
+      : undefined;
 
   return {
     actorUserId: params.uid,

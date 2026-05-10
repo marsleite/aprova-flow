@@ -166,7 +166,7 @@ test('GET /entitlements/scenarios exposes manual scenarios for testing', async (
 
     assert.ok(Array.isArray(body.scenarios));
     assert.ok(body.scenarios.some((item: { userId: string }) => item.userId === 'free-user'));
-    assert.ok(body.scenarios.some((item: { userId: string }) => item.userId === 'premium-user'));
+    assert.ok(body.scenarios.some((item: { userId: string }) => item.userId === 'pro-user'));
   } finally {
     await app.close();
   }
@@ -188,7 +188,7 @@ test('GET /entitlements/me returns the entitlement snapshot for a test user', as
     assert.equal(body.entitlements.catalogPlan, 'pro');
     assert.equal(body.entitlements.effectivePlan, 'pro');
     assert.equal(body.entitlements.features.subject_health_full.enabled, true);
-    assert.equal(body.entitlements.features.multi_edital.enabled, false);
+    assert.equal(body.entitlements.features.multi_edital.enabled, true);
   } finally {
     await app.close();
   }
@@ -309,15 +309,15 @@ test('GET /billing/subscription/me returns the manual subscription scenario when
   try {
     const response = await app.inject({
       method: 'GET',
-      url: '/billing/subscription/me?userId=premium-user',
+      url: '/billing/subscription/me?userId=pro-user',
     });
 
     assert.equal(response.statusCode, 200);
     const body = response.json();
 
-    assert.equal(body.userId, 'premium-user');
+    assert.equal(body.userId, 'pro-user');
     assert.equal(body.source, 'manual');
-    assert.equal(body.subscription.plan, 'premium');
+    assert.equal(body.subscription.plan, 'pro');
     assert.equal(body.subscription.status, 'active');
   } finally {
     await app.close();
@@ -372,9 +372,9 @@ test('GET /billing/subscription/me ignores sandbox query when manual scenarios a
   try {
     const response = await app.inject({
       method: 'GET',
-      url: '/billing/subscription/me?userId=premium-user',
+      url: '/billing/subscription/me?userId=pro-user',
       headers: {
-        'x-aprovamind-user-id': 'premium-user',
+        'x-aprovamind-user-id': 'pro-user',
       },
     });
 
@@ -533,7 +533,7 @@ test('POST /billing/admin/subscription updates a tester subscription for admin i
       },
       payload: {
         userId: 'tester-1',
-        plan: 'premium',
+        plan: 'pro',
         status: 'past_due',
         resetUsage: true,
       },
@@ -543,7 +543,7 @@ test('POST /billing/admin/subscription updates a tester subscription for admin i
     const body = response.json();
 
     assert.equal(body.userId, 'tester-1');
-    assert.equal(body.subscription.plan, 'premium');
+    assert.equal(body.subscription.plan, 'pro');
     assert.equal(body.subscription.status, 'past_due');
     assert.equal(recordedEvents.length, 2);
     assert.deepEqual(
@@ -613,7 +613,7 @@ test('POST /billing/admin/subscription resolves tester by email before updating'
       },
       payload: {
         email: 'tester2@example.com',
-        plan: 'premium',
+        plan: 'pro',
         status: 'active',
       },
     });
@@ -623,7 +623,7 @@ test('POST /billing/admin/subscription resolves tester by email before updating'
 
     assert.equal(body.userId, 'tester-2');
     assert.equal(body.email, 'tester2@example.com');
-    assert.equal(body.subscription.plan, 'premium');
+    assert.equal(body.subscription.plan, 'pro');
     assert.equal(body.subscription.status, 'active');
   } finally {
     await app.close();
@@ -662,9 +662,9 @@ test('POST /product-events records public product events for authenticated users
         route: ' /planner ',
         surface: ' planner_multi_edital_gate ',
         featureCode: 'multi_edital',
-        recommendedPlan: 'premium',
+        recommendedPlan: 'pro',
         metadata: {
-          title: ' Multi-edital fica no Premium ',
+          title: ' Multi-edital fica no Pro ',
           ignored: '   ',
         },
       },
@@ -680,12 +680,12 @@ test('POST /product-events records public product events for authenticated users
         route: '/planner',
         surface: 'planner_multi_edital_gate',
         featureCode: 'multi_edital',
-        recommendedPlan: 'premium',
+        recommendedPlan: 'pro',
         planTier: undefined,
         task: undefined,
         ctaHref: undefined,
         metadata: {
-          title: 'Multi-edital fica no Premium',
+          title: 'Multi-edital fica no Pro',
         },
       },
       idToken: 'valid-token',

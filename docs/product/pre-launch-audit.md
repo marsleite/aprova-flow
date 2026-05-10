@@ -105,7 +105,7 @@ Recomendação:
   - execução diária
 - reforçar links/contexto entre planner, dashboard e engine
 
-### 3. Simulados misturam promessa premium com métricas ainda vazias
+### 3. Simulados misturam promessa pro com métricas ainda vazias
 
 A tela de simulados vende alta sofisticação, mas alguns KPIs continuam com placeholder estático.
 

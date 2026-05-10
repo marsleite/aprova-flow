@@ -95,4 +95,4 @@ ancorados no estado real do AprovaMind.
   limites de deploy ou acoplamento
 - Evidencia de medicao: o que ja existe hoje e o que ainda falta instrumentar
 - Evidencia comercial: gates, quotas, bloqueios, copy de upgrade e clareza da
-  escada `free -> pro -> premium`
+  escada `free -> pro`

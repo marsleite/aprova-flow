@@ -258,7 +258,7 @@ export default function PlannerPage() {
               <TrackedUpgradeLink
                 href="/settings"
                 surface="planner_new_edital_topbar_locked"
-                recommendedPlan="premium"
+                recommendedPlan="pro"
                 currentPlan={planTier}
                 featureCode={FeatureCode.MultiEdital}
                 eventMetadata={{
@@ -304,10 +304,10 @@ export default function PlannerPage() {
         {!canUseMultiEdital && (
           <motion.div custom={0.2} variants={fadeUp} initial="hidden" animate="show">
             <EntitlementUpgradeCard
-              title="Multi-edital entra no Premium"
-              description="O planner continua funcionando muito bem para um edital por vez. Quando a rotina pede coordenacao entre varios editais, o proximo passo natural e a camada Premium."
+              title="Multi-edital entra no Pro"
+              description="O planner continua funcionando no Free para um edital por vez. Quando a rotina pede coordenacao entre varios editais, o Pro libera o plano completo."
               highlight="3 editais ativos, recovery plan, plano adaptativo e coordenacao mais forte da rotina."
-              recommendedPlan="premium"
+              recommendedPlan="pro"
               currentPlan={planTier}
               surface="planner_multi_edital_gate"
               featureCode={FeatureCode.MultiEdital}
@@ -340,7 +340,7 @@ export default function PlannerPage() {
               </div>
 
               <div className="mt-8 flex items-center gap-4">
-                <Button asChild variant="premium" size="lg" className="shadow-[0_4px_24px_var(--color-am-ai-glow)]">
+                <Button asChild variant="primary" size="lg" className="shadow-[0_4px_24px_var(--color-am-ai-glow)]">
                   <a href="/engine">
                     <Play className="mr-2 h-5 w-5" /> Iniciar Otimização
                   </a>

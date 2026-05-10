@@ -92,7 +92,7 @@ export default function MentoringPage() {
   const canUseWeeklyDiagnostic = hasFeature(FeatureCode.WeeklyDiagnostic);
   const canUseWeeklyMentoring = hasFeature(FeatureCode.WeeklyMentoring);
   const canUseContextualChat = hasFeature(FeatureCode.ContextualAiChat);
-  const recommendedPlanForMentoring = planTier === 'free' ? 'pro' : 'premium';
+  const recommendedPlanForMentoring = 'pro';
 
   const todayDominant = recentSessions.length > 0
     ? [...recentSessions].sort((a, b) => b.duration - a.duration)[0].subject
@@ -298,7 +298,7 @@ export default function MentoringPage() {
                   </button>
                 )}
                 {canUseContextualChat ? (
-                  <Button onClick={() => setChatOpen(true)} variant="premium" className="w-full">
+                  <Button onClick={() => setChatOpen(true)} variant="primary" className="w-full">
                     <MessageCircle className="h-4 w-4 mr-2" /> Iniciar Conversa
                   </Button>
                 ) : (

@@ -36,7 +36,7 @@
 - `ST-02`, `ST-05`, and `ST-06` are important, but they become safer and more
   purposeful once the team knows which user flows need the cleanest ownership.
 
-### 5. Premium after the main ladder
+### 5. Pro after the main ladder
 
 - `SG-02` and `SG-03` should not lead the roadmap because they add strategic
   depth to a product that still needs stronger clarity around the single-plan
@@ -49,7 +49,7 @@
 - Jumping to `SG-01` before `ST-03`
   - Produces gateway decisions without knowing what actually pulls upgrade.
 - Jumping to `SG-02` before `SG-01`
-  - Over-invests in premium differentiation before the main ladder is proven.
+  - Over-invests in pro differentiation before the main ladder is proven.
 - Doing `ST-02` before journey coherence work
   - Can spend significant refactor effort without reducing the most visible user
     confusion first.

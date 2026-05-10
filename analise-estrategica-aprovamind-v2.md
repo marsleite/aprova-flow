@@ -84,19 +84,19 @@ Marcelo decidiu por um **demo estático** na landing para evitar custo de Gemini
 
 ### Sem mudanças estruturais
 
-Os tiers Free/Pro/Premium (R$ 0 / R$ 34,90 / R$ 64,90) continuam iguais. Nenhum billing real foi implementado — correto para o estágio.
+Os tiers Free/Pro (R$ 0 / R$ 34,90 / R$ 64,90) continuam iguais. Nenhum billing real foi implementado — correto para o estágio.
 
 ### Impacto da deprecação de provas no packaging
 
-Com a remoção de provas/simulados, o valor do Pro e Premium precisa ser recalibrado. Antes, simulados ilimitados eram parte do Pro. Agora, os diferenciais precisam ser:
+Com a remoção de provas/simulados, o valor de Free e Pro precisa ser recalibrado. Antes, simulados ilimitados eram parte do Pro. Agora, os diferenciais precisam ser:
 
 | Tier | Diferenciais principais (pós-deprecação) |
 |------|------------------------------------------|
 | Free | Cronômetro, dashboard básico, 1 edital, 5 msgs chat/mês |
 | Pro | Mentoria semanal IA, analytics avançados, histórico completo |
-| Premium | Multi-edital, plano diário IA, replanejamento adaptativo |
+| Pro | Multi-edital, plano diário IA, replanejamento adaptativo |
 
-A distância de valor entre tiers ficou *menos clara* com a remoção de provas. **Ação necessária**: revisar a matriz de entitlements para garantir que o upgrade Pro→Premium tem gatilho claro.
+A distância de valor entre tiers ficou *menos clara* com a remoção de provas. **Ação necessária**: revisar a matriz de entitlements para garantir que o upgrade Free→Pro tem gatilho claro.
 
 ### Nota: → Estável (7/10 — mesmo da v1)
 
@@ -145,7 +145,7 @@ A codebase ficou mais enxuta e manutenível:
 
 ### Firestore rules: bem estruturadas
 
-As rules atuais têm validação de tipos em todos os campos obrigatórios, helpers de entitlement (isAdmin, isProOrPremium, isPremium), proteção server-managed para campos de billing, e rate limit collections para o parse público. Ponto positivo.
+As rules atuais têm validação de tipos em todos os campos obrigatórios, helpers de entitlement (isAdmin, isPro, isPro), proteção server-managed para campos de billing, e rate limit collections para o parse público. Ponto positivo.
 
 ### Pontos de atenção técnica
 

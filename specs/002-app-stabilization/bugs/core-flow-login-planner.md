@@ -81,7 +81,7 @@ continuava refletindo sandbox local persistido no navegador.
 
 ### Reproducao
 
-1. Persistir `entitlementScenario=premium-user`.
+1. Persistir `entitlementScenario=pro-user`.
 2. Voltar ao `/login`.
 3. Prosseguir para o Planner.
 4. Notar que o contexto de sandbox precisava ficar explicito logo no inicio da

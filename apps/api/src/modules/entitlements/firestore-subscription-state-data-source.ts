@@ -71,7 +71,7 @@ export class FirestoreSubscriptionStateDataSource
         found: true,
         subscription: {
           userId: params.userId,
-          plan: PlanCode.Premium,
+          plan: PlanCode.Pro,
           status: SubscriptionStatus.Active,
         },
       };

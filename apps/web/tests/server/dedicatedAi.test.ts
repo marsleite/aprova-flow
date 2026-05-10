@@ -5,7 +5,6 @@ let runDedicatedAiText: typeof import('@/lib/server/dedicatedAi').runDedicatedAi
 
 const originalApiBaseUrl = process.env.API_BASE_URL;
 const originalPublicApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-const originalNodeEnv = process.env.NODE_ENV;
 
 beforeAll(async () => {
   ({ runDedicatedAiPdf, runDedicatedAiText } = await import('@/lib/server/dedicatedAi'));
@@ -26,12 +25,7 @@ afterEach(() => {
   } else {
     process.env.NEXT_PUBLIC_API_BASE_URL = originalPublicApiBaseUrl;
   }
-
-  if (originalNodeEnv === undefined) {
-    delete process.env.NODE_ENV;
-  } else {
-    process.env.NODE_ENV = originalNodeEnv;
-  }
+  vi.unstubAllEnvs();
 });
 
 describe('dedicatedAi', () => {

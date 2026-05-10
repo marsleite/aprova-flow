@@ -22,7 +22,7 @@ interface AccountPlanModalProps {
 
 type ComparisonRow = {
   label: string;
-  value: (tier: 'free' | 'pro' | 'premium') => string;
+  value: (tier: 'free' | 'pro') => string;
 };
 
 const COMPARISON_ROWS: ComparisonRow[] = [
@@ -194,7 +194,7 @@ export default function AccountPlanModal({
                 </div>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid gap-3 md:grid-cols-2">
                 {BETA_PLAN_ORDER.map((tier) => {
                   const plan = BETA_PLAN_META[tier];
                   const isCurrent = plan.tier === currentDisplayTier;
@@ -204,9 +204,7 @@ export default function AccountPlanModal({
                   const borderClass =
                     plan.tier === 'pro'
                       ? 'border-am-brand-primary/30'
-                      : plan.tier === 'premium'
-                        ? 'border-am-brand-secondary/30'
-                        : 'border-border';
+                      : 'border-border';
 
                   return (
                     <div
@@ -320,13 +318,12 @@ export default function AccountPlanModal({
 
                 {showComparison && (
                   <div className="mt-3 overflow-x-auto">
-                    <table className="min-w-[680px] w-full text-left text-xs">
+                    <table className="min-w-[480px] w-full text-left text-xs">
                       <thead>
                         <tr className="border-b border-border">
                           <th className="px-3 py-2 text-muted-foreground">Recurso</th>
                           <th className="px-3 py-2 text-foreground">Free</th>
                           <th className="px-3 py-2 text-primary">Pro</th>
-                          <th className="px-3 py-2 text-foreground">Premium</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -335,7 +332,6 @@ export default function AccountPlanModal({
                             <td className="px-3 py-2 text-muted-foreground">{row.label}</td>
                             <td className="px-3 py-2 text-muted-foreground">{row.value('free')}</td>
                             <td className="px-3 py-2 text-primary">{row.value('pro')}</td>
-                            <td className="px-3 py-2 text-foreground">{row.value('premium')}</td>
                           </tr>
                         ))}
                       </tbody>

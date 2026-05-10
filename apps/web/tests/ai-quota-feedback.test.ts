@@ -41,7 +41,7 @@ describe('ai quota feedback', () => {
         error: 'Limite de uso de IA atingido para este recurso.',
         task: 'planner-daily',
         planTier: 'pro',
-        recommendedPlan: 'premium',
+        recommendedPlan: 'pro',
         limit: 8,
         window: 'month',
         retryAfterSeconds: 172800,
@@ -50,15 +50,15 @@ describe('ai quota feedback', () => {
       title: 'Quota de IA do Pro atingida',
       message: 'Limite de uso de IA atingido para este recurso.',
       detail:
-        'Limite atual: 8/mês. Nova tentativa em cerca de 2 dias. O Pro resolve bem um edital por vez. O Premium entra quando a rotina pede multi-edital, recovery e uma camada adaptativa mais forte.',
-      recommendedPlan: 'premium',
+        'Limite atual: 8/mês. Nova tentativa em cerca de 2 dias. O Free ajuda a ativar o motor. O Pro libera tudo: multi-edital, IA completa, plano adaptativo e recovery.',
+      recommendedPlan: 'pro',
       planTier: 'pro',
       task: 'planner-daily',
       featureCode: FeatureCode.AdaptiveDailyPlan,
       limit: 8,
       window: 'month',
       retryAfterSeconds: 172800,
-      ctaLabel: 'Entender o Premium',
+      ctaLabel: 'Entender o Pro',
       ctaHref: '/settings',
     });
   });

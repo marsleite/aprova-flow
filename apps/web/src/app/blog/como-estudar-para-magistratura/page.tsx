@@ -167,7 +167,7 @@ export default function BlogMagistratura() {
             A abordagem mais eficaz é o <strong className="text-foreground">estudo cíclico</strong>: você percorre todas as matérias dentro de ciclos regulares (por exemplo, ciclos de 4 semanas), com profundidade progressiva a cada ciclo. No primeiro ciclo você constrói a estrutura; no segundo, consolida; no terceiro, aprofunda jurisprudência; e assim por diante.
           </p>
           <p className="mt-4">
-            Esse modelo evita que matérias fiquem "mortas" por meses sem revisão, o que é especialmente crítico para Penal e Processual Penal — disciplinas que requerem revisão frequente para manutenção da retenção.
+            Esse modelo evita que matérias fiquem &quot;mortas&quot; por meses sem revisão, o que é especialmente crítico para Penal e Processual Penal — disciplinas que requerem revisão frequente para manutenção da retenção.
           </p>
         </section>
 

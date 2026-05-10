@@ -28,7 +28,7 @@ Este trabalho deve ser tratado como:
 - **rebranding estruturado**
 - **reconstrução progressiva da interface**
 - **migração para um design system consistente**
-- **elevação da percepção premium do produto**
+- **elevação da percepção pro do produto**
 - **padronização visual e técnica preservando o valor já construído**
 
 ---
@@ -222,7 +222,7 @@ A marca deve parecer:
 - disciplinada
 - estratégica
 - confiável
-- premium
+- pro
 - moderna
 - acolhedora sem ser infantil
 - analítica sem ser fria
@@ -309,12 +309,12 @@ Exemplos:
 
 ### 12.1 Território visual ideal
 A identidade do AprovaMind deve unir:
-- EdTech premium
+- EdTech pro
 - SaaS analítico
 - produto de foco e alta performance
 
 ### 12.2 O que o produto deve parecer
-- premium
+- pro
 - claro
 - moderno
 - disciplinado
@@ -393,7 +393,7 @@ A direção correta é:
 
 ### 13.3 Regras de uso da cor
 - azul é a cor estrutural da marca
-- violeta é reservado para IA, mentoria, planner e premium
+- violeta é reservado para IA, mentoria, planner e pro
 - verde, laranja e vermelho são semânticos
 - gradiente azul→violeta só em aplicação institucional ou destaque controlado
 - não usar roxo como cor dominante da aplicação inteira
@@ -405,7 +405,7 @@ A direção correta é:
 
 Usos permitidos:
 - hero da landing
-- glow sutil de elementos premium
+- glow sutil de elementos pro
 - detalhe de logo animation
 - destaque de blocos IA
 
@@ -476,7 +476,7 @@ O logo deve unir:
 - precisa
 - respirável
 - acionável
-- premium
+- pro
 - orientada a decisão
 
 ### 16.2 A interface nunca deve parecer
@@ -543,7 +543,7 @@ A motion deve reforçar:
 - heatmap
 - sidebar
 - chart card
-- CTA premium
+- CTA pro
 
 ### 18.3 Moodboard desejado
 Referências devem comunicar:
@@ -896,7 +896,7 @@ Regras:
 
 ### 26.4 Mentoria semanal
 Sensação:
-- premium
+- pro
 - estratégica
 - personalizada
 
@@ -1032,7 +1032,7 @@ Comunicar:
 - inteligência
 - ganho de clareza
 
-### 30.3 Premium
+### 30.3 Pro
 Comunicar:
 - mentoria
 - personalização
@@ -1040,7 +1040,7 @@ Comunicar:
 
 ### 30.4 Como diferenciar paid features
 - badges violeta sutis
-- glow leve em recursos premium
+- glow leve em recursos pro
 - frases orientadas a resultado
 - sem paywall agressivo visualmente
 
@@ -1064,7 +1064,7 @@ Sempre que possível, preservar:
 - tokens
 - navegação
 - hierarquia de informação
-- sensação premium
+- sensação pro
 
 ### 31.3 Regra principal
 A reconstrução deve seguir:
@@ -1180,7 +1180,7 @@ A interface deve conduzir do geral para o específico.
 ## 33. Handoff mestre para Claude Code Opus 4.6
 
 ### 33.1 Instrução mestre
-> Você está implementando a interface do AprovaMind, uma plataforma SaaS premium para concurseiros, focada em tracking de estudo, dashboards analíticos e IA grounded em dados reais do usuário. O produto não deve parecer cursinho tradicional, app escolar nem dashboard corporativo genérico. A linguagem visual deve comunicar clareza, estratégia e aprovação. Use Inter como tipografia principal. Use azul como cor estrutural da marca e violeta apenas para recursos de IA, premium e inteligência assistida. Priorize hierarquia da informação, legibilidade, consistência entre componentes e estados completos. Toda tela deve ajudar o usuário a entender o que aconteceu, em qual contexto, e qual a próxima ação recomendada. Importante: o AprovaMind já existe. Trate este trabalho como reconstrução progressiva com rebranding, preservando a lógica validada sempre que possível.
+> Você está implementando a interface do AprovaMind, uma plataforma SaaS pro para concurseiros, focada em tracking de estudo, dashboards analíticos e IA grounded em dados reais do usuário. O produto não deve parecer cursinho tradicional, app escolar nem dashboard corporativo genérico. A linguagem visual deve comunicar clareza, estratégia e aprovação. Use Inter como tipografia principal. Use azul como cor estrutural da marca e violeta apenas para recursos de IA, pro e inteligência assistida. Priorize hierarquia da informação, legibilidade, consistência entre componentes e estados completos. Toda tela deve ajudar o usuário a entender o que aconteceu, em qual contexto, e qual a próxima ação recomendada. Importante: o AprovaMind já existe. Trate este trabalho como reconstrução progressiva com rebranding, preservando a lógica validada sempre que possível.
 
 ### 33.2 Prompt de análise inicial
 > Quero reconstruir o AprovaMind com rebranding, mas o app já existe. Não trate isso como greenfield. Use este documento como fonte de verdade. Sua primeira tarefa é: 1) analisar a estrutura atual do app, 2) identificar o que pode ser reaproveitado, 3) separar lógica reutilizável de UI inconsistente, 4) propor um plano incremental de reconstrução, 5) sugerir a nova arquitetura do design system e da UI. Não implemente ainda. Primeiro entregue diagnóstico da base atual, mapa de componentes/telas, estratégia de migração por fases, riscos técnicos e ordem recomendada de execução.
@@ -1189,13 +1189,13 @@ A interface deve conduzir do geral para o específico.
 > Agora implemente apenas a fundação do rebranding. Objetivo: criar tokens, tema light/dark, primitives, base de componentes e layout shell principal. Não reconstrua todas as páginas ainda. Quero primeiro a infraestrutura visual do novo sistema. Use estritamente o branding e as regras deste documento.
 
 ### 33.4 Prompt de migração incremental
-> Analise a base atual do AprovaMind como um produto existente em operação. Identifique componentes reutilizáveis, padrões visuais inconsistentes e oportunidades de migração para o novo design system. Evite rewrite cego. Proponha uma estratégia incremental de reconstrução com rebranding, preservando a lógica já validada e elevando a percepção premium da interface.
+> Analise a base atual do AprovaMind como um produto existente em operação. Identifique componentes reutilizáveis, padrões visuais inconsistentes e oportunidades de migração para o novo design system. Evite rewrite cego. Proponha uma estratégia incremental de reconstrução com rebranding, preservando a lógica já validada e elevando a percepção pro da interface.
 
 ### 33.5 Prompt operacional curto
-> Implemente o AprovaMind como uma EdTech premium de performance para concurseiros. Use Inter, paleta azul + violeta, design system baseado em tokens e foco absoluto em clareza de informação. O dashboard deve mostrar contexto, KPIs, tendências, lacunas e próxima ação. Violeta é reservado para IA e recursos premium. Não use estética de cursinho, nem visual infantil, nem dashboard corporativo genérico. Toda interface deve parecer parte do mesmo sistema.
+> Implemente o AprovaMind como uma EdTech pro de performance para concurseiros. Use Inter, paleta azul + violeta, design system baseado em tokens e foco absoluto em clareza de informação. O dashboard deve mostrar contexto, KPIs, tendências, lacunas e próxima ação. Violeta é reservado para IA e recursos pro. Não use estética de cursinho, nem visual infantil, nem dashboard corporativo genérico. Toda interface deve parecer parte do mesmo sistema.
 
 ### 33.6 Prompt operacional expandido
-> Você é responsável por implementar a interface do AprovaMind em Next.js 16, TypeScript, Tailwind CSS 4 e um design system próprio chamado RDS. O AprovaMind é uma plataforma SaaS premium para concurseiros, focada em tracking de estudo, dashboards claros, multi-edital, planner diário e IA grounded em dados reais do usuário. A identidade visual já está definida e não deve ser reinventada. Use Inter como tipografia principal. A cor estrutural da marca é azul (#3D74F6) e a cor de IA/premium é violeta (#8B5CF6). Neutros frios devem sustentar superfícies e legibilidade. Priorize componentes claros, reutilizáveis e escaláveis. Toda tela deve deixar claro o contexto, o período analisado, a variação, a meta e a próxima ação recomendada. Implemente estados completos de loading, empty, error, success, hover e focus. Evite qualquer estética infantil, escolar, promocional demais ou futurista exagerada. O resultado deve parecer um SaaS analítico premium com foco em aprovação e disciplina de estudo. Importante: trate o projeto como reconstrução progressiva sobre um produto existente, preservando lógica e fluxos validados sempre que possível.
+> Você é responsável por implementar a interface do AprovaMind em Next.js 16, TypeScript, Tailwind CSS 4 e um design system próprio chamado RDS. O AprovaMind é uma plataforma SaaS pro para concurseiros, focada em tracking de estudo, dashboards claros, multi-edital, planner diário e IA grounded em dados reais do usuário. A identidade visual já está definida e não deve ser reinventada. Use Inter como tipografia principal. A cor estrutural da marca é azul (#3D74F6) e a cor de IA/pro é violeta (#8B5CF6). Neutros frios devem sustentar superfícies e legibilidade. Priorize componentes claros, reutilizáveis e escaláveis. Toda tela deve deixar claro o contexto, o período analisado, a variação, a meta e a próxima ação recomendada. Implemente estados completos de loading, empty, error, success, hover e focus. Evite qualquer estética infantil, escolar, promocional demais ou futurista exagerada. O resultado deve parecer um SaaS analítico pro com foco em aprovação e disciplina de estudo. Importante: trate o projeto como reconstrução progressiva sobre um produto existente, preservando lógica e fluxos validados sempre que possível.
 
 ### 33.7 Ordem de trabalho recomendada para o Claude
 1. analisar a base atual
@@ -1247,7 +1247,7 @@ A IA e qualquer implementador não devem:
 
 ## 35. Definição final do AprovaMind
 
-**AprovaMind é uma plataforma SaaS premium de performance para concurseiros, que combina tracking real de estudo, dashboards claros e IA grounded para orientar a melhor estratégia de aprovação.**
+**AprovaMind é uma plataforma SaaS pro de performance para concurseiros, que combina tracking real de estudo, dashboards claros e IA grounded para orientar a melhor estratégia de aprovação.**
 
 Em três palavras:
 
@@ -1269,7 +1269,7 @@ Este documento funciona como:
 A partir daqui, o AprovaMind deve evoluir com:
 - mais consistência
 - mais clareza
-- mais percepção premium
+- mais percepção pro
 - mais escalabilidade visual e técnica
 - menos ruído
 - menos deriva estética

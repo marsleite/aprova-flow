@@ -51,7 +51,7 @@ O próximo eixo de complexidade do produto não é o motor em si. É a camada de
 - sincronização do status da assinatura
 - liberação/bloqueio de features
 - auditoria mínima
-- autorização premium
+- autorização pro
 
 Essas responsabilidades justificam um backend próprio antes de outras partes do sistema.
 
@@ -98,7 +98,7 @@ Não deve concentrar no médio prazo:
 
 - webhook
 - lógica de assinatura
-- validação final de acesso premium
+- validação final de acesso pro
 - sincronização financeira
 
 ### `apps/api`
@@ -110,7 +110,7 @@ Responsável por:
 - webhooks do gateway
 - sincronização do estado da assinatura
 - cálculo e persistência de `entitlements`
-- autorização de recursos premium
+- autorização de recursos pro
 - auditoria e idempotência do ciclo de billing
 
 Pode evoluir depois para:
@@ -243,7 +243,7 @@ O AprovaMind não deve ser dono da cobrança. Ele deve ser dono do:
 ### Conceitos centrais
 
 ```ts
-type PlanCode = 'free' | 'pro' | 'premium';
+type PlanCode = 'free' | 'pro' | 'pro';
 
 type SubscriptionStatus =
   | 'trialing'
@@ -344,8 +344,8 @@ Não é necessário mover tudo de uma vez.
 
 ### Possível evolução posterior
 
-- autorização central para recursos premium
-- rotas premium sensíveis
+- autorização central para recursos pro
+- rotas pro sensíveis
 - IA com custo/segredo mais sensível
 - jobs/eventos
 
@@ -388,7 +388,7 @@ Entregas:
 - criar persistência de assinatura e entitlements
 - integrar `web` com a API
 
-### Fase 3 — Fechar autorização premium
+### Fase 3 — Fechar autorização pro
 
 Objetivo:
 
@@ -398,7 +398,7 @@ Entregas:
 
 - `GET /me/entitlements`
 - guards server-side
-- bloqueio nas rotas premium reais
+- bloqueio nas rotas pro reais
 
 ### Fase 4 — Reavaliar extrações futuras
 
@@ -417,7 +417,7 @@ Possíveis candidatos:
 
 ### Regra 1
 
-O frontend nunca decide sozinho se o usuário pode usar uma feature premium.
+O frontend nunca decide sozinho se o usuário pode usar uma feature pro.
 
 ### Regra 2
 
@@ -441,7 +441,7 @@ Não misturar `Next` e `Fastify` no mesmo processo/custom server.
 ## 14. Sinais de que vale mover mais coisas para a API
 
 - rotas do Next começam a carregar regras sensíveis demais
-- crescimento de recursos premium bloqueados por plano
+- crescimento de recursos pro bloqueados por plano
 - necessidade de jobs assíncronos
 - IA com maior custo e maior necessidade de controle
 - parse de edital e pipelines mais pesados
@@ -465,7 +465,7 @@ Depois deste documento, os próximos artefatos de arquitetura deveriam ser:
 1. modelagem de `plans`, `subscriptionStatus` e `entitlements`
 2. contratos HTTP de `apps/api`
 3. plano de migração do repositório atual para monorepo
-4. matriz de features por plano (`free / pro / premium`)
+4. matriz de features por plano (`free / pro`)
 5. fluxo de autenticação entre `web` e `api`
 
 ## 17. Próxima Decisão de Produto/Tecnologia
@@ -476,7 +476,7 @@ A próxima decisão prática não é “migrar tudo”.
 
 - quais features existem em `free`
 - quais entram em `pro`
-- quais entram em `premium`
+- quais entram em `pro`
 - e como isso será traduzido para `entitlements`
 
 Esse é o ponto que fecha a fronteira entre produto, billing e autorização.

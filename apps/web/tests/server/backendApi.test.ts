@@ -6,7 +6,6 @@ let resolveBackendApiBaseUrl: typeof import('@/lib/server/backendApi').resolveBa
 
 const originalApiBaseUrl = process.env.API_BASE_URL;
 const originalPublicApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-const originalNodeEnv = process.env.NODE_ENV;
 
 beforeAll(async () => {
   ({ proxyRequestToBackendApi, resolveBackendApiBaseUrl } = await import('@/lib/server/backendApi'));
@@ -27,12 +26,7 @@ afterEach(() => {
   } else {
     process.env.NEXT_PUBLIC_API_BASE_URL = originalPublicApiBaseUrl;
   }
-
-  if (originalNodeEnv === undefined) {
-    delete process.env.NODE_ENV;
-  } else {
-    process.env.NODE_ENV = originalNodeEnv;
-  }
+  vi.unstubAllEnvs();
 });
 
 describe('backendApi', () => {
@@ -45,7 +39,7 @@ describe('backendApi', () => {
   it('proxies method, headers, body and selected response headers to the dedicated API', async () => {
     delete process.env.API_BASE_URL;
     delete process.env.NEXT_PUBLIC_API_BASE_URL;
-    process.env.NODE_ENV = 'test';
+    vi.stubEnv('NODE_ENV', 'test');
 
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ found: true }), {
@@ -110,7 +104,7 @@ describe('backendApi', () => {
   it('returns 503 when the dedicated API base URL is missing in production', async () => {
     delete process.env.API_BASE_URL;
     delete process.env.NEXT_PUBLIC_API_BASE_URL;
-    process.env.NODE_ENV = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
 
     const request = new NextRequest('https://app.aprovamind.com/api/engine/portfolio', {
       method: 'GET',

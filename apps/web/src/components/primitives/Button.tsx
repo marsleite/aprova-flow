@@ -3,7 +3,7 @@ import { Slot } from '@radix-ui/react-slot';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     asChild?: boolean;
-    variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'premium';
+    variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
     size?: 'sm' | 'md' | 'lg' | 'icon';
 }
 
@@ -33,7 +33,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         // Variant styles — Flux brand
         switch (variant) {
             case 'primary':
-            case 'premium':
                 classes += 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:opacity-90 ';
                 break;
             case 'secondary':

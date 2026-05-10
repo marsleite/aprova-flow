@@ -12,15 +12,15 @@ test('GET /entitlements/me still resolves manual scenarios from headers when man
       method: 'GET',
       url: '/entitlements/me',
       headers: {
-        'x-aprovamind-user-id': 'premium-user',
+        'x-aprovamind-user-id': 'pro-user',
       },
     });
 
     assert.equal(response.statusCode, 200);
     const body = response.json();
-    assert.equal(body.userId, 'premium-user');
-    assert.equal(body.entitlements.catalogPlan, 'premium');
-    assert.equal(body.entitlements.effectivePlan, 'premium');
+    assert.equal(body.userId, 'pro-user');
+    assert.equal(body.entitlements.catalogPlan, 'pro');
+    assert.equal(body.entitlements.effectivePlan, 'pro');
   } finally {
     await app.close();
   }

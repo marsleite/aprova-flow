@@ -212,7 +212,7 @@ export default function EnginePage() {
                     title="Leitura completa do motor entra no Pro"
                     description="O motor gratis mostra a direcao do dia. O Pro entra quando voce quer a leitura completa por materia, score detalhado e recomendacoes estruturadas do plano ativo."
                     highlight="Saude completa da materia, priority score detalhado e recomendacoes completas para o plano ativo."
-                    recommendedPlan={planTier === 'free' ? 'pro' : 'premium'}
+                    recommendedPlan="pro"
                     currentPlan={planTier}
                     surface="engine_snapshot_gate"
                     featureCode={FeatureCode.SubjectHealthFull}
