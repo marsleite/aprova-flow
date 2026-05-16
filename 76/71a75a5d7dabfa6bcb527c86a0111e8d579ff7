@@ -1,0 +1,21 @@
+apps/api/api/billing/admin/beta-signals.ts
+  s_d70f27d56480a5::t_5a14a807a43197 1-99
+apps/api/vercel.json
+  s_d70f27d56480a5::t_5a14a807a43197 24-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "7671a75a5d7dabfa6bcb527c86a0111e8d579ff7",
+  "prompts": {},
+  "sessions": {
+    "s_d70f27d56480a5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1197-c217-7353-97d7-a7d1245662be",
+        "model": "gpt-5.5"
+      },
+      "human_author": "marsleite <marsleite@gmail.com>"
+    }
+  }
+}
