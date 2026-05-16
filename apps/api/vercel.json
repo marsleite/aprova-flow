@@ -21,6 +21,22 @@
       "destination": "/api/billing/admin/subscription"
     },
     {
+      "source": "/billing/admin/beta-signals",
+      "destination": "/api/billing/admin/beta-signals"
+    },
+    {
+      "source": "/engine/snapshot",
+      "destination": "/api/engine/snapshot"
+    },
+    {
+      "source": "/engine/portfolio",
+      "destination": "/api/engine/portfolio"
+    },
+    {
+      "source": "/product-events",
+      "destination": "/api/product-events"
+    },
+    {
       "source": "/ai/text",
       "destination": "/api/ai/text"
     },
