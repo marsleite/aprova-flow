@@ -1,0 +1,35 @@
+apps/api/api/billing/subscription/me.ts
+  s_d70f27d56480a5::t_917ff22b185e27 2-8,11-78
+apps/api/api/billing/admin/subscription.ts
+  s_d70f27d56480a5::t_c6c57205830a2e 2-13,16-107,109-174
+apps/api/vercel.json
+  s_d70f27d56480a5::t_c9cc31e22741f1 28-38
+apps/api/api/entitlements/scenarios.ts
+  s_d70f27d56480a5::t_917ff22b185e27 2,5-39
+apps/api/api/engine/portfolio.ts
+  s_d70f27d56480a5::t_c6c57205830a2e 1-69
+apps/api/api/_standalone.ts
+  s_d70f27d56480a5::t_c9cc31e22741f1 1-95
+apps/api/api/entitlements/me.ts
+  s_d70f27d56480a5::t_917ff22b185e27 2-8,11-84
+apps/api/api/product-events.ts
+  s_d70f27d56480a5::t_c6c57205830a2e 1-91
+apps/api/api/engine/snapshot.ts
+  s_d70f27d56480a5::t_c6c57205830a2e 1-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "7d0407b0e5e9df3ac714a009d9eb9062af2aabb8",
+  "prompts": {},
+  "sessions": {
+    "s_d70f27d56480a5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1197-c217-7353-97d7-a7d1245662be",
+        "model": "gpt-5.5"
+      },
+      "human_author": "marsleite <marsleite@gmail.com>"
+    }
+  }
+}
