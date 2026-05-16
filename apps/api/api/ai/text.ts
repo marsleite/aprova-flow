@@ -1,43 +1,13 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-
-function sendJson(res: ServerResponse, statusCode: number, payload: unknown) {
-  res.statusCode = statusCode;
-  res.setHeader('content-type', 'application/json; charset=utf-8');
-  res.setHeader('cache-control', 'no-store');
-  res.end(JSON.stringify(payload));
-}
-
-function setCors(req: IncomingMessage, res: ServerResponse) {
-  const origin = req.headers.origin;
-  res.setHeader('access-control-allow-origin', typeof origin === 'string' ? origin : '*');
-  res.setHeader('access-control-allow-methods', 'POST,OPTIONS');
-  res.setHeader('access-control-allow-headers', 'Content-Type, Authorization');
-  res.setHeader('vary', 'Origin');
-}
-
-function extractBearerToken(value: string | string[] | undefined): string | null {
-  if (typeof value !== 'string') return null;
-  if (!value.startsWith('Bearer ')) return null;
-  const token = value.slice('Bearer '.length).trim();
-  return token || null;
-}
-
-async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown> | null> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-  if (chunks.length === 0) return null;
-  const text = Buffer.concat(chunks).toString('utf-8');
-  if (!text.trim()) return null;
-  const parsed = JSON.parse(text) as unknown;
-  return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
-    ? parsed as Record<string, unknown>
-    : null;
-}
+import {
+  extractBearerToken,
+  readJsonBody,
+  sendJson,
+  setCors,
+} from '../../src/vercel/standalone';
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
-  setCors(req, res);
+  setCors(req, res, 'POST');
 
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;

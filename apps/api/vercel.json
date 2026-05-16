@@ -6,35 +6,35 @@
     { "source": "/health", "destination": "/api/health" },
     {
       "source": "/entitlements/me",
-      "destination": "/api/entitlements/me"
+      "destination": "/api/backend?__route=entitlements-me"
     },
     {
       "source": "/entitlements/scenarios",
-      "destination": "/api/entitlements/scenarios"
+      "destination": "/api/backend?__route=entitlements-scenarios"
     },
     {
       "source": "/billing/subscription/me",
-      "destination": "/api/billing/subscription/me"
+      "destination": "/api/backend?__route=billing-subscription-me"
     },
     {
       "source": "/billing/admin/subscription",
-      "destination": "/api/billing/admin/subscription"
+      "destination": "/api/backend?__route=billing-admin-subscription"
     },
     {
       "source": "/billing/admin/beta-signals",
-      "destination": "/api/billing/admin/beta-signals"
+      "destination": "/api/backend?__route=billing-admin-beta-signals"
     },
     {
       "source": "/engine/snapshot",
-      "destination": "/api/engine/snapshot"
+      "destination": "/api/backend?__route=engine-snapshot"
     },
     {
       "source": "/engine/portfolio",
-      "destination": "/api/engine/portfolio"
+      "destination": "/api/backend?__route=engine-portfolio"
     },
     {
       "source": "/product-events",
-      "destination": "/api/product-events"
+      "destination": "/api/backend?__route=product-events"
     },
     {
       "source": "/ai/text",
