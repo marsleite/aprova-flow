@@ -1,10 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { handleWithAiFastify } from './_shared';
+import { handleAiFunction } from './_shared';
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
-  await handleWithAiFastify({
+  await handleAiFunction({
     req,
     res,
-    targetPath: '/ai/pdf',
+    path: '/ai/pdf',
   });
 }
