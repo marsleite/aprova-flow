@@ -130,7 +130,33 @@ describe('dedicatedAi', () => {
     expect(response.text).toBe('{"subjects":[]}');
   });
 
-  it('throws a status-aware error when the dedicated API rejects the request', async () => {
+  it('falls back to the local gateway when the dedicated API crashes', async () => {
+    process.env.API_BASE_URL = 'https://api.aprovamind.test';
+    process.env.AI_DAILY_USER_BUDGET_USD = '0';
+
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        'A server error has occurred\n\nFUNCTION_INVOCATION_FAILED',
+        { status: 500, headers: { 'content-type': 'text/plain' } }
+      )
+    );
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await runDedicatedAiText({
+      idToken: 'token-3',
+      payload: {
+        task: 'chat',
+        prompt: 'Oi',
+      },
+    });
+
+    expect(fetchMock).toHaveBeenCalled();
+    expect(response.status).toBe('blocked_by_budget');
+    expect(response.provider).toBe('local-heuristic');
+  });
+
+  it('throws a status-aware error when the dedicated API rejects the request with a client error', async () => {
     process.env.API_BASE_URL = 'https://api.aprovamind.test';
 
     vi.stubGlobal(
@@ -139,9 +165,9 @@ describe('dedicatedAi', () => {
         new Response(
           JSON.stringify({
             error: 'ai_error',
-            message: 'Erro ao processar requisição de IA.',
+            message: 'Requisição inválida.',
           }),
-          { status: 500, headers: { 'content-type': 'application/json' } }
+          { status: 400, headers: { 'content-type': 'application/json' } }
         )
       )
     );
@@ -155,8 +181,8 @@ describe('dedicatedAi', () => {
         },
       })
     ).rejects.toMatchObject({
-      message: 'Erro ao processar requisição de IA.',
-      statusCode: 500,
+      message: 'Requisição inválida.',
+      statusCode: 400,
     });
   });
 });

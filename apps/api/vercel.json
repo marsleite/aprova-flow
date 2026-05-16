@@ -17,6 +17,14 @@
     {
       "source": "/billing/admin/subscription",
       "destination": "/api/billing/admin/subscription"
+    },
+    {
+      "source": "/ai/text",
+      "destination": "/api/ai/text"
+    },
+    {
+      "source": "/ai/pdf",
+      "destination": "/api/ai/pdf"
     }
   ]
 }

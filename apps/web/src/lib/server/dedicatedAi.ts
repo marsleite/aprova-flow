@@ -17,6 +17,9 @@ function createDedicatedAiError(
 
 function isConnectionError(err: unknown): boolean {
   if (!(err instanceof Error)) return false;
+  const statusCode = (err as { statusCode?: unknown }).statusCode;
+  if (typeof statusCode === 'number' && statusCode >= 500) return true;
+
   const msg = err.message.toLowerCase();
   return (
     msg.includes('econnrefused') ||
@@ -25,6 +28,7 @@ function isConnectionError(err: unknown): boolean {
     msg.includes('connect') ||
     msg.includes('socket') ||
     msg.includes('timeout') ||
+    msg.includes('function_invocation_failed') ||
     msg.includes('503') ||
     msg.includes('não configurada')
   );
