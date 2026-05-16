@@ -7,7 +7,7 @@ import {
   sendNotFound,
   setCors,
   verifyRequestUser,
-} from './standalone';
+} from './_standalone';
 
 function getRoute(req: IncomingMessage): string {
   return readQuery(req).get('__route') || '';
@@ -37,7 +37,7 @@ async function handleEntitlementsScenarios(req: IncomingMessage, res: ServerResp
     return;
   }
   const { listManualSubscriptionScenarios } = await import(
-    '../modules/entitlements/manual-subscription-state-data-source'
+    '../src/modules/entitlements/manual-subscription-state-data-source'
   );
   sendJson(res, 200, {
     scenarios: listManualSubscriptionScenarios().map((scenario) => ({
@@ -61,7 +61,7 @@ async function handleEntitlementsMe(req: IncomingMessage, res: ServerResponse) {
   if (sandboxUserId) {
     const [{ GetUserEntitlements }, { ManualSubscriptionStateDataSource }] = await Promise.all([
       import('@aprovamind/application/use-cases/billing/GetUserEntitlements'),
-      import('../modules/entitlements/manual-subscription-state-data-source'),
+      import('../src/modules/entitlements/manual-subscription-state-data-source'),
     ]);
     const result = await new GetUserEntitlements(new ManualSubscriptionStateDataSource())
       .execute({ userId: sandboxUserId });
@@ -75,7 +75,7 @@ async function handleEntitlementsMe(req: IncomingMessage, res: ServerResponse) {
   try {
     const [{ GetUserEntitlements }, { FirestoreSubscriptionStateDataSource }] = await Promise.all([
       import('@aprovamind/application/use-cases/billing/GetUserEntitlements'),
-      import('../modules/entitlements/firestore-subscription-state-data-source'),
+      import('../src/modules/entitlements/firestore-subscription-state-data-source'),
     ]);
     const result = await new GetUserEntitlements(
       new FirestoreSubscriptionStateDataSource({ idToken: auth.idToken, identity: auth.identity })
@@ -99,7 +99,7 @@ async function handleSubscriptionMe(req: IncomingMessage, res: ServerResponse) {
   const sandboxUserId = resolveSandboxUserId(req);
   if (sandboxUserId) {
     const { ManualSubscriptionStateDataSource } = await import(
-      '../modules/entitlements/manual-subscription-state-data-source'
+      '../src/modules/entitlements/manual-subscription-state-data-source'
     );
     const result = await new ManualSubscriptionStateDataSource()
       .getUserSubscriptionState({ userId: sandboxUserId });
@@ -112,7 +112,7 @@ async function handleSubscriptionMe(req: IncomingMessage, res: ServerResponse) {
   if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
   try {
     const { FirestoreSubscriptionStateDataSource } = await import(
-      '../modules/entitlements/firestore-subscription-state-data-source'
+      '../src/modules/entitlements/firestore-subscription-state-data-source'
     );
     const result = await new FirestoreSubscriptionStateDataSource({
       idToken: auth.idToken,
@@ -143,8 +143,8 @@ async function handleAdminSubscription(req: IncomingMessage, res: ServerResponse
     { FirestoreSubscriptionAdminDataSource },
   ] = await Promise.all([
     import('@aprovamind/infrastructure-firebase'),
-    import('../modules/entitlements/subscription-state.shared'),
-    import('../modules/entitlements/firestore-subscription-admin-data-source'),
+    import('../src/modules/entitlements/subscription-state.shared'),
+    import('../src/modules/entitlements/firestore-subscription-admin-data-source'),
   ]);
 
   if (!defaultIsAdminIdentity(auth.identity)) {
@@ -238,8 +238,8 @@ async function handleBetaSignals(req: IncomingMessage, res: ServerResponse) {
   if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
   try {
     const [{ defaultIsAdminIdentity }, { loadAdminBetaSignalsSummary }] = await Promise.all([
-      import('../modules/entitlements/subscription-state.shared'),
-      import('../modules/entitlements/beta-signals'),
+      import('../src/modules/entitlements/subscription-state.shared'),
+      import('../src/modules/entitlements/beta-signals'),
     ]);
     if (!defaultIsAdminIdentity(auth.identity)) {
       sendJson(res, 403, { error: 'forbidden', message: 'Somente administradores podem revisar sinais do beta.' });
@@ -349,7 +349,7 @@ async function handleProductEvents(req: IncomingMessage, res: ServerResponse) {
   const [{ isPublicProductEventName, normalizeProductEventMetadata }, { saveProductUsageEvent }] =
     await Promise.all([
       import('@aprovamind/contracts/analytics/ProductEvents'),
-      import('../modules/entitlements/product-event-store'),
+      import('../src/modules/entitlements/product-event-store'),
     ]);
   if (!isPublicProductEventName(body?.eventName)) {
     sendJson(res, 400, { error: 'invalid_event_name', message: 'Evento de produto nao permitido nesta rota.' });

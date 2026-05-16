@@ -4,7 +4,7 @@ import {
   readJsonBody,
   sendJson,
   setCors,
-} from '../../src/vercel/standalone';
+} from '../_standalone';
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   setCors(req, res, 'POST');
