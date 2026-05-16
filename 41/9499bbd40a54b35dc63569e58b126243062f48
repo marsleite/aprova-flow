@@ -1,0 +1,21 @@
+apps/api/api/ai/pdf.ts
+  s_d70f27d56480a5::t_1424ed60872d7e 3-37,40-149
+apps/api/api/ai/text.ts
+  s_d70f27d56480a5::t_1424ed60872d7e 3-37,40-145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "419499bbd40a54b35dc63569e58b126243062f48",
+  "prompts": {},
+  "sessions": {
+    "s_d70f27d56480a5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1197-c217-7353-97d7-a7d1245662be",
+        "model": "gpt-5.5"
+      },
+      "human_author": "marsleite <marsleite@gmail.com>"
+    }
+  }
+}
