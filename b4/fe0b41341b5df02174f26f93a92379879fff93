@@ -1,0 +1,50 @@
+packages/ai-gateway/src/metrics.ts
+  s_d70f27d56480a5::t_3b3da1894585c8 70-71
+specs/004-economic-ai-gateway/implementation-notes.md
+  s_d70f27d56480a5::t_30264e1559af71 16
+packages/ai-gateway/src/providers/openai.test.ts
+  s_d70f27d56480a5::t_f2d338d7c7e9f7 11-40
+specs/004-economic-ai-gateway/research.md
+  s_d70f27d56480a5::t_16fa1a8987d2ab 12-28
+packages/ai-gateway/src/types.ts
+  s_d70f27d56480a5::t_d86eb1e5b4cb86 3
+specs/004-economic-ai-gateway/plan.md
+  s_d70f27d56480a5::t_5335a363272bd7 8
+docs/architecture/deploy-and-environments.md
+  s_d70f27d56480a5::t_14f8fc568ce95d 125-157
+packages/ai-gateway/src/gateway.test.ts
+  s_d70f27d56480a5::t_a7e321ad941b17 11-25
+docs/architecture/current-architecture.md
+  s_d70f27d56480a5::t_34bde1b108a77b 180-190
+packages/ai-gateway/src/providers/openai.ts
+  s_d70f27d56480a5::t_7b0a96c592df52 2,4-7,9-11,41-68,70,75-76,78-104,118-120,123-127,132-137,144,148,158
+packages/ai-gateway/src/pricing.ts
+  s_d70f27d56480a5::t_79bc1ce81af2b9 17-24
+specs/004-economic-ai-gateway/tasks.md
+  s_d70f27d56480a5::t_48283d7a24c579 33-296
+specs/004-economic-ai-gateway/quickstart.md
+  s_d70f27d56480a5::t_0b149c5dcedc68 10-47
+packages/ai-gateway/src/gateway.ts
+  s_d70f27d56480a5::t_995ce2a0fd3368 23-31,73-79,87-201,204,208-251,253,255
+  s_d70f27d56480a5::t_d22cfe6fe7b42d 41-52,268
+specs/004-economic-ai-gateway/spec.md
+  s_d70f27d56480a5::t_e2a6adbad78bd8 91-156
+apps/web/tests/ai-gateway-policy.test.ts
+  s_d70f27d56480a5::t_cef5a47f268a37 12-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "b4fe0b41341b5df02174f26f93a92379879fff93",
+  "prompts": {},
+  "sessions": {
+    "s_d70f27d56480a5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1197-c217-7353-97d7-a7d1245662be",
+        "model": "gpt-5.5"
+      },
+      "human_author": "marsleite <marsleite@gmail.com>"
+    }
+  }
+}
