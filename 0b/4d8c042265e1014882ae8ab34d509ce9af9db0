@@ -1,0 +1,29 @@
+apps/api/api/ai/text.ts
+  s_d70f27d56480a5::t_42fd9329bedef9 1-10
+apps/api/vercel.json
+  s_d70f27d56480a5::t_42fd9329bedef9 20-27
+apps/api/api/ai/pdf.ts
+  s_d70f27d56480a5::t_42fd9329bedef9 1-10
+apps/web/src/lib/server/dedicatedAi.ts
+  s_d70f27d56480a5::t_86eed8d45374db 20-22,31
+apps/web/tests/server/dedicatedAi.test.ts
+  s_d70f27d56480a5::t_dcd3a861f8a9b3 133-159,168,170,184-185
+apps/api/api/ai/_shared.ts
+  s_d70f27d56480a5::t_42fd9329bedef9 1-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "0b4d8c042265e1014882ae8ab34d509ce9af9db0",
+  "prompts": {},
+  "sessions": {
+    "s_d70f27d56480a5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1197-c217-7353-97d7-a7d1245662be",
+        "model": "gpt-5.5"
+      },
+      "human_author": "marsleite <marsleite@gmail.com>"
+    }
+  }
+}
