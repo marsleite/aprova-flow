@@ -65,6 +65,33 @@ function sanitizeSchedule(
         });
 }
 
+function buildFallbackSchedule(params: {
+    availableSchedule: { day: string; availableHours: number }[];
+    planSubjects: { subject: string; weight: number; hoursStudied: number; accuracy: number }[];
+}): SmartScheduleItem[] {
+    const subjects = [...params.planSubjects]
+        .sort((a, b) => (b.weight * (100 - b.accuracy)) - (a.weight * (100 - a.accuracy)))
+        .slice(0, 3);
+
+    return params.availableSchedule.map((day) => {
+        const totalHours = Math.max(0, Math.round(Math.min(day.availableHours, Math.max(0.5, day.availableHours)) * 10) / 10);
+        const primary = subjects[0]?.subject || 'Matéria prioritária';
+        const secondary = subjects[1]?.subject;
+        const split = secondary && totalHours >= 1
+            ? [
+                { name: primary, hours: Math.round(totalHours * 0.6 * 10) / 10, reason: 'Maior prioridade pelo peso e desempenho atual.' },
+                { name: secondary, hours: Math.round(totalHours * 0.4 * 10) / 10, reason: 'Complemento para manter distribuição semanal.' },
+            ]
+            : [{ name: primary, hours: totalHours, reason: 'Bloco seguro gerado sem depender da IA ao vivo.' }];
+
+        return {
+            day: day.day,
+            totalHours,
+            subjects: split,
+        };
+    }).filter((item) => item.totalHours > 0);
+}
+
 export async function POST(request: NextRequest) {
     try {
         const auth = await requireAuthenticatedUser(request);
@@ -154,6 +181,17 @@ export async function POST(request: NextRequest) {
             },
         });
 
+        if (aiResponse.budgetBlocked) {
+            return NextResponse.json(
+                {
+                    schedule: buildFallbackSchedule({ availableSchedule: normalizedAvailableSchedule, planSubjects }),
+                    fallbackUsed: true,
+                    userMessage: aiResponse.userMessage || 'Cronograma resiliente gerado sem custo externo.',
+                },
+                { headers: { ...quota.headers, 'x-ai-fallback': 'true' } }
+            );
+        }
+
         const text = aiResponse.text?.trim() || '[]';
         const jsonStr = text.replace(/^```json/g, '').replace(/```$/g, '').trim();
         const parsedSchedule = parseJsonFromModelText<SmartScheduleItem[]>(jsonStr) || [];
@@ -162,12 +200,10 @@ export async function POST(request: NextRequest) {
         if (!sanitizedSchedule || sanitizedSchedule.length === 0) {
             console.error("Falha ao parsear JSON no smart-schedule", jsonStr);
             return NextResponse.json({
-                error: 'Não consegui montar o cronograma agora. Tente novamente ou distribua os blocos manualmente.',
-                aiCapability: resolveAiFailureState({
-                    capability: 'smart_schedule',
-                    error: new Error('invalid_json'),
-                }),
-            }, { status: 500 });
+                schedule: buildFallbackSchedule({ availableSchedule: normalizedAvailableSchedule, planSubjects }),
+                fallbackUsed: true,
+                userMessage: 'Cronograma resiliente gerado porque a resposta da IA veio incompleta.',
+            }, { headers: { ...quota.headers, 'x-ai-fallback': 'true' } });
         }
 
         return NextResponse.json(
@@ -183,12 +219,11 @@ export async function POST(request: NextRequest) {
         );
     } catch (error) {
         console.error('Erro na rota /smart-schedule:', error);
-        const failure = resolveAiFailureState({
-            capability: 'smart_schedule',
-            error,
-        });
         return NextResponse.json(
-            { error: failure.message, aiCapability: failure },
+            {
+                error: 'Não consegui montar o cronograma agora. Tente novamente ou distribua os blocos manualmente.',
+                aiCapability: resolveAiFailureState({ capability: 'smart_schedule', error }),
+            },
             { status: 500 }
         );
     }

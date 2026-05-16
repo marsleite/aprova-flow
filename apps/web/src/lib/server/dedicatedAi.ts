@@ -68,6 +68,11 @@ async function requestDedicatedAi<TPayload extends AiTextRequest | AiPdfRequest>
           model?: string;
           latencyMs?: number;
           usage?: AiResponse['usage'];
+          status?: AiResponse['status'];
+          fallbackUsed?: boolean;
+          budgetBlocked?: boolean;
+          userMessage?: string;
+          errorCode?: string;
         }
       | null;
 
@@ -98,6 +103,11 @@ async function requestDedicatedAi<TPayload extends AiTextRequest | AiPdfRequest>
       model: body.model,
       latencyMs: body.latencyMs,
       usage: body.usage,
+      status: body.status,
+      fallbackUsed: body.fallbackUsed,
+      budgetBlocked: body.budgetBlocked,
+      userMessage: body.userMessage,
+      errorCode: body.errorCode,
     };
   } finally {
     clearTimeout(timeoutId);

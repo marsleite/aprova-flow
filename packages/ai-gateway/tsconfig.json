@@ -8,7 +8,9 @@
     "baseUrl": ".",
     "paths": {
       "@aprovamind/ai-gateway": ["./src/index.ts"],
-      "@aprovamind/ai-gateway/*": ["./src/*"]
+      "@aprovamind/ai-gateway/*": ["./src/*"],
+      "@aprovamind/domain": ["../domain/src/index.ts"],
+      "@aprovamind/domain/*": ["../domain/src/*"]
     }
   },
   "include": ["src/**/*.ts"]

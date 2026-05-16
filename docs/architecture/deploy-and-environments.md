@@ -116,6 +116,46 @@ Devem ficar aqui:
 - credenciais Firebase Admin
 - secrets de webhook
 
+#### IA econômica e providers compatíveis
+
+As chamadas pagas de IA devem ficar no runtime server-side. Para avaliar modelos
+mais baratos sem expor segredo ao browser, configurar no ambiente da API ou do
+BFF server-side:
+
+- `AI_PROVIDER_DEFAULT`: provider padrão (`openrouter`, `gemini` ou `openai-compatible`)
+- `AI_MODEL_DEFAULT`: modelo padrão quando a task não tiver override
+- `AI_PROVIDER_CHAT`, `AI_MODEL_CHAT`
+- `AI_PROVIDER_PLANNER_DAILY`, `AI_MODEL_PLANNER_DAILY`
+- `AI_PROVIDER_SMART_SCHEDULE`, `AI_MODEL_SMART_SCHEDULE`
+- `AI_PROVIDER_WEEKLY_MENTORING`, `AI_MODEL_WEEKLY_MENTORING`
+- `AI_PROVIDER_ERROR_DIAGNOSIS`, `AI_MODEL_ERROR_DIAGNOSIS`
+- `AI_OPENROUTER_API_KEY`: chave server-side do OpenRouter
+- `AI_OPENROUTER_BASE_URL`: base URL do OpenRouter, normalmente `https://openrouter.ai/api/v1`
+- `AI_OPENROUTER_SITE_URL`: URL pública do produto enviada no header `HTTP-Referer`
+- `AI_OPENROUTER_APP_NAME`: nome enviado no header `X-Title`
+- `AI_OPENAI_COMPAT_BASE_URL`: base URL para providers compatíveis diretos
+- `AI_OPENAI_COMPAT_API_KEY`: chave server-side do provider compatível direto
+- `AI_DAILY_USER_BUDGET_USD`: teto diário estimado por usuário
+- `AI_MONTHLY_GLOBAL_BUDGET_USD`: teto mensal estimado do produto
+
+OpenRouter é o default recomendado para beta porque permite uma única API key e
+troca de modelo por tarefa. Gemini continua sendo fallback operacional. Qwen e
+DeepSeek devem entrar por task, começando por chat ou fluxos de menor risco,
+com monitoramento de custo, falha e fallback no painel beta/admin.
+
+Configuração inicial sugerida:
+
+```bash
+AI_PROVIDER_DEFAULT=openrouter
+AI_OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+AI_OPENROUTER_API_KEY=...
+AI_MODEL_CHAT=qwen/qwen3-8b
+AI_MODEL_PLANNER_DAILY=qwen/qwen3-8b
+AI_MODEL_SMART_SCHEDULE=qwen/qwen3-14b
+AI_MODEL_WEEKLY_MENTORING=deepseek/deepseek-v4-flash
+AI_MODEL_ERROR_DIAGNOSIS=deepseek/deepseek-v4-flash
+```
+
 Regra:
 
 - não duplicar secrets da API no projeto web

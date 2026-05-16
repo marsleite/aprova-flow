@@ -1,7 +1,9 @@
 import { FeatureCode } from '@aprovamind/domain';
 import { describe, expect, it } from 'vitest';
 import {
+  buildAiBudgetChatMessage,
   buildAiQuotaChatMessage,
+  extractAiBudgetNotice,
   extractAiQuotaNotice,
 } from '@/lib/ai/quota-feedback';
 
@@ -75,6 +77,26 @@ describe('ai quota feedback', () => {
 
     expect(message).toBe(
       'Quota de IA do Free atingida Limite de uso de IA atingido para este recurso. Limite atual: 5/mês. Nova tentativa em cerca de 1h. Entender o Pro em /settings.'
+    );
+  });
+
+  it('creates budget-aware copy for spend guardrail blocks', () => {
+    const notice = extractAiBudgetNotice({
+      status: 'blocked_by_budget',
+      budgetBlocked: true,
+      userMessage: 'Limite de orçamento de IA atingido.',
+      task: 'chat',
+      errorCode: 'user_daily_budget',
+    });
+
+    expect(notice).toMatchObject({
+      title: 'Orçamento de IA protegido',
+      message: 'Limite de orçamento de IA atingido.',
+      task: 'chat',
+      errorCode: 'user_daily_budget',
+    });
+    expect(buildAiBudgetChatMessage(notice!)).toContain(
+      'A ação foi interrompida antes de gerar custo externo.'
     );
   });
 });

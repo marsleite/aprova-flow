@@ -170,6 +170,30 @@ Esse fluxo já vale para IA, entitlements, eventos de produto e operações admi
 
 Para IA, a `apps/web` pode continuar montando contexto de produto e aplicando quota/entitlements locais, mas a execução do modelo e a persistência de `ai_usage_events` acontecem canonicamente na `apps/api`.
 
+### Fluxo econômico de IA
+
+```text
+apps/web ou apps/api
+  -> @aprovamind/ai-gateway
+    -> policy por tarefa
+    -> orçamento por usuário/global
+    -> provider OpenRouter, Gemini ou OpenAI-compatible
+    -> telemetria de uso/custo
+    -> fallback determinístico quando permitido
+```
+
+O gateway econômico é o ponto único para decisões de provider/modelo, limite de
+saída, estimativa de custo, bloqueio por orçamento e normalização de falhas. O
+OpenRouter segue como provider padrão para reduzir atrito operacional e permitir
+seleção de modelos por tarefa. Gemini fica como fallback seguro, e providers
+compatíveis com OpenAI diretos ainda podem ser ativados por variáveis de
+ambiente sem alterar a experiência do estudante.
+
+Fluxos críticos como plano diário, cronograma, mentoria e diagnóstico precisam
+continuar úteis mesmo sem chamada externa. Quando o orçamento bloqueia ou o
+provider falha, a resposta deve ser marcada como fallback/resiliente e não deve
+expor prompt, stack trace, chave ou erro bruto do provider.
+
 Para sinais de produto e revisao operacional do beta, a `apps/web` usa proxies finos e cards de leitura, enquanto `product_usage_events` e o resumo admin de beta ficam centralizados na `apps/api`.
 
 Para a jornada principal, a `apps/web` agora também assume uma regra explícita

@@ -14,6 +14,10 @@ export interface AiUsageEventDoc {
   totalTokens: number;
   estimatedCostUsd: number;
   success: boolean;
+  status?: string;
+  fallbackUsed?: boolean;
+  budgetBlocked?: boolean;
+  errorCode?: string;
   statusCode: number;
   createdAt: string;
 }

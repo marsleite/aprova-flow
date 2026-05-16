@@ -19,6 +19,9 @@ export async function saveAiUsageEvent(
 
   const payload = {
     ...event,
+    status: event.status || (event.success ? 'success' : 'failed'),
+    fallbackUsed: Boolean(event.fallbackUsed),
+    budgetBlocked: Boolean(event.budgetBlocked),
     createdAt: new Date().toISOString(),
   };
 

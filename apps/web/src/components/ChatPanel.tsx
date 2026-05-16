@@ -18,7 +18,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { StudyConsistency, SubjectHours, PlanVsActual, StudySession, DailyHours } from '@/types';
-import { buildAiQuotaChatMessage, readAiErrorResponse } from '@/lib/ai/quota-feedback';
+import { buildAiBudgetChatMessage, buildAiQuotaChatMessage, extractAiBudgetNotice, readAiErrorResponse } from '@/lib/ai/quota-feedback';
 import { formatDuration } from '@/lib/utils';
 import { auth } from '@/lib/firebase/config';
 
@@ -174,22 +174,23 @@ export default function ChatPanel({
   // ================================================
   // Sugestões contextuais (variam com os dados)
   // ================================================
-  function getSuggestions(): string[] {
-    const suggestions: string[] = [];
+function getSuggestions(): string[] {
+    const suggestions: string[] = [
+      'Montar plano de hoje',
+      'Recuperar atraso',
+      'Escolher revisão agora',
+      'Explicar meu desempenho',
+      'Gerar plano B',
+    ];
 
     const neglected = planVsActual.find((p) => p.status === 'neglected');
     if (neglected) {
-      suggestions.push(`Como melhorar em ${neglected.subject}?`);
+      suggestions.unshift(`Revisar ${neglected.subject} agora`);
     }
-
-    suggestions.push('Monte um plano de estudo para hoje');
 
     if ((consistency?.weeklyProgressPercent ?? 0) < 50) {
-      suggestions.push('Como bater minha meta semanal?');
+      suggestions.unshift('Bater meta semanal');
     }
-
-    suggestions.push('Estou desmotivado, me ajuda');
-    suggestions.push('Quanto tempo devo estudar por dia?');
 
     return suggestions.slice(0, 5);
   }
@@ -231,6 +232,17 @@ export default function ChatPanel({
           response: res,
           fallbackMessage: 'Erro na IA',
         });
+        const budgetNotice = extractAiBudgetNotice(failure.payload);
+        if (budgetNotice) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: buildAiBudgetChatMessage(budgetNotice),
+            },
+          ]);
+          return;
+        }
         if (failure.quotaNotice) {
           if (failure.quotaNotice.limit) {
             setQuota({ limit: failure.quotaNotice.limit, remaining: 0 });
@@ -257,8 +269,21 @@ export default function ChatPanel({
         });
       }
 
-      const { reply } = await res.json();
-      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+      const {
+        reply,
+        fallbackUsed,
+        budgetBlocked,
+      } = await res.json() as {
+        reply: string;
+        fallbackUsed?: boolean;
+        budgetBlocked?: boolean;
+      };
+      const statusPrefix = budgetBlocked
+        ? 'Orçamento protegido: '
+        : fallbackUsed
+          ? 'Modo resiliente: '
+          : '';
+      setMessages((prev) => [...prev, { role: 'assistant', content: `${statusPrefix}${reply}` }]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -455,7 +480,7 @@ export default function ChatPanel({
                 </button>
               </div>
               <p className="mt-1.5 text-center text-[10px] text-gray-700">
-                Respostas baseadas nos seus dados reais de estudo
+                Ações guiadas economizam IA e usam seus dados reais
               </p>
             </div>
           </motion.div>

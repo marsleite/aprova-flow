@@ -2,7 +2,7 @@
  * Mini-card do Coach IA
  *
  * Mostra uma dica rápida contextual baseada nos dados
- * e botão para abrir o chat conversacional completo.
+ * e botão para abrir ações guiadas do coach.
  */
 
 'use client';
@@ -145,7 +145,7 @@ export default function GeminiCoachCard({
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--primary)] to-[var(--primary)] px-4 py-2.5 text-sm font-medium text-foreground shadow-lg shadow-[var(--primary)]/15 transition-all hover:shadow-[var(--primary)]/25 hover:brightness-110"
         >
           <MessageCircle className="h-4 w-4" />
-          Conversar com o Coach
+          Abrir ações do Coach
         </button>
       </div>
     </motion.div>
