@@ -1,6 +1,8 @@
 {
+  "redirects": [
+    { "source": "/", "destination": "/health", "permanent": false }
+  ],
   "rewrites": [
-    { "source": "/", "destination": "/api/root" },
     { "source": "/health", "destination": "/api/health" },
     {
       "source": "/entitlements/me",
