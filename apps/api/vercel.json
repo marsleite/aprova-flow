@@ -21,6 +21,10 @@
       "destination": "/api/billing/admin/subscription"
     },
     {
+      "source": "/billing/admin/beta-signals",
+      "destination": "/api/billing/admin/beta-signals"
+    },
+    {
       "source": "/ai/text",
       "destination": "/api/ai/text"
     },
