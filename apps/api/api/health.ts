@@ -1,10 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { handleWithFastify } from './_shared';
 
-export default async function handler(req: IncomingMessage, res: ServerResponse) {
-  await handleWithFastify({
-    req,
-    res,
-    targetPath: '/health',
-  });
+export default function handler(_req: IncomingMessage, res: ServerResponse) {
+  res.statusCode = 200;
+  res.setHeader('content-type', 'application/json; charset=utf-8');
+  res.end(JSON.stringify({
+    service: 'aprovamind-api',
+    status: 'ok',
+  }));
 }
