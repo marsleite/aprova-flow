@@ -1,0 +1,28 @@
+apps/api/api/_backend.ts
+  s_d70f27d56480a5::t_d76fed101a82c3 1-9,11-39,41-63,65-77,79-101,103-114,116-145,148-240,243-351,353-404
+  s_d70f27d56480a5::t_2f29c58749c6f7 10
+  s_d70f27d56480a5::t_79a487bddbd305 40,102,115
+  s_d70f27d56480a5::t_361017e252a929 64,78,146-147,241-242,352
+apps/api/api/ai/pdf.ts
+  s_d70f27d56480a5::t_2f29c58749c6f7 7
+apps/api/api/backend.ts
+  s_d70f27d56480a5::t_d76fed101a82c3 2
+apps/api/api/ai/text.ts
+  s_d70f27d56480a5::t_2f29c58749c6f7 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "098f3d9f5a7cf1f1cd380f75fa36ecb4748a7d7b",
+  "prompts": {},
+  "sessions": {
+    "s_d70f27d56480a5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1197-c217-7353-97d7-a7d1245662be",
+        "model": "gpt-5.5"
+      },
+      "human_author": "marsleite <marsleite@gmail.com>"
+    }
+  }
+}
