@@ -102,6 +102,39 @@ function buildStatistics(errors: ErrorItem[]): SubjectStats[] {
     return [...statsMap.values()].sort((a, b) => b.total - a.total);
 }
 
+function buildFallbackDiagnosis(errors: ErrorItem[]) {
+    const stats = buildStatistics(errors);
+    const criticalSubjects = stats.slice(0, 2).map((s) => s.materia);
+    const first = stats[0];
+    const topSubtema = first ? Object.entries(first.subtemas).sort((a, b) => b[1] - a[1])[0]?.[0] : 'Geral';
+    return {
+        gaps: first
+            ? [{
+                description: `Erros concentrados em ${first.materia}${topSubtema ? ` > ${topSubtema}` : ''}`,
+                dimension: 'conceitual',
+                severity: Math.min(10, Math.max(5, first.total)),
+                materia: first.materia,
+                subtema: topSubtema || 'Geral',
+                advice: 'Revise a teoria curta e faça uma bateria de questões.',
+            }]
+            : [],
+        overallScore: { legislacao: 50, jurisprudencia: 50, interpretacao: 50, conceitual: 50 },
+        flashcards: first
+            ? [{
+                topic: `${first.materia} - ${topSubtema || 'Geral'}`,
+                front: 'Qual ponto revisar antes da próxima bateria?',
+                back: `Revisar ${topSubtema || first.materia} e refazer questões erradas.`,
+                source: 'Fallback local AprovaMind',
+            }]
+            : [],
+        criticalSubjects,
+        summary: 'Diagnóstico resiliente gerado sem depender da IA ao vivo.',
+        patterns: first ? [`Erros concentrados em ${first.materia}`] : [],
+        recommendations: ['Faça revisão ativa curta e registre novas questões para recalibrar o diagnóstico.'],
+        fallbackUsed: true,
+    };
+}
+
 // ── POST Handler ──
 
 export async function POST(request: NextRequest) {
@@ -204,6 +237,12 @@ export async function POST(request: NextRequest) {
             },
         });
 
+        if (aiResponse.budgetBlocked) {
+            return NextResponse.json(buildFallbackDiagnosis(errors), {
+                headers: { ...quota.headers, 'x-ai-fallback': 'true' },
+            });
+        }
+
         const text = aiResponse.text?.trim() || '{}';
         // Extrair JSON mesmo que venha com markdown
         let jsonStr = text;
@@ -302,8 +341,8 @@ export async function POST(request: NextRequest) {
                 error: new Error('invalid_json'),
             });
             return NextResponse.json(
-                { error: failure.message, aiCapability: failure },
-                { status: 500 }
+                { ...buildFallbackDiagnosis(errors), aiCapability: failure },
+                { headers: { ...quota.headers, 'x-ai-fallback': 'true' } }
             );
         }
     } catch (error) {

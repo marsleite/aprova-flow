@@ -7,5 +7,5 @@
  */
 export { runAiText, runAiPdf } from '@aprovamind/ai-gateway';
 export { extractFirstJsonObject, parseJsonFromModelText } from '@aprovamind/ai-gateway';
-export { estimateTokensFromText, buildUsage, extractGeminiUsage, extractOpenAiUsage, logAiUsageEvent } from '@aprovamind/ai-gateway';
-export type { AiTask, AiProvider, AiUsage, AiResponse, AiTextRequest, AiPdfRequest, AiUsageEvent } from '@aprovamind/ai-gateway';
+export { estimateTokensFromText, buildUsage, extractGeminiUsage, extractOpenAiUsage, logAiUsageEvent, estimateCostUsd, estimateRequestCostUsd, getModelPricing, resolveAiTaskPolicy } from '@aprovamind/ai-gateway';
+export type { AiTask, AiProvider, AiUsage, AiResponse, AiTextRequest, AiPdfRequest, AiUsageEvent, AiDecisionStatus, AiBudgetDecision, AiTaskPolicy, AiProviderProfile } from '@aprovamind/ai-gateway';

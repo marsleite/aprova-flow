@@ -69,9 +69,13 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
         outputTokens: result.usage.outputTokens,
         totalTokens: result.usage.totalTokens,
         estimatedCostUsd: result.usage.estimatedCostUsd,
-        success: true,
-        statusCode: 200,
+        success: result.status !== 'failed' && result.status !== 'blocked_by_budget',
+        status: result.status || 'success',
+        fallbackUsed: Boolean(result.fallbackUsed),
+        budgetBlocked: Boolean(result.budgetBlocked),
+        statusCode: result.status === 'blocked_by_budget' ? 429 : 200,
         userId,
+        errorCode: result.errorCode,
       } as const;
 
       logAiUsageEvent(usageEvent);
@@ -83,6 +87,11 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
         model: result.model,
         latencyMs: result.latencyMs,
         usage: result.usage,
+        status: result.status || 'success',
+        fallbackUsed: Boolean(result.fallbackUsed),
+        budgetBlocked: Boolean(result.budgetBlocked),
+        userMessage: result.userMessage,
+        errorCode: result.errorCode,
       });
     } catch (err) {
       request.log.error(err);
@@ -126,9 +135,13 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
         outputTokens: result.usage.outputTokens,
         totalTokens: result.usage.totalTokens,
         estimatedCostUsd: result.usage.estimatedCostUsd,
-        success: true,
+        success: result.status !== 'failed' && result.status !== 'blocked_by_budget',
+        status: result.status || 'success',
+        fallbackUsed: Boolean(result.fallbackUsed),
+        budgetBlocked: Boolean(result.budgetBlocked),
         statusCode: 200,
         userId,
+        errorCode: result.errorCode,
       } as const;
 
       logAiUsageEvent(usageEvent);
@@ -140,6 +153,11 @@ export async function registerAiRoutes(app: FastifyInstance): Promise<void> {
         model: result.model,
         latencyMs: result.latencyMs,
         usage: result.usage,
+        status: result.status || 'success',
+        fallbackUsed: Boolean(result.fallbackUsed),
+        budgetBlocked: Boolean(result.budgetBlocked),
+        userMessage: result.userMessage,
+        errorCode: result.errorCode,
       });
     } catch (err) {
       request.log.error(err);

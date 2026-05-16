@@ -6,6 +6,19 @@ export function estimateTokensFromText(text: string): number {
   return Math.max(1, Math.ceil((text || '').length / 4));
 }
 
+export function estimatePromptTokens(params: {
+  prompt: string;
+  systemInstruction?: string;
+}): number {
+  return estimateTokensFromText(`${params.systemInstruction || ''}\n${params.prompt || ''}`);
+}
+
+export function estimateOutputTokensFromLimit(maxOutputTokens?: number, fallback = 256): number {
+  const value = Number(maxOutputTokens ?? fallback);
+  if (!Number.isFinite(value) || value <= 0) return fallback;
+  return Math.max(1, Math.ceil(value));
+}
+
 export function buildUsage(params: {
   model: string;
   inputTokens: number;
@@ -54,8 +67,8 @@ export function extractOpenAiUsage(response: unknown): {
   const usage = (response as { usage?: Record<string, unknown> } | undefined)?.usage;
   if (!usage) return {};
 
-  const inputTokens = Number(usage.input_tokens);
-  const outputTokens = Number(usage.output_tokens);
+  const inputTokens = Number(usage.input_tokens ?? usage.prompt_tokens);
+  const outputTokens = Number(usage.output_tokens ?? usage.completion_tokens);
   const totalTokens = Number(usage.total_tokens);
 
   return {

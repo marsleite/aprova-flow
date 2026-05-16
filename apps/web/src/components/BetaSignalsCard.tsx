@@ -535,6 +535,62 @@ export default function BetaSignalsCard() {
             <EmptyState text="Nenhum uso de IA encontrado na janela atual." />
           )}
         </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-sans text-am-body font-bold text-foreground">Saude da IA</h3>
+            {!loading && (
+              <span className="text-am-caption text-muted-foreground">
+                {summary?.aiFallbackRatePercent ?? 0}% fallback
+              </span>
+            )}
+          </div>
+          {loading ? (
+            <EmptyState text="Carregando saude da IA..." />
+          ) : (
+            <div className="rounded-md border border-border bg-card px-3 py-3">
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <p className="text-am-heading-sm text-foreground">{summary?.aiFallbacks ?? 0}</p>
+                  <p className="text-am-caption text-muted-foreground">fallbacks</p>
+                </div>
+                <div>
+                  <p className="text-am-heading-sm text-foreground">{summary?.aiBudgetBlocks ?? 0}</p>
+                  <p className="text-am-caption text-muted-foreground">bloqueios</p>
+                </div>
+                <div>
+                  <p className="text-am-heading-sm text-foreground">{summary?.aiFailures ?? 0}</p>
+                  <p className="text-am-caption text-muted-foreground">falhas</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-sans text-am-body font-bold text-foreground">Providers de IA</h3>
+          </div>
+          {loading ? (
+            <EmptyState text="Carregando providers..." />
+          ) : summary?.topAiProviders?.length ? (
+            <div className="space-y-2">
+              {summary.topAiProviders.map((item) => (
+                <div key={`${item.provider}-${item.model}`} className="rounded-md border border-border bg-card px-3 py-3">
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-am-body-sm text-foreground">{item.provider}</span>
+                    <Badge variant="outline">{item.events}</Badge>
+                  </div>
+                  <p className="text-am-caption text-muted-foreground">
+                    {item.model} · {formatUsd(item.costUsd)} · fallback {item.fallbackRatePercent}% · falha {item.failureRatePercent}%
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState text="Nenhum provider registrado na janela atual." />
+          )}
+        </div>
       </div>
 
       {/* Gestão de acesso beta */}

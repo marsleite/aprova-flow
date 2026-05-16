@@ -129,3 +129,11 @@ export {
     PromptHeuristics,
     type AIHeuristicResult,
 } from './ai/PromptHeuristics';
+export {
+    resolveAiBudgetPolicy,
+    type AiBudgetBlockReason,
+    type AiBudgetTask,
+    type ResolveAiBudgetPolicyInput,
+    type ResolvedAiBudgetDecision,
+    type ResolvedAiBudgetLimit,
+} from './ai/AiBudgetPolicy';

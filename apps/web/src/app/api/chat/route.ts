@@ -221,9 +221,35 @@ ${engineResult.snapshot.subjects.filter(s => ['critical', 'neglected', 'warning'
         prompt,
         systemInstruction: systemPrompt,
         temperature: 0.5,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 420,
+        userId: auth.uid,
+        route: '/api/chat',
+        budgetTier: quota.planTier,
+        allowFallback: false,
       },
     });
+
+    if (aiResponse.budgetBlocked) {
+      return NextResponse.json(
+        {
+          error: aiResponse.userMessage || 'Limite de orçamento de IA atingido para este recurso.',
+          status: aiResponse.status || 'blocked_by_budget',
+          budgetBlocked: true,
+          task: 'chat',
+          errorCode: aiResponse.errorCode,
+        },
+        {
+          status: 429,
+          headers: {
+            ...quota.headers,
+            'x-ai-provider': aiResponse.provider,
+            'x-ai-model': aiResponse.model,
+            'x-ai-latency-ms': String(aiResponse.latencyMs),
+            'x-ai-cost-usd': aiResponse.usage.estimatedCostUsd.toString(),
+          },
+        }
+      );
+    }
 
     const text = aiResponse.text?.trim() || 'Desculpe, não consegui gerar uma resposta. Tente novamente.';
 
@@ -233,7 +259,12 @@ ${engineResult.snapshot.subjects.filter(s => ['critical', 'neglected', 'warning'
       .trim();
 
     return NextResponse.json(
-      { reply: cleaned },
+      {
+        reply: cleaned,
+        status: aiResponse.status || 'success',
+        fallbackUsed: Boolean(aiResponse.fallbackUsed),
+        budgetBlocked: Boolean(aiResponse.budgetBlocked),
+      },
       {
         headers: {
           ...quota.headers,

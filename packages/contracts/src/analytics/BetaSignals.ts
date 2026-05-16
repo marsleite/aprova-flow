@@ -34,6 +34,10 @@ export interface BetaAiUsageEventDoc {
   totalTokens: number;
   estimatedCostUsd: number;
   success: boolean;
+  status?: string;
+  fallbackUsed?: boolean;
+  budgetBlocked?: boolean;
+  errorCode?: string;
   statusCode: number;
   createdAt: string;
 }
@@ -80,6 +84,12 @@ export interface BetaSignalsSummary {
   topQuotaTasks: BetaQuotaTaskSummary[];
   topPlanTransitions: BetaPlanTransitionSummary[];
   topAiTasks: { task: string; events: number; costUsd: number }[];
+  aiFallbacks: number;
+  aiBudgetBlocks: number;
+  aiFailures: number;
+  aiFallbackRatePercent: number;
+  aiFailureRatePercent: number;
+  topAiProviders: { provider: string; model: string; events: number; costUsd: number; fallbackRatePercent: number; failureRatePercent: number }[];
 }
 
 function toDate(value: string | undefined): Date | null {
@@ -143,6 +153,7 @@ export function buildBetaSignalsSummary(
   const quotaTasks = new Map<string, number>();
   const planTransitions = new Map<string, number>();
   const aiTasks = new Map<string, { events: number; costUsd: number }>();
+  const aiProviders = new Map<string, { provider: string; model: string; events: number; costUsd: number; fallbacks: number; failures: number }>();
 
   let featureBlocked = 0;
   let upgradeViews = 0;
@@ -153,6 +164,9 @@ export function buildBetaSignalsSummary(
   let planStatusChanged = 0;
   let aiEventsCount = 0;
   let aiCostUsd = 0;
+  let aiFallbacks = 0;
+  let aiBudgetBlocks = 0;
+  let aiFailures = 0;
 
   for (const event of productEvents) {
     const createdAt = toDate(event.createdAt);
@@ -287,10 +301,35 @@ export function buildBetaSignalsSummary(
     }
 
     const task = event.task?.trim() || 'unknown';
+    const status = event.status?.trim() || (event.success ? 'success' : 'failed');
+    const fallbackUsed = event.fallbackUsed === true || status === 'fallback';
+    const budgetBlocked = event.budgetBlocked === true || status === 'blocked_by_budget';
+    const failed = !event.success || status === 'failed';
+    if (fallbackUsed) aiFallbacks += 1;
+    if (budgetBlocked) aiBudgetBlocks += 1;
+    if (failed && !budgetBlocked && !fallbackUsed) aiFailures += 1;
+
     const current = aiTasks.get(task) || { events: 0, costUsd: 0 };
     current.events += 1;
     current.costUsd += Number(event.estimatedCostUsd || 0);
     aiTasks.set(task, current);
+
+    const provider = event.provider?.trim() || (fallbackUsed ? 'local-heuristic' : 'unknown');
+    const model = event.model?.trim() || (fallbackUsed ? 'fallback' : 'unknown');
+    const providerKey = `${provider}::${model}`;
+    const providerCurrent = aiProviders.get(providerKey) || {
+      provider,
+      model,
+      events: 0,
+      costUsd: 0,
+      fallbacks: 0,
+      failures: 0,
+    };
+    providerCurrent.events += 1;
+    providerCurrent.costUsd += Number(event.estimatedCostUsd || 0);
+    if (fallbackUsed) providerCurrent.fallbacks += 1;
+    if (failed && !budgetBlocked && !fallbackUsed) providerCurrent.failures += 1;
+    aiProviders.set(providerKey, providerCurrent);
   }
 
   const topBlockedFeatures = Array.from(blockedFeatures.entries())
@@ -345,6 +384,18 @@ export function buildBetaSignalsSummary(
     .sort((a, b) => b.events - a.events || b.costUsd - a.costUsd || a.task.localeCompare(b.task))
     .slice(0, 5);
 
+  const topAiProviders = Array.from(aiProviders.values())
+    .map((value) => ({
+      provider: value.provider,
+      model: value.model,
+      events: value.events,
+      costUsd: roundCurrency(value.costUsd),
+      fallbackRatePercent: value.events > 0 ? Math.round((value.fallbacks / value.events) * 100) : 0,
+      failureRatePercent: value.events > 0 ? Math.round((value.failures / value.events) * 100) : 0,
+    }))
+    .sort((a, b) => b.events - a.events || b.costUsd - a.costUsd || a.provider.localeCompare(b.provider))
+    .slice(0, 5);
+
   return {
     windowDays,
     activeUsers: activeUsers.size,
@@ -366,5 +417,11 @@ export function buildBetaSignalsSummary(
     topQuotaTasks,
     topPlanTransitions,
     topAiTasks,
+    aiFallbacks,
+    aiBudgetBlocks,
+    aiFailures,
+    aiFallbackRatePercent: aiEventsCount > 0 ? Math.round((aiFallbacks / aiEventsCount) * 100) : 0,
+    aiFailureRatePercent: aiEventsCount > 0 ? Math.round((aiFailures / aiEventsCount) * 100) : 0,
+    topAiProviders,
   };
 }

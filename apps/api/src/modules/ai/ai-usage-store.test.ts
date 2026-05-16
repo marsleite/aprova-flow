@@ -37,7 +37,47 @@ test('saveAiUsageEvent persists ai_usage_events with createdAt when idToken is p
   assert.equal(writes[0]?.data.route, '/api/chat');
   assert.equal(writes[0]?.data.task, 'chat');
   assert.equal(writes[0]?.data.userId, 'user-1');
+  assert.equal(writes[0]?.data.status, 'success');
+  assert.equal(writes[0]?.data.fallbackUsed, false);
+  assert.equal(writes[0]?.data.budgetBlocked, false);
   assert.equal(typeof writes[0]?.data.createdAt, 'string');
+});
+
+test('saveAiUsageEvent persists blocked and fallback ai usage statuses', async () => {
+  const writes: Array<{
+    collection: string;
+    data: Record<string, string | number | boolean | null | undefined>;
+    idToken: string;
+  }> = [];
+
+  await saveAiUsageEvent(
+    {
+      route: '/api/chat',
+      task: 'chat',
+      provider: 'local-heuristic',
+      model: 'budget-policy',
+      latencyMs: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+      estimatedCostUsd: 0,
+      success: false,
+      status: 'blocked_by_budget',
+      fallbackUsed: false,
+      budgetBlocked: true,
+      statusCode: 429,
+      errorCode: 'user_daily_budget',
+    },
+    'token-1',
+    async (params) => {
+      writes.push(params);
+      return { ok: true, status: 200 };
+    }
+  );
+
+  assert.equal(writes[0]?.data.status, 'blocked_by_budget');
+  assert.equal(writes[0]?.data.budgetBlocked, true);
+  assert.equal(writes[0]?.data.errorCode, 'user_daily_budget');
 });
 
 test('saveAiUsageEvent skips persistence when idToken is missing', async () => {

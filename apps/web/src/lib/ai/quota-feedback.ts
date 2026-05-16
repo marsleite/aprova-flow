@@ -25,6 +25,10 @@ export interface AiQuotaErrorPayload {
   window?: string | null;
   retryAfterSeconds?: number | null;
   upgradeHint?: string | null;
+  status?: string;
+  budgetBlocked?: boolean;
+  userMessage?: string | null;
+  errorCode?: string | null;
 }
 
 export interface AiQuotaNoticeData {
@@ -40,6 +44,14 @@ export interface AiQuotaNoticeData {
   retryAfterSeconds?: number | null;
   ctaLabel?: string;
   ctaHref?: string;
+}
+
+export interface AiBudgetNoticeData {
+  title: string;
+  message: string;
+  detail?: string;
+  task?: string;
+  errorCode?: string;
 }
 
 function normalizeRecommendedPlan(value: string | null | undefined): RecommendedPlan | undefined {
@@ -191,6 +203,31 @@ export function extractAiQuotaNotice(
   };
 }
 
+export function extractAiBudgetNotice(payload: unknown): AiBudgetNoticeData | null {
+  if (!payload || typeof payload !== 'object') {
+    return null;
+  }
+
+  const data = payload as AiQuotaErrorPayload;
+  const budgetBlocked = data.budgetBlocked === true || data.status === 'blocked_by_budget';
+  if (!budgetBlocked) {
+    return null;
+  }
+
+  return {
+    title: 'Orçamento de IA protegido',
+    message:
+      typeof data.userMessage === 'string' && data.userMessage.trim()
+        ? data.userMessage.trim()
+        : typeof data.error === 'string' && data.error.trim()
+          ? data.error.trim()
+          : 'Limite de orçamento de IA atingido para este recurso.',
+    detail: 'A ação foi interrompida antes de gerar custo externo. Quando houver fallback local, o app continua oferecendo uma orientação segura.',
+    task: typeof data.task === 'string' ? data.task : undefined,
+    errorCode: typeof data.errorCode === 'string' ? data.errorCode : undefined,
+  };
+}
+
 export async function readAiErrorResponse(params: {
   response: Response;
   fallbackMessage: string;
@@ -201,11 +238,20 @@ export async function readAiErrorResponse(params: {
 }> {
   const payload = await params.response.json().catch(() => ({}));
   const quotaNotice = extractAiQuotaNotice(payload);
+  const budgetNotice = extractAiBudgetNotice(payload);
 
   if (quotaNotice) {
     return {
       message: quotaNotice.message,
       quotaNotice,
+      payload,
+    };
+  }
+
+  if (budgetNotice) {
+    return {
+      message: budgetNotice.message,
+      quotaNotice: null,
       payload,
     };
   }
@@ -243,4 +289,8 @@ export function buildAiQuotaChatMessage(notice: AiQuotaNoticeData): string {
   }
 
   return parts.join(' ');
+}
+
+export function buildAiBudgetChatMessage(notice: AiBudgetNoticeData): string {
+  return [notice.title, notice.message, notice.detail].filter(Boolean).join(' ');
 }

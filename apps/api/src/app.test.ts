@@ -818,6 +818,11 @@ test('GET /billing/admin/beta-signals returns the aggregated admin summary', asy
           planStatusChanged: 1,
           aiEvents: 11,
           aiCostUsd: 0.1842,
+          aiFallbacks: 2,
+          aiBudgetBlocks: 1,
+          aiFailures: 1,
+          aiFallbackRatePercent: 18,
+          aiFailureRatePercent: 9,
           upgradeByRecommendedPlan: [
             {
               recommendedPlan: 'pro',
@@ -834,6 +839,16 @@ test('GET /billing/admin/beta-signals returns the aggregated admin summary', asy
           topQuotaTasks: [{ task: 'chat', count: 2 }],
           topPlanTransitions: [{ label: 'free -> pro', count: 1 }],
           topAiTasks: [{ task: 'chat', events: 5, costUsd: 0.074 }],
+          topAiProviders: [
+            {
+              provider: 'gemini',
+              model: 'gemini-2.5-flash-lite',
+              events: 5,
+              costUsd: 0.074,
+              fallbackRatePercent: 20,
+              failureRatePercent: 10,
+            },
+          ],
         };
       },
     },
@@ -865,6 +880,11 @@ test('GET /billing/admin/beta-signals returns the aggregated admin summary', asy
       planStatusChanged: 1,
       aiEvents: 11,
       aiCostUsd: 0.1842,
+      aiFallbacks: 2,
+      aiBudgetBlocks: 1,
+      aiFailures: 1,
+      aiFallbackRatePercent: 18,
+      aiFailureRatePercent: 9,
       upgradeByRecommendedPlan: [
         {
           recommendedPlan: 'pro',
@@ -881,6 +901,16 @@ test('GET /billing/admin/beta-signals returns the aggregated admin summary', asy
       topQuotaTasks: [{ task: 'chat', count: 2 }],
       topPlanTransitions: [{ label: 'free -> pro', count: 1 }],
       topAiTasks: [{ task: 'chat', events: 5, costUsd: 0.074 }],
+      topAiProviders: [
+        {
+          provider: 'gemini',
+          model: 'gemini-2.5-flash-lite',
+          events: 5,
+          costUsd: 0.074,
+          fallbackRatePercent: 20,
+          failureRatePercent: 10,
+        },
+      ],
     });
   } finally {
     await app.close();

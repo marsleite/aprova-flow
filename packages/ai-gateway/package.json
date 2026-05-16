@@ -7,6 +7,10 @@
     ".": "./src/index.ts",
     "./*": "./src/*"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "test": "vitest run --dir src"
+  },
   "dependencies": {
     "@aprovamind/domain": "*",
     "@google/genai": "^0.14.0"

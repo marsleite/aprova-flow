@@ -138,6 +138,28 @@ Responda EXATAMENTE neste formato JSON (sem markdown, sem \`\`\`):
 }`;
 }
 
+function buildFallbackMentoring(body: WeeklyMentoringRequest) {
+  const neglected = body.planVsActual.filter((p) => p.status === 'neglected').map((p) => p.subject);
+  const topSubject = neglected[0] || body.subjectHours[0]?.subject || 'matéria prioritária';
+  return {
+    weekDiagnosis: `Modo resiliente: você estudou ${body.weeklyTotalHours.toFixed(1)}h de ${body.weeklyGoalHours}h previstas (${body.weeklyProgressPercent}%). Use esta leitura como orientação segura enquanto a IA ao vivo não responde.`,
+    strengths: body.daysStudiedThisWeek > 0
+      ? [`Você estudou em ${body.daysStudiedThisWeek} dia(s) nesta semana.`]
+      : ['Você já tem dados suficientes para recomeçar com um plano simples.'],
+    improvements: neglected.length > 0
+      ? neglected.slice(0, 2).map((subject) => `${subject} ficou abaixo do planejado.`)
+      : ['Aumente o volume de questões e registre sessões para melhorar a precisão do diagnóstico.'],
+    recoveryPlan: `Priorize ${topSubject} no próximo bloco e reserve pelo menos 30 minutos para questões ou revisão ativa.`,
+    suggestedGoals: [
+      'Registrar pelo menos uma sessão no próximo dia de estudo.',
+      `Fazer um bloco de revisão em ${topSubject}.`,
+      'Resolver 10 questões e registrar acertos.',
+    ],
+    motivationalClose: 'O importante agora é manter tração. Um bloco bem feito já muda o ritmo da semana.',
+    fallbackUsed: true,
+  };
+}
+
 // ============================================================
 // Handler
 // ============================================================
@@ -186,16 +208,16 @@ export async function POST(request: NextRequest) {
     });
 
     const parsed = parseJsonFromModelText<Record<string, unknown>>(aiResponse.text || '');
+    if (aiResponse.budgetBlocked) {
+      return NextResponse.json(buildFallbackMentoring(body), {
+        headers: { ...quota.headers, 'x-ai-fallback': 'true' },
+      });
+    }
     if (!parsed) {
       console.error('[weekly-mentoring] JSON inválido:', (aiResponse.text || '').slice(0, 500));
-      const failure = resolveAiFailureState({
-        capability: 'weekly_mentoring',
-        error: new Error('invalid_json'),
+      return NextResponse.json(buildFallbackMentoring(body), {
+        headers: { ...quota.headers, 'x-ai-fallback': 'true' },
       });
-      return NextResponse.json(
-        { error: failure.message, aiCapability: failure },
-        { status: 422 }
-      );
     }
 
     // Validação e defaults
@@ -229,8 +251,8 @@ export async function POST(request: NextRequest) {
         error,
       });
       return NextResponse.json(
-        { error: failure.message, code: 'QUOTA_EXCEEDED', aiCapability: failure },
-        { status: 429 }
+      { ...buildFallbackMentoring({ userName: 'Estudante', currentStreak: 0, bestStreak: 0, weeklyGoalHours: 0, weeklyTotalHours: 0, weeklyProgressPercent: 0, daysStudiedThisWeek: 0, subjectHours: [], planVsActual: [], weeklyBreakdown: [], recentSessions: [] }), code: 'QUOTA_EXCEEDED', aiCapability: failure },
+        { status: 200, headers: { 'x-ai-fallback': 'true' } }
       );
     }
 
