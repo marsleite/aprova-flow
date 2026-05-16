@@ -53,8 +53,16 @@ async function verifyRequestUser(req: IncomingMessage) {
     };
   }
 
-  const { verifyFirebaseIdToken } = await import('@aprovamind/infrastructure-firebase');
-  const identity = await verifyFirebaseIdToken(idToken);
+  let identity: { uid: string; email?: string | null } | null = null;
+  try {
+    const { verifyFirebaseIdToken } = await import('@aprovamind/infrastructure-firebase');
+    identity = await verifyFirebaseIdToken(idToken);
+  } catch (error) {
+    console.error('[api-auth] firebase token verification failed', {
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+
   if (!identity) {
     return {
       ok: false as const,
