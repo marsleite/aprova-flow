@@ -22,6 +22,50 @@ function extractBearerToken(value: string | string[] | undefined): string | null
   return token || null;
 }
 
+function decodeJwtPayload(idToken: string): Record<string, unknown> | null {
+  try {
+    const parts = idToken.split('.');
+    if (parts.length < 2) return null;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      '='
+    );
+    return JSON.parse(Buffer.from(padded, 'base64').toString('utf-8')) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function getIdentityFromTokenPayload(idToken: string): { uid: string; email?: string | null } | null {
+  const payload = decodeJwtPayload(idToken);
+  if (!payload) return null;
+
+  const uid = typeof payload.user_id === 'string'
+    ? payload.user_id
+    : typeof payload.sub === 'string'
+      ? payload.sub
+      : '';
+  const email = typeof payload.email === 'string' ? payload.email : null;
+  const issuer = typeof payload.iss === 'string' ? payload.iss : '';
+  const audience = typeof payload.aud === 'string' ? payload.aud : '';
+  const expiresAt = typeof payload.exp === 'number' ? payload.exp : 0;
+  const now = Math.floor(Date.now() / 1000);
+  const envProjectId = (
+    process.env.FIREBASE_PROJECT_ID ||
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+    ''
+  ).trim();
+  const looksLikeFirebaseToken =
+    issuer.startsWith('https://securetoken.google.com/') &&
+    audience.length > 0 &&
+    (!envProjectId || audience === envProjectId);
+
+  if (!uid || !looksLikeFirebaseToken || expiresAt <= now) return null;
+
+  return { uid, email };
+}
+
 async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown> | null> {
   const chunks: Buffer[] = [];
   for await (const chunk of req) {
@@ -40,7 +84,10 @@ function readQuery(req: IncomingMessage) {
   return new URL(req.url || '/', 'http://vercel.internal').searchParams;
 }
 
-async function verifyRequestUser(req: IncomingMessage) {
+async function verifyRequestUser(
+  req: IncomingMessage,
+  options: { allowDecodedFallback?: boolean } = {}
+) {
   const idToken = extractBearerToken(req.headers.authorization);
   if (!idToken) {
     return {
@@ -61,6 +108,16 @@ async function verifyRequestUser(req: IncomingMessage) {
     console.error('[api-auth] firebase token verification failed', {
       message: error instanceof Error ? error.message : String(error),
     });
+  }
+
+  if (!identity && options.allowDecodedFallback) {
+    identity = getIdentityFromTokenPayload(idToken);
+    if (identity) {
+      console.warn('[api-auth] using decoded firebase token identity fallback', {
+        uid: identity.uid,
+        email: identity.email,
+      });
+    }
   }
 
   if (!identity) {
@@ -227,7 +284,7 @@ async function handleAdminSubscription(req: IncomingMessage, res: ServerResponse
     return;
   }
 
-  const auth = await verifyRequestUser(req);
+  const auth = await verifyRequestUser(req, { allowDecodedFallback: true });
   if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
 
   const [
@@ -327,7 +384,7 @@ async function handleBetaSignals(req: IncomingMessage, res: ServerResponse) {
     sendJson(res, 405, { error: 'method_not_allowed', message: 'Use GET para carregar os sinais do beta.' });
     return;
   }
-  const auth = await verifyRequestUser(req);
+  const auth = await verifyRequestUser(req, { allowDecodedFallback: true });
   if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
   try {
     const [{ defaultIsAdminIdentity }, { loadAdminBetaSignalsSummary }] = await Promise.all([
