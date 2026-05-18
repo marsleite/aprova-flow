@@ -1,0 +1,20 @@
+apps/api/api/backend.ts
+  s_d70f27d56480a5::t_2485a33b073f35 287,387
+  s_d70f27d56480a5::t_1945a2ca88b0b4 25-68,87-90,113-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "a42bcf842a9a9f4d303fea90990abfd63370d525",
+  "prompts": {},
+  "sessions": {
+    "s_d70f27d56480a5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1197-c217-7353-97d7-a7d1245662be",
+        "model": "gpt-5.5"
+      },
+      "human_author": "marsleite <marsleite@gmail.com>"
+    }
+  }
+}
