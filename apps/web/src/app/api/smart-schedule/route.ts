@@ -23,28 +23,74 @@ interface SmartScheduleItem {
     subjects: { name: string; hours: number; reason: string }[];
 }
 
+interface RawSmartSubject {
+    name?: unknown;
+    hours?: unknown;
+    reason?: unknown;
+}
+
+interface RawSmartScheduleItem {
+    day?: unknown;
+    totalHours?: unknown;
+    subjects?: unknown;
+}
+
 function sanitizeSchedule(
-    raw: SmartScheduleItem[],
+    rawInput: unknown,
     availableSchedule: { day: string; availableHours: number }[]
 ): SmartScheduleItem[] {
+    let raw: RawSmartScheduleItem[] = [];
+    if (Array.isArray(rawInput)) {
+        raw = rawInput as RawSmartScheduleItem[];
+    } else if (rawInput && typeof rawInput === 'object') {
+        const obj = rawInput as Record<string, unknown>;
+        const candidateKeys = ['schedule', 'days', 'cronograma', 'items', 'weekly', 'weeklySchedule', 'weekly_schedule', 'data'];
+        for (const key of candidateKeys) {
+            if (Array.isArray(obj[key])) {
+                raw = obj[key] as RawSmartScheduleItem[];
+                break;
+            }
+        }
+        if (raw.length === 0) {
+            for (const key in obj) {
+                if (Array.isArray(obj[key])) {
+                    raw = obj[key] as RawSmartScheduleItem[];
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!Array.isArray(raw)) {
+        return [];
+    }
+
     const limits = new Map(
         availableSchedule.map((day) => [day.day.toLowerCase(), day.availableHours])
     );
 
     return raw
-        .filter((item) => item && typeof item.day === 'string' && limits.has(item.day.toLowerCase()))
+        .filter((item): item is RawSmartScheduleItem & { day: string } => 
+            !!(item && typeof item === 'object' && typeof item.day === 'string' && limits.has(item.day.toLowerCase()))
+        )
         .map((item) => {
             const dayKey = item.day.toLowerCase();
             const maxHours = limits.get(dayKey) ?? 0;
-            const subjects = Array.isArray(item.subjects)
-                ? item.subjects
-                    .filter((subject) => subject && typeof subject.name === 'string')
-                    .map((subject) => ({
-                        name: subject.name,
-                        hours: Math.max(0, Math.round(Number(subject.hours || 0) * 10) / 10),
-                        reason: typeof subject.reason === 'string' ? subject.reason : 'Distribuição estratégica da semana.',
-                    }))
+            
+            const rawSubjects = Array.isArray(item.subjects)
+                ? (item.subjects as RawSmartSubject[])
                 : [];
+                
+            const subjects = rawSubjects
+                .filter((subject): subject is RawSmartSubject & { name: string } => 
+                    !!(subject && typeof subject.name === 'string')
+                )
+                .map((subject) => ({
+                    name: subject.name,
+                    hours: Math.max(0, Math.round(Number(subject.hours || 0) * 10) / 10),
+                    reason: typeof subject.reason === 'string' ? subject.reason : 'Distribuição estratégica da semana.',
+                }));
+                
             const totalHours = Math.max(
                 0,
                 Math.min(
@@ -52,7 +98,7 @@ function sanitizeSchedule(
                     Math.round(
                         (Number.isFinite(Number(item.totalHours))
                             ? Number(item.totalHours)
-                            : subjects.reduce((sum, subject) => sum + subject.hours, 0)) * 10
+                            : subjects.reduce((sum: number, subject) => sum + subject.hours, 0)) * 10
                     ) / 10
                 )
             );
