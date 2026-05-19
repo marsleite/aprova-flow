@@ -9,6 +9,7 @@ import { auth } from '@/lib/firebase/config';
 
 interface PlanEngineSnapshotCardProps {
   planId?: string | null;
+  onAdjustPlan?: () => void;
 }
 
 type EngineSnapshotApiResponse =
@@ -110,6 +111,7 @@ function emptyStateCopy(reason: 'no_active_plan' | 'plan_not_found') {
 
 export default function PlanEngineSnapshotCard({
   planId,
+  onAdjustPlan,
 }: PlanEngineSnapshotCardProps) {
   const [snapshot, setSnapshot] = useState<PlanEngineSnapshotV1 | null>(null);
   const [reason, setReason] = useState<'no_active_plan' | 'plan_not_found' | null>(null);
@@ -369,12 +371,24 @@ export default function PlanEngineSnapshotCard({
                 {snapshot.recommendations.length} recomendações no snapshot atual
               </span>
             </div>
-            <Button asChild variant="outline" size="sm" className="h-8">
-              <Link href="/planner">
+            {onAdjustPlan ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8"
+                onClick={onAdjustPlan}
+              >
                 Ajustar plano
                 <ChevronRight className="ml-1 h-3 w-3" />
-              </Link>
-            </Button>
+              </Button>
+            ) : (
+              <Button asChild variant="outline" size="sm" className="h-8">
+                <Link href="/planner">
+                  Ajustar plano
+                  <ChevronRight className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       ) : null}

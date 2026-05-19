@@ -395,7 +395,17 @@ export default function PlannerPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Núcleo de Prioridade do Motor */}
           <motion.div custom={2} variants={fadeUp} initial="hidden" animate="show">
-            <PlanEngineSnapshotCard planId={activePlanId || null} />
+            <PlanEngineSnapshotCard
+              planId={activePlanId || null}
+              onAdjustPlan={
+                activePlan
+                  ? () => {
+                      setEditingPlan(activePlan);
+                      setPlanManagerOpen(true);
+                    }
+                  : undefined
+              }
+            />
           </motion.div>
 
           {/* AI Diagnóstico */}
