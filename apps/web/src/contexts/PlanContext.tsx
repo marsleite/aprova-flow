@@ -8,6 +8,7 @@ interface PlanContextValue {
   activePlanId: string | null;
   activePlan: StudyPlanEdital | null;
   onPlanChange: (planId: string | null) => void;
+  refreshPlans: () => Promise<void>;
 }
 
 export const PlanContext = createContext<PlanContextValue>({
@@ -15,6 +16,7 @@ export const PlanContext = createContext<PlanContextValue>({
   activePlanId: null,
   activePlan: null,
   onPlanChange: () => {},
+  refreshPlans: async () => {},
 });
 
 export function usePlanContext() {
