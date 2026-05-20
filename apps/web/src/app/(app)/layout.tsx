@@ -68,8 +68,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       activePlanId,
       activePlan: plans.find((p) => p.id === activePlanId) ?? null,
       onPlanChange: handlePlanChange,
+      refreshPlans: async () => {
+        if (!user) return;
+        try {
+          const allPlans = await deduplicateDefaultPlans(user.uid);
+          setPlans(allPlans);
+        } catch {
+          // silent error
+        }
+      },
     }),
-    [plans, activePlanId, handlePlanChange]
+    [plans, activePlanId, handlePlanChange, user]
   );
 
   if (loading) {

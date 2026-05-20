@@ -243,6 +243,7 @@ export default function DashboardPage() {
             <div className="h-full">
               <SmartScheduleCard
                 userId={user.uid}
+                activePlanId={activePlanId}
                 userName={user.displayName?.split(' ')[0] || 'Estudante'}
                 activePlanName={activePlan?.name || null}
                 consistency={consistency}

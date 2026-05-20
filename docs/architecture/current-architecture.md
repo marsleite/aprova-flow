@@ -265,3 +265,18 @@ Dependências proibidas:
 - duplicar o runtime do engine entre `web` e `api`
 - usar rotas Next como backend definitivo para recursos protegidos
 - tratar `packages/infrastructure-*` como lugar de regra de produto
+
+## Coleções e Persistência de Dados (Firestore)
+
+### `weekly_smart_schedules`
+- **Objetivo**: Salvar o cronograma semanal inteligível gerado por IA para evitar perda de dados no reload.
+- **Formato do ID do Documento**: `${userId}_${planId}_${weekStart}` (onde `weekStart` é o YYYY-MM-DD da segunda-feira da semana corrente, obtido de forma timezone-safe).
+- **Campos**:
+  - `userId` (string): Identificador do usuário dono do cronograma.
+  - `planId` (string): Identificador do plano de estudos ativo (garante isolamento multi-edital).
+  - `weekStart` (string): Data da segunda-feira da semana de alocação (YYYY-MM-DD).
+  - `schedule` (list): Array com itens do cronograma diário, contendo dia, horas totais sugeridas e matérias detalhadas com motivo de alocação.
+  - `generatedAt` (string): Timestamp ISO 8601 da primeira geração do cronograma.
+  - `updatedAt` (string): Timestamp ISO 8601 da última atualização (recalculação) do cronograma.
+- **Regras de Acesso**: Leitura, escrita e atualização permitidas exclusivamente para o próprio usuário autenticado (`request.auth.uid == userId`).
+

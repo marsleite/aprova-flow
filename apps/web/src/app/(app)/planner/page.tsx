@@ -93,7 +93,7 @@ export default function PlannerPage() {
     user?.uid,
     user?.email
   );
-  const { plans, activePlanId, activePlan, onPlanChange } = usePlanContext();
+  const { plans, activePlanId, activePlan, onPlanChange, refreshPlans } = usePlanContext();
 
   const [planStats, setPlanStats] = useState<PlanStats[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
@@ -210,9 +210,15 @@ export default function PlannerPage() {
 
   const handleDelete = async (planId: string) => {
     if (!user || !confirm('Excluir este edital? Esta ação é irreversível.')) return;
-    await deleteStudyPlan(planId);
-    setOpenMenuId(null);
-    await loadData();
+    try {
+      await deleteStudyPlan(planId);
+      await refreshPlans();
+      setOpenMenuId(null);
+      await loadData();
+    } catch (err) {
+      console.error('Erro ao excluir edital:', err);
+      alert(err instanceof Error ? err.message : 'Erro ao excluir edital.');
+    }
   };
 
   if (!user) return null;

@@ -37,6 +37,7 @@ import {
   PLAN_COLORS,
 } from '@/types';
 import { useEntitlements } from '@/hooks/useEntitlements';
+import { usePlanContext } from '@/contexts/PlanContext';
 import {
   createStudyPlan,
   updateStudyPlan,
@@ -205,6 +206,7 @@ export default function PlanManager({
   const isEditing = !!editPlan?.id;
   const { hasFeature, planTier } = useEntitlements(userId);
   const pathname = usePathname();
+  const { refreshPlans } = usePlanContext();
 
   const [name, setName] = useState('');
   const [color, setColor] = useState<string>(PLAN_COLORS[0].hex);
@@ -474,6 +476,7 @@ export default function PlanManager({
           isDefault: false,
         });
       }
+      await refreshPlans();
       onClose();
     } catch (err) {
       console.error('Erro ao salvar plano:', err);
@@ -488,6 +491,7 @@ export default function PlanManager({
     setDeleting(true);
     try {
       await deleteStudyPlan(editPlan.id);
+      await refreshPlans();
       onClose();
     } catch (err) {
       console.error('Erro ao deletar plano:', err);
