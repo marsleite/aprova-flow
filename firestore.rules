@@ -264,6 +264,31 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Cronograma de Foco Semanal Inteligente (Livre e Pro)
+    match /weekly_smart_schedules/{docId} {
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+      
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.planId is string
+                    && request.resource.data.weekStart is string
+                    && request.resource.data.schedule is list
+                    && request.resource.data.generatedAt is string
+                    && request.resource.data.updatedAt is string;
+
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.planId == resource.data.planId
+                    && request.resource.data.weekStart == resource.data.weekStart
+                    && request.resource.data.schedule is list
+                    && request.resource.data.updatedAt is string;
+
+      allow delete: if request.auth != null
+                    && resource.data.userId == request.auth.uid;
+    }
+
     // Contadores de quota/rate limit de IA (janela distribuída)
     match /ai_rate_limits/{docId} {
       allow read: if request.auth != null

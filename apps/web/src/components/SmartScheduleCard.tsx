@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Sparkles, Loader2, RefreshCw, AlertTriangle, CalendarDays, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Loader2, RefreshCw, AlertTriangle, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components';
 import { StudyConsistency, SubjectWeight, SubjectAccuracy, StudyCapacityHours } from '@/types';
 import AiQuotaNotice from '@/components/AiQuotaNotice';
@@ -12,6 +12,11 @@ import {
     buildAvailableStudyDays,
     getStudyPlanCoverageProjection,
 } from '@/lib/plans/studyCapacity';
+import {
+    getMondayOfCurrentWeek,
+    saveWeeklySmartSchedule,
+    getWeeklySmartSchedule,
+} from '@/lib/firebase/smartSchedules';
 
 interface SmartScheduleItem {
     day: string;
@@ -21,6 +26,7 @@ interface SmartScheduleItem {
 
 interface SmartScheduleCardProps {
     userId: string;
+    activePlanId: string | null;
     userName: string;
     activePlanName?: string | null;
     consistency: StudyConsistency | null;
@@ -33,6 +39,7 @@ interface SmartScheduleCardProps {
 
 export default function SmartScheduleCard({
     userId,
+    activePlanId,
     userName,
     activePlanName,
     consistency,
@@ -43,10 +50,51 @@ export default function SmartScheduleCard({
     studyCapacityHours,
 }: SmartScheduleCardProps) {
     const [loading, setLoading] = useState(false);
+    const [loadingLocal, setLoadingLocal] = useState(false);
     const [schedule, setSchedule] = useState<SmartScheduleItem[] | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [saveWarning, setSaveWarning] = useState<string | null>(null);
     const [quotaNotice, setQuotaNotice] = useState<AiQuotaNoticeData | null>(null);
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
+
+    useEffect(() => {
+        let active = true;
+        const loadSavedSchedule = async () => {
+            if (!userId || !activePlanId) {
+                setSchedule(null);
+                return;
+            }
+            setLoadingLocal(true);
+            setError(null);
+            setSaveWarning(null);
+            try {
+                const weekStart = getMondayOfCurrentWeek(new Date());
+                const saved = await getWeeklySmartSchedule(userId, activePlanId, weekStart);
+                if (active) {
+                    if (saved && saved.length > 0) {
+                        setSchedule(saved);
+                        setExpandedDay(saved[0].day);
+                    } else {
+                        setSchedule(null);
+                    }
+                }
+            } catch (err) {
+                console.error('[SmartScheduleCard] Error loading saved schedule:', err);
+                if (active) {
+                    setSchedule(null);
+                }
+            } finally {
+                if (active) {
+                    setLoadingLocal(false);
+                }
+            }
+        };
+
+        loadSavedSchedule();
+        return () => {
+            active = false;
+        };
+    }, [userId, activePlanId]);
 
     const hasContext = (planWeights?.length || 0) > 0 && (consistency?.weeklyGoalHours || 0) > 0;
     const availableSchedule = buildAvailableStudyDays(
@@ -125,13 +173,24 @@ export default function SmartScheduleCard({
                 setExpandedDay(data.schedule[0].day);
             }
 
+            // Save to Firestore
+            if (userId && activePlanId && data.schedule) {
+                try {
+                    const weekStart = getMondayOfCurrentWeek(new Date());
+                    await saveWeeklySmartSchedule(userId, activePlanId, weekStart, data.schedule);
+                } catch (saveErr) {
+                    console.error('[SmartScheduleCard] Error saving generated schedule:', saveErr);
+                    setSaveWarning('Erro ao salvar no banco. O cronograma estará disponível apenas nesta sessão.');
+                }
+            }
+
         } catch {
             setQuotaNotice(null);
             setError('Erro de conexão ao gerar o cronograma.');
         } finally {
             setLoading(false);
         }
-    }, [loading, userName, activePlanName, consistency, examDate, materialWorkloadHours, projection.requiredWeeklyHours, projection.status, availableSchedule, planWeights, accuracyData]);
+    }, [loading, userName, activePlanName, consistency, examDate, materialWorkloadHours, projection.requiredWeeklyHours, projection.status, availableSchedule, planWeights, accuracyData, userId, activePlanId]);
 
     return (
         <motion.div
@@ -169,98 +228,114 @@ export default function SmartScheduleCard({
                 </Button>
             </div>
 
-            {!hasContext && (
-                <div className="rounded-xl border border-am-warning/30 bg-am-warning/10 px-4 py-3 text-sm text-am-warning flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 flex-shrink-0" />
-                    <p>Defina as matérias e seus pesos no &apos;Edital&apos; para a IA poder calcular sua rota ideal.</p>
+            {loadingLocal ? (
+                <div className="flex-1 flex flex-col items-center justify-center py-12 gap-3">
+                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                    <p className="text-sm text-muted-foreground">Carregando cronograma...</p>
                 </div>
-            )}
-
-            {hasContext && (
-                <div className="mb-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] text-muted-foreground">
-                        Capacidade da semana: <strong className="text-foreground">{projection.weeklyCapacityHours.toFixed(1)}h</strong>
-                    </span>
-                    <span className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] text-muted-foreground">
-                        Meta do plano: <strong className="text-foreground">{(consistency?.weeklyGoalHours ?? 10).toFixed(1)}h</strong>
-                    </span>
-                    {projection.requiredWeeklyHours != null && (
-                        <span className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] text-muted-foreground">
-                            Ritmo necessário: <strong className="text-foreground">{projection.requiredWeeklyHours.toFixed(1)}h</strong>
-                        </span>
+            ) : (
+                <>
+                    {!hasContext && (
+                        <div className="rounded-xl border border-am-warning/30 bg-am-warning/10 px-4 py-3 text-sm text-am-warning flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+                            <p>Defina as matérias e seus pesos no &apos;Edital&apos; para a IA poder calcular sua rota ideal.</p>
+                        </div>
                     )}
-                </div>
-            )}
 
-            {quotaNotice ? (
-                <AiQuotaNotice
-                    notice={quotaNotice}
-                    className="mb-4"
-                    surface="smart_schedule_card"
-                />
-            ) : error && (
-                <div className="mb-4 flex items-center gap-2 rounded-xl border border-am-error/30 bg-am-error/10 px-4 py-3 text-sm text-am-error">
-                    <AlertTriangle className="h-5 w-5" />
-                    {error}
-                </div>
-            )}
+                    {hasContext && (
+                        <div className="mb-4 flex flex-wrap gap-2">
+                            <span className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] text-muted-foreground">
+                                Capacidade da semana: <strong className="text-foreground">{projection.weeklyCapacityHours.toFixed(1)}h</strong>
+                            </span>
+                            <span className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] text-muted-foreground">
+                                Meta do plano: <strong className="text-foreground">{(consistency?.weeklyGoalHours ?? 10).toFixed(1)}h</strong>
+                            </span>
+                            {projection.requiredWeeklyHours != null && (
+                                <span className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] text-muted-foreground">
+                                    Ritmo necessário: <strong className="text-foreground">{projection.requiredWeeklyHours.toFixed(1)}h</strong>
+                                </span>
+                            )}
+                        </div>
+                    )}
 
-            {schedule && (
-                <div className="space-y-3 relative z-10">
-                    {schedule.map((dayItem, idx) => {
-                        const isExpanded = expandedDay === dayItem.day;
-                        return (
-                            <div key={idx} className="rounded-lg border border-border/50 bg-muted overflow-hidden transition-all hover:border-border ring-1 ring-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-                                <button
-                                    onClick={() => setExpandedDay(isExpanded ? null : dayItem.day)}
-                                    className="w-full flex items-center justify-between p-4 text-left focus:outline-none"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-md ring-1 ring-white/5 ${isExpanded ? 'bg-am-ai-subtle/40 text-primary' : 'bg-background text-muted-foreground'}`}>
-                                            <CalendarDays className="h-5 w-5" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-foreground">{dayItem.day}</p>
-                                            <p className="text-xs text-primary font-medium">{dayItem.totalHours} horas sugeridas</p>
-                                        </div>
-                                    </div>
-                                    {isExpanded ? <ChevronUp className="text-muted-foreground h-5 w-5" /> : <ChevronDown className="text-muted-foreground h-5 w-5" />}
-                                </button>
+                    {quotaNotice ? (
+                        <AiQuotaNotice
+                            notice={quotaNotice}
+                            className="mb-4"
+                            surface="smart_schedule_card"
+                        />
+                    ) : error && (
+                        <div className="mb-4 flex items-center gap-2 rounded-xl border border-am-error/30 bg-am-error/10 px-4 py-3 text-sm text-am-error">
+                            <AlertTriangle className="h-5 w-5" />
+                            {error}
+                        </div>
+                    )}
 
-                                <AnimatePresence>
-                                    {isExpanded && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            transition={{ duration: 0.2 }}
-                                            className="px-4 pb-4 pt-1 border-t border-border"
+                    {saveWarning && (
+                        <div className="mb-4 flex items-center gap-2 rounded-xl border border-am-warning/30 bg-am-warning/10 px-4 py-3 text-sm text-am-warning">
+                            <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+                            {saveWarning}
+                        </div>
+                    )}
+
+                    {schedule && (
+                        <div className="space-y-3 relative z-10">
+                            {schedule.map((dayItem, idx) => {
+                                const isExpanded = expandedDay === dayItem.day;
+                                return (
+                                    <div key={idx} className="rounded-lg border border-border/50 bg-muted overflow-hidden transition-all hover:border-border ring-1 ring-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                                        <button
+                                            onClick={() => setExpandedDay(isExpanded ? null : dayItem.day)}
+                                            className="w-full flex items-center justify-between p-4 text-left focus:outline-none"
                                         >
-                                            <div className="space-y-3">
-                                                {dayItem.subjects.map((sub, sIdx) => (
-                                                    <div key={sIdx} className="bg-card rounded-md p-3 border border-border/50 shadow-sm ring-1 ring-white/5">
-                                                        <div className="flex justify-between items-center mb-1.5">
-                                                            <span className="text-sm font-semibold text-foreground flex items-center gap-2">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                                                                {sub.name}
-                                                            </span>
-                                                            <span className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-md bg-am-ai-subtle/50 text-primary font-mono border border-border/50/30">
-                                                                {sub.hours}h
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-xs text-muted-foreground ml-3.5 leading-relaxed">
-                                                            <strong className="text-foreground font-medium">Motivo:</strong> {sub.reason}
-                                                        </p>
-                                                    </div>
-                                                ))}
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-2 rounded-md ring-1 ring-white/5 ${isExpanded ? 'bg-am-ai-subtle/40 text-primary' : 'bg-background text-muted-foreground'}`}>
+                                                    <CalendarDays className="h-5 w-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-foreground">{dayItem.day}</p>
+                                                    <p className="text-xs text-primary font-medium">{dayItem.totalHours} horas sugeridas</p>
+                                                </div>
                                             </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        )
-                    })}
-                </div>
+                                            {isExpanded ? <ChevronUp className="text-muted-foreground h-5 w-5" /> : <ChevronDown className="text-muted-foreground h-5 w-5" />}
+                                        </button>
+
+                                        <AnimatePresence>
+                                            {isExpanded && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="px-4 pb-4 pt-1 border-t border-border"
+                                                >
+                                                    <div className="space-y-3">
+                                                        {dayItem.subjects.map((sub, sIdx) => (
+                                                            <div key={sIdx} className="bg-card rounded-md p-3 border border-border/50 shadow-sm ring-1 ring-white/5">
+                                                                <div className="flex justify-between items-center mb-1.5">
+                                                                    <span className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                                                        <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                                                        {sub.name}
+                                                                    </span>
+                                                                    <span className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-md bg-am-ai-subtle/50 text-primary font-mono border border-border/50/30">
+                                                                        {sub.hours}h
+                                                                    </span>
+                                                                </div>
+                                                                <p className="text-xs text-muted-foreground ml-3.5 leading-relaxed">
+                                                                    <strong className="text-foreground font-medium">Motivo:</strong> {sub.reason}
+                                                                </p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </>
             )}
         </motion.div>
     );
