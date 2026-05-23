@@ -205,7 +205,7 @@ export default function SettingsPage() {
         );
       case 'past_due':
         return (
-          <Badge variant="danger" className="bg-red-500/15 text-red-500 border border-red-500/30 font-sans font-bold">
+          <Badge variant="error" className="bg-red-500/15 text-red-500 border border-red-500/30 font-sans font-bold">
             Atrasado
           </Badge>
         );
