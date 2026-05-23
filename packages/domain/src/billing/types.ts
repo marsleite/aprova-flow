@@ -128,6 +128,7 @@ export interface ResolveUserEntitlementsInput {
     plan: PlanCode;
     status: SubscriptionStatus;
     usage?: FeatureUsageMap;
+    billingPeriodEnd?: string | Date;
 }
 
 export interface UserEntitlements {

@@ -9,6 +9,7 @@ export interface UserSubscriptionState {
   plan: PlanCode;
   status: SubscriptionStatus;
   usage?: FeatureUsageMap;
+  billingPeriodEnd?: string | Date;
 }
 
 export interface GetUserSubscriptionStateParams {

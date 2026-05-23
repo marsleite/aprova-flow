@@ -46,7 +46,18 @@ export function resolveUserEntitlements(
     input: ResolveUserEntitlementsInput,
     policy: EntitlementPolicy = DEFAULT_ENTITLEMENT_POLICY
 ): UserEntitlements {
-    const behavior = policy.statusBehavior[input.status];
+    let resolvedStatus = input.status;
+    if (input.billingPeriodEnd) {
+        const periodEnd =
+            typeof input.billingPeriodEnd === 'string'
+                ? new Date(input.billingPeriodEnd)
+                : input.billingPeriodEnd;
+        if (Date.now() > periodEnd.getTime()) {
+            resolvedStatus = 'expired';
+        }
+    }
+
+    const behavior = policy.statusBehavior[resolvedStatus];
     const effectivePlan = behavior.fallbackPlan ?? input.plan;
     const template = policy.plans[effectivePlan];
     const disabledFeatures = new Set<FeatureCode>(behavior.disabledFeatures ?? []);
@@ -64,7 +75,7 @@ export function resolveUserEntitlements(
     return {
         catalogPlan: input.plan,
         effectivePlan,
-        status: input.status,
+        status: resolvedStatus,
         accessState: behavior.accessState,
         features,
     };

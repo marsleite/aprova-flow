@@ -110,6 +110,7 @@ export class FirestoreSubscriptionStateDataSource
         plan: extractPlanCode(data),
         status: extractSubscriptionStatus(data),
         usage: extractUsage(data),
+        billingPeriodEnd: data?.billingPeriodEnd as string | undefined,
       },
     };
   }

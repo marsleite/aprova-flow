@@ -44,7 +44,11 @@ service cloud.firestore {
         'entitlementsUsagePeriods',
         'featureUsagePeriods',
         'featureUsagePeriodsJson',
-        'subscriptionUpdatedAt'
+        'subscriptionUpdatedAt',
+        'subscriptionId',
+        'subscriptionPaymentId',
+        'billingPeriodEnd',
+        'billingPeriodStart'
       ];
     }
 
@@ -408,6 +412,11 @@ service cloud.firestore {
                     && request.resource.data.email.size() > 0
                     && request.resource.data.email.size() < 256;
       allow read, update, delete: if isAdmin();
+    }
+
+    // Histórico/Logs de transações/eventos de faturamento
+    match /billing_event_logs/{eventId} {
+      allow read, write: if isAdmin();
     }
 
     // Bloqueia tudo que não esteja permitido

@@ -17,7 +17,9 @@
       "@aprovamind/domain": ["../../packages/domain/src/index.ts"],
       "@aprovamind/domain/*": ["../../packages/domain/src/*"],
       "@aprovamind/infrastructure-firebase": ["../../packages/infrastructure-firebase/src/index.ts"],
-      "@aprovamind/infrastructure-firebase/*": ["../../packages/infrastructure-firebase/src/*"]
+      "@aprovamind/infrastructure-firebase/*": ["../../packages/infrastructure-firebase/src/*"],
+      "@aprovamind/infrastructure-billing": ["../../packages/infrastructure-billing/src/index.ts"],
+      "@aprovamind/infrastructure-billing/*": ["../../packages/infrastructure-billing/src/*"]
     }
   },
   "include": ["src/**/*.ts", "api/**/*.ts"]
