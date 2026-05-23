@@ -17,6 +17,18 @@
       "destination": "/api/backend?__route=billing-subscription-me"
     },
     {
+      "source": "/billing/checkout",
+      "destination": "/api/backend?__route=billing-checkout"
+    },
+    {
+      "source": "/billing/cancel",
+      "destination": "/api/backend?__route=billing-cancel"
+    },
+    {
+      "source": "/billing/webhook/mercadopago",
+      "destination": "/api/backend?__route=billing-webhook-mercadopago"
+    },
+    {
       "source": "/billing/admin/subscription",
       "destination": "/api/backend?__route=billing-admin-subscription"
     },
