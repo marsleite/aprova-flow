@@ -5,6 +5,7 @@
     { "path": "./apps/api" },
     { "path": "./packages/domain" },
     { "path": "./packages/application" },
-    { "path": "./packages/contracts" }
+    { "path": "./packages/contracts" },
+    { "path": "./packages/infrastructure-billing" }
   ]
 }

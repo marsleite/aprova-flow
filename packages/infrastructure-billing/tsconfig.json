@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@aprovamind/infrastructure-billing": ["./src/index.ts"],
+      "@aprovamind/infrastructure-billing/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

@@ -5,6 +5,7 @@ import {
 } from './modules/entitlements/routes';
 import { registerAiRoutes } from './modules/ai/routes';
 import { registerEngineRoutes } from './modules/engine/routes';
+import { registerBillingRoutes } from './modules/billing/routes';
 import { firebaseAuth } from './plugins/firebase-auth';
 import { featureGuard } from './plugins/feature-guard';
 
@@ -87,6 +88,9 @@ export function createApp(options: CreateAppOptions = {}) {
   });
   app.register(async (instance) => {
     await registerEngineRoutes(instance);
+  });
+  app.register(async (instance) => {
+    await registerBillingRoutes(instance);
   });
 
   return app;

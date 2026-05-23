@@ -25,7 +25,9 @@
       "@aprovamind/contracts": ["../../packages/contracts/src/index.ts"],
       "@aprovamind/contracts/*": ["../../packages/contracts/src/*"],
       "@aprovamind/infrastructure-firebase": ["../../packages/infrastructure-firebase/src/index.ts"],
-      "@aprovamind/infrastructure-firebase/*": ["../../packages/infrastructure-firebase/src/*"]
+      "@aprovamind/infrastructure-firebase/*": ["../../packages/infrastructure-firebase/src/*"],
+      "@aprovamind/infrastructure-billing": ["../../packages/infrastructure-billing/src/index.ts"],
+      "@aprovamind/infrastructure-billing/*": ["../../packages/infrastructure-billing/src/*"]
     }
   },
   "include": [

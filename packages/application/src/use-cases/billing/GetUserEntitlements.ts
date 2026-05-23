@@ -45,6 +45,7 @@ export class GetUserEntitlements {
         plan: loaded.subscription.plan,
         status: loaded.subscription.status,
         usage: loaded.subscription.usage,
+        billingPeriodEnd: loaded.subscription.billingPeriodEnd,
       },
       this.policy
     );

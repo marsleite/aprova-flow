@@ -3,7 +3,8 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, ChevronDown, ChevronUp, Crown, Info, X } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Crown, Info, X, Loader2, Zap } from 'lucide-react';
+import { auth } from '@/lib/firebase/config';
 import { PlanTier } from '@/lib/entitlements';
 import {
   BETA_PLAN_META,
@@ -83,6 +84,47 @@ export default function AccountPlanModal({
   onClose,
 }: AccountPlanModalProps) {
   const [showComparison, setShowComparison] = useState(false);
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annually'>('monthly');
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const handleCheckout = async () => {
+    if (checkoutLoading) return;
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        setCheckoutError('Por favor, faça login para continuar.');
+        setCheckoutLoading(false);
+        return;
+      }
+
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ interval: billingInterval }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success || !data.checkoutUrl) {
+        throw new Error(data.message || 'Erro ao gerar sessão de pagamento.');
+      }
+
+      // Redireciona para o Mercado Pago
+      window.location.href = data.checkoutUrl;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao conectar ao servidor de pagamento. Tente novamente.';
+      setCheckoutError(message);
+      setCheckoutLoading(false);
+    }
+  };
+
   const modalRef = useRef<HTMLDivElement>(null);
   const currentDisplayTier = toDisplayTier(currentTier);
   const currentPlanMeta = BETA_PLAN_META[currentDisplayTier];
@@ -186,10 +228,9 @@ export default function AccountPlanModal({
               <div className="flex items-start gap-3 rounded-md border border-primary/20 bg-primary/5 px-3 py-3 text-sm text-muted-foreground">
                 <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
                 <div>
-                  <p className="font-medium text-foreground">Beta com operação manual</p>
+                  <p className="font-medium text-foreground">Assinaturas do AprovaMind Pro</p>
                   <p className="mt-1">
-                    Durante o beta, mudanças de plano, upgrade e qualquer ajuste comercial são liberados manualmente pela equipe.
-                    Esta tela é informativa e não altera a sua assinatura.
+                    Experimente o Pro sem limites com liberação e recorrência automática integrada. Pagamento 100% seguro processado pelo Mercado Pago. Cancele com reembolso integral em até 7 dias.
                   </p>
                 </div>
               </div>
@@ -287,17 +328,92 @@ export default function AccountPlanModal({
                         </li>
                       </ul>
 
-                      <button
-                        type="button"
-                        disabled
-                        className={`mt-auto flex w-full items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                          isCurrent
-                            ? 'bg-muted text-muted-foreground'
-                            : 'border border-border bg-card text-muted-foreground'
-                        } disabled:cursor-not-allowed disabled:opacity-70`}
-                      >
-                        {isCurrent ? 'Plano atual' : 'Liberacao manual no beta'}
-                      </button>
+                      {plan.tier === 'pro' && !isCurrent && (
+                        <div className="my-4 rounded-lg bg-muted/40 p-3 border border-border/50">
+                          <p className="text-xs font-semibold text-muted-foreground mb-2 text-center uppercase tracking-wide">
+                            Ciclo de Faturamento
+                          </p>
+                          <div className="flex gap-2 p-1 bg-muted rounded-full border border-border">
+                            <button
+                              type="button"
+                              onClick={() => setBillingInterval('monthly')}
+                              className={`flex-1 text-center py-1.5 rounded-full text-xs font-medium transition-all ${
+                                billingInterval === 'monthly'
+                                  ? 'bg-background text-primary shadow-sm border border-border/50 font-bold'
+                                  : 'text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              Mensal (R$ 34,90)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setBillingInterval('annually')}
+                              className={`flex-1 text-center py-1.5 rounded-full text-xs font-medium transition-all relative ${
+                                billingInterval === 'annually'
+                                  ? 'bg-background text-primary shadow-sm border border-border/50 font-bold'
+                                  : 'text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              Anual (R$ 29,90/mês)
+                              <span className="absolute -top-2.5 -right-1 bg-primary text-[9px] font-bold text-primary-foreground px-1.5 py-0.5 rounded-full shadow-[0_0_8px_rgba(139,92,246,0.3)] animate-pulse scale-90">
+                                -14%
+                              </span>
+                            </button>
+                          </div>
+                          <p className="mt-2 text-[10px] text-muted-foreground text-center">
+                            {billingInterval === 'annually'
+                              ? 'Cobrado anualmente (R$ 358,80/ano)'
+                              : 'Cobrado mensalmente, cancele quando quiser'}
+                          </p>
+                        </div>
+                      )}
+
+                      {isCurrent ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="mt-auto flex w-full items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-medium transition-all duration-200 bg-muted text-muted-foreground disabled:cursor-not-allowed"
+                        >
+                          Plano atual
+                        </button>
+                      ) : plan.tier === 'pro' ? (
+                        <div className="mt-auto w-full space-y-2">
+                          {checkoutError && (
+                            <p className="text-[11px] text-red-500 text-center font-medium bg-red-500/10 py-1 px-2 rounded-md border border-red-500/20">
+                              {checkoutError}
+                            </p>
+                          )}
+                          <button
+                            type="button"
+                            onClick={onSubmitCheckout => {
+                              onSubmitCheckout.preventDefault();
+                              handleCheckout();
+                            }}
+                            disabled={checkoutLoading}
+                            className="flex w-full items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-semibold transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary/95 shadow-am-md hover:shadow-am-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                          >
+                            {checkoutLoading ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin text-primary-foreground" />
+                                Redirecionando...
+                              </>
+                            ) : (
+                              <>
+                                <Zap className="h-4 w-4 fill-current text-primary-foreground" />
+                                Assinar Pro
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled
+                          className="mt-auto flex w-full items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-medium transition-all duration-200 border border-border bg-card text-muted-foreground disabled:cursor-not-allowed"
+                        >
+                          Incluído no Pro
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -340,8 +456,8 @@ export default function AccountPlanModal({
                 )}
               </div>
 
-              <p className="text-xs text-muted-foreground">
-                Gateway e cobranca real entram numa fase posterior, depois da calibracao do beta e da esteira de valor free to pro.
+              <p className="text-xs text-muted-foreground text-center">
+                Todas as cobranças e assinaturas seguem rigorosamente o Código de Defesa do Consumidor. Cancelamentos e reembolsos automáticos podem ser realizados em até 7 dias diretamente pelo painel de faturamento.
               </p>
             </div>
           </motion.div>
