@@ -476,7 +476,7 @@ export default function SettingsPage() {
 
                       <div className="pt-2 flex flex-col gap-3">
                         <Button
-                          variant="default"
+                          variant="primary"
                           onClick={() => setAccountModalOpen(true)}
                           className="w-full justify-center bg-primary hover:bg-primary/95 text-white shadow-am-md hover:shadow-am-lg active:scale-[0.98] transition-all"
                         >
