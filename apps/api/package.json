@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc --noEmit --project tsconfig.json",
+    "build": "tsc --noEmit --project tsconfig.json && node build.js",
     "start": "tsx src/server.ts",
     "lint": "tsc --noEmit --project tsconfig.json",
     "typecheck": "tsc --noEmit --project tsconfig.json",
