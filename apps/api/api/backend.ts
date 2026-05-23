@@ -529,6 +529,233 @@ async function handleProductEvents(req: IncomingMessage, res: ServerResponse) {
   }
 }
 
+async function handleBillingCheckout(req: IncomingMessage, res: ServerResponse) {
+  setCors(req, res, 'POST');
+  if (req.method === 'OPTIONS') return void (res.statusCode = 204, res.end());
+  if (req.method !== 'POST') {
+    sendJson(res, 405, { error: 'method_not_allowed', message: 'Use POST para iniciar sessao de checkout.' });
+    return;
+  }
+
+  const auth = await verifyRequestUser(req);
+  if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
+
+  let body: Record<string, unknown> | null = null;
+  try {
+    body = await readJsonBody(req);
+  } catch {
+    sendJson(res, 400, { error: 'bad_request', message: 'JSON invalido.' });
+    return;
+  }
+
+  const interval = body?.interval;
+  if (interval !== 'monthly' && interval !== 'annually') {
+    sendJson(res, 400, {
+      error: 'bad_request',
+      message: 'Campo "interval" deve ser "monthly" ou "annually".',
+    });
+    return;
+  }
+
+  try {
+    const [{ CreateCheckoutSession }, { MercadoPagoBillingAdapter }] = await Promise.all([
+      import('@aprovamind/application/use-cases/billing/CreateCheckoutSession'),
+      import('@aprovamind/infrastructure-billing'),
+    ]);
+    const adapter = new MercadoPagoBillingAdapter();
+    const useCase = new CreateCheckoutSession(adapter);
+    const result = await useCase.execute({
+      userId: auth.identity.uid,
+      email: auth.identity.email || 'sandbox-user@aprovamind.com',
+      interval,
+    });
+    sendJson(res, 200, result);
+  } catch (error: any) {
+    console.error('[api-billing-checkout] execution failed', error);
+    sendJson(res, 500, {
+      error: 'checkout_error',
+      message: error.message || 'Erro ao gerar sessao de checkout.',
+    });
+  }
+}
+
+class RestFirestoreAdminWriter {
+  constructor(
+    private readonly idToken: string,
+    private readonly setDocFn: any,
+    private readonly getDocFn: any
+  ) {}
+
+  async setDocument(
+    collection: string,
+    documentId: string,
+    data: Record<string, any>
+  ): Promise<{ ok: boolean; error?: string }> {
+    const result = await this.setDocFn({
+      collection,
+      documentId,
+      data,
+      idToken: this.idToken,
+    });
+    return {
+      ok: result.ok,
+      error: result.error,
+    };
+  }
+
+  async getDocument(
+    collection: string,
+    documentId: string
+  ): Promise<{ ok: boolean; exists?: boolean; data?: Record<string, any> }> {
+    const result = await this.getDocFn({
+      collection,
+      documentId,
+      idToken: this.idToken,
+    });
+    return {
+      ok: result.ok,
+      exists: result.exists,
+      data: result.data,
+    };
+  }
+}
+
+async function handleBillingCancel(req: IncomingMessage, res: ServerResponse) {
+  setCors(req, res, 'POST');
+  if (req.method === 'OPTIONS') return void (res.statusCode = 204, res.end());
+  if (req.method !== 'POST') {
+    sendJson(res, 405, { error: 'method_not_allowed', message: 'Use POST para cancelar assinatura.' });
+    return;
+  }
+
+  const auth = await verifyRequestUser(req);
+  if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
+
+  try {
+    const [
+      { CancelSubscription },
+      { MercadoPagoBillingAdapter },
+      { getAdminSession },
+      { setFirestoreDocumentWithUserToken, getFirestoreDocumentWithUserToken },
+    ] = await Promise.all([
+      import('@aprovamind/application/use-cases/billing/CancelSubscription'),
+      import('@aprovamind/infrastructure-billing'),
+      import('../src/modules/billing/admin-auth'),
+      import('@aprovamind/infrastructure-firebase'),
+    ]);
+    const adapter = new MercadoPagoBillingAdapter();
+    const adminSession = await getAdminSession();
+    const writer = new RestFirestoreAdminWriter(
+      adminSession.idToken,
+      setFirestoreDocumentWithUserToken,
+      getFirestoreDocumentWithUserToken
+    );
+    const useCase = new CancelSubscription(adapter, writer);
+    const result = await useCase.execute({
+      userId: auth.identity.uid,
+    });
+    sendJson(res, 200, result);
+  } catch (error: any) {
+    console.error('[api-billing-cancel] execution failed', error);
+    sendJson(res, 500, {
+      error: 'cancel_error',
+      message: error.message || 'Erro ao cancelar assinatura.',
+    });
+  }
+}
+
+async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse) {
+  setCors(req, res, 'POST');
+  if (req.method === 'OPTIONS') return void (res.statusCode = 204, res.end());
+  if (req.method !== 'POST') {
+    sendJson(res, 405, { error: 'method_not_allowed', message: 'Use POST para receber webhook.' });
+    return;
+  }
+
+  let body: Record<string, unknown> | null = null;
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  const rawBody = Buffer.concat(chunks).toString('utf-8');
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    sendJson(res, 400, { error: 'bad_request', message: 'JSON invalido.' });
+    return;
+  }
+
+  const signature = req.headers['x-signature'] as string;
+  const requestId = req.headers['x-request-id'] as string;
+
+  try {
+    const [
+      { HandleBillingWebhook },
+      { MercadoPagoBillingAdapter },
+      { getAdminSession },
+      { setFirestoreDocumentWithUserToken, getFirestoreDocumentWithUserToken },
+    ] = await Promise.all([
+      import('@aprovamind/application/use-cases/billing/HandleBillingWebhook'),
+      import('@aprovamind/infrastructure-billing'),
+      import('../src/modules/billing/admin-auth'),
+      import('@aprovamind/infrastructure-firebase'),
+    ]);
+
+    const adapter = new MercadoPagoBillingAdapter();
+    const secret = process.env.MERCADO_PAGO_WEBHOOK_SECRET || '';
+    if (secret) {
+      const isValid = adapter.verifyWebhookSignature(signature || '', requestId || '', rawBody);
+      if (!isValid) {
+        sendJson(res, 400, {
+          error: 'invalid_signature',
+          message: 'Assinatura digital do webhook inválida ou ausente.',
+        });
+        return;
+      }
+    }
+
+    const eventId = (body?.id ?? requestId ?? '').toString();
+    const rawTopic = (body?.topic ?? body?.type ?? '').toString();
+    let topic = '';
+    if (rawTopic.includes('payment')) {
+      topic = 'payment';
+    } else if (rawTopic.includes('preapproval')) {
+      topic = 'preapproval';
+    } else {
+      topic = rawTopic;
+    }
+    const dataObj = body?.data as Record<string, unknown> | undefined;
+    const resourceId = (dataObj?.id ?? (body?.resource as string)?.split('/').pop() ?? '').toString();
+
+    if (!eventId || !topic || !resourceId) {
+      console.warn({ eventId, topic, resourceId }, 'Webhook recebido com parâmetros incompletos.');
+      sendJson(res, 200, { status: 'ignored', reason: 'incomplete_parameters' });
+      return;
+    }
+
+    const adminSession = await getAdminSession();
+    const writer = new RestFirestoreAdminWriter(
+      adminSession.idToken,
+      setFirestoreDocumentWithUserToken,
+      getFirestoreDocumentWithUserToken
+    );
+    const useCase = new HandleBillingWebhook(adapter, writer);
+    const result = await useCase.execute({
+      eventId,
+      topic,
+      resourceId,
+    });
+
+    sendJson(res, 200, result);
+  } catch (error: any) {
+    console.error('[api-billing-webhook] execution failed', error);
+    sendJson(res, 500, {
+      error: 'webhook_error',
+      message: error.message || 'Erro ao processar webhook.',
+    });
+  }
+}
+
 export async function handleBackendRequest(req: IncomingMessage, res: ServerResponse) {
   const route = getRoute(req);
   switch (route) {
@@ -538,6 +765,12 @@ export async function handleBackendRequest(req: IncomingMessage, res: ServerResp
       return handleEntitlementsScenarios(req, res);
     case 'billing-subscription-me':
       return handleSubscriptionMe(req, res);
+    case 'billing-checkout':
+      return handleBillingCheckout(req, res);
+    case 'billing-cancel':
+      return handleBillingCancel(req, res);
+    case 'billing-webhook-mercadopago':
+      return handleBillingWebhook(req, res);
     case 'billing-admin-subscription':
       return handleAdminSubscription(req, res);
     case 'billing-admin-beta-signals':
