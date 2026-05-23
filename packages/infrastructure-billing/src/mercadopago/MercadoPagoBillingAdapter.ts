@@ -33,8 +33,13 @@ export class MercadoPagoBillingAdapter implements BillingAdapter {
       throw new Error('Mercado Pago Access Token is not configured');
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const backUrl = `${appUrl}/checkout/success`;
+    let appUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || '').trim();
+    if (!appUrl || !appUrl.startsWith('https://')) {
+      // Mercado Pago Preapproval API requires a secure public HTTPS domain for back_url.
+      // HTTP localhost is rejected with 400. In development without an HTTPS tunnel (e.g. ngrok), fallback to a secure production domain.
+      appUrl = 'https://aprova-flow-web.vercel.app';
+    }
+    const backUrl = `${appUrl.replace(/\/$/, '')}/checkout/success`;
 
     const body = {
       payer_email: params.email,
