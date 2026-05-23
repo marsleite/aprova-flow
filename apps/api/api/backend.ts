@@ -1,5 +1,44 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
+// Static imports to ensure Vercel bundles internal monorepo packages and local files at build time
+import {
+  verifyFirebaseIdToken,
+  findFirebaseUserByEmail,
+  setFirestoreDocumentWithUserToken,
+  getFirestoreDocumentWithUserToken,
+} from '@aprovamind/infrastructure-firebase';
+import { LegacyEngineDataSource } from '@aprovamind/infrastructure-firebase/LegacyEngineDataSource';
+
+import { listManualSubscriptionScenarios } from '../src/modules/entitlements/manual-subscription-state-data-source';
+import { ManualSubscriptionStateDataSource } from '../src/modules/entitlements/manual-subscription-state-data-source';
+import { FirestoreSubscriptionStateDataSource } from '../src/modules/entitlements/firestore-subscription-state-data-source';
+import { FirestoreSubscriptionAdminDataSource } from '../src/modules/entitlements/firestore-subscription-admin-data-source';
+import { loadAdminBetaSignalsSummary } from '../src/modules/entitlements/beta-signals';
+import { saveProductUsageEvent } from '../src/modules/entitlements/product-event-store';
+import { getAdminSession } from '../src/modules/billing/admin-auth';
+
+import {
+  defaultIsAdminIdentity,
+  normalizePlanCode,
+  normalizeSubscriptionStatus,
+  toFeatureUsageMap,
+} from '../src/modules/entitlements/subscription-state.shared';
+
+import { GetUserEntitlements } from '@aprovamind/application/use-cases/billing/GetUserEntitlements';
+import { GetPlanEngineSnapshot } from '@aprovamind/application/use-cases/engine/GetPlanEngineSnapshot';
+import { GetPortfolioSnapshot } from '@aprovamind/application/use-cases/engine/GetPortfolioSnapshot';
+import { CreateCheckoutSession } from '@aprovamind/application/use-cases/billing/CreateCheckoutSession';
+import { CancelSubscription } from '@aprovamind/application/use-cases/billing/CancelSubscription';
+import { HandleBillingWebhook } from '@aprovamind/application/use-cases/billing/HandleBillingWebhook';
+
+import { MercadoPagoBillingAdapter } from '@aprovamind/infrastructure-billing';
+
+import {
+  isPublicProductEventName,
+  normalizeProductEventMetadata,
+} from '@aprovamind/contracts/analytics/ProductEvents';
+
+
 function sendJson(res: ServerResponse, statusCode: number, payload: unknown) {
   res.statusCode = statusCode;
   res.setHeader('content-type', 'application/json; charset=utf-8');
@@ -102,7 +141,6 @@ async function verifyRequestUser(
 
   let identity: { uid: string; email?: string | null } | null = null;
   try {
-    const { verifyFirebaseIdToken } = await import('@aprovamind/infrastructure-firebase');
     identity = await verifyFirebaseIdToken(idToken);
   } catch (error) {
     console.error('[api-auth] firebase token verification failed', {
@@ -186,9 +224,6 @@ async function handleEntitlementsScenarios(req: IncomingMessage, res: ServerResp
     sendJson(res, 404, { error: 'not_found', message: 'Cenarios manuais nao estao disponiveis neste ambiente.' });
     return;
   }
-  const { listManualSubscriptionScenarios } = await import(
-    '../src/modules/entitlements/manual-subscription-state-data-source'
-  );
   sendJson(res, 200, {
     scenarios: listManualSubscriptionScenarios().map((scenario) => ({
       userId: scenario.userId,
@@ -209,10 +244,6 @@ async function handleEntitlementsMe(req: IncomingMessage, res: ServerResponse) {
 
   const sandboxUserId = resolveSandboxUserId(req);
   if (sandboxUserId) {
-    const [{ GetUserEntitlements }, { ManualSubscriptionStateDataSource }] = await Promise.all([
-      import('@aprovamind/application/use-cases/billing/GetUserEntitlements'),
-      import('../src/modules/entitlements/manual-subscription-state-data-source'),
-    ]);
     const result = await new GetUserEntitlements(new ManualSubscriptionStateDataSource())
       .execute({ userId: sandboxUserId });
     if (!result.found) return sendNotFound(res, result.reason);
@@ -223,10 +254,6 @@ async function handleEntitlementsMe(req: IncomingMessage, res: ServerResponse) {
   const auth = await verifyRequestUser(req);
   if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
   try {
-    const [{ GetUserEntitlements }, { FirestoreSubscriptionStateDataSource }] = await Promise.all([
-      import('@aprovamind/application/use-cases/billing/GetUserEntitlements'),
-      import('../src/modules/entitlements/firestore-subscription-state-data-source'),
-    ]);
     const result = await new GetUserEntitlements(
       new FirestoreSubscriptionStateDataSource({ idToken: auth.idToken, identity: auth.identity })
     ).execute({ userId: auth.identity.uid, email: auth.identity.email });
@@ -248,9 +275,6 @@ async function handleSubscriptionMe(req: IncomingMessage, res: ServerResponse) {
 
   const sandboxUserId = resolveSandboxUserId(req);
   if (sandboxUserId) {
-    const { ManualSubscriptionStateDataSource } = await import(
-      '../src/modules/entitlements/manual-subscription-state-data-source'
-    );
     const result = await new ManualSubscriptionStateDataSource()
       .getUserSubscriptionState({ userId: sandboxUserId });
     if (!result.found) return sendNotFound(res, result.reason);
@@ -261,9 +285,6 @@ async function handleSubscriptionMe(req: IncomingMessage, res: ServerResponse) {
   const auth = await verifyRequestUser(req);
   if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
   try {
-    const { FirestoreSubscriptionStateDataSource } = await import(
-      '../src/modules/entitlements/firestore-subscription-state-data-source'
-    );
     const result = await new FirestoreSubscriptionStateDataSource({
       idToken: auth.idToken,
       identity: auth.identity,
@@ -286,16 +307,6 @@ async function handleAdminSubscription(req: IncomingMessage, res: ServerResponse
 
   const auth = await verifyRequestUser(req, { allowDecodedFallback: true });
   if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
-
-  const [
-    { findFirebaseUserByEmail },
-    { defaultIsAdminIdentity, normalizePlanCode, normalizeSubscriptionStatus, toFeatureUsageMap },
-    { FirestoreSubscriptionAdminDataSource },
-  ] = await Promise.all([
-    import('@aprovamind/infrastructure-firebase'),
-    import('../src/modules/entitlements/subscription-state.shared'),
-    import('../src/modules/entitlements/firestore-subscription-admin-data-source'),
-  ]);
 
   if (!defaultIsAdminIdentity(auth.identity)) {
     sendJson(res, 403, { error: 'forbidden', message: 'Somente administradores podem alterar assinatura de testers.' });
@@ -387,10 +398,6 @@ async function handleBetaSignals(req: IncomingMessage, res: ServerResponse) {
   const auth = await verifyRequestUser(req, { allowDecodedFallback: true });
   if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
   try {
-    const [{ defaultIsAdminIdentity }, { loadAdminBetaSignalsSummary }] = await Promise.all([
-      import('../src/modules/entitlements/subscription-state.shared'),
-      import('../src/modules/entitlements/beta-signals'),
-    ]);
     if (!defaultIsAdminIdentity(auth.identity)) {
       sendJson(res, 403, { error: 'forbidden', message: 'Somente administradores podem revisar sinais do beta.' });
       return;
@@ -438,10 +445,6 @@ async function handleEngineSnapshot(req: IncomingMessage, res: ServerResponse) {
     return;
   }
   try {
-    const [{ GetPlanEngineSnapshot }, { LegacyEngineDataSource }] = await Promise.all([
-      import('@aprovamind/application/use-cases/engine/GetPlanEngineSnapshot'),
-      import('@aprovamind/infrastructure-firebase/LegacyEngineDataSource'),
-    ]);
     const result = await new GetPlanEngineSnapshot(new LegacyEngineDataSource(auth.idToken))
       .execute({ userId: auth.identity.uid, today: getServerTodayIso(), planId, maxRecommendations });
     sendJson(res, 200, result);
@@ -467,10 +470,6 @@ async function handleEnginePortfolio(req: IncomingMessage, res: ServerResponse) 
     return;
   }
   try {
-    const [{ GetPortfolioSnapshot }, { LegacyEngineDataSource }] = await Promise.all([
-      import('@aprovamind/application/use-cases/engine/GetPortfolioSnapshot'),
-      import('@aprovamind/infrastructure-firebase/LegacyEngineDataSource'),
-    ]);
     const result = await new GetPortfolioSnapshot(new LegacyEngineDataSource(auth.idToken))
       .execute({ userId: auth.identity.uid, today: getServerTodayIso(), globalWeeklyBudget });
     sendJson(res, 200, result);
@@ -496,11 +495,6 @@ async function handleProductEvents(req: IncomingMessage, res: ServerResponse) {
     sendJson(res, 400, { error: 'bad_request', message: 'JSON invalido.' });
     return;
   }
-  const [{ isPublicProductEventName, normalizeProductEventMetadata }, { saveProductUsageEvent }] =
-    await Promise.all([
-      import('@aprovamind/contracts/analytics/ProductEvents'),
-      import('../src/modules/entitlements/product-event-store'),
-    ]);
   if (!isPublicProductEventName(body?.eventName)) {
     sendJson(res, 400, { error: 'invalid_event_name', message: 'Evento de produto nao permitido nesta rota.' });
     return;
@@ -558,10 +552,6 @@ async function handleBillingCheckout(req: IncomingMessage, res: ServerResponse) 
   }
 
   try {
-    const [{ CreateCheckoutSession }, { MercadoPagoBillingAdapter }] = await Promise.all([
-      import('@aprovamind/application/use-cases/billing/CreateCheckoutSession'),
-      import('@aprovamind/infrastructure-billing'),
-    ]);
     const adapter = new MercadoPagoBillingAdapter();
     const useCase = new CreateCheckoutSession(adapter);
     const result = await useCase.execute({
@@ -632,17 +622,6 @@ async function handleBillingCancel(req: IncomingMessage, res: ServerResponse) {
   if (!auth.ok) return sendJson(res, auth.statusCode, auth.payload);
 
   try {
-    const [
-      { CancelSubscription },
-      { MercadoPagoBillingAdapter },
-      { getAdminSession },
-      { setFirestoreDocumentWithUserToken, getFirestoreDocumentWithUserToken },
-    ] = await Promise.all([
-      import('@aprovamind/application/use-cases/billing/CancelSubscription'),
-      import('@aprovamind/infrastructure-billing'),
-      import('../src/modules/billing/admin-auth'),
-      import('@aprovamind/infrastructure-firebase'),
-    ]);
     const adapter = new MercadoPagoBillingAdapter();
     const adminSession = await getAdminSession();
     const writer = new RestFirestoreAdminWriter(
@@ -689,18 +668,6 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse) {
   const requestId = req.headers['x-request-id'] as string;
 
   try {
-    const [
-      { HandleBillingWebhook },
-      { MercadoPagoBillingAdapter },
-      { getAdminSession },
-      { setFirestoreDocumentWithUserToken, getFirestoreDocumentWithUserToken },
-    ] = await Promise.all([
-      import('@aprovamind/application/use-cases/billing/HandleBillingWebhook'),
-      import('@aprovamind/infrastructure-billing'),
-      import('../src/modules/billing/admin-auth'),
-      import('@aprovamind/infrastructure-firebase'),
-    ]);
-
     const adapter = new MercadoPagoBillingAdapter();
     const secret = process.env.MERCADO_PAGO_WEBHOOK_SECRET || '';
     if (secret) {
