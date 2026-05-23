@@ -1,0 +1,20 @@
+docs/architecture/mercado-pago-subscriptions.md
+  s_69d07eb0654d7d::t_9efb9f1214caac 1-258
+  s_69d07eb0654d7d::t_82abb2d5767425 259-651
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "731f54accf74a46045c568ee7bf608e12dac3617",
+  "prompts": {},
+  "sessions": {
+    "s_69d07eb0654d7d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e47a3-61e8-76f1-abe4-9b3295ac655a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "marsleite <marsleite@gmail.com>"
+    }
+  }
+}
