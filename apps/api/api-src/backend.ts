@@ -559,7 +559,11 @@ async function handleBillingCheckout(req: IncomingMessage, res: ServerResponse) 
       email: auth.identity.email || 'sandbox-user@aprovamind.com',
       interval,
     });
-    sendJson(res, 200, result);
+    sendJson(res, 200, {
+      success: true,
+      checkoutUrl: result.initPoint,
+      checkoutId: result.checkoutId,
+    });
   } catch (error: any) {
     console.error('[api-billing-checkout] execution failed', error);
     sendJson(res, 500, {
