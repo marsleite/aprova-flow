@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { CancelSubscription } from '@aprovamind/application/use-cases/billing/CancelSubscription';
 import type { BillingAdapter } from '@aprovamind/application/ports/BillingAdapter';
-import type { FirestoreAdminWriter } from '@aprovamind/application/use-cases/billing/HandleBillingWebhook';
+import type { FirestoreAdminWriter } from '@aprovamind/application/ports/FirestoreAdminWriter';
 
 describe('CancelSubscription', () => {
   it('performs refund and immediate downgrade if within 7 days (CDC compliant)', async () => {

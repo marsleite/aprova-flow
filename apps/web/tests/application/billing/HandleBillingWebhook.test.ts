@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { HandleBillingWebhook } from '@aprovamind/application/use-cases/billing/HandleBillingWebhook';
 import type { BillingAdapter } from '@aprovamind/application/ports/BillingAdapter';
-import type { FirestoreAdminWriter } from '@aprovamind/application/use-cases/billing/HandleBillingWebhook';
+import type { FirestoreAdminWriter } from '@aprovamind/application/ports/FirestoreAdminWriter';
 import { PlanCode, SubscriptionStatus } from '@aprovamind/domain';
 
 describe('HandleBillingWebhook', () => {

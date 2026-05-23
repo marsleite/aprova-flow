@@ -50,7 +50,7 @@ export class MercadoPagoBillingAdapter implements BillingAdapter {
       status: 'pending',
     };
 
-    const response = await fetch(`${this.baseUrl}/v1/preapproval`, {
+    const response = await fetch(`${this.baseUrl}/preapproval`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(body),
@@ -81,7 +81,7 @@ export class MercadoPagoBillingAdapter implements BillingAdapter {
       throw new Error('Mercado Pago Access Token is not configured');
     }
 
-    const response = await fetch(`${this.baseUrl}/v1/preapproval/${subscriptionId}`, {
+    const response = await fetch(`${this.baseUrl}/preapproval/${subscriptionId}`, {
       method: 'PUT',
       headers: this.getHeaders(),
       body: JSON.stringify({
@@ -124,7 +124,7 @@ export class MercadoPagoBillingAdapter implements BillingAdapter {
       throw new Error('Mercado Pago Access Token is not configured');
     }
 
-    const response = await fetch(`${this.baseUrl}/v1/preapproval/${subscriptionId}`, {
+    const response = await fetch(`${this.baseUrl}/preapproval/${subscriptionId}`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
