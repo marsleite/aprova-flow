@@ -4090,9 +4090,11 @@ async function handleBillingCheckout(req, res) {
   try {
     const adapter = new MercadoPagoBillingAdapter();
     const useCase = new CreateCheckoutSession(adapter);
+    const isSandbox = process.env.MERCADO_PAGO_ACCESS_TOKEN?.startsWith("TEST-");
+    const payerEmail = isSandbox ? `sandbox-buyer-${auth.identity.uid.slice(0, 8)}@aprovamind.com` : auth.identity.email || "sandbox-user@aprovamind.com";
     const result = await useCase.execute({
       userId: auth.identity.uid,
-      email: auth.identity.email || "sandbox-user@aprovamind.com",
+      email: payerEmail,
       interval
     });
     sendJson(res, 200, {
