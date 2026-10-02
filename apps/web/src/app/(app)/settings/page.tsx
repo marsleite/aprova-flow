@@ -9,6 +9,7 @@ import AccountPlanModal from '@/components/AccountPlanModal';
 import BetaSignalsCard from '@/components/BetaSignalsCard';
 import EntitlementSandboxCard from '@/components/EntitlementSandboxCard';
 import TesterSubscriptionManagerCard from '@/components/TesterSubscriptionManagerCard';
+import WhatsAppTutorCard from '@/components/WhatsAppTutorCard';
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/config';
@@ -251,6 +252,15 @@ export default function SettingsPage() {
             <BetaSignalsCard />
           </motion.div>
         )}
+
+        {/* WhatsApp Tutor Companion Card */}
+        <motion.div custom={0.9} variants={fadeUp} initial="hidden" animate="show">
+          <WhatsAppTutorCard
+            userId={user.uid}
+            userEmail={user.email}
+            userName={user.displayName}
+          />
+        </motion.div>
 
         {/* Profile card */}
         <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show">
