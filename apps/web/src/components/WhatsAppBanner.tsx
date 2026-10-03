@@ -86,7 +86,7 @@ export default function WhatsAppBanner({ userId }: WhatsAppBannerProps) {
 
       <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
         <Link
-          href="/settings"
+          href="/settings#whatsapp"
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors shadow-sm"
         >
           <Sparkles className="h-3 w-3" />

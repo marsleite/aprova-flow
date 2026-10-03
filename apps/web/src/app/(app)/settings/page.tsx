@@ -237,24 +237,8 @@ export default function SettingsPage() {
       </div>
 
       <div className="mx-auto w-full max-w-2xl px-6 space-y-6">
-        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
-          <EntitlementSandboxCard currentScenarioUserId={sandboxScenarioUserId} />
-        </motion.div>
-
-        {canManageTesters && (
-          <motion.div custom={0.5} variants={fadeUp} initial="hidden" animate="show">
-            <TesterSubscriptionManagerCard />
-          </motion.div>
-        )}
-
-        {canManageTesters && (
-          <motion.div custom={0.75} variants={fadeUp} initial="hidden" animate="show">
-            <BetaSignalsCard />
-          </motion.div>
-        )}
-
-        {/* WhatsApp Tutor Companion Card */}
-        <motion.div custom={0.9} variants={fadeUp} initial="hidden" animate="show">
+        {/* WhatsApp Tutor Companion Card — Destaque Principal */}
+        <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show" id="whatsapp">
           <WhatsAppTutorCard
             userId={user.uid}
             userEmail={user.email}
@@ -263,7 +247,7 @@ export default function SettingsPage() {
         </motion.div>
 
         {/* Profile card */}
-        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="show">
+        <motion.div custom={0.5} variants={fadeUp} initial="hidden" animate="show">
           <Card padding="lg" variant="default" className="w-full">
             <div className="mb-5 flex items-center gap-2 border-b border-am-border-subtle pb-3">
               <User className="h-4 w-4 text-muted-foreground" />
@@ -526,6 +510,20 @@ export default function SettingsPage() {
             </div>
           </Card>
         </motion.div>
+
+        {/* Painel Administrativo Interno — Apenas para Admins */}
+        {canManageTesters && (
+          <motion.div custom={3.5} variants={fadeUp} initial="hidden" animate="show" className="space-y-4 pt-4 border-t border-border">
+            <div className="flex items-center gap-2">
+              <Badge variant="ai" className="text-[10px] uppercase font-mono tracking-wider">Área Administrativa</Badge>
+              <span className="text-xs text-muted-foreground">Visível exclusivamente para você (Admin)</span>
+            </div>
+
+            <EntitlementSandboxCard currentScenarioUserId={sandboxScenarioUserId} />
+            <TesterSubscriptionManagerCard />
+            <BetaSignalsCard />
+          </motion.div>
+        )}
 
         {/* Danger zone */}
         <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
