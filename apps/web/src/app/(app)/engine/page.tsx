@@ -87,11 +87,14 @@ export default function EnginePage() {
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-12 pb-6 px-8">
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <Badge variant="outline" className="border-white/10 text-muted-foreground bg-transparent"><Zap className="h-3 w-3 mr-1" /> Motor do Dia</Badge>
+            <Badge variant="outline" className="border-white/10 text-muted-foreground bg-transparent"><Clock className="h-3 w-3 mr-1" /> Cronômetro de Estudo</Badge>
           </div>
           <h1 className="font-sans text-[40px] font-light text-foreground tracking-tighter leading-none">
-            Sessão
+            Estudar Agora
           </h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Rastreie suas horas líquidas com cronômetro inteligente e registro de questões
+          </p>
         </div>
 
         {consistency && (

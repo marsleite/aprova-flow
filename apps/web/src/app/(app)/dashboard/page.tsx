@@ -27,6 +27,7 @@ import SmartScheduleCard from '@/components/SmartScheduleCard';
 import InsightsPanel from '@/components/InsightsPanel';
 import PortfolioOverviewCard from '@/components/engine/PortfolioOverviewCard';
 import StudyJourneyCard from '@/components/StudyJourneyCard';
+import SessionHistory from '@/components/SessionHistory';
 import {
   TrendingUp,
   Zap,
@@ -263,6 +264,23 @@ export default function DashboardPage() {
         {/* ── Portfólio Multi-Edital (detail section) ── */}
         <motion.div custom={3} variants={fadeUp} initial="hidden" animate="show">
           <PortfolioOverviewCard />
+        </motion.div>
+
+        {/* ── Histórico de Sessões de Estudo ── */}
+        <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
+          <div className="rounded-xl border border-border bg-card shadow-am-sm overflow-hidden p-6">
+            <h3 className="font-sans text-am-body font-bold text-foreground mb-4 flex items-center gap-2">
+              <span className="w-2 h-6 bg-primary rounded-full"></span>
+              Histórico de Sessões
+            </h3>
+            <SessionHistory
+              userId={user.uid}
+              planId={activePlanId ?? undefined}
+              planSubjects={activePlan?.subjects}
+              activePlanName={activePlan?.name}
+              onSessionsChanged={fetchData}
+            />
+          </div>
         </motion.div>
       </div>
     </div>

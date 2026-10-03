@@ -27,40 +27,22 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 
 const NAV_ITEMS = [
   {
-    href: '/planner',
-    icon: CalendarDays,
-    label: 'Planner',
-    description: 'Macro e viabilidade',
+    href: '/engine',
+    icon: Timer,
+    label: 'Estudar',
+    description: 'Cronômetro de foco',
   },
   {
     href: '/dashboard',
     icon: LayoutDashboard,
     label: 'Dashboard',
-    description: 'Ritmo da semana',
+    description: 'Cockpit e métricas',
   },
   {
-    href: '/engine',
-    icon: Timer,
-    label: 'Engine',
-    description: 'Sessão de hoje',
-  },
-  {
-    href: '/mentoring',
-    icon: Brain,
-    label: 'Mentoria',
-    description: 'Diagnóstico e apoio',
-  },
-  {
-    href: '/analytics',
-    icon: BarChart2,
-    label: 'Análises',
-    description: 'Performance',
-  },
-  {
-    href: '/history',
-    icon: History,
-    label: 'Histórico',
-    description: 'Sessões passadas',
+    href: '/planner',
+    icon: CalendarDays,
+    label: 'Editais',
+    description: 'Planejamento e metas',
   },
 ];
 
