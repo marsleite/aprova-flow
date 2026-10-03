@@ -36,4 +36,10 @@ TypeScript 5.x no monorepo; React 19.2 e Next.js 16.1.6 no `apps/web`; Node + Fa
 
 
 <!-- MANUAL ADDITIONS START -->
+### Diretrizes Fundamentais de Desenvolvimento
+- **Arquitetura Monorepo**: `apps/web` (Next.js 16 + React 19) e `apps/api` (Fastify 5.6) consom os pacotes compartilhados `@aprovamind/*` (`domain`, `contracts`, `application`, `ai-gateway`, `infrastructure-firebase`, `infrastructure-billing`).
+- **Política de IA**: Jamais instanciar chamadas diretas de IA para feedbacks simples ou estatísticas diárias. Use o motor de regras local no frontend (`MentorCard`, `PostSessionToast`). Reservar IA para o AI Gateway centralizado (`/ai/text`, `/ai/pdf`, `/api/chat`, `/api/planner-daily`, `/api/weekly-mentoring`, `/api/parse-edital`).
+- **Idioma**: Textos de interface e mensagens ao usuário sempre em Português do Brasil (pt-BR). Identificadores de código, tipos, funções e comentários técnicos em Inglês.
+- **Multi-Edital**: Ao manipular sessões, metas ou estatísticas de questões, sempre preservar a amarração com `planId` e tratar o fallback para visualização global quando `planId` for nulo/geral.
+- **Validação de Testes**: Executar `npm test` (`npm run test -w @aprovamind/web` / `npm run test:domain`) e `npm run lint` ao finalizar alterações.
 <!-- MANUAL ADDITIONS END -->
