@@ -14,6 +14,12 @@ import { auth, googleProvider } from '@/lib/firebase/config';
 import { getBetaAccessMessage, getBetaAccessStatus, isBetaAllowed } from '@/lib/beta-access';
 import { UserProfile } from '@/types';
 
+import {
+  getStoredEntitlementScenarioUserId,
+  setStoredEntitlementScenarioUserId,
+  syncEntitlementScenarioFromUrl,
+} from '@/lib/entitlement-sandbox';
+
 export function useAuth() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +44,18 @@ export function useAuth() {
           email: firebaseUser.email,
           photoURL: firebaseUser.photoURL,
         });
+      } else if (process.env.NODE_ENV !== 'production') {
+        const scenario = syncEntitlementScenarioFromUrl() || getStoredEntitlementScenarioUserId();
+        if (scenario) {
+          setUser({
+            uid: `dev-${scenario}`,
+            displayName: `Dev User (${scenario})`,
+            email: `${scenario}@aprova.mind`,
+            photoURL: null,
+          });
+        } else {
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
@@ -111,6 +129,10 @@ export function useAuth() {
   const logout = async () => {
     try {
       setError(null);
+      if (process.env.NODE_ENV !== 'production') {
+        setStoredEntitlementScenarioUserId(null);
+        setUser(null);
+      }
       await signOut(auth);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao fazer logout';
