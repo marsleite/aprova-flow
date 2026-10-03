@@ -238,9 +238,9 @@ export default function LoginPage() {
             className="ds-display-1 mb-6"
             style={{ color: 'var(--foreground)' }}
           >
-            Comece no macro e{' '}
+            Cockpit Web &amp;{' '}
             <span className="text-primary">
-              execute melhor hoje.
+              Tutor no WhatsApp.
             </span>
           </motion.h1>
 
@@ -251,7 +251,7 @@ export default function LoginPage() {
             className="ds-body-lg"
             style={{ color: 'var(--muted-foreground)' }}
           >
-            O AprovaMind organiza a sua rotina em uma ordem clara: Planner para viabilidade, Dashboard para ritmo semanal e Engine para a melhor sessão de hoje.
+            Rastreie suas horas líquidas no computador com cronômetro sem distrações e tire dúvidas jurídicas com jurisprudência STF/STJ direto no WhatsApp 24/7.
           </motion.p>
         </div>
 
@@ -263,10 +263,10 @@ export default function LoginPage() {
           className="grid grid-cols-2 gap-4 max-w-lg mt-8"
         >
           {[
-            { icon: Brain, label: 'IA Diagnóstica', desc: 'Mentoria personalizada diária', accent: 'var(--primary)' },
-            { icon: Target, label: 'Multi-Edital', desc: 'Foque no peso de cada matéria', accent: 'var(--primary)' },
-            { icon: TrendingUp, label: 'Provas & Simulados', desc: 'Treino e evolução', accent: 'var(--primary)' },
-            { icon: BarChart2, label: 'Performance Real', desc: 'Identifique seus gaps', accent: 'var(--primary)' },
+            { icon: Brain, label: 'Tutor WhatsApp', desc: 'Dúvidas jurídicas com STF/STJ', accent: 'var(--primary)' },
+            { icon: Target, label: 'Multi-Edital & PDF', desc: 'Pesos e matérias automáticos', accent: 'var(--primary)' },
+            { icon: TrendingUp, label: 'Simulado Diário', desc: 'Questão rápida no celular às 12h', accent: 'var(--primary)' },
+            { icon: BarChart2, label: 'Horas Líquidas', desc: 'Cockpit analítico e foco real', accent: 'var(--primary)' },
           ].map(({ icon: Icon, label, desc, accent }) => (
             <div
               key={label}

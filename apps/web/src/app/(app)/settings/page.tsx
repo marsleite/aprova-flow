@@ -94,6 +94,11 @@ export default function SettingsPage() {
     email: user.email,
   });
 
+  const actualPlanTier = userStats?.planTier || 'free';
+  const actualSubStatus = userStats?.subscriptionStatus || 'expired';
+  const isPro = actualPlanTier === 'pro';
+  const isAdmin = planTier === 'admin';
+
   const activePlansFeature = getFeature(FeatureCode.ActivePlans);
   const activePlansLabel =
     activePlansFeature?.mode === 'quota'
@@ -102,11 +107,11 @@ export default function SettingsPage() {
 
   const planFeatures = [
     { label: activePlansLabel, available: true },
-    { label: 'Motor completo por matéria', available: hasFeature(FeatureCode.SubjectHealthFull) },
-    { label: 'Simulados customizados', available: hasFeature(FeatureCode.SimulationsCustom) },
-    { label: 'Diagnóstico semanal', available: hasFeature(FeatureCode.WeeklyDiagnostic) },
-    { label: 'Mentoria recorrente', available: hasFeature(FeatureCode.WeeklyMentoring) },
-    { label: 'Multi-edital', available: hasFeature(FeatureCode.MultiEdital) },
+    { label: 'Tutor WhatsApp (200 dúvidas/mês STF/STJ)', available: isPro || isAdmin },
+    { label: 'Simulado Diário no WhatsApp (12h)', available: isPro || isAdmin },
+    { label: 'Motor analítico por matéria e gaps', available: hasFeature(FeatureCode.SubjectHealthFull) },
+    { label: 'Cronômetro com horas líquidas reais', available: true },
+    { label: 'Multi-edital & Extração de PDF por IA', available: hasFeature(FeatureCode.MultiEdital) },
   ];
 
   const handleCancelSubscription = async () => {
@@ -171,11 +176,6 @@ export default function SettingsPage() {
 
   const startedAt = userStats?.subscriptionStartedAt ? parseDate(userStats.subscriptionStartedAt) : null;
   const isWithinCDC = startedAt ? (Date.now() - startedAt.getTime()) <= 7 * 24 * 60 * 60 * 1000 : false;
-
-  const actualPlanTier = userStats?.planTier || 'free';
-  const actualSubStatus = userStats?.subscriptionStatus || 'expired';
-  const isPro = actualPlanTier === 'pro';
-  const isAdmin = planTier === 'admin';
 
   // Helper component/render for dynamic badge
   const renderStatusBadge = () => {
@@ -465,8 +465,8 @@ export default function SettingsPage() {
                     // Free View
                     <div className="space-y-4">
                       <p className="text-am-body-sm text-muted-foreground leading-relaxed">
-                        Você está no plano <span className="font-semibold text-foreground uppercase">AprovaMind Free</span>. 
-                        Faça o upgrade para liberar o motor de simulados customizados, IA explicativa ilimitada, diagnóstico semanal completo e recuperação adaptativa de cronogramas.
+                        Você está no plano <span className="font-semibold text-foreground uppercase">AprovaMind Free</span> (5 dúvidas/mês no WhatsApp e 1 edital ativo). 
+                        Faça o upgrade para o <strong className="text-foreground">Pro</strong> e libere 200 dúvidas jurídicas/mês com jurisprudência STF/STJ, simulados diários no celular, múltiplos editais e relatórios profundos de retenção.
                       </p>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/50 p-4 rounded-md border border-am-border-subtle">

@@ -28,6 +28,7 @@ import InsightsPanel from '@/components/InsightsPanel';
 import PortfolioOverviewCard from '@/components/engine/PortfolioOverviewCard';
 import StudyJourneyCard from '@/components/StudyJourneyCard';
 import SessionHistory from '@/components/SessionHistory';
+import WhatsAppBanner from '@/components/WhatsAppBanner';
 import {
   TrendingUp,
   Zap,
@@ -171,6 +172,11 @@ export default function DashboardPage() {
       <div className="px-6 space-y-6">
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
           <StudyJourneyCard current="dashboard" />
+        </motion.div>
+
+        {/* ── WhatsApp Tutor Companion Banner ── */}
+        <motion.div custom={0.3} variants={fadeUp} initial="hidden" animate="show">
+          <WhatsAppBanner userId={user.uid} />
         </motion.div>
 
         {/* ── KPIs ── */}
