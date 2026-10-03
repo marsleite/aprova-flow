@@ -50,10 +50,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    let planTier = 'free';
+    try {
+      const { getUserEntitlements } = await import('@/lib/firebase/entitlements');
+      const entitlements = await getUserEntitlements(firebase_uid, email);
+      planTier = entitlements.planTier;
+    } catch {
+      // fallback to free
+    }
+
     const response = await fetch(`${BOT_API_URL}/api/auth/redeem-phone-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, firebase_uid, email }),
+      body: JSON.stringify({ token, firebase_uid, email, plan_tier: planTier }),
     });
 
     if (!response.ok) {
