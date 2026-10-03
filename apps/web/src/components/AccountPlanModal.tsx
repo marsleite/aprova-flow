@@ -270,6 +270,12 @@ export default function AccountPlanModal({
                       </div>
 
                       <ul className="space-y-1.5 text-xs text-muted-foreground">
+                        <li className="inline-flex items-center gap-1.5 font-medium text-foreground">
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                          {plan.tier === 'pro'
+                            ? 'Tutor WhatsApp: 200 dúvidas/mês + Simulados Diários'
+                            : 'Tutor WhatsApp: 5 dúvidas/mês (Degustação)'}
+                        </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-green-500" />
                           Dashboard completo
