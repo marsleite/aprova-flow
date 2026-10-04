@@ -94,32 +94,29 @@ export default function AccountPlanModal({
     setCheckoutError(null);
 
     try {
-      const idToken = await auth.currentUser?.getIdToken();
-      if (!idToken) {
+      const user = auth.currentUser;
+      if (!user) {
         setCheckoutError('Por favor, faça login para continuar.');
         setCheckoutLoading(false);
         return;
       }
 
-      const res = await fetch('/api/billing/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ interval: billingInterval }),
-      });
+      const hotmartMonthly =
+        process.env.NEXT_PUBLIC_HOTMART_MONTHLY_URL ||
+        'https://pay.hotmart.com/O107879968U?off=6krpa1in';
+      const hotmartAnnual =
+        process.env.NEXT_PUBLIC_HOTMART_ANNUAL_URL ||
+        'https://pay.hotmart.com/O107879968U?off=dai4096l';
 
-      const data = await res.json();
+      const targetUrl = billingInterval === 'annually' ? hotmartAnnual : hotmartMonthly;
+      const checkoutUrl = new URL(targetUrl);
+      if (user.email) checkoutUrl.searchParams.set('email', user.email);
+      if (user.uid) checkoutUrl.searchParams.set('sck', user.uid);
 
-      if (!res.ok || !data.success || !data.checkoutUrl) {
-        throw new Error(data.message || 'Erro ao gerar sessão de pagamento.');
-      }
-
-      // Redireciona para o Mercado Pago
-      window.location.href = data.checkoutUrl;
+      // Redireciona para o checkout oficial da Hotmart
+      window.location.href = checkoutUrl.toString();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao conectar ao servidor de pagamento. Tente novamente.';
+      const message = err instanceof Error ? err.message : 'Erro ao conectar ao checkout da Hotmart. Tente novamente.';
       setCheckoutError(message);
       setCheckoutLoading(false);
     }

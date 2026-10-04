@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+  <defs>
+    <radialGradient id="bgGlow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#111116" />
+      <stop offset="70%" stop-color="#09090b" />
+      <stop offset="100%" stop-color="#040405" />
+    </radialGradient>
+
+    <linearGradient id="pureOrange" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c" />
+      <stop offset="50%" stop-color="#f97316" />
+      <stop offset="100%" stop-color="#d94e07" />
+    </linearGradient>
+
+    <linearGradient id="horizonShine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f97316" />
+      <stop offset="50%" stop-color="#ffedd5" />
+      <stop offset="100%" stop-color="#f97316" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1000" height="1000" fill="url(#bgGlow2)" />
+
+  <g transform="translate(0, 0)">
+    <!-- Top Triangle Pyramid -->
+    <polygon
+      points="500, 190 410, 460 590, 460"
+      fill="url(#pureOrange)"
+    />
+
+    <!-- Inner dark negative space in top pyramid -->
+    <polygon
+      points="500, 310 458, 440 542, 440"
+      fill="#09090b"
+    />
+
+    <!-- Bottom Left Leg with precision slant -->
+    <polygon
+      points="390, 520 220, 800 330, 800 450, 600"
+      fill="url(#pureOrange)"
+    />
+
+    <!-- Bottom Right Leg with precision slant -->
+    <polygon
+      points="610, 520 780, 800 670, 800 550, 600"
+      fill="url(#pureOrange)"
+    />
+
+    <!-- Floating Horizon Diamond Needle (Negative-space floating focus needle) -->
+    <polygon
+      points="130, 490 500, 462 870, 490 500, 518"
+      fill="url(#horizonShine)"
+    />
+  </g>
+</svg>

@@ -161,6 +161,97 @@ export async function registerBillingRoutes(app: FastifyInstance): Promise<void>
     }
   });
 
+  // ── POST /billing/webhook/hotmart ──
+  app.post('/billing/webhook/hotmart', async (request, reply) => {
+    const body = request.body as any;
+    const headerHottok = request.headers['x-hotmart-hottok'] as string;
+    const expectedHottok = process.env.HOTMART_HOTTOK || 'FPQSTyF60MbpINRs92BGjVaE1iiwUe599014';
+    const incomingHottok = headerHottok || body?.hottok;
+
+    if (incomingHottok && incomingHottok !== expectedHottok) {
+      request.log.warn({ incomingHottok }, 'Hotmart Hottok mismatch');
+      return reply.code(401).send({ error: 'unauthorized', message: 'Hottok inválido.' });
+    }
+
+    const event = body?.event || body?.type || 'UNKNOWN';
+    request.log.info({ event, id: body?.id }, 'Hotmart webhook received');
+
+    const data = body?.data || {};
+    const buyer = data.buyer || {};
+    const purchase = data.purchase || {};
+    const subscription = data.subscription || {};
+
+    const buyerEmail = buyer.email;
+    const buyerPhone = buyer.checkout_phone;
+    const sck = purchase.sck;
+
+    const isApproved = ['PURCHASE_APPROVED', 'PURCHASE_COMPLETE'].includes(event);
+    const isRevoked = [
+      'PURCHASE_CANCELED',
+      'PURCHASE_REFUNDED',
+      'SUBSCRIPTION_CANCELED',
+      'PURCHASE_CHARGEBACK',
+    ].includes(event);
+
+    const planTier = isApproved ? 'pro' : isRevoked ? 'free' : null;
+    const subscriptionStatus = isApproved ? 'active' : isRevoked ? 'canceled' : null;
+
+    if (planTier && sck) {
+      try {
+        const isUid = typeof sck === 'string' && sck.length >= 20 && !sck.startsWith('+');
+        if (isUid) {
+          const adminSession = await getAdminSession();
+          const writer = new RestFirestoreAdminWriter(adminSession.idToken);
+          await writer.setDocument('user_stats', sck, {
+            planTier,
+            subscriptionStatus,
+            planCode: planTier,
+            billingProvider: 'hotmart',
+            billingInterval: subscription.plan?.name?.toLowerCase().includes('anual')
+              ? 'annually'
+              : 'monthly',
+            hotmartBuyerEmail: buyerEmail || null,
+            hotmartBuyerPhone: buyerPhone || null,
+            subscriptionUpdatedAt: new Date().toISOString(),
+          });
+        }
+      } catch (err: any) {
+        request.log.error(err, 'Failed to update Firestore user_stats from Hotmart webhook');
+      }
+    }
+
+    // Forward to WhatsApp companion (aprova-mind)
+    const aprovamindUrl = process.env.APROVAMIND_API_URL || 'http://localhost:8000';
+    const secretKey = process.env.INTERNAL_SERVICE_KEY || 'aprovamind-secret-service-key-2026';
+    const targetPhone = buyerPhone || (typeof sck === 'string' && (sck.startsWith('+') || sck.length <= 15) ? sck : undefined);
+
+    if (planTier && (targetPhone || sck)) {
+      try {
+        await fetch(`${aprovamindUrl.replace(/\/$/, '')}/api/auth/update-plan-tier`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-service-key': secretKey,
+          },
+          body: JSON.stringify({
+            phone: targetPhone,
+            firebase_uid: typeof sck === 'string' && sck.length >= 20 ? sck : undefined,
+            plan_tier: planTier,
+          }),
+        });
+      } catch (botErr) {
+        request.log.warn({ botErr }, 'Could not notify aprova-mind companion API');
+      }
+    }
+
+    return reply.send({
+      ok: true,
+      event,
+      status: 'processed',
+      message: 'Hotmart webhook processed successfully',
+    });
+  });
+
   // ── POST /billing/cancel ──
   app.post('/billing/cancel', {
     preHandler: [app.authenticate],
