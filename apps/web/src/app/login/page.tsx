@@ -27,6 +27,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import AprovaMindLogo, { AprovaMindIcon } from '@/components/brand/AprovaMindLogo';
 
 export default function LoginPage() {
   const { user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, error } =
@@ -187,15 +188,15 @@ export default function LoginPage() {
             border: '1px solid var(--border)',
           }}
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
-            <Zap className="h-4 w-4 text-st-text-on-light" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-b from-orange-500/15 to-amber-500/5 border border-orange-500/25 shadow-sm shadow-orange-500/10">
+            <AprovaMindIcon size={22} />
           </div>
           <div className="flex flex-col">
             <p
-              className="text-lg font-semibold tracking-tight leading-none"
+              className="text-lg font-bold tracking-tight leading-none"
               style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--foreground)' }}
             >
-              Aprova<span className="text-primary">Mind</span>
+              Aprova<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">Mind</span>
             </p>
             <p
               className="text-[10px] uppercase tracking-widest mt-0.5"
@@ -313,16 +314,8 @@ export default function LoginPage() {
       >
         <div className="w-full max-w-md">
           {/* Mobile logo */}
-          <div className="mb-10 flex flex-col items-center justify-center gap-3 lg:hidden">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-xl">
-              <Zap className="h-7 w-7 text-st-text-on-light" />
-            </div>
-            <p
-              className="text-2xl font-semibold tracking-tight"
-              style={{ fontFamily: 'var(--ds-font-display)', color: 'var(--foreground)' }}
-            >
-              Aprova<span className="text-primary">Mind</span>
-            </p>
+          <div className="mb-10 flex justify-center lg:hidden">
+            <AprovaMindLogo size="lg" href="/" />
           </div>
 
           {/* Card — Sitetrip glassmorphism */}

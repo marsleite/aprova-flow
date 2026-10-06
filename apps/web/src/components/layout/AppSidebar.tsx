@@ -14,6 +14,7 @@ import {
     LogOut,
     Zap,
 } from 'lucide-react';
+import AprovaMindLogo from '@/components/brand/AprovaMindLogo';
 
 interface SidebarItemProps {
     href: string;
@@ -72,14 +73,7 @@ export function AppSidebar() {
         <aside className="fixed inset-y-0 left-0 z-40 flex w-[240px] flex-col border-r border-border bg-background">
             {/* Logo Area */}
             <div className="flex h-16 shrink-0 items-center px-6">
-                <Link href="/dashboard" className="flex items-center gap-2 group">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-am-brand-gradient shadow-am-sm transition-transform duration-300 group-hover:scale-105">
-                        <Zap className="h-4 w-4 text-foreground" />
-                    </div>
-                    <span className="font-sans text-lg font-bold text-foreground tracking-tighter">
-                        Aprova<span className="text-am-text-brand">Mind</span>
-                    </span>
-                </Link>
+                <AprovaMindLogo size="sm" href="/dashboard" />
             </div>
 
             {/* Main Nav */}

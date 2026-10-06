@@ -22,6 +22,7 @@ import {
   ArrowRight,
   Send,
 } from 'lucide-react';
+import AprovaMindLogo from '@/components/brand/AprovaMindLogo';
 
 export const metadata: Metadata = {
   title: 'AprovaMind | Cockpit Web e Tutor 24/7 no WhatsApp para Concursos',
@@ -64,12 +65,7 @@ export default function LandingPage() {
       <nav className="z-50 sticky global-nav w-full border-b border-border top-0 bg-background/80 backdrop-blur-md transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-12">
-            <Link href="/" className="flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-2.5 h-2.5 rounded-full animate-pulse bg-primary"></span>
-              <span className="font-semibold tracking-tight text-foreground text-xl">
-                Aprova<span className="text-primary">Mind</span>
-              </span>
-            </Link>
+            <AprovaMindLogo size="md" href="/" />
           </div>
           <div className="hidden md:flex items-center gap-8 text-xs font-medium text-muted-foreground uppercase tracking-widest">
             <a href="#tutor-whatsapp" className="hover:text-foreground transition-colors flex items-center gap-1.5 text-emerald-500 font-semibold">
@@ -602,9 +598,8 @@ export default function LandingPage() {
       <footer className="py-12 bg-background border-t border-border">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-primary" />
-            <span className="font-semibold tracking-tight text-foreground text-sm">AprovaMind</span>
-            <span className="text-xs text-muted-foreground ml-2">· Ecossistema de Performance</span>
+            <AprovaMindLogo size="xs" href="/" />
+            <span className="text-xs text-muted-foreground ml-1">· Ecossistema de Performance</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-muted-foreground">
             <Link href="/privacy" className="hover:text-foreground transition-colors">

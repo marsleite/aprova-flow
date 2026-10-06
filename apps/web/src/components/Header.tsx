@@ -15,6 +15,7 @@ import { StudyPlanEdital } from '@/types';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { isUnlimited } from '@/lib/entitlements';
 import AccountPlanModal from './AccountPlanModal';
+import AprovaMindLogo from '@/components/brand/AprovaMindLogo';
 
 interface HeaderProps {
   plans?: StudyPlanEdital[];
@@ -54,18 +55,8 @@ export default function Header({
     <header className="relative z-50 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         {/* Logo & Nome */}
-        <div className="flex items-center gap-3 self-start sm:self-auto">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/20 shadow-lg shadow-[var(--primary)]/25">
-            <Zap className="h-5 w-5 text-foreground" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">
-              Aprova<span className="text-[var(--primary)]">Mind</span>
-            </h1>
-            <p className="hidden text-xs text-muted-foreground sm:block">
-              Rastreie seu progresso
-            </p>
-          </div>
+        <div className="self-start sm:self-auto">
+          <AprovaMindLogo size="md" subtitle="Rastreie seu progresso" href="/dashboard" />
         </div>
 
         {/* Centro: Plan Selector (desktop) */}

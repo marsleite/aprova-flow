@@ -14,6 +14,7 @@ import { StudyPlanEdital } from '@/types';
 import { Zap } from 'lucide-react';
 import { PlanContext } from '@/contexts/PlanContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import AprovaMindLogo, { AprovaMindIcon } from '@/components/brand/AprovaMindLogo';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -85,8 +86,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-card">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-12 w-12 animate-pulse items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
-            <Zap className="h-6 w-6 text-white" />
+          <div className="flex h-14 w-14 animate-pulse items-center justify-center rounded-2xl bg-gradient-to-b from-orange-500/15 to-amber-500/5 border border-orange-500/25 shadow-lg shadow-orange-500/10">
+            <AprovaMindIcon size={34} />
           </div>
           <p className="text-am-caption text-muted-foreground uppercase tracking-wider font-mono">Carregando...</p>
         </div>
@@ -114,14 +115,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between border-b border-border bg-card/80 px-4 py-3 backdrop-blur-xl lg:hidden">
             <div className="flex items-center gap-3">
               <MobileMenuButton onClick={() => setMobileOpen(true)} />
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: 'var(--identity-grad)' }}>
-                  <Zap className="h-3.5 w-3.5 text-white" />
-                </div>
-                <span className="font-sans text-sm font-bold text-foreground">
-                  Aprova<span className="text-primary">Mind</span>
-                </span>
-              </div>
+              <AprovaMindLogo size="xs" href="/dashboard" />
             </div>
             <ThemeToggle />
           </div>

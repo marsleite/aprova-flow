@@ -14,7 +14,11 @@ export const metadata: Metadata = {
   title: "AprovaMind | Alta Performance",
   description: "Plataforma inteligente de estudo para concursos baseada no conceito Flux.",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/branding/aprovamind_apex_refinado_v1.png", type: "image/png" },
+    ],
+    apple: "/branding/aprovamind_apex_refinado_v1.png",
   },
 };
 

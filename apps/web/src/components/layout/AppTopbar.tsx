@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Menu, Zap } from 'lucide-react';
 import { Button } from '@/components';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import AprovaMindLogo from '@/components/brand/AprovaMindLogo';
 
 export function AppTopbar({ onMenuToggle }: { onMenuToggle: () => void }) {
     // We'll wire PlanSelector here later; for now, keeping it clean as per phase 1 definition
@@ -15,14 +16,7 @@ export function AppTopbar({ onMenuToggle }: { onMenuToggle: () => void }) {
                     <Menu className="h-5 w-5" />
                     <span className="sr-only">Abrir menu</span>
                 </Button>
-                <div className="flex items-center gap-2">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-am-brand-gradient">
-                        <Zap className="h-3.5 w-3.5 text-foreground" />
-                    </div>
-                    <span className="font-sans text-sm font-bold text-foreground tracking-tighter">
-                        Aprova<span className="text-am-text-brand">Mind</span>
-                    </span>
-                </div>
+                <AprovaMindLogo size="xs" href="/dashboard" />
             </div>
 
             {/* Desktop empty spacer for left / Future title */}

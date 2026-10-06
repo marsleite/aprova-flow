@@ -24,6 +24,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AccountPlanModal from '@/components/AccountPlanModal';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AprovaMindIcon } from '@/components/brand/AprovaMindLogo';
 
 const NAV_ITEMS = [
   {
@@ -115,17 +116,16 @@ export default function Sidebar({
           }}
         >
           <div
-            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
-            style={{ background: 'var(--primary)' }}
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-orange-500/15 to-amber-500/5 border border-orange-500/25 shadow-sm shadow-orange-500/10"
           >
-            <Zap className="h-4 w-4" style={{ color: 'var(--primary-foreground)' }} />
+            <AprovaMindIcon size={22} />
           </div>
           <div className="min-w-0">
             <p
-              className="text-[15px] font-medium tracking-tight leading-none"
+              className="text-[15px] font-bold tracking-tight leading-none"
               style={{ fontFamily: 'var(--ds-font-display, inherit)', color: 'var(--foreground)' }}
             >
-              AprovaMind
+              Aprova<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">Mind</span>
             </p>
             <p
               className="mt-1 text-[9px] uppercase tracking-[0.2em]"
