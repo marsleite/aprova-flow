@@ -32,19 +32,19 @@ export function resolveEntitlementsApiBaseUrl(): string {
 
   if (typeof window === 'undefined') {
     if (process.env.NODE_ENV !== 'production') {
-      return 'http://127.0.0.1:3001';
+      return 'http://127.0.0.1:8080';
     }
-    return '';
+    return 'https://core.aprovamind.com.br';
   }
 
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://127.0.0.1:3001';
+      return 'http://127.0.0.1:8080';
     }
   }
 
-  return '';
+  return 'https://core.aprovamind.com.br';
 }
 
 export async function fetchUserEntitlementsSnapshot(

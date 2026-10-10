@@ -25,6 +25,8 @@ import { auth } from '@/lib/firebase/config';
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
+  channel?: 'whatsapp' | 'web';
+  timestamp?: string;
 }
 
 interface ChatPanelProps {
@@ -59,7 +61,7 @@ export default function ChatPanel({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [greeted, setGreeted] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [quota, setQuota] = useState<{ remaining: number; limit: number } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -117,18 +119,53 @@ export default function ChatPanel({
   }, [userName, consistency, subjectHours, planVsActual, todaySessions, totalTodaySeconds, weeklyData, recentSessions, activePlanName]);
 
   // ================================================
-  // Saudação inteligente ao abrir o chat
+  // Carrega histórico unificado (WhatsApp + Web) ou saudação inteligente
   // ================================================
   useEffect(() => {
-    if (!isOpen || greeted || messages.length > 0) return;
+    if (!isOpen || historyLoaded) return;
 
-    const greeting = buildGreeting();
-    if (greeting) {
-      setMessages([{ role: 'assistant', content: greeting }]);
-      setGreeted(true);
+    let active = true;
+
+    async function loadUnifiedHistory() {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        if (idToken) {
+          const res = await fetch('/api/chat/history', {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.messages && Array.isArray(data.messages) && data.messages.length > 0) {
+              if (active) {
+                setMessages(data.messages);
+                setHistoryLoaded(true);
+                return;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Falha ao carregar histórico omnicanal:', err);
+      }
+
+      if (active) {
+        const greeting = buildGreeting();
+        if (greeting) {
+          setMessages([{ role: 'assistant', content: greeting, channel: 'web' }]);
+        }
+        setHistoryLoaded(true);
+      }
     }
+
+    loadUnifiedHistory();
+
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, historyLoaded]);
 
   function buildGreeting(): string {
     const name = userName || 'Estudante';
@@ -201,7 +238,7 @@ function getSuggestions(): string[] {
   async function sendMessage(content: string) {
     if (!content.trim() || loading) return;
 
-    const userMsg: ChatMessage = { role: 'user', content: content.trim() };
+    const userMsg: ChatMessage = { role: 'user', content: content.trim(), channel: 'web' };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput('');
@@ -283,7 +320,7 @@ function getSuggestions(): string[] {
         : fallbackUsed
           ? 'Modo resiliente: '
           : '';
-      setMessages((prev) => [...prev, { role: 'assistant', content: `${statusPrefix}${reply}` }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: `${statusPrefix}${reply}`, channel: 'web' }]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -309,7 +346,7 @@ function getSuggestions(): string[] {
 
   function clearChat() {
     setMessages([]);
-    setGreeted(false);
+    setHistoryLoaded(false);
   }
 
   return (
@@ -412,7 +449,19 @@ function getSuggestions(): string[] {
                           : 'rounded-tl-sm border border-border bg-card text-gray-300'
                       }`}
                     >
-                      {msg.content}
+                      {msg.channel === 'whatsapp' && (
+                        <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold text-emerald-400">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                          <span>WhatsApp</span>
+                        </div>
+                      )}
+                      {msg.channel === 'web' && (
+                        <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold text-sky-400">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-sky-400"></span>
+                          <span>Web</span>
+                        </div>
+                      )}
+                      <div className="whitespace-pre-wrap">{msg.content}</div>
                     </div>
                   </motion.div>
                 ))}

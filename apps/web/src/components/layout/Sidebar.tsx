@@ -19,6 +19,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,6 +39,12 @@ const NAV_ITEMS = [
     icon: LayoutDashboard,
     label: 'Dashboard',
     description: 'Cockpit e métricas',
+  },
+  {
+    href: '/resumos',
+    icon: Sparkles,
+    label: 'Fechamento do Dia',
+    description: 'Dossiê e flashcards',
   },
   {
     href: '/planner',

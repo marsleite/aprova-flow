@@ -14,10 +14,10 @@ export function resolveBackendApiBaseUrl(): string {
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    return 'http://127.0.0.1:3001';
+    return 'http://127.0.0.1:8080';
   }
 
-  return '';
+  return 'https://core.aprovamind.com.br';
 }
 
 export async function proxyRequestToBackendApi(params: {
