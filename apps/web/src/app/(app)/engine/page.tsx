@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Plus,
   Zap,
+  MessageCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -285,6 +286,17 @@ export default function EnginePage() {
                   Inicie sua primeira sessão cronometrada para ativar as inferências do motor de performance inteligente.
                 </p>
               )}
+
+              <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3 relative z-10">
+                <span className="text-[11px] text-muted-foreground">Tutor 24/7 conectado ao WhatsApp</span>
+                <Link
+                  href="/mentoring"
+                  className="flex items-center gap-1.5 rounded-lg bg-orange-500/10 px-3 py-1.5 text-xs font-semibold text-orange-400 hover:bg-orange-500/20 transition-colors border border-orange-500/20"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  <span>Conversar com Mentor IA</span>
+                </Link>
+              </div>
             </motion.div>
 
             {/* Execution log (recent sessions) */}

@@ -41,6 +41,12 @@ const NAV_ITEMS = [
     description: 'Cockpit e métricas',
   },
   {
+    href: '/mentoring',
+    icon: Brain,
+    label: 'Mentor IA',
+    description: 'Tutor 24/7 & WhatsApp',
+  },
+  {
     href: '/resumos',
     icon: Sparkles,
     label: 'Fechamento do Dia',
