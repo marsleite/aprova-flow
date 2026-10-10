@@ -18,8 +18,8 @@ services:
         NEXT_PUBLIC_APROVAMIND_API_URL: ${NEXT_PUBLIC_APROVAMIND_API_URL:-https://api.aprovamind.com.br}
     container_name: aprovamind-web
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -50,8 +50,8 @@ services:
       dockerfile: Dockerfile.api
     container_name: aprovamind-web-api
     restart: unless-stopped
-    ports:
-      - "3001:3001"
+    expose:
+      - "3001"
     environment:
       - NODE_ENV=production
       - PORT=3001
