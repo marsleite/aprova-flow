@@ -608,7 +608,7 @@ export default function LandingPage() {
             <Link href="/login" className="hover:text-foreground transition-colors">
               Entrar
             </Link>
-            <a href="https://wa.me/557193430828" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors flex items-center gap-1 text-emerald-400">
+            <a href="https://wa.me/5571981356297" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors flex items-center gap-1 text-emerald-400">
               <MessageSquare className="w-3.5 h-3.5" /> Falar com o Tutor
             </a>
           </div>
