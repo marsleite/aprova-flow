@@ -79,6 +79,20 @@ O app **não ensina matéria** — ele é o **coach de rotina** que garante que 
 - Planejado vs Real com status por matéria
 - Meta semanal + Streak de dias consecutivos
 
+### Fechamento do Dia & Timeline de Revisão
+- Síntese diária automatizada de todas as dúvidas debatidas com o Mentor IA.
+- **Caderno de Erros Inteligente**: Alertas de pegadinhas de bancas examinadoras.
+- **Lei Seca Citada**: Dispositivos legais mapeados e vinculados para leitura rápida.
+- **Aulas no YouTube**: Curadoria de vídeos recomendados para os temas do dia.
+- **Flashcards de Active Recall**: Treino interativo com questões Verdadeiro/Falso e justificativa pedagógica.
+- **Favoritos**: Possibilidade de salvar dias estratégicos para revisão na véspera da prova.
+
+### Chat Omnicanal Unificado (WhatsApp + Web)
+- Histórico sincronizado em tempo real entre o app do WhatsApp e o Web Cockpit.
+- Badges visuais indicando a origem de cada mensagem (`📱 WhatsApp` e `💻 Web`).
+- Conexão de altíssima performance intermediada pelo microserviço em Go (`aprova-core-go`).
+
+
 ### Módulo de Questões
 - Registro de acertos/erros por matéria
 - Gráfico RadialBar com taxa de acerto geral
