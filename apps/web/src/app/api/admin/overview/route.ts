@@ -84,34 +84,51 @@ export async function GET(request: NextRequest) {
     // fallback
   }
 
-  // 3. Monta histórico de 14 dias (para gráfico de atividade e novos alunos)
+  // 3. Obtém contagem real dos usuários do sistema
+  let systemUsers: any[] = [];
+  try {
+    const { getSystemUsersList } = await import('@/app/api/admin/users/route');
+    systemUsers = getSystemUsersList();
+  } catch {
+    systemUsers = [];
+  }
+
+  const totalUsers = systemUsers.length;
+  const proUsers = systemUsers.filter((u) => u.tier === 'pro').length;
+  const freeUsers = systemUsers.filter((u) => u.tier === 'free').length;
+  const whatsappConnectedCount = systemUsers.filter((u) => u.whatsappLinked).length;
+
+  const mrrBrl = proUsers * 49.9;
+  const arrBrl = mrrBrl * 12;
+
+  // 4. Histórico dos últimos 14 dias com atividade real/limpa
   const today = new Date();
   const registrationHistory = Array.from({ length: 14 }).map((_, idx) => {
     const d = new Date(today);
     d.setDate(d.getDate() - (13 - idx));
     const dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-    // Projeção baseada em atividade recente
+    const isToday = idx === 13;
     return {
       date: dateStr,
-      novosCadastros: Math.max(1, Math.floor(Math.sin(idx + 1) * 3 + 4)),
-      simuladosFeitos: Math.max(2, Math.floor(Math.cos(idx + 2) * 4 + 6)),
-      duvidasWhatsapp: Math.max(3, Math.floor(Math.sin(idx * 2) * 5 + 8)),
+      novosCadastros: isToday ? totalUsers : 0,
+      simuladosFeitos: isToday ? (betaSignals.simulationCompleted || 0) : 0,
+      duvidasWhatsapp: isToday ? (betaSignals.aiEvents || 0) : 0,
     };
   });
 
-  // 4. Retorna payload executivo
+  // 5. Retorna payload executivo baseado em dados reais de produção
   return NextResponse.json({
     metrics: {
-      totalUsers: 142,
-      proUsers: 18,
-      freeUsers: 124,
-      mrrBrl: 18 * 49.9, // R$ 898,20
-      arrBrl: 18 * 49.9 * 12,
-      whatsappConnectedCount: 37,
-      aiTokensToday: 184500,
-      aiCostUsdToday: betaSignals.aiCostUsd || 0.42,
-      aiCostBrlToday: (betaSignals.aiCostUsd || 0.42) * 5.85,
-      simuladosTotal: betaSignals.simulationCompleted || 240,
+      totalUsers,
+      proUsers,
+      freeUsers,
+      mrrBrl,
+      arrBrl,
+      whatsappConnectedCount,
+      aiTokensToday: betaSignals.aiEvents ? betaSignals.aiEvents * 280 : 0,
+      aiCostUsdToday: betaSignals.aiCostUsd || 0,
+      aiCostBrlToday: (betaSignals.aiCostUsd || 0) * 5.85,
+      simuladosTotal: betaSignals.simulationCompleted || 0,
     },
     services,
     registrationHistory,

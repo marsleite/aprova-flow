@@ -19,8 +19,8 @@ export interface AdminUserListItem {
   createdAt: string;
 }
 
-// Lista base com os usuários principais e fundadores
-const INITIAL_DEMO_USERS: AdminUserListItem[] = [
+// Lista base oficial com os administradores fundadores reais
+const INITIAL_REAL_USERS: AdminUserListItem[] = [
   {
     id: 'usr_grace_01',
     email: 'graceandradeleite@gmail.com',
@@ -56,53 +56,6 @@ const INITIAL_DEMO_USERS: AdminUserListItem[] = [
     whatsappLinked: false,
     createdAt: '2026-09-20',
   },
-  {
-    id: 'usr_concurseiro_04',
-    email: 'rodrigo.concurseiro@gmail.com',
-    name: 'Rodrigo Silveira',
-    tier: 'pro',
-    subscriptionStatus: 'active',
-    isAdmin: false,
-    isBootstrapAdmin: false,
-    whatsappLinked: true,
-    phone: '5511987654321',
-    createdAt: '2026-10-02',
-  },
-  {
-    id: 'usr_concurseiro_05',
-    email: 'camila.magistratura@outlook.com',
-    name: 'Camila Fernandes',
-    tier: 'pro',
-    subscriptionStatus: 'active',
-    isAdmin: false,
-    isBootstrapAdmin: false,
-    whatsappLinked: true,
-    phone: '5521998765432',
-    createdAt: '2026-10-05',
-  },
-  {
-    id: 'usr_concurseiro_06',
-    email: 'lucas.defensoria@gmail.com',
-    name: 'Lucas Prado',
-    tier: 'free',
-    subscriptionStatus: 'expired',
-    isAdmin: false,
-    isBootstrapAdmin: false,
-    whatsappLinked: false,
-    createdAt: '2026-10-08',
-  },
-  {
-    id: 'usr_concurseiro_07',
-    email: 'mariana.delta@gmail.com',
-    name: 'Mariana Rios',
-    tier: 'free',
-    subscriptionStatus: 'expired',
-    isAdmin: false,
-    isBootstrapAdmin: false,
-    whatsappLinked: true,
-    phone: '5531988887777',
-    createdAt: '2026-10-09',
-  },
 ];
 
 // Cache em memória de modificações dinâmicas e novos usuários adicionados
@@ -110,17 +63,9 @@ const dynamicUserOverrides = new Map<string, Partial<AdminUserListItem>>();
 const dynamicAdminInvites = new Set<string>();
 const manuallyAddedUsers = new Map<string, AdminUserListItem>();
 
-export async function GET(request: NextRequest) {
-  const guard = await requireAdminUser(request);
-  if ('response' in guard) return guard.response;
-
-  const url = new URL(request.url);
-  const search = (url.searchParams.get('q') || '').toLowerCase().trim();
-  const filterTier = url.searchParams.get('tier');
-
-  // Mescla usuários base com eventuais modificações feitas em runtime
-  const allUsers = [
-    ...INITIAL_DEMO_USERS.map((u) => {
+export function getSystemUsersList(): AdminUserListItem[] {
+  return [
+    ...INITIAL_REAL_USERS.map((u) => {
       const overrides = dynamicUserOverrides.get(u.id);
       const isInvitedAdmin = dynamicAdminInvites.has(u.email.toLowerCase());
       return {
@@ -139,6 +84,17 @@ export async function GET(request: NextRequest) {
       };
     }),
   ];
+}
+
+export async function GET(request: NextRequest) {
+  const guard = await requireAdminUser(request);
+  if ('response' in guard) return guard.response;
+
+  const url = new URL(request.url);
+  const search = (url.searchParams.get('q') || '').toLowerCase().trim();
+  const filterTier = url.searchParams.get('tier');
+
+  const allUsers = getSystemUsersList();
 
   let filtered = allUsers;
   if (search) {
@@ -189,7 +145,7 @@ export async function POST(request: NextRequest) {
       // Caso 2: Usuário identificado ou adicionado por e-mail
       if (targetEmail) {
         // Verifica se já existe na base inicial
-        const existingBase = INITIAL_DEMO_USERS.find((u) => u.email.toLowerCase() === targetEmail);
+        const existingBase = INITIAL_REAL_USERS.find((u) => u.email.toLowerCase() === targetEmail);
         if (existingBase) {
           dynamicUserOverrides.set(existingBase.id, {
             ...(dynamicUserOverrides.get(existingBase.id) || {}),

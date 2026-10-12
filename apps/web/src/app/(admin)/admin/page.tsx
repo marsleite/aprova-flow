@@ -85,16 +85,16 @@ export default function AdminOverviewPage() {
   }, []);
 
   const metrics = data?.metrics || {
-    totalUsers: 142,
-    proUsers: 18,
-    freeUsers: 124,
-    mrrBrl: 898.2,
-    arrBrl: 10778.4,
-    whatsappConnectedCount: 37,
-    aiTokensToday: 184500,
-    aiCostUsdToday: 0.42,
-    aiCostBrlToday: 2.45,
-    simuladosTotal: 240,
+    totalUsers: 0,
+    proUsers: 0,
+    freeUsers: 0,
+    mrrBrl: 0,
+    arrBrl: 0,
+    whatsappConnectedCount: 0,
+    aiTokensToday: 0,
+    aiCostUsdToday: 0,
+    aiCostBrlToday: 0,
+    simuladosTotal: 0,
   };
 
   const services = data?.services || [
@@ -104,15 +104,7 @@ export default function AdminOverviewPage() {
     { name: 'Evolution WhatsApp', url: 'https://whats.aprovamind.com.br', status: 'healthy', latencyMs: 120 },
   ];
 
-  const history = data?.registrationHistory || [
-    { date: '01/10', novosCadastros: 4, simuladosFeitos: 6, duvidasWhatsapp: 8 },
-    { date: '02/10', novosCadastros: 5, simuladosFeitos: 8, duvidasWhatsapp: 12 },
-    { date: '03/10', novosCadastros: 3, simuladosFeitos: 7, duvidasWhatsapp: 9 },
-    { date: '04/10', novosCadastros: 6, simuladosFeitos: 11, duvidasWhatsapp: 14 },
-    { date: '05/10', novosCadastros: 7, simuladosFeitos: 14, duvidasWhatsapp: 18 },
-    { date: '06/10', novosCadastros: 5, simuladosFeitos: 12, duvidasWhatsapp: 15 },
-    { date: '07/10', novosCadastros: 8, simuladosFeitos: 16, duvidasWhatsapp: 22 },
-  ];
+  const history = data?.registrationHistory || [];
 
   return (
     <div className="flex flex-col min-h-screen">

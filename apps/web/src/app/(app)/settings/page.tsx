@@ -6,39 +6,11 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { usePlanContext } from '@/contexts/PlanContext';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import AccountPlanModal from '@/components/AccountPlanModal';
-import BetaSignalsCard from '@/components/BetaSignalsCard';
-import EntitlementSandboxCard from '@/components/EntitlementSandboxCard';
-import TesterSubscriptionManagerCard from '@/components/TesterSubscriptionManagerCard';
 import WhatsAppTutorCard from '@/components/WhatsAppTutorCard';
 import React, { useState, useEffect } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/config';
-
-class AdminCardErrorBoundary extends React.Component<
-  { children: React.ReactNode; cardTitle: string },
-  { hasError: boolean }
-> {
-  constructor(props: { children: React.ReactNode; cardTitle: string }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  componentDidCatch(error: unknown) {
-    console.error(`[AdminCardErrorBoundary] Erro ao renderizar ${this.props.cardTitle}:`, error);
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-amber-500">
-          Não foi possível exibir o card administrativo ({this.props.cardTitle}) temporariamente.
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+import Link from 'next/link';
 import Image from 'next/image';
 import {
   Settings,
@@ -71,7 +43,7 @@ interface UserStatsData {
 export default function SettingsPage() {
   const { user, logout } = useAuthContext();
   const { plans } = usePlanContext();
-  const { planTier, sandboxScenarioUserId, hasFeature, getFeature } = useEntitlements(
+  const { planTier, hasFeature, getFeature } = useEntitlements(
     user?.uid,
     user?.email
   );
@@ -115,15 +87,10 @@ export default function SettingsPage() {
 
   if (!user) return null;
 
-  const canManageTesters = isAdminIdentity({
-    uid: user.uid,
-    email: user.email,
-  });
-
   const actualPlanTier = userStats?.planTier || 'free';
   const actualSubStatus = userStats?.subscriptionStatus || 'expired';
   const isPro = actualPlanTier === 'pro';
-  const isAdmin = planTier === 'admin';
+  const isAdmin = planTier === 'admin' || isAdminIdentity({ uid: user.uid, email: user.email });
 
   const activePlansFeature = getFeature(FeatureCode.ActivePlans);
   const activePlansLimit =
@@ -422,12 +389,25 @@ export default function SettingsPage() {
                   {isAdmin ? (
                     // Admin View
                     <div className="space-y-3">
-                      <p className="text-am-body-sm text-muted-foreground leading-relaxed">
-                        Você possui privilégios totais de Administrador no sistema. O faturamento e cobranças recorrentes estão desativados para contas de equipe interna e desenvolvimento.
-                      </p>
-                      <div className="p-4 bg-muted/50 rounded-md border border-am-border-subtle flex items-center gap-3">
-                        <Shield className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-am-body-sm font-semibold text-foreground">Acesso ilimitado de desenvolvedor ativo</span>
+                      <div className="p-4 bg-muted/40 rounded-lg border border-am-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <Crown className="h-5 w-5 text-emerald-400 shrink-0" />
+                          <div>
+                            <span className="text-am-body-sm font-semibold text-foreground">
+                              Conta de Administrador / Fundador
+                            </span>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              Acesso vitalício completo a todas as ferramentas e recursos da plataforma.
+                            </p>
+                          </div>
+                        </div>
+                        <Link
+                          href="/admin"
+                          className="px-3.5 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5 self-start sm:self-auto shrink-0"
+                        >
+                          Ir para o Cockpit Admin
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </Link>
                       </div>
                     </div>
                   ) : isPro ? (
@@ -539,26 +519,6 @@ export default function SettingsPage() {
             </div>
           </Card>
         </motion.div>
-
-        {/* Painel Administrativo Interno — Apenas para Admins */}
-        {canManageTesters && (
-          <motion.div custom={3.5} variants={fadeUp} initial="hidden" animate="show" className="space-y-4 pt-4 border-t border-border">
-            <div className="flex items-center gap-2">
-              <Badge variant="ai" className="text-[10px] uppercase font-mono tracking-wider">Área Administrativa</Badge>
-              <span className="text-xs text-muted-foreground">Visível exclusivamente para você (Admin)</span>
-            </div>
-
-            <AdminCardErrorBoundary cardTitle="Sandbox de Entitlements">
-              <EntitlementSandboxCard currentScenarioUserId={sandboxScenarioUserId} />
-            </AdminCardErrorBoundary>
-            <AdminCardErrorBoundary cardTitle="Operação de Testers">
-              <TesterSubscriptionManagerCard />
-            </AdminCardErrorBoundary>
-            <AdminCardErrorBoundary cardTitle="Painel Beta Semanal">
-              <BetaSignalsCard />
-            </AdminCardErrorBoundary>
-          </motion.div>
-        )}
 
         {/* Danger zone */}
         <motion.div custom={4} variants={fadeUp} initial="hidden" animate="show">
