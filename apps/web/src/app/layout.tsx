@@ -11,8 +11,45 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AprovaMind | Alta Performance",
-  description: "Plataforma inteligente de estudo para concursos baseada no conceito Flux.",
+  metadataBase: new URL("https://aprovamind.com.br"),
+  title: {
+    default: "AprovaMind | Plataforma Inteligente para Concursos",
+    template: "%s | AprovaMind",
+  },
+  description: "Evolua seus estudos com editais inteligentes, questões comentadas por IA, cronômetro de foco e mentoria com IA no WhatsApp.",
+  keywords: [
+    "concursos",
+    "estudo para concurso",
+    "edital esquematizado",
+    "inteligência artificial",
+    "aprovamind",
+    "mentoria concursos",
+    "cronograma de estudos",
+  ],
+  authors: [{ name: "AprovaMind Team" }],
+  creator: "AprovaMind",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://aprovamind.com.br",
+    siteName: "AprovaMind",
+    title: "AprovaMind | Plataforma Inteligente para Concursos",
+    description: "Evolua seus estudos com editais inteligentes, questões comentadas por IA, cronômetro de foco e mentoria com IA no WhatsApp.",
+    images: [
+      {
+        url: "/branding/banner_ecossistema_16x9.jpg",
+        width: 1200,
+        height: 675,
+        alt: "AprovaMind - Ecossistema de Alta Performance para Concursos",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AprovaMind | Plataforma Inteligente para Concursos",
+    description: "Evolua seus estudos com editais inteligentes, questões comentadas por IA, cronômetro de foco e mentoria no WhatsApp.",
+    images: ["/branding/banner_ecossistema_16x9.jpg"],
+  },
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },

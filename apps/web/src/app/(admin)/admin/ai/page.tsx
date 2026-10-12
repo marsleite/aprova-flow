@@ -19,6 +19,8 @@ import {
   FileText,
   GitFork,
   HelpCircle,
+  ShieldCheck,
+  AlertTriangle,
 } from 'lucide-react';
 import { Card, Badge, Button } from '@/components';
 import { auth } from '@/lib/firebase/config';
@@ -300,6 +302,24 @@ export default function AdminAiObservatoryPage() {
                 </h4>
                 <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
                   O parser de editais e resumos simples está direcionado para Llama 3.1 8B Instant e Gemini 2.5 Flash, mantendo o Llama 3.3 70B focado em raciocínio jurídico profundo e fundamentação de jurisprudência do STF/STJ. O custo por milhão de tokens permanece abaixo de R$ 0,005.
+                </p>
+              </div>
+            </div>
+
+            {/* Guardrail e Alerta de Consumo Excessivo */}
+            <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-800/30 flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+              <div className="w-full">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-emerald-300 uppercase tracking-wider font-mono">
+                    Guardrail & Proteção Anti-Abuso
+                  </h4>
+                  <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 text-[10px]">
+                    Ativo 100%
+                  </Badge>
+                </div>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                  Teto diário configurado em <strong>1.500.000 tokens</strong> por dia. Disparos automáticos bloqueiam requisições de IPs suspeitos e alertam a administração antes de ultrapassar $2,00/dia.
                 </p>
               </div>
             </div>

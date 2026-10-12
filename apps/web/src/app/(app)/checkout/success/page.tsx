@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { Card, Button, Badge } from '@/components';
-import { CheckCircle2, Crown, Zap, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Crown, Zap, ArrowRight, MessageSquare, Sparkles } from 'lucide-react';
 import { fadeUp } from '@/design-system/tokens';
 
 export default function CheckoutSuccessPage() {
@@ -42,7 +42,7 @@ export default function CheckoutSuccessPage() {
           
           <div className="relative z-10 space-y-6">
             {/* Animated Success Icon Container */}
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-500/10 text-green-500 shadow-inner">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 shadow-inner">
               <motion.div
                 initial={{ scale: 0, rotate: -45 }}
                 animate={{ scale: 1, rotate: 0 }}
@@ -54,47 +54,49 @@ export default function CheckoutSuccessPage() {
 
             <div className="space-y-2">
               <Badge variant="ai" className="shadow-[0_0_12px_var(--color-am-ai-glow)] mx-auto">
-                <Crown className="mr-1 h-3.5 w-3.5 text-primary animate-pulse" /> PRO ATIVO
+                <Crown className="mr-1 h-3.5 w-3.5 text-primary animate-pulse" /> ASSINATURA PRO ATIVADA
               </Badge>
               <h1 className="font-sans text-am-h3 font-bold text-foreground tracking-tight">
-                Assinatura Confirmada!
+                Bem-vindo ao AprovaMind Pro!
               </h1>
               <p className="text-am-body-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                Parabéns! Sua conta foi atualizada para o <strong className="text-foreground">AprovaMind Pro</strong>. Todas as funcionalidades premium, plano adaptativo de estudos e cotas estendidas já estão liberadas.
+                Pagamento confirmado com sucesso pela Hotmart. Todos os recursos de Inteligência Artificial, editais ilimitados e relatórios profundos já estão desbloqueados.
               </p>
             </div>
 
-            {/* Plan Tier Status Info */}
-            <div className="bg-muted/50 p-4 rounded-xl border border-am-border-subtle text-left space-y-3">
-              <div className="flex justify-between items-center text-am-body-sm">
-                <span className="text-muted-foreground font-medium">Plano Atual</span>
-                <span className="font-bold text-foreground capitalize flex items-center gap-1">
-                  <Zap className="h-3.5 w-3.5 text-primary" /> {planTier}
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-am-body-sm">
-                <span className="text-muted-foreground font-medium">Status</span>
-                <span className="font-semibold text-green-500 flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Pago
-                </span>
+            {/* Quick Next Steps */}
+            <div className="p-4 rounded-xl bg-muted/40 border border-am-border-subtle text-left space-y-3">
+              <p className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-primary" /> Próximos Passos Recomendados:
+              </p>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <div className="flex items-start gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-[10px]">1</span>
+                  <span><strong>Conecte seu WhatsApp:</strong> receba simulados e mentoria personalizada no seu celular.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-[10px]">2</span>
+                  <span><strong>Gere seu cronograma:</strong> crie seus blocos inteligentes de estudo no Planner.</span>
+                </div>
               </div>
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 pt-2">
               <Button
                 variant="primary"
-                onClick={() => router.push('/dashboard')}
-                className="w-full justify-center shadow-am-md hover:shadow-am-lg transition-all"
+                onClick={() => router.push('/settings')}
+                className="w-full justify-center bg-emerald-600 hover:bg-emerald-500 text-white shadow-am-md transition-all gap-2"
               >
-                Ir para o Painel <ArrowRight className="ml-2 h-4 w-4" />
+                <MessageSquare className="h-4 w-4" />
+                Conectar WhatsApp para Mentoria
               </Button>
               <Button
                 variant="outline"
-                onClick={() => router.push('/settings')}
-                className="w-full justify-center border-border/50/40 text-muted-foreground hover:text-foreground"
+                onClick={() => router.push('/planner')}
+                className="w-full justify-center border-border hover:bg-muted"
               >
-                Gerenciar Faturamento
+                Acessar meu Planner de Estudos <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>

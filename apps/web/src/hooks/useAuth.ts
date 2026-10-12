@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import {
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
@@ -26,6 +28,11 @@ export function useAuth() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Processa retorno de redirecionamento (especialmente em mobile)
+    getRedirectResult(auth).catch((redirectErr) => {
+      console.warn('Redirect auth result info:', redirectErr);
+    });
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: User | null) => {
       if (firebaseUser) {
         // BETA: verifica allowlist no Firestore
@@ -68,8 +75,33 @@ export function useAuth() {
   const signInWithGoogle = async () => {
     try {
       setError(null);
+      const isMobile =
+        typeof window !== 'undefined' &&
+        /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      }
+
       await signInWithPopup(auth, googleProvider);
-    } catch (err) {
+    } catch (err: unknown) {
+      const authErr = err as { code?: string; message?: string };
+      // Fallback para redirect se o navegador bloquear o popup
+      if (
+        authErr?.code === 'auth/popup-blocked' ||
+        authErr?.code === 'auth/popup-closed-by-user' ||
+        authErr?.code === 'auth/cancelled-popup-request'
+      ) {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectErr) {
+          const message = redirectErr instanceof Error ? redirectErr.message : 'Erro ao fazer login com Google';
+          setError(message);
+          return;
+        }
+      }
       const message = err instanceof Error ? err.message : 'Erro ao fazer login';
       setError(message);
     }

@@ -1,7 +1,9 @@
+import fs from 'fs';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminUser } from '@/lib/server/apiGuard';
 import { BOOTSTRAP_ADMIN_EMAILS } from '@/lib/admin';
 import { resolveBackendApiBaseUrl } from '@/lib/server/backendApi';
+import { setFirestoreDocumentWithUserToken } from '@/lib/server/firestoreRest';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -62,6 +64,48 @@ const INITIAL_REAL_USERS: AdminUserListItem[] = [
 const dynamicUserOverrides = new Map<string, Partial<AdminUserListItem>>();
 const dynamicAdminInvites = new Set<string>();
 const manuallyAddedUsers = new Map<string, AdminUserListItem>();
+
+const CACHE_FILE = '/tmp/am_admin_users_cache.json';
+
+function loadCacheFromDisk() {
+  try {
+    if (fs.existsSync(CACHE_FILE)) {
+      const raw = fs.readFileSync(CACHE_FILE, 'utf-8');
+      const data = JSON.parse(raw);
+      if (data.dynamicUserOverrides) {
+        Object.entries(data.dynamicUserOverrides).forEach(([k, v]) => {
+          dynamicUserOverrides.set(k, v as Partial<AdminUserListItem>);
+        });
+      }
+      if (Array.isArray(data.dynamicAdminInvites)) {
+        data.dynamicAdminInvites.forEach((e: string) => dynamicAdminInvites.add(e));
+      }
+      if (data.manuallyAddedUsers) {
+        Object.entries(data.manuallyAddedUsers).forEach(([k, v]) => {
+          manuallyAddedUsers.set(k, v as AdminUserListItem);
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[Admin Users] Failed to load cache from disk:', err);
+  }
+}
+
+function persistCacheToDisk() {
+  try {
+    const data = {
+      dynamicUserOverrides: Object.fromEntries(dynamicUserOverrides),
+      dynamicAdminInvites: Array.from(dynamicAdminInvites),
+      manuallyAddedUsers: Object.fromEntries(manuallyAddedUsers),
+    };
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('[Admin Users] Failed to persist cache to disk:', err);
+  }
+}
+
+// Inicializa o cache persistido na memória
+loadCacheFromDisk();
 
 export function getSystemUsersList(): AdminUserListItem[] {
   return [
@@ -173,8 +217,24 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      if (!userId && !targetEmail) {
-        return NextResponse.json({ error: 'Informe o ID ou o e-mail do usuário.' }, { status: 400 });
+      // Salva estado persistido no disco
+      persistCacheToDisk();
+
+      // Persiste diretamente no documento user_stats do Firestore se o UID for real
+      if (guard.idToken && userId && !userId.startsWith('usr_manual_')) {
+        setFirestoreDocumentWithUserToken({
+          collection: 'user_stats',
+          documentId: userId,
+          data: {
+            planTier: newTier,
+            subscriptionStatus: newTier === 'pro' ? 'active' : 'expired',
+            planCode: newTier,
+            subscriptionUpdatedAt: new Date().toISOString(),
+          },
+          idToken: guard.idToken,
+        }).catch((fsErr) => {
+          console.warn('[Admin Users] Firestore update warning:', fsErr);
+        });
       }
 
       // Tenta sincronizar com a API de billing do Go Core
@@ -210,6 +270,7 @@ export async function POST(request: NextRequest) {
       }
 
       dynamicAdminInvites.add(targetEmail);
+      persistCacheToDisk();
       return NextResponse.json({ success: true, message: `Admin convocado com sucesso: ${targetEmail}` });
     }
 
@@ -223,6 +284,7 @@ export async function POST(request: NextRequest) {
       }
 
       dynamicAdminInvites.delete(targetEmail);
+      persistCacheToDisk();
       return NextResponse.json({ success: true, message: `Permissão de admin revogada para: ${targetEmail}` });
     }
 

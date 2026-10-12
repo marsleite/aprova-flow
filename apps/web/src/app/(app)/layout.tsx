@@ -15,6 +15,7 @@ import { Zap } from 'lucide-react';
 import { PlanContext } from '@/contexts/PlanContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import AprovaMindLogo, { AprovaMindIcon } from '@/components/brand/AprovaMindLogo';
+import WelcomeOnboardingModal from '@/components/WelcomeOnboardingModal';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -124,6 +125,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <main className="flex-1">
             {children}
           </main>
+          <WelcomeOnboardingModal />
         </div>
       </div>
     </PlanContext.Provider>
