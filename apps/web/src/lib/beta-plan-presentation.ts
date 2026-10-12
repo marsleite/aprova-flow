@@ -29,6 +29,7 @@ export interface BetaPlanDisplay {
   recoveryPlanLabel: string;
   adaptivePlanLabel: string;
   postSimuladoLabel: string;
+  dailyDigestLabel: string;
 }
 
 export interface BetaUpgradeNarrative {
@@ -179,6 +180,7 @@ export function getBetaPlanDisplay(plan: DisplayPlanTier): BetaPlanDisplay {
     recoveryPlanLabel: formatBooleanLabel(plan, FeatureCode.RecoveryPlan),
     adaptivePlanLabel: formatBooleanLabel(plan, FeatureCode.AdaptiveDailyPlan),
     postSimuladoLabel: formatQuotaLabel(plan, FeatureCode.PostSimuladoInteligente),
+    dailyDigestLabel: formatQuotaLabel(plan, FeatureCode.DailyDigest),
   };
 }
 

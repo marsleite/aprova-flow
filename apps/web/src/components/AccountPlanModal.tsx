@@ -75,6 +75,10 @@ const COMPARISON_ROWS: ComparisonRow[] = [
     label: 'Pos-simulado inteligente',
     value: (tier) => getBetaPlanDisplay(tier).postSimuladoLabel,
   },
+  {
+    label: 'Fechamento do Dia (Dossiê + Mapas + Flashcards)',
+    value: (tier) => getBetaPlanDisplay(tier).dailyDigestLabel,
+  },
 ];
 
 export default function AccountPlanModal({
@@ -324,6 +328,10 @@ export default function AccountPlanModal({
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-green-500" />
                           Plano adaptativo: {display.adaptivePlanLabel}
+                        </li>
+                        <li className="inline-flex items-center gap-1.5 font-medium text-foreground">
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                          Fechamento do Dia (IA): {display.dailyDigestLabel}
                         </li>
                         <li className="inline-flex items-center gap-1.5">
                           <Check className="h-3.5 w-3.5 text-green-500" />

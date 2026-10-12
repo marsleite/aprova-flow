@@ -71,6 +71,7 @@ export const FeatureCode = {
     WeeklyMentoring: 'weekly_mentoring',
     ErrorGapAnalyzer: 'error_gap_analyzer',
     PostSimuladoInteligente: 'post_simulado_inteligente',
+    DailyDigest: 'daily_digest',
 } as const;
 
 export type FeatureCode = (typeof FeatureCode)[keyof typeof FeatureCode];

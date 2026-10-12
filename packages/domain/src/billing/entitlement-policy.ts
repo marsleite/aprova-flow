@@ -132,6 +132,11 @@ export const DEFAULT_ENTITLEMENT_POLICY: EntitlementPolicy = {
                 limit: 0,
                 period: EntitlementPeriod.Month,
             },
+            [FeatureCode.DailyDigest]: {
+                mode: EntitlementMode.Quota,
+                limit: 1,
+                period: EntitlementPeriod.Lifetime,
+            },
         }),
         [PlanCode.Pro]: createPlan(PlanCode.Pro, {
             [FeatureCode.StudyTimer]: { mode: EntitlementMode.Boolean, enabled: true },
@@ -197,6 +202,11 @@ export const DEFAULT_ENTITLEMENT_POLICY: EntitlementPolicy = {
                 limit: 8,
                 period: EntitlementPeriod.Month,
             },
+            [FeatureCode.DailyDigest]: {
+                mode: EntitlementMode.Quota,
+                limit: 31,
+                period: EntitlementPeriod.Month,
+            },
         }),
     },
     statusBehavior: {
@@ -218,6 +228,7 @@ export const DEFAULT_ENTITLEMENT_POLICY: EntitlementPolicy = {
                 FeatureCode.WeeklyMentoring,
                 FeatureCode.ErrorGapAnalyzer,
                 FeatureCode.PostSimuladoInteligente,
+                FeatureCode.DailyDigest,
             ],
         },
         [SubscriptionStatus.GracePeriod]: {

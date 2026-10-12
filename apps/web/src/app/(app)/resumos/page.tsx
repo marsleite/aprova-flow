@@ -27,6 +27,10 @@ import {
 import { auth } from '@/lib/firebase/config';
 import { useAuthContext } from '@/contexts/AuthContext';
 import MindMapTree from '@/components/MindMapTree';
+import { useEntitlements } from '@/hooks/useEntitlements';
+import { FeatureCode } from '@aprovamind/domain';
+import AccountPlanModal from '@/components/AccountPlanModal';
+import { Crown, Lock } from 'lucide-react';
 
 interface Flashcard {
   id: string;
@@ -78,6 +82,10 @@ type DigestTab = 'dossier' | 'mindmap' | 'doubts' | 'flashcards' | 'traps' | 'vi
 
 export default function ResumosDiariosPage() {
   const { user } = useAuthContext();
+  const { planTier } = useEntitlements(user?.uid, user?.email);
+  const isPro = planTier === 'pro' || planTier === 'admin';
+  const [planModalOpen, setPlanModalOpen] = useState(false);
+
   const [digests, setDigests] = useState<DailyDigest[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -115,6 +123,11 @@ export default function ResumosDiariosPage() {
   }, [loadDigests]);
 
   const handleGenerateToday = async () => {
+    if (!isPro && digests.length >= 1) {
+      setPlanModalOpen(true);
+      return;
+    }
+
     try {
       setGenerating(true);
       const idToken = await auth.currentUser?.getIdToken();
@@ -347,13 +360,62 @@ export default function ResumosDiariosPage() {
           <button
             onClick={handleGenerateToday}
             disabled={generating}
-            className="flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-600 disabled:opacity-50"
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold shadow-lg transition active:scale-95 ${
+              !isPro && digests.length >= 1
+                ? 'bg-gradient-to-r from-primary to-amber-500 text-white shadow-primary/20 hover:opacity-90 cursor-pointer'
+                : 'bg-primary text-white shadow-primary/20 hover:opacity-90 disabled:opacity-50 cursor-pointer'
+            }`}
           >
-            <RotateCw className={`h-4 w-4 ${generating ? 'animate-spin' : ''}`} />
-            <span>{generating ? 'Consolidando Dia...' : 'Gerar Fechamento de Hoje'}</span>
+            {!isPro && digests.length >= 1 ? (
+              <>
+                <Crown className="h-4 w-4 text-amber-300" />
+                <span>Desbloquear no PRO</span>
+              </>
+            ) : (
+              <>
+                <RotateCw className={`h-4 w-4 ${generating ? 'animate-spin' : ''}`} />
+                <span>{generating ? 'Consolidando Dia...' : 'Gerar Fechamento de Hoje'}</span>
+              </>
+            )}
           </button>
         </div>
       </div>
+
+      {/* ── Banner de Conversão PRO / Degustação ── */}
+      {!isPro && (
+        <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-r from-card via-card to-primary/10 p-5 shadow-lg shadow-primary/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25 text-primary">
+                <Crown className="h-5 w-5 text-amber-400" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-foreground">
+                    Fechamento do Dia com IA é exclusivo do AprovaMind PRO
+                  </h3>
+                  <span className="rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
+                    Recurso Premium
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+                  {digests.length === 0
+                    ? 'Você tem 1 degustação gratuita para experimentar o poder dos nossos dossiês com IA. No plano PRO, gere resumos automáticos, mapas mentais interativos e flashcards ilimitados todos os dias.'
+                    : 'Você já utilizou sua degustação gratuita. Desbloqueie o AprovaMind PRO para continuar gerando dossiês diários automáticos, mapas mentais e flashcards de todas as suas sessões de estudo.'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setPlanModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-primary/20 transition hover:opacity-90 active:scale-95 shrink-0 self-start sm:self-center cursor-pointer"
+            >
+              <Crown className="h-4 w-4 text-amber-300" />
+              <span>{digests.length === 0 ? 'Conhecer o PRO' : 'Desbloquear no PRO'}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Loading State */}
       {loading ? (
@@ -833,6 +895,14 @@ export default function ResumosDiariosPage() {
           })}
         </div>
       )}
+
+      {/* ── Modal de Upgrade PRO ── */}
+      <AccountPlanModal
+        isOpen={planModalOpen}
+        onClose={() => setPlanModalOpen(false)}
+        currentTier={planTier}
+        currentPlansCount={1}
+      />
     </div>
   );
 }
