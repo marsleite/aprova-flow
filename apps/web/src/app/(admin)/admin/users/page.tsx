@@ -6,20 +6,19 @@ import {
   Users,
   Search,
   Filter,
-  UserCheck,
   Shield,
   ShieldAlert,
   Sparkles,
   Phone,
   Mail,
-  Calendar,
   CheckCircle2,
   AlertCircle,
   RefreshCw,
   UserPlus,
   Crown,
-  ChevronRight,
-  MoreVertical,
+  Zap,
+  ArrowUpDown,
+  Calendar,
 } from 'lucide-react';
 import { Card, Badge, Button } from '@/components';
 import { auth } from '@/lib/firebase/config';
@@ -34,7 +33,14 @@ export default function AdminUsersPage() {
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  // Modal para convidar Admin
+  // Modal para Conceder / Alterar Plano (PRO / FREE)
+  const [showTierModal, setShowTierModal] = useState(false);
+  const [targetEmail, setTargetEmail] = useState('');
+  const [targetName, setTargetName] = useState('');
+  const [selectedTier, setSelectedTier] = useState<'pro' | 'free'>('pro');
+  const [tierModalLoading, setTierModalLoading] = useState(false);
+
+  // Modal para Convidar Admin
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
@@ -67,8 +73,9 @@ export default function AdminUsersPage() {
     return () => clearTimeout(timer);
   }, [search, tierFilter]);
 
-  const handleSetTier = async (userId: string, newTier: 'free' | 'pro') => {
-    setActionLoadingId(userId);
+  const handleSetTier = async (identifier: { id?: string; email?: string; name?: string }, newTier: 'free' | 'pro') => {
+    const loadingKey = identifier.id || identifier.email || 'loading';
+    setActionLoadingId(loadingKey);
     setNotification(null);
     try {
       const idToken = await auth.currentUser?.getIdToken();
@@ -80,24 +87,63 @@ export default function AdminUsersPage() {
         },
         body: JSON.stringify({
           action: 'set_tier',
-          userId,
+          userId: identifier.id,
+          email: identifier.email,
+          name: identifier.name,
           newTier,
         }),
       });
       const data = await res.json();
       if (res.ok) {
-        setNotification({ type: 'success', message: `Plano alterado para ${newTier.toUpperCase()} com sucesso!` });
-        // Atualiza estado local
-        setUsers((prev) =>
-          prev.map((u) => (u.id === userId ? { ...u, tier: newTier, subscriptionStatus: newTier === 'pro' ? 'active' : 'expired' } : u))
-        );
+        setNotification({ type: 'success', message: data.message || `Plano atualizado para ${newTier.toUpperCase()}!` });
+        await fetchUsers();
       } else {
         setNotification({ type: 'error', message: data.error || 'Erro ao alterar plano.' });
       }
-    } catch (err) {
+    } catch {
       setNotification({ type: 'error', message: 'Erro de conexão com o servidor.' });
     } finally {
       setActionLoadingId(null);
+    }
+  };
+
+  const handleSaveTierModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!targetEmail || !targetEmail.includes('@')) {
+      setNotification({ type: 'error', message: 'Por favor, insira um e-mail válido.' });
+      return;
+    }
+    setTierModalLoading(true);
+    setNotification(null);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken || ''}`,
+        },
+        body: JSON.stringify({
+          action: 'set_tier',
+          email: targetEmail.trim(),
+          name: targetName.trim() || undefined,
+          newTier: selectedTier,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNotification({ type: 'success', message: data.message || `Plano definido como ${selectedTier.toUpperCase()}!` });
+        setShowTierModal(false);
+        setTargetEmail('');
+        setTargetName('');
+        await fetchUsers();
+      } else {
+        setNotification({ type: 'error', message: data.error || 'Erro ao processar.' });
+      }
+    } catch {
+      setNotification({ type: 'error', message: 'Falha de comunicação com o servidor.' });
+    } finally {
+      setTierModalLoading(false);
     }
   };
 
@@ -121,9 +167,7 @@ export default function AdminUsersPage() {
       const data = await res.json();
       if (res.ok) {
         setNotification({ type: 'success', message: data.message });
-        setUsers((prev) =>
-          prev.map((u) => (u.email.toLowerCase() === email.toLowerCase() ? { ...u, isAdmin: false, tier: u.tier === 'admin' ? 'pro' : u.tier } : u))
-        );
+        await fetchUsers();
       } else {
         setNotification({ type: 'error', message: data.error || 'Erro ao revogar admin.' });
       }
@@ -168,6 +212,14 @@ export default function AdminUsersPage() {
     }
   };
 
+  // Abre o modal de plano já pré-selecionado para um usuário da lista
+  const openTierModalForUser = (user: AdminUserListItem) => {
+    setTargetEmail(user.email);
+    setTargetName(user.name);
+    setSelectedTier(user.tier === 'pro' ? 'free' : 'pro');
+    setShowTierModal(true);
+  };
+
   // Métricas agregadas
   const stats = useMemo(() => {
     const total = users.length;
@@ -181,9 +233,9 @@ export default function AdminUsersPage() {
     <div className="flex flex-col min-h-screen">
       <AdminHeader
         title="Gestão de Usuários & Acessos"
-        subtitle="Controle de assinaturas Pro, papéis de administrador e vinculação de WhatsApp."
+        subtitle="Controle de assinaturas Pro, concessão manual de planos e papéis de administrador."
         rightElement={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button
               variant="outline"
               size="sm"
@@ -193,6 +245,23 @@ export default function AdminUsersPage() {
               <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? 'animate-spin text-cyan-400' : ''}`} />
               Atualizar
             </Button>
+
+            {/* BOTÃO PRINCIPAL: DEFINIR PRO / FREE */}
+            <Button
+              size="sm"
+              onClick={() => {
+                setTargetEmail('');
+                setTargetName('');
+                setSelectedTier('pro');
+                setShowTierModal(true);
+              }}
+              className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs shadow-lg shadow-emerald-500/20"
+            >
+              <Crown className="w-3.5 h-3.5 mr-1.5" />
+              Atribuir PRO / FREE
+            </Button>
+
+            {/* BOTÃO: CONVIDAR ADMIN */}
             <Button
               size="sm"
               onClick={() => setShowInviteModal(true)}
@@ -205,7 +274,7 @@ export default function AdminUsersPage() {
         }
       />
 
-      <div className="p-6 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
+      <div className="p-4 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
         {/* Banner de Feedback */}
         {notification && (
           <div
@@ -307,24 +376,23 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-        {/* Tabela de Usuários */}
+        {/* Tabela de Usuários com Layout Responsivo e Ações Rápidas */}
         <Card className="bg-[#0B0F17]/90 border-zinc-800/80 overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-zinc-900/60 text-zinc-400 text-xs uppercase font-mono tracking-wider border-b border-zinc-800">
+              <thead className="bg-zinc-900/70 text-zinc-400 text-xs uppercase font-mono tracking-wider border-b border-zinc-800">
                 <tr>
-                  <th className="py-3.5 px-4 font-semibold">Usuário</th>
-                  <th className="py-3.5 px-4 font-semibold">Plano</th>
-                  <th className="py-3.5 px-4 font-semibold">Acesso</th>
-                  <th className="py-3.5 px-4 font-semibold">WhatsApp</th>
-                  <th className="py-3.5 px-4 font-semibold">Cadastro</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Ações Rápidas</th>
+                  <th className="py-3 px-4 font-semibold">Usuário & Cadastro</th>
+                  <th className="py-3 px-4 font-semibold">Plano Atual</th>
+                  <th className="py-3 px-4 font-semibold">Papel</th>
+                  <th className="py-3 px-4 font-semibold">WhatsApp</th>
+                  <th className="py-3 px-4 font-semibold text-right">Ação Direta</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60 text-zinc-300">
                 {users.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-zinc-500">
+                    <td colSpan={5} className="py-12 text-center text-zinc-500">
                       Nenhum usuário encontrado com os filtros selecionados.
                     </td>
                   </tr>
@@ -332,53 +400,72 @@ export default function AdminUsersPage() {
                   users.map((u) => {
                     const isBootstrap = u.isBootstrapAdmin || bootstrapAdmins.includes(u.email.toLowerCase());
                     const isPro = u.tier === 'pro';
+                    const isLoading = actionLoadingId === u.id || actionLoadingId === u.email;
 
                     return (
                       <tr key={u.id} className="hover:bg-zinc-900/40 transition-colors">
-                        {/* Usuário */}
-                        <td className="py-3.5 px-4">
+                        {/* Usuário + Data */}
+                        <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-xs text-zinc-300 uppercase">
+                            <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-xs text-zinc-300 uppercase shrink-0">
                               {u.name ? u.name.charAt(0) : u.email.charAt(0)}
                             </div>
-                            <div>
-                              <div className="font-medium text-zinc-100 flex items-center gap-1.5">
-                                {u.name || 'Sem nome'}
+                            <div className="min-w-0">
+                              <div className="font-medium text-zinc-100 flex items-center gap-1.5 truncate">
+                                <span>{u.name || 'Sem nome'}</span>
                                 {isBootstrap && (
                                   <span title="Fundador / Imutável">
-                                    <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                                    <ShieldAlert className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                                   </span>
                                 )}
                               </div>
-                              <div className="text-xs text-zinc-500 font-mono flex items-center gap-1">
-                                <Mail className="w-3 h-3 text-zinc-600" />
-                                {u.email}
+                              <div className="text-xs text-zinc-500 font-mono flex items-center gap-2 truncate">
+                                <span>{u.email}</span>
+                                <span className="text-[10px] text-zinc-600">• {u.createdAt || '2026-10-01'}</span>
                               </div>
                             </div>
                           </div>
                         </td>
 
-                        {/* Plano */}
-                        <td className="py-3.5 px-4">
-                          {isPro ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                              <Crown className="w-3 h-3" />
-                              PRO
-                            </span>
-                          ) : u.tier === 'admin' ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                              <Shield className="w-3 h-3" />
-                              ADMIN
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700/60">
-                              FREE
-                            </span>
-                          )}
+                        {/* Plano com Toggle Rápido */}
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            {isPro ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                <Crown className="w-3 h-3" />
+                                PRO
+                              </span>
+                            ) : u.tier === 'admin' ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                                <Shield className="w-3 h-3" />
+                                ADMIN
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700/60">
+                                FREE
+                              </span>
+                            )}
+
+                            {/* Botão de alternar plano direto na célula */}
+                            {u.tier !== 'admin' && (
+                              <button
+                                disabled={isLoading}
+                                onClick={() => handleSetTier({ id: u.id, email: u.email }, isPro ? 'free' : 'pro')}
+                                title={isPro ? 'Clique para mudar para FREE' : 'Clique para promover a PRO'}
+                                className={`text-[11px] px-2 py-0.5 rounded border transition-colors font-medium ${
+                                  isPro
+                                    ? 'border-zinc-800 text-zinc-400 hover:text-rose-400 hover:border-rose-900/50'
+                                    : 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
+                                }`}
+                              >
+                                {isLoading ? '...' : isPro ? 'Virar Free' : 'Tornar Pro ⚡'}
+                              </button>
+                            )}
+                          </div>
                         </td>
 
                         {/* Papel */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-4">
                           {isBootstrap ? (
                             <span className="text-xs text-amber-300 font-mono font-medium">Fundador</span>
                           ) : u.isAdmin ? (
@@ -389,7 +476,7 @@ export default function AdminUsersPage() {
                         </td>
 
                         {/* WhatsApp */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-4">
                           {u.whatsappLinked ? (
                             <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
                               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -400,43 +487,29 @@ export default function AdminUsersPage() {
                           )}
                         </td>
 
-                        {/* Data */}
-                        <td className="py-3.5 px-4 font-mono text-xs text-zinc-500">
-                          {u.createdAt || '2026-10-01'}
-                        </td>
-
-                        {/* Ações */}
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {/* Alternar Pro/Free */}
+                        {/* Ações Rápidas */}
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* Botão Editar Plano */}
                             {u.tier !== 'admin' && (
                               <button
-                                disabled={actionLoadingId === u.id}
-                                onClick={() => handleSetTier(u.id, isPro ? 'free' : 'pro')}
-                                className={`text-xs px-2.5 py-1 rounded border transition-colors font-medium ${
-                                  isPro
-                                    ? 'border-zinc-800 text-zinc-400 hover:text-rose-400 hover:border-rose-900/50'
-                                    : 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
-                                }`}
+                                onClick={() => openTierModalForUser(u)}
+                                className="text-xs px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 font-medium transition-colors"
                               >
-                                {actionLoadingId === u.id
-                                  ? 'Salvando...'
-                                  : isPro
-                                  ? 'Rebaixar Free'
-                                  : 'Promover Pro'}
+                                Alterar
                               </button>
                             )}
 
                             {/* Gerenciar Admin */}
                             {isBootstrap ? (
-                              <span className="text-[11px] text-zinc-600 font-mono px-2 py-1">Imutável</span>
+                              <span className="text-[11px] text-zinc-600 font-mono px-2">Imutável</span>
                             ) : u.isAdmin ? (
                               <button
-                                disabled={actionLoadingId === u.email}
+                                disabled={isLoading}
                                 onClick={() => handleRevokeAdmin(u.email)}
-                                className="text-xs px-2.5 py-1 rounded border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 font-medium"
+                                className="text-xs px-2 py-1 rounded border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 font-medium"
                               >
-                                {actionLoadingId === u.email ? '...' : 'Revogar Admin'}
+                                {isLoading ? '...' : 'Revogar'}
                               </button>
                             ) : null}
                           </div>
@@ -450,9 +523,132 @@ export default function AdminUsersPage() {
           </div>
         </Card>
 
-        {/* Modal de Convidar Admin */}
+        {/* MODAL: ATRIBUIR / ALTERAR PLANO MANUALMENTE (PRO ou FREE) */}
+        {showTierModal && (
+          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+            <div className="bg-[#0D121F] border border-emerald-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-5">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Crown className="w-5 h-5 text-emerald-400" />
+                  <h3 className="text-base font-bold text-zinc-100">Atribuir Plano Manualmente</h3>
+                </div>
+                <button
+                  onClick={() => setShowTierModal(false)}
+                  className="text-zinc-500 hover:text-zinc-300 text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Defina o plano de qualquer aluno digitando o e-mail cadastrado ou adicionando um novo usuário diretamente como <span className="text-emerald-400 font-semibold">PRO</span> ou <span className="text-zinc-300 font-semibold">FREE</span>.
+              </p>
+
+              <form onSubmit={handleSaveTierModal} className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-300 block mb-1.5 uppercase font-mono">
+                    E-mail do Aluno *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="ex: aluno@gmail.com"
+                    value={targetEmail}
+                    onChange={(e) => setTargetEmail(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-300 block mb-1.5 uppercase font-mono">
+                    Nome do Aluno (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ex: Carlos Silva"
+                    value={targetName}
+                    onChange={(e) => setTargetName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors"
+                  />
+                </div>
+
+                {/* Seleção do Plano: PRO vs FREE */}
+                <div>
+                  <label className="text-xs font-semibold text-zinc-300 block mb-2 uppercase font-mono">
+                    Selecione o Plano *
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTier('pro')}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        selectedTier === 'pro'
+                          ? 'bg-emerald-950/40 border-emerald-500 text-emerald-300 ring-2 ring-emerald-500/20'
+                          : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-sm flex items-center gap-1.5">
+                          <Crown className="w-4 h-4 text-emerald-400" />
+                          PRO
+                        </span>
+                        {selectedTier === 'pro' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                      </div>
+                      <p className="text-[11px] text-zinc-400 mt-1.5 leading-snug">
+                        Acesso Ilimitado: simulados, IA mentor, cronômetro e resumos.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTier('free')}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        selectedTier === 'free'
+                          ? 'bg-zinc-800/80 border-cyan-500 text-zinc-200 ring-2 ring-cyan-500/20'
+                          : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-sm flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-zinc-400" />
+                          FREE
+                        </span>
+                        {selectedTier === 'free' && <CheckCircle2 className="w-4 h-4 text-cyan-400" />}
+                      </div>
+                      <p className="text-[11px] text-zinc-400 mt-1.5 leading-snug">
+                        Acesso Gratuito: cotas básicas de perguntas e 1 plano ativo.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowTierModal(false)}
+                    className="border-zinc-800 text-zinc-400 hover:text-white"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={tierModalLoading}
+                    className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold"
+                  >
+                    {tierModalLoading ? 'Salvando...' : 'Salvar Alteração'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: CONVIDAR NOVO ADMINISTRADOR */}
         {showInviteModal && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
             <div className="bg-[#0D121F] border border-cyan-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
               <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
                 <div className="flex items-center gap-2">

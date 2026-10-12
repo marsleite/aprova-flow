@@ -105,9 +105,10 @@ const INITIAL_DEMO_USERS: AdminUserListItem[] = [
   },
 ];
 
-// Cache em memória de modificações dinâmicas feitas pelos admins
+// Cache em memória de modificações dinâmicas e novos usuários adicionados
 const dynamicUserOverrides = new Map<string, Partial<AdminUserListItem>>();
 const dynamicAdminInvites = new Set<string>();
+const manuallyAddedUsers = new Map<string, AdminUserListItem>();
 
 export async function GET(request: NextRequest) {
   const guard = await requireAdminUser(request);
@@ -118,15 +119,26 @@ export async function GET(request: NextRequest) {
   const filterTier = url.searchParams.get('tier');
 
   // Mescla usuários base com eventuais modificações feitas em runtime
-  const allUsers = INITIAL_DEMO_USERS.map((u) => {
-    const overrides = dynamicUserOverrides.get(u.id);
-    const isInvitedAdmin = dynamicAdminInvites.has(u.email.toLowerCase());
-    return {
-      ...u,
-      ...(overrides || {}),
-      isAdmin: u.isBootstrapAdmin || isInvitedAdmin || (overrides?.isAdmin ?? false),
-    };
-  });
+  const allUsers = [
+    ...INITIAL_DEMO_USERS.map((u) => {
+      const overrides = dynamicUserOverrides.get(u.id);
+      const isInvitedAdmin = dynamicAdminInvites.has(u.email.toLowerCase());
+      return {
+        ...u,
+        ...(overrides || {}),
+        isAdmin: u.isBootstrapAdmin || isInvitedAdmin || (overrides?.isAdmin ?? false),
+      };
+    }),
+    ...Array.from(manuallyAddedUsers.values()).map((u) => {
+      const overrides = dynamicUserOverrides.get(u.id);
+      const isInvitedAdmin = dynamicAdminInvites.has(u.email.toLowerCase());
+      return {
+        ...u,
+        ...(overrides || {}),
+        isAdmin: u.isBootstrapAdmin || isInvitedAdmin || (overrides?.isAdmin ?? false),
+      };
+    }),
+  ];
 
   let filtered = allUsers;
   if (search) {
@@ -156,18 +168,58 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { action, userId, email, newTier } = body;
+    const { action, userId, email, name, newTier } = body;
 
     if (action === 'set_tier') {
-      if (!userId || !['free', 'pro'].includes(newTier)) {
-        return NextResponse.json({ error: 'Parâmetros inválidos.' }, { status: 400 });
+      if (!['free', 'pro'].includes(newTier)) {
+        return NextResponse.json({ error: 'Plano inválido. Escolha PRO ou FREE.' }, { status: 400 });
       }
 
-      dynamicUserOverrides.set(userId, {
-        ...(dynamicUserOverrides.get(userId) || {}),
-        tier: newTier,
-        subscriptionStatus: newTier === 'pro' ? 'active' : 'expired',
-      });
+      const targetEmail = (email || '').toLowerCase().trim();
+
+      // Caso 1: Usuário identificado por ID
+      if (userId) {
+        dynamicUserOverrides.set(userId, {
+          ...(dynamicUserOverrides.get(userId) || {}),
+          tier: newTier,
+          subscriptionStatus: newTier === 'pro' ? 'active' : 'expired',
+        });
+      }
+
+      // Caso 2: Usuário identificado ou adicionado por e-mail
+      if (targetEmail) {
+        // Verifica se já existe na base inicial
+        const existingBase = INITIAL_DEMO_USERS.find((u) => u.email.toLowerCase() === targetEmail);
+        if (existingBase) {
+          dynamicUserOverrides.set(existingBase.id, {
+            ...(dynamicUserOverrides.get(existingBase.id) || {}),
+            tier: newTier,
+            subscriptionStatus: newTier === 'pro' ? 'active' : 'expired',
+          });
+        } else {
+          // Cria ou atualiza usuário manual
+          const currentManual = manuallyAddedUsers.get(targetEmail);
+          const userObj: AdminUserListItem = currentManual || {
+            id: `usr_manual_${Date.now()}`,
+            email: targetEmail,
+            name: name?.trim() || targetEmail.split('@')[0],
+            tier: newTier,
+            subscriptionStatus: newTier === 'pro' ? 'active' : 'expired',
+            isAdmin: false,
+            isBootstrapAdmin: false,
+            whatsappLinked: false,
+            createdAt: new Date().toISOString().split('T')[0],
+          };
+          userObj.tier = newTier;
+          userObj.subscriptionStatus = newTier === 'pro' ? 'active' : 'expired';
+          if (name?.trim()) userObj.name = name.trim();
+          manuallyAddedUsers.set(targetEmail, userObj);
+        }
+      }
+
+      if (!userId && !targetEmail) {
+        return NextResponse.json({ error: 'Informe o ID ou o e-mail do usuário.' }, { status: 400 });
+      }
 
       // Tenta sincronizar com a API de billing do Go Core
       try {
@@ -179,7 +231,8 @@ export async function POST(request: NextRequest) {
             Authorization: `Bearer ${guard.idToken}`,
           },
           body: JSON.stringify({
-            userId,
+            userId: userId || targetEmail,
+            email: targetEmail,
             plan: newTier,
             status: newTier === 'pro' ? 'active' : 'expired',
           }),
@@ -188,7 +241,10 @@ export async function POST(request: NextRequest) {
         // segue com sucesso local
       }
 
-      return NextResponse.json({ success: true, message: `Plano atualizado para ${newTier.toUpperCase()}` });
+      return NextResponse.json({
+        success: true,
+        message: `Plano de ${targetEmail || userId} atualizado para ${newTier.toUpperCase()} com sucesso!`,
+      });
     }
 
     if (action === 'invite_admin') {
