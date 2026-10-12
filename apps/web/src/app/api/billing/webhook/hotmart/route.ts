@@ -87,15 +87,52 @@ export async function POST(request: NextRequest) {
     const sck = purchase.sck; // Can be user UID or WhatsApp phone number
 
     const isApproved = ['PURCHASE_APPROVED', 'PURCHASE_COMPLETE'].includes(event);
-    const isRevoked = [
-      'PURCHASE_CANCELED',
-      'PURCHASE_REFUNDED',
-      'SUBSCRIPTION_CANCELED',
-      'PURCHASE_CHARGEBACK',
-    ].includes(event);
+    const isRefunded = ['PURCHASE_REFUNDED', 'PURCHASE_CHARGEBACK'].includes(event);
+    const isSubscriptionCanceled = ['SUBSCRIPTION_CANCELED'].includes(event);
+    const isExpired = ['SUBSCRIPTION_EXPIRED', 'PURCHASE_CANCELED'].includes(event);
 
-    const planTier = isApproved ? 'pro' : isRevoked ? 'free' : null;
-    const subscriptionStatus = isApproved ? 'active' : isRevoked ? 'canceled' : null;
+    const isAnnual = Boolean(subscription.plan?.name?.toLowerCase().includes('anual'));
+    const cycleDays = isAnnual ? 365 : 30;
+
+    // Calcular data de expiração do ciclo pago (billingPeriodEnd)
+    let billingPeriodEnd: string | null = null;
+    if (subscription.date_next_charge) {
+      try {
+        const nextChargeMs =
+          typeof subscription.date_next_charge === 'number'
+            ? subscription.date_next_charge
+            : Date.parse(subscription.date_next_charge);
+        if (!isNaN(nextChargeMs)) {
+          billingPeriodEnd = new Date(nextChargeMs).toISOString();
+        }
+      } catch {
+        // fallback
+      }
+    }
+    if (!billingPeriodEnd && isApproved) {
+      billingPeriodEnd = new Date(Date.now() + cycleDays * 24 * 60 * 60 * 1000).toISOString();
+    }
+
+    let planTier: 'pro' | 'free' | null = null;
+    let subscriptionStatus: string | null = null;
+
+    if (isApproved) {
+      planTier = 'pro';
+      subscriptionStatus = 'active';
+    } else if (isRefunded) {
+      // Reembolso nos 7 dias do CDC ou chargeback: estorno efetuado, corta acesso imediatamente
+      planTier = 'free';
+      subscriptionStatus = 'refunded';
+    } else if (isSubscriptionCanceled) {
+      // Cancelamento de renovação programada: mantém status canceled mas preserva PRO durante o mês pago
+      subscriptionStatus = 'canceled';
+      // Permanece Pro até a conclusão dos 30 dias contratados
+      planTier = 'pro';
+    } else if (isExpired) {
+      // Ciclo encerrou sem renovação
+      planTier = 'free';
+      subscriptionStatus = 'expired';
+    }
 
     const adminToken = await getAdminIdToken();
 
@@ -112,6 +149,7 @@ export async function POST(request: NextRequest) {
           sck: sck || null,
           planTier: planTier || null,
           subscriptionStatus: subscriptionStatus || null,
+          billingPeriodEnd: billingPeriodEnd || null,
           provider: 'hotmart',
           transactionId: purchase.transaction || body.id || null,
           processedAt: new Date().toISOString(),
@@ -123,27 +161,38 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Atualiza o user_stats do aluno no Firestore se o UID estiver identificado
-    if (planTier && sck) {
+    if ((planTier || subscriptionStatus) && sck) {
       if (adminToken) {
         // Se sck for um UID válido do Firebase (alfanumérico, >= 20 chars)
         const isUid = typeof sck === 'string' && sck.length >= 20 && !sck.startsWith('+');
         if (isUid) {
+          const updateData: Record<string, string | number | boolean | null | undefined> = {
+            ...(planTier ? { planTier, planCode: planTier } : {}),
+            ...(subscriptionStatus ? { subscriptionStatus } : {}),
+            ...(billingPeriodEnd ? { billingPeriodEnd } : {}),
+            billingProvider: 'hotmart',
+            billingInterval: isAnnual ? 'annually' : 'monthly',
+            hotmartBuyerEmail: buyerEmail || null,
+            hotmartBuyerPhone: buyerPhone || null,
+            subscriptionUpdatedAt: new Date().toISOString(),
+          };
+
+          if (isApproved) {
+            updateData.subscriptionStartedAt = purchase.approved_date
+              ? new Date(purchase.approved_date).toISOString()
+              : new Date().toISOString();
+          }
+          if (isSubscriptionCanceled) {
+            updateData.subscriptionCanceledAt = new Date().toISOString();
+          }
+          if (isRefunded) {
+            updateData.refundedAt = new Date().toISOString();
+          }
+
           const updateResult = await setFirestoreDocumentWithUserToken({
             collection: 'user_stats',
             documentId: sck,
-            data: {
-              planTier,
-              subscriptionStatus,
-              planCode: planTier,
-              billingProvider: 'hotmart',
-              billingInterval:
-                subscription.plan?.name?.toLowerCase().includes('anual')
-                  ? 'annually'
-                  : 'monthly',
-              hotmartBuyerEmail: buyerEmail || null,
-              hotmartBuyerPhone: buyerPhone || null,
-              subscriptionUpdatedAt: new Date().toISOString(),
-            },
+            data: updateData,
             idToken: adminToken,
           });
 

@@ -11,6 +11,7 @@ import {
   buildFeatureUsagePeriods,
   materializeCurrentFeatureUsage,
 } from '@aprovamind/domain/billing/usage-periods';
+import { extractPlanTierFromData } from '@/lib/entitlements';
 
 describe('Billing entitlements', () => {
   it('keeps free focused on activation and blocks paid features', () => {
@@ -198,5 +199,35 @@ describe('Billing entitlements', () => {
       [FeatureCode.EditalParse]: 'lifetime',
       [FeatureCode.AiExplanations]: '2026-03',
     });
+  });
+
+  it('preserves PRO access when subscription is canceled but billingPeriodEnd is in the future', () => {
+    const futureDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString();
+    const tier = extractPlanTierFromData({
+      planTier: 'pro',
+      subscriptionStatus: 'canceled',
+      billingPeriodEnd: futureDate,
+    });
+    expect(tier).toBe('pro');
+  });
+
+  it('revokes to FREE when subscription is canceled and billingPeriodEnd has passed', () => {
+    const pastDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+    const tier = extractPlanTierFromData({
+      planTier: 'pro',
+      subscriptionStatus: 'canceled',
+      billingPeriodEnd: pastDate,
+    });
+    expect(tier).toBe('free');
+  });
+
+  it('revokes to FREE immediately when subscription is refunded', () => {
+    const futureDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString();
+    const tier = extractPlanTierFromData({
+      planTier: 'pro',
+      subscriptionStatus: 'refunded',
+      billingPeriodEnd: futureDate,
+    });
+    expect(tier).toBe('free');
   });
 });

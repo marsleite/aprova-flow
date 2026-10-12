@@ -114,6 +114,49 @@ export function extractPlanTierFromData(
   data: Record<string, unknown> | null | undefined
 ): PlanTier {
   if (!data) return 'free';
+
+  // 1. Admin check
+  for (const key of TIER_CANDIDATE_FIELDS) {
+    const value = data[key];
+    if (typeof value === 'string' && value.trim().toLowerCase() === 'admin') {
+      return 'admin';
+    }
+  }
+
+  const subStatus = typeof data.subscriptionStatus === 'string' ? data.subscriptionStatus.toLowerCase() : null;
+
+  // 2. Se for estornado (reembolso do CDC / chargeback), acesso é cortado imediatamente
+  if (subStatus === 'refunded' || subStatus === 'chargeback') {
+    return 'free';
+  }
+
+  // 3. Se for cancelamento de renovação programado ('canceled'):
+  // Se ainda estiver dentro do prazo pago (billingPeriodEnd > agora), continua PRO até completar os 30 dias!
+  if (subStatus === 'canceled' || subStatus === 'expired') {
+    const billingPeriodEnd = data.billingPeriodEnd;
+    if (billingPeriodEnd) {
+      try {
+        const endDate =
+          typeof billingPeriodEnd === 'object' && billingPeriodEnd !== null && 'toDate' in billingPeriodEnd
+            ? (billingPeriodEnd as { toDate: () => Date }).toDate()
+            : new Date(billingPeriodEnd as string | number);
+
+        if (!isNaN(endDate.getTime())) {
+          if (endDate.getTime() > Date.now()) {
+            return 'pro'; // Continua PRO até o fim do período pago!
+          }
+          return 'free'; // Período pago encerrou
+        }
+      } catch {
+        return 'free';
+      }
+    }
+    if (subStatus === 'expired') {
+      return 'free';
+    }
+  }
+
+  // 4. Checagem padrão de campos
   for (const key of TIER_CANDIDATE_FIELDS) {
     const value = data[key];
     if (typeof value === 'string' && value.trim()) {
