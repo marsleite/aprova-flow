@@ -257,10 +257,10 @@ export default function PlannerPage() {
                 setEditingPlan(null);
                 setPlanManagerOpen(true);
               }}
-              variant="secondary"
-              className="rounded-full"
+              variant="primary"
+              className="rounded-full shadow-am-md gap-2 font-semibold"
             >
-              <Plus className="mr-2 h-4 w-4" /> Novo Edital
+              <Sparkles className="h-4 w-4 text-amber-300" /> Novo Edital (ou Subir PDF)
             </Button>
           ) : showMultiEditalUpgrade ? (
             <Button asChild variant="secondary" className="rounded-full">

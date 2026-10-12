@@ -15,12 +15,14 @@ import {
 } from 'lucide-react';
 import { Button, Badge } from '@/components';
 import { useAuthContext } from '@/contexts/AuthContext';
+import WhatsAppPairingModal from '@/components/WhatsAppPairingModal';
 
 export default function WelcomeOnboardingModal() {
   const router = useRouter();
   const { user } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -64,10 +66,9 @@ export default function WelcomeOnboardingModal() {
       iconBg: 'bg-emerald-500/10',
       description:
         'Conecte seu WhatsApp com 1 clique para receber simulados diários, flashcards e tirar dúvidas jurídicas complexas com jurisprudência STF/STJ.',
-      actionLabel: 'Conectar WhatsApp Agora',
+      actionLabel: 'Conectar WhatsApp',
       action: () => {
-        handleDismiss();
-        router.push('/settings');
+        setShowWhatsAppModal(true);
       },
     },
     {
@@ -82,7 +83,7 @@ export default function WelcomeOnboardingModal() {
       actionLabel: 'Começar a Estudar!',
       action: () => {
         handleDismiss();
-        router.push('/planner');
+        router.push('/engine');
       },
     },
   ];
@@ -165,7 +166,25 @@ export default function WelcomeOnboardingModal() {
 
             {/* Botões de Ação */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              {currentStep < steps.length - 1 ? (
+              {currentStep === 1 ? (
+                <>
+                  <Button
+                    variant="primary"
+                    onClick={current.action}
+                    className="flex-1 justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white shadow-am-md"
+                  >
+                    <Smartphone className="w-4 h-4" />
+                    {current.actionLabel}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentStep(2)}
+                    className="justify-center border-border hover:bg-muted text-xs text-foreground"
+                  >
+                    Próximo <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  </Button>
+                </>
+              ) : currentStep < steps.length - 1 ? (
                 <Button
                   variant="primary"
                   onClick={() => setCurrentStep((prev) => prev + 1)}
@@ -194,6 +213,20 @@ export default function WelcomeOnboardingModal() {
             </div>
           </div>
         </motion.div>
+
+        {user && (
+          <WhatsAppPairingModal
+            isOpen={showWhatsAppModal}
+            onClose={() => setShowWhatsAppModal(false)}
+            userId={user.uid}
+            userEmail={user.email}
+            userName={user.displayName}
+            onSuccess={() => {
+              setShowWhatsAppModal(false);
+              setCurrentStep(2);
+            }}
+          />
+        )}
       </div>
     </AnimatePresence>
   );

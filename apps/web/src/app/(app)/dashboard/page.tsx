@@ -29,6 +29,9 @@ import PortfolioOverviewCard from '@/components/engine/PortfolioOverviewCard';
 import StudyJourneyCard from '@/components/StudyJourneyCard';
 import SessionHistory from '@/components/SessionHistory';
 import WhatsAppBanner from '@/components/WhatsAppBanner';
+import OnboardingChecklistCard from '@/components/OnboardingChecklistCard';
+import WhatsAppPairingModal from '@/components/WhatsAppPairingModal';
+import PlanManager from '@/components/PlanManager';
 import {
   TrendingUp,
   Zap,
@@ -56,7 +59,10 @@ import {
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
-  const { plans, activePlanId, activePlan } = usePlanContext();
+  const { plans, activePlanId, activePlan, refreshPlans } = usePlanContext();
+
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
+  const [planManagerOpen, setPlanManagerOpen] = useState(false);
 
   const [summary, setSummary] = useState<StudySummary>({ totalToday: 0, totalWeek: 0, totalMonth: 0 });
   const [subjectData, setSubjectData] = useState<SubjectHours[]>([]);
@@ -170,13 +176,27 @@ export default function DashboardPage() {
       </div>
 
       <div className="px-6 space-y-6">
+        {/* ── Onboarding / Ativação de Primeiro Uso ── */}
         <motion.div custom={0} variants={fadeUp} initial="hidden" animate="show">
+          <OnboardingChecklistCard
+            userId={user.uid}
+            userEmail={user.email}
+            userName={user.displayName}
+            plans={plans}
+            summary={summary}
+            recentSessionsCount={weeklyData.filter((d) => d.hours > 0).length}
+            onOpenPlanManager={() => setPlanManagerOpen(true)}
+            onOpenWhatsAppModal={() => setWhatsAppModalOpen(true)}
+          />
+        </motion.div>
+
+        <motion.div custom={0.2} variants={fadeUp} initial="hidden" animate="show">
           <StudyJourneyCard current="dashboard" />
         </motion.div>
 
         {/* ── WhatsApp Tutor Companion Banner ── */}
         <motion.div custom={0.3} variants={fadeUp} initial="hidden" animate="show">
-          <WhatsAppBanner userId={user.uid} />
+          <WhatsAppBanner userId={user.uid} onConnect={() => setWhatsAppModalOpen(true)} />
         </motion.div>
 
         {/* ── KPIs ── */}
@@ -289,6 +309,25 @@ export default function DashboardPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* ── Modais Auxiliares (Onboarding & Pairing) ── */}
+      <WhatsAppPairingModal
+        isOpen={whatsAppModalOpen}
+        onClose={() => setWhatsAppModalOpen(false)}
+        userId={user.uid}
+        userEmail={user.email}
+        userName={user.displayName}
+      />
+
+      <PlanManager
+        isOpen={planManagerOpen}
+        userId={user.uid}
+        onClose={() => {
+          setPlanManagerOpen(false);
+          refreshPlans();
+          fetchData();
+        }}
+      />
     </div>
   );
 }

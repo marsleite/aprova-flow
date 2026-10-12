@@ -6,9 +6,10 @@ import { MessageSquare, Smartphone, ArrowRight, CheckCircle2, Sparkles, X } from
 
 interface WhatsAppBannerProps {
   userId: string;
+  onConnect?: () => void;
 }
 
-export default function WhatsAppBanner({ userId }: WhatsAppBannerProps) {
+export default function WhatsAppBanner({ userId, onConnect }: WhatsAppBannerProps) {
   const [isLinked, setIsLinked] = useState<boolean | null>(null);
   const [phone, setPhone] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState(false);
@@ -85,14 +86,25 @@ export default function WhatsAppBanner({ userId }: WhatsAppBannerProps) {
       </div>
 
       <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-        <Link
-          href="/settings#whatsapp"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors shadow-sm"
-        >
-          <Sparkles className="h-3 w-3" />
-          Conectar WhatsApp
-          <ArrowRight className="h-3 w-3" />
-        </Link>
+        {onConnect ? (
+          <button
+            onClick={onConnect}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors shadow-sm cursor-pointer"
+          >
+            <Sparkles className="h-3 w-3" />
+            Conectar WhatsApp
+            <ArrowRight className="h-3 w-3" />
+          </button>
+        ) : (
+          <Link
+            href="/settings#whatsapp"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors shadow-sm"
+          >
+            <Sparkles className="h-3 w-3" />
+            Conectar WhatsApp
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+        )}
         <button
           onClick={() => setDismissed(true)}
           className="p-1 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
