@@ -16,6 +16,7 @@ import {
   Brain,
   User,
   Trash2,
+  MessageCircle,
 } from 'lucide-react';
 import { StudyConsistency, SubjectHours, PlanVsActual, StudySession, DailyHours } from '@/types';
 import { buildAiBudgetChatMessage, buildAiQuotaChatMessage, extractAiBudgetNotice, readAiErrorResponse } from '@/lib/ai/quota-feedback';
@@ -27,6 +28,77 @@ interface ChatMessage {
   content: string;
   channel?: 'whatsapp' | 'web';
   timestamp?: string;
+}
+
+function parseInlineFormatting(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+      return (
+        <strong key={idx} className="font-semibold text-foreground">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.startsWith('*') && part.endsWith('*') && part.length >= 2) {
+      return (
+        <em key={idx} className="italic text-foreground/90 font-medium">
+          {part.slice(1, -1)}
+        </em>
+      );
+    }
+    return part;
+  });
+}
+
+function FormattedMessageContent({
+  content,
+  role,
+}: {
+  content: string;
+  role: 'user' | 'assistant';
+}) {
+  if (role === 'user') {
+    return <div className="text-sm text-zinc-100 whitespace-pre-wrap leading-relaxed">{content}</div>;
+  }
+
+  const paragraphs = content.split('\n\n');
+
+  return (
+    <div className="space-y-3 text-sm leading-relaxed text-foreground/95">
+      {paragraphs.map((para, pIdx) => {
+        const lines = para.split('\n');
+        const isList = lines.every((line) => line.trim().startsWith('- ') || line.trim().startsWith('* '));
+
+        if (isList && lines.length > 0) {
+          return (
+            <ul key={pIdx} className="space-y-2 pl-1 my-2">
+              {lines.map((line, lIdx) => {
+                const cleanLine = line.trim().replace(/^[-*]\s+/, '');
+                return (
+                  <li key={lIdx} className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]" />
+                    <span className="leading-relaxed">{parseInlineFormatting(cleanLine)}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          );
+        }
+
+        return (
+          <p key={pIdx} className="leading-relaxed">
+            {lines.map((line, lIdx) => (
+              <span key={lIdx}>
+                {parseInlineFormatting(line)}
+                {lIdx < lines.length - 1 && <br />}
+              </span>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
 }
 
 interface ChatPanelProps {
@@ -443,25 +515,30 @@ function getSuggestions(): string[] {
 
                     {/* Balão */}
                     <div
-                      className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed sm:max-w-[80%] ${
+                      className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed sm:max-w-[80%] transition-all ${
                         msg.role === 'user'
-                          ? 'rounded-tr-sm bg-primary text-foreground'
-                          : 'rounded-tl-sm border border-border bg-card text-gray-300'
+                          ? 'rounded-tr-sm border border-zinc-700/60 text-zinc-100 shadow-am-md'
+                          : 'rounded-tl-sm border border-border/80 bg-card/80 text-foreground shadow-sm'
                       }`}
+                      style={
+                        msg.role === 'user'
+                          ? { background: 'linear-gradient(135deg, #27272a 0%, #18181b 100%)' }
+                          : undefined
+                      }
                     >
                       {msg.channel === 'whatsapp' && (
-                        <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold text-emerald-400">
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
+                          <MessageCircle className="h-3 w-3" />
                           <span>WhatsApp</span>
                         </div>
                       )}
                       {msg.channel === 'web' && (
-                        <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold text-sky-400">
+                        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 text-[10px] font-medium text-sky-400">
                           <span className="inline-block h-1.5 w-1.5 rounded-full bg-sky-400"></span>
                           <span>Web</span>
                         </div>
                       )}
-                      <div className="whitespace-pre-wrap">{msg.content}</div>
+                      <FormattedMessageContent content={msg.content} role={msg.role} />
                     </div>
                   </motion.div>
                 ))}

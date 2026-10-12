@@ -32,6 +32,77 @@ const QUICK_PROMPTS = [
   'Gere um simulado rápido de 2 questões estilo Certo/Errado com gabarito fundamentado.',
 ];
 
+function parseInlineFormatting(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+      return (
+        <strong key={idx} className="font-semibold text-foreground">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.startsWith('*') && part.endsWith('*') && part.length >= 2) {
+      return (
+        <em key={idx} className="italic text-foreground/90 font-medium">
+          {part.slice(1, -1)}
+        </em>
+      );
+    }
+    return part;
+  });
+}
+
+function FormattedMessageContent({
+  content,
+  role,
+}: {
+  content: string;
+  role: 'user' | 'assistant';
+}) {
+  if (role === 'user') {
+    return <div className="text-sm text-zinc-100 whitespace-pre-wrap leading-relaxed">{content}</div>;
+  }
+
+  const paragraphs = content.split('\n\n');
+
+  return (
+    <div className="space-y-3 text-sm leading-relaxed text-foreground/95">
+      {paragraphs.map((para, pIdx) => {
+        const lines = para.split('\n');
+        const isList = lines.every((line) => line.trim().startsWith('- ') || line.trim().startsWith('* '));
+
+        if (isList && lines.length > 0) {
+          return (
+            <ul key={pIdx} className="space-y-2 pl-1 my-2">
+              {lines.map((line, lIdx) => {
+                const cleanLine = line.trim().replace(/^[-*]\s+/, '');
+                return (
+                  <li key={lIdx} className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/80" />
+                    <span className="leading-relaxed">{parseInlineFormatting(cleanLine)}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          );
+        }
+
+        return (
+          <p key={pIdx} className="leading-relaxed">
+            {lines.map((line, lIdx) => (
+              <span key={lIdx}>
+                {parseInlineFormatting(line)}
+                {lIdx < lines.length - 1 && <br />}
+              </span>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function MentoringPage() {
   const { user } = useAuthContext();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -188,7 +259,7 @@ export default function MentoringPage() {
             href="https://wa.me/5571981356297"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-500"
+            className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 text-xs font-semibold text-emerald-400 shadow-sm transition hover:bg-emerald-500/20 active:scale-95"
           >
             <MessageCircle className="h-4 w-4" />
             <span>Abrir no WhatsApp</span>
@@ -218,34 +289,39 @@ export default function MentoringPage() {
                   <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
                       msg.role === 'assistant'
-                        ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20'
-                        : 'bg-muted text-muted-foreground border border-border'
+                        ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 shadow-sm'
+                        : 'bg-zinc-800 text-zinc-300 border border-zinc-700 shadow-sm'
                     }`}
                   >
                     {msg.role === 'assistant' ? <Brain className="h-4 w-4" /> : <User className="h-4 w-4" />}
                   </div>
 
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed sm:max-w-[75%] ${
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed sm:max-w-[75%] transition-all ${
                       msg.role === 'user'
-                        ? 'rounded-tr-sm bg-orange-500 text-white shadow-sm'
-                        : 'rounded-tl-sm border border-border bg-muted/40 text-foreground'
+                        ? 'rounded-tr-sm border border-zinc-750 text-zinc-100 shadow-am-md'
+                        : 'rounded-tl-sm border border-border/80 bg-card/80 text-foreground shadow-sm'
                     }`}
+                    style={
+                      msg.role === 'user'
+                        ? { background: 'linear-gradient(135deg, #27272a 0%, #18181b 100%)' }
+                        : undefined
+                    }
                   >
                     {/* Badge de Canal */}
                     {msg.channel === 'whatsapp' && (
-                      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold text-emerald-400">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                      <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-medium text-emerald-400">
+                        <MessageCircle className="h-3 w-3" />
                         <span>Enviado via WhatsApp</span>
                       </div>
                     )}
                     {msg.channel === 'web' && (
-                      <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold text-sky-400">
+                      <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-sky-500/10 border border-sky-500/20 px-2.5 py-0.5 text-[10px] font-medium text-sky-400">
                         <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
                         <span>Enviado via Web Cockpit</span>
                       </div>
                     )}
-                    <div className="whitespace-pre-wrap">{msg.content}</div>
+                    <FormattedMessageContent content={msg.content} role={msg.role} />
                   </div>
                 </motion.div>
               ))}
@@ -288,7 +364,7 @@ export default function MentoringPage() {
         )}
 
         {/* Input Bar */}
-        <div className="border-t border-border bg-card p-3 sm:p-4">
+        <div className="border-t border-border bg-card/90 backdrop-blur-md p-3 sm:p-4">
           <div className="flex items-center gap-2">
             <input
               ref={inputRef}
@@ -298,12 +374,13 @@ export default function MentoringPage() {
               onKeyDown={handleKeyDown}
               placeholder="Digite sua dúvida de edital ou lei seca..."
               disabled={loading}
-              className="flex-1 rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
+              className="flex-1 rounded-xl border border-border bg-muted/40 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all disabled:opacity-50"
             />
             <button
               onClick={() => handleSend()}
               disabled={loading || !input.trim()}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow transition hover:bg-orange-600 disabled:opacity-40"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition hover:opacity-90 active:scale-95 disabled:opacity-40"
+              title="Enviar mensagem"
             >
               <Send className="h-4 w-4" />
             </button>
