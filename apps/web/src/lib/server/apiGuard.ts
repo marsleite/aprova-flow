@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isAdminIdentity } from '@/lib/admin';
 
 type LimiterState = {
   count: number;
@@ -81,6 +82,25 @@ export async function requireAuthenticatedUser(req: NextRequest): Promise<
       ),
     };
   }
+}
+
+export async function requireAdminUser(req: NextRequest): Promise<
+  | { uid: string; email?: string | null; key: string; idToken: string }
+  | { response: NextResponse }
+> {
+  const authResult = await requireAuthenticatedUser(req);
+  if ('response' in authResult) return authResult;
+
+  if (!isAdminIdentity({ uid: authResult.uid, email: authResult.email })) {
+    return {
+      response: NextResponse.json(
+        { error: 'Acesso negado. Esta rota é restrita a administradores.' },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return authResult;
 }
 
 export function enforceRateLimit(opts: {

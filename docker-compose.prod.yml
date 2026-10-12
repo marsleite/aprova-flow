@@ -45,4 +45,42 @@ services:
       - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
       - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
       - R2_BUCKET_NAME=${R2_BUCKET_NAME}
-
+    labels:
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-6-web.rule=Host(`aprovamind.com.br`)
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-6-web.entrypoints=web
+      - traefik.http.services.aprovamindweb-web-gq7k5w-6-web.loadbalancer.server.port=3000
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-6-web.service=aprovamindweb-web-gq7k5w-6-web
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-6-web.middlewares=redirect-to-https@file
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-6-websecure.rule=Host(`aprovamind.com.br`)
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-6-websecure.entrypoints=websecure
+      - traefik.http.services.aprovamindweb-web-gq7k5w-6-websecure.loadbalancer.server.port=3000
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-6-websecure.service=aprovamindweb-web-gq7k5w-6-websecure
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-6-websecure.tls.certresolver=letsencrypt
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-5-web.rule=Host(`www.aprovamind.com.br`)
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-5-web.entrypoints=web
+      - traefik.http.services.aprovamindweb-web-gq7k5w-5-web.loadbalancer.server.port=3000
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-5-web.service=aprovamindweb-web-gq7k5w-5-web
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-5-web.middlewares=redirect-to-https@file
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-5-websecure.rule=Host(`www.aprovamind.com.br`)
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-5-websecure.entrypoints=websecure
+      - traefik.http.services.aprovamindweb-web-gq7k5w-5-websecure.loadbalancer.server.port=3000
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-5-websecure.service=aprovamindweb-web-gq7k5w-5-websecure
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-5-websecure.tls.certresolver=letsencrypt
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-admin-web.rule=Host(`admin.aprovamind.com.br`)
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-admin-web.entrypoints=web
+      - traefik.http.services.aprovamindweb-web-gq7k5w-admin-web.loadbalancer.server.port=3000
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-admin-web.service=aprovamindweb-web-gq7k5w-admin-web
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-admin-web.middlewares=redirect-to-https@file
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-admin-websecure.rule=Host(`admin.aprovamind.com.br`)
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-admin-websecure.entrypoints=websecure
+      - traefik.http.services.aprovamindweb-web-gq7k5w-admin-websecure.loadbalancer.server.port=3000
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-admin-websecure.service=aprovamindweb-web-gq7k5w-admin-websecure
+      - traefik.http.routers.aprovamindweb-web-gq7k5w-admin-websecure.tls.certresolver=letsencrypt
+      - traefik.enable=true
+    networks:
+      - dokploy-network
+      - default
+networks:
+  dokploy-network:
+    external: true
