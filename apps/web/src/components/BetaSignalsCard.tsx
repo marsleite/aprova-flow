@@ -144,6 +144,19 @@ export default function BetaSignalsCard() {
   const [manualEmail, setManualEmail] = useState('');
   const [manualPending, setManualPending] = useState(false);
 
+  const safeSummary = summary
+    ? {
+        ...summary,
+        upgradeByRecommendedPlan: Array.isArray(summary.upgradeByRecommendedPlan) ? summary.upgradeByRecommendedPlan : [],
+        topBlockedFeatures: Array.isArray(summary.topBlockedFeatures) ? summary.topBlockedFeatures : [],
+        topUpgradeSurfaces: Array.isArray(summary.topUpgradeSurfaces) ? summary.topUpgradeSurfaces : [],
+        topQuotaTasks: Array.isArray(summary.topQuotaTasks) ? summary.topQuotaTasks : [],
+        topPlanTransitions: Array.isArray(summary.topPlanTransitions) ? summary.topPlanTransitions : [],
+        topAiTasks: Array.isArray(summary.topAiTasks) ? summary.topAiTasks : [],
+        topAiProviders: Array.isArray(summary.topAiProviders) ? summary.topAiProviders : [],
+      }
+    : null;
+
   async function handleManualGrant(e: React.FormEvent) {
     e.preventDefault();
     const email = manualEmail.toLowerCase().trim();
@@ -369,9 +382,9 @@ export default function BetaSignalsCard() {
           </div>
           {loading ? (
             <EmptyState text="Carregando escada de upgrade..." />
-          ) : summary?.upgradeByRecommendedPlan.length ? (
+          ) : safeSummary?.upgradeByRecommendedPlan?.length ? (
             <div className="space-y-2">
-              {summary.upgradeByRecommendedPlan.map((item) => (
+              {safeSummary.upgradeByRecommendedPlan.map((item) => (
                 <div key={item.recommendedPlan} className="rounded-md border border-border bg-card px-3 py-3">
                   <div className="mb-1 flex items-center justify-between gap-3">
                     <span className="text-am-body-sm text-foreground">
@@ -412,9 +425,9 @@ export default function BetaSignalsCard() {
           </div>
           {loading ? (
             <EmptyState text="Carregando bloqueios..." />
-          ) : summary?.topBlockedFeatures.length ? (
+          ) : safeSummary?.topBlockedFeatures?.length ? (
             <div className="space-y-2">
-              {summary.topBlockedFeatures.map((item) => (
+              {safeSummary.topBlockedFeatures.map((item) => (
                 <div key={item.label} className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-3">
                   <span className="text-am-body-sm text-foreground">{item.label}</span>
                   <Badge variant="outline">{item.count}</Badge>
@@ -437,9 +450,9 @@ export default function BetaSignalsCard() {
           </div>
           {loading ? (
             <EmptyState text="Carregando superficies..." />
-          ) : summary?.topUpgradeSurfaces.length ? (
+          ) : safeSummary?.topUpgradeSurfaces?.length ? (
             <div className="space-y-2">
-              {summary.topUpgradeSurfaces.map((item) => (
+              {safeSummary.topUpgradeSurfaces.map((item) => (
                 <div key={item.label} className="rounded-md border border-border bg-card px-3 py-3">
                   <div className="mb-1 flex items-center justify-between">
                     <span className="text-am-body-sm text-foreground">{item.label}</span>
@@ -467,9 +480,9 @@ export default function BetaSignalsCard() {
           </div>
           {loading ? (
             <EmptyState text="Carregando pressao de quota..." />
-          ) : summary?.topQuotaTasks.length ? (
+          ) : safeSummary?.topQuotaTasks?.length ? (
             <div className="space-y-2">
-              {summary.topQuotaTasks.map((item) => (
+              {safeSummary.topQuotaTasks.map((item) => (
                 <div key={item.task} className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-3">
                   <span className="text-am-body-sm text-foreground">{item.task}</span>
                   <Badge variant="outline">{item.count}</Badge>
@@ -492,9 +505,9 @@ export default function BetaSignalsCard() {
           </div>
           {loading ? (
             <EmptyState text="Carregando mudancas..." />
-          ) : summary?.topPlanTransitions.length ? (
+          ) : safeSummary?.topPlanTransitions?.length ? (
             <div className="space-y-2">
-              {summary.topPlanTransitions.map((item) => (
+              {safeSummary.topPlanTransitions.map((item) => (
                 <div key={item.label} className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-3">
                   <span className="text-am-body-sm text-foreground">{item.label}</span>
                   <Badge variant="outline">{item.count}</Badge>
@@ -517,9 +530,9 @@ export default function BetaSignalsCard() {
           </div>
           {loading ? (
             <EmptyState text="Carregando tarefas de IA..." />
-          ) : summary?.topAiTasks.length ? (
+          ) : safeSummary?.topAiTasks?.length ? (
             <div className="space-y-2">
-              {summary.topAiTasks.map((item) => (
+              {safeSummary.topAiTasks.map((item) => (
                 <div key={item.task} className="rounded-md border border-border bg-card px-3 py-3">
                   <div className="mb-1 flex items-center justify-between">
                     <span className="text-am-body-sm text-foreground">{item.task}</span>
@@ -573,9 +586,9 @@ export default function BetaSignalsCard() {
           </div>
           {loading ? (
             <EmptyState text="Carregando providers..." />
-          ) : summary?.topAiProviders?.length ? (
+          ) : safeSummary?.topAiProviders?.length ? (
             <div className="space-y-2">
-              {summary.topAiProviders.map((item) => (
+              {safeSummary.topAiProviders.map((item) => (
                 <div key={`${item.provider}-${item.model}`} className="rounded-md border border-border bg-card px-3 py-3">
                   <div className="mb-1 flex items-center justify-between">
                     <span className="text-am-body-sm text-foreground">{item.provider}</span>

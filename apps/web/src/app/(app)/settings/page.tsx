@@ -10,9 +10,35 @@ import BetaSignalsCard from '@/components/BetaSignalsCard';
 import EntitlementSandboxCard from '@/components/EntitlementSandboxCard';
 import TesterSubscriptionManagerCard from '@/components/TesterSubscriptionManagerCard';
 import WhatsAppTutorCard from '@/components/WhatsAppTutorCard';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/config';
+
+class AdminCardErrorBoundary extends React.Component<
+  { children: React.ReactNode; cardTitle: string },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; cardTitle: string }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.error(`[AdminCardErrorBoundary] Erro ao renderizar ${this.props.cardTitle}:`, error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-amber-500">
+          Não foi possível exibir o card administrativo ({this.props.cardTitle}) temporariamente.
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 import Image from 'next/image';
 import {
   Settings,
@@ -100,9 +126,11 @@ export default function SettingsPage() {
   const isAdmin = planTier === 'admin';
 
   const activePlansFeature = getFeature(FeatureCode.ActivePlans);
+  const activePlansLimit =
+    activePlansFeature?.mode === 'quota' ? (activePlansFeature.limit ?? 1) : 1;
   const activePlansLabel =
     activePlansFeature?.mode === 'quota'
-      ? `${activePlansFeature.limit} plano${activePlansFeature.limit > 1 ? 's' : ''} ativo${activePlansFeature.limit > 1 ? 's' : ''}`
+      ? `${activePlansLimit} plano${activePlansLimit > 1 ? 's' : ''} ativo${activePlansLimit > 1 ? 's' : ''}`
       : 'Planos ativos';
 
   const planFeatures = [
@@ -261,6 +289,7 @@ export default function SettingsPage() {
                   alt={user.displayName || 'Avatar'}
                   width={64}
                   height={64}
+                  unoptimized
                   className="rounded-am-full ring-2 ring-am-border-default object-cover"
                 />
               ) : (
@@ -519,9 +548,15 @@ export default function SettingsPage() {
               <span className="text-xs text-muted-foreground">Visível exclusivamente para você (Admin)</span>
             </div>
 
-            <EntitlementSandboxCard currentScenarioUserId={sandboxScenarioUserId} />
-            <TesterSubscriptionManagerCard />
-            <BetaSignalsCard />
+            <AdminCardErrorBoundary cardTitle="Sandbox de Entitlements">
+              <EntitlementSandboxCard currentScenarioUserId={sandboxScenarioUserId} />
+            </AdminCardErrorBoundary>
+            <AdminCardErrorBoundary cardTitle="Operação de Testers">
+              <TesterSubscriptionManagerCard />
+            </AdminCardErrorBoundary>
+            <AdminCardErrorBoundary cardTitle="Painel Beta Semanal">
+              <BetaSignalsCard />
+            </AdminCardErrorBoundary>
           </motion.div>
         )}
 
@@ -548,7 +583,7 @@ export default function SettingsPage() {
       <AccountPlanModal
         isOpen={accountModalOpen}
         currentTier={planTier}
-        currentPlansCount={plans.length}
+        currentPlansCount={plans?.length ?? 0}
         onClose={() => setAccountModalOpen(false)}
       />
     </div>

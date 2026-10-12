@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronDown, ChevronUp, Crown, Info, X, Loader2, Zap } from 'lucide-react';
@@ -126,15 +126,15 @@ export default function AccountPlanModal({
   const currentDisplayTier = toDisplayTier(currentTier);
   const currentPlanMeta = BETA_PLAN_META[currentDisplayTier];
 
-  const closeFromEffect = useEffectEvent(() => {
-    setShowComparison(false);
-    onClose();
-  });
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setShowComparison(false);
-    onClose();
-  };
+    onCloseRef.current();
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -143,13 +143,13 @@ export default function AccountPlanModal({
     document.body.style.overflow = 'hidden';
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') closeFromEffect();
+      if (e.key === 'Escape') handleClose();
     }
 
     function handleMouseDown(e: MouseEvent) {
       if (!modalRef.current) return;
       if (!modalRef.current.contains(e.target as Node)) {
-        closeFromEffect();
+        handleClose();
       }
     }
 
@@ -161,7 +161,7 @@ export default function AccountPlanModal({
       document.removeEventListener('mousedown', handleMouseDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   if (typeof document === 'undefined') return null;
 

@@ -43,16 +43,49 @@ function buildFallbackSummary(windowDays: number): BetaSignalsSummary {
 }
 
 export async function GET(request: NextRequest) {
+  const windowDays = readWindowDays(request);
   const response = await proxyRequestToBackendApi({
     request,
     targetPath: '/billing/admin/beta-signals',
   });
 
-  if (response.ok || response.status === 401 || response.status === 403) {
+  if (response.ok) {
+    try {
+      const data = (await response.json()) as Partial<BetaSignalsSummary>;
+      const fallback = buildFallbackSummary(windowDays);
+      const merged: BetaSignalsSummary = {
+        ...fallback,
+        ...data,
+        windowDays,
+        upgradeByRecommendedPlan: Array.isArray(data.upgradeByRecommendedPlan) ? data.upgradeByRecommendedPlan : [],
+        topBlockedFeatures: Array.isArray(data.topBlockedFeatures) ? data.topBlockedFeatures : [],
+        topUpgradeSurfaces: Array.isArray(data.topUpgradeSurfaces) ? data.topUpgradeSurfaces : [],
+        topQuotaTasks: Array.isArray(data.topQuotaTasks) ? data.topQuotaTasks : [],
+        topPlanTransitions: Array.isArray(data.topPlanTransitions) ? data.topPlanTransitions : [],
+        topAiTasks: Array.isArray(data.topAiTasks) ? data.topAiTasks : [],
+        topAiProviders: Array.isArray(data.topAiProviders) ? data.topAiProviders : [],
+      };
+      return NextResponse.json(merged, {
+        status: 200,
+        headers: {
+          'cache-control': 'no-store',
+        },
+      });
+    } catch {
+      return NextResponse.json(buildFallbackSummary(windowDays), {
+        status: 200,
+        headers: {
+          'cache-control': 'no-store',
+        },
+      });
+    }
+  }
+
+  if (response.status === 401 || response.status === 403) {
     return response;
   }
 
-  return NextResponse.json(buildFallbackSummary(readWindowDays(request)), {
+  return NextResponse.json(buildFallbackSummary(windowDays), {
     status: 200,
     headers: {
       'cache-control': 'no-store',
