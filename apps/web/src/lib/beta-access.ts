@@ -2,8 +2,8 @@ import { doc, getDoc } from 'firebase/firestore';
 
 export type BetaAccessStatus = 'open' | 'invite_only' | 'allowed' | 'blocked';
 
-// Mude para false para abrir o beta para todos sem precisar de deploy
-const BETA_INVITE_ONLY = true;
+// Liberado para todos se inscreverem livremente
+const BETA_INVITE_ONLY = false;
 
 // Admins sempre têm acesso, independente da beta_allowlist no Firestore
 const ADMIN_EMAILS = [

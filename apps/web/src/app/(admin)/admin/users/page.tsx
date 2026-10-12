@@ -33,6 +33,11 @@ export default function AdminUsersPage() {
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Atribuição Direta na Barra Rápida
+  const [quickEmail, setQuickEmail] = useState('');
+  const [quickTier, setQuickTier] = useState<'pro' | 'free'>('pro');
+  const [quickLoading, setQuickLoading] = useState(false);
+
   // Modal para Conceder / Alterar Plano (PRO / FREE)
   const [showTierModal, setShowTierModal] = useState(false);
   const [targetEmail, setTargetEmail] = useState('');
@@ -44,6 +49,43 @@ export default function AdminUsersPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
+
+  const handleQuickAssign = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickEmail || !quickEmail.includes('@')) {
+      setNotification({ type: 'error', message: 'Digite um e-mail válido para atribuir o plano.' });
+      return;
+    }
+    setQuickLoading(true);
+    setNotification(null);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken || ''}`,
+        },
+        body: JSON.stringify({
+          action: 'set_tier',
+          email: quickEmail.trim(),
+          newTier: quickTier,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNotification({ type: 'success', message: data.message || `Plano ${quickTier.toUpperCase()} salvo para ${quickEmail}!` });
+        setQuickEmail('');
+        await fetchUsers();
+      } else {
+        setNotification({ type: 'error', message: data.error || 'Erro ao atribuir plano.' });
+      }
+    } catch {
+      setNotification({ type: 'error', message: 'Falha de comunicação com o servidor.' });
+    } finally {
+      setQuickLoading(false);
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -376,6 +418,44 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
+        {/* Formulário Direto: Adicionar ou Definir Plano por E-mail */}
+        <Card className="p-4 bg-[#0B0F17]/95 border-emerald-500/30 shadow-lg shadow-emerald-950/20">
+          <form onSubmit={handleQuickAssign} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase font-mono shrink-0">
+              <Crown className="w-4 h-4" />
+              <span>Atribuir por E-mail:</span>
+            </div>
+            <div className="relative flex-1">
+              <input
+                type="email"
+                required
+                placeholder="Digite o e-mail do aluno (ex: aluno@gmail.com)..."
+                value={quickEmail}
+                onChange={(e) => setQuickEmail(e.target.value)}
+                className="w-full px-3.5 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-colors"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={quickTier}
+                onChange={(e) => setQuickTier(e.target.value as 'pro' | 'free')}
+                className="bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-emerald-500 font-medium"
+              >
+                <option value="pro">👑 Definir como PRO</option>
+                <option value="free">✨ Definir como FREE</option>
+              </select>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={quickLoading}
+                className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs px-4"
+              >
+                {quickLoading ? 'Salvando...' : 'Salvar Plano'}
+              </Button>
+            </div>
+          </form>
+        </Card>
+
         {/* Tabela de Usuários com Layout Responsivo e Ações Rápidas */}
         <Card className="bg-[#0B0F17]/90 border-zinc-800/80 overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
@@ -392,8 +472,26 @@ export default function AdminUsersPage() {
               <tbody className="divide-y divide-zinc-800/60 text-zinc-300">
                 {users.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center text-zinc-500">
-                      Nenhum usuário encontrado com os filtros selecionados.
+                    <td colSpan={5} className="py-12 text-center text-zinc-400">
+                      <p className="text-sm">Nenhum usuário encontrado com os filtros selecionados.</p>
+                      {search.includes('@') && (
+                        <div className="mt-3 flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleSetTier({ email: search.trim() }, 'pro')}
+                            className="text-xs px-3 py-1.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 font-semibold"
+                          >
+                            👑 Atribuir PRO para {search}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSetTier({ email: search.trim() }, 'free')}
+                            className="text-xs px-3 py-1.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 hover:bg-zinc-700 font-medium"
+                          >
+                            ✨ Atribuir FREE para {search}
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ) : (

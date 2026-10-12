@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useAuthContext } from '@/contexts/AuthContext';
 import {
   getBetaAccessMessage,
@@ -313,9 +315,27 @@ export default function LoginPage() {
         className="flex flex-1 items-center justify-center p-6 lg:p-12 relative z-20"
       >
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="mb-10 flex justify-center lg:hidden">
-            <AprovaMindLogo size="lg" href="/" />
+          {/* Logo Header */}
+          <div className="mb-6 flex justify-center">
+            <Link href="/" className="inline-flex items-center gap-3 group">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-b from-orange-500/20 to-amber-500/10 border border-orange-500/30 shadow-lg shadow-orange-500/10 transition-transform group-hover:scale-105 shrink-0">
+                <Image
+                  src="/icon.svg"
+                  alt="AprovaMind"
+                  width={30}
+                  height={30}
+                  priority
+                />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-2xl font-bold tracking-tight text-white leading-none">
+                  Aprova<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">Mind</span>
+                </span>
+                <span className="text-[10px] uppercase font-semibold tracking-widest text-zinc-400 mt-1">
+                  Alta Performance
+                </span>
+              </div>
+            </Link>
           </div>
 
           {/* Card — Sitetrip glassmorphism */}
@@ -335,30 +355,6 @@ export default function LoginPage() {
                 border: '1px solid var(--border)',
               }}
             >
-              {betaRestricted && (
-                <div
-                  className="mb-6 rounded-2xl px-4 py-3.5"
-                  style={{
-                    background: 'rgba(245, 151, 104, 0.08)',
-                    border: '1px solid rgba(245, 151, 104, 0.22)',
-                  }}
-                >
-                  <p
-                    className="text-[10px] font-medium uppercase"
-                    style={{
-                      fontFamily: 'var(--ds-font-display)',
-                      letterSpacing: 'var(--ds-letter-kicker)',
-                      color: 'var(--primary)',
-                    }}
-                  >
-                    Beta por convite
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
-                    {betaMessage}
-                  </p>
-                </div>
-              )}
-
               {sandboxContextMessage && (
                 <div
                   className="mb-6 rounded-2xl px-4 py-3.5"
@@ -395,10 +391,12 @@ export default function LoginPage() {
                   className="ds-title-1"
                   style={{ color: 'var(--foreground)' }}
                 >
-                  {mode === 'login' ? 'Acesse sua conta' : 'Ative seu convite beta'}
+                  {mode === 'login' ? 'Acesse sua conta' : 'Crie sua conta'}
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
-                  {helperText}
+                  {mode === 'login'
+                    ? 'Retome seu plano de estudos com IA e simulados.'
+                    : 'Cadastre-se gratuitamente para começar a estudar com alta performance.'}
                 </p>
               </div>
 
@@ -752,22 +750,17 @@ export default function LoginPage() {
                 }}
               >
                 <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  {mode === 'login' ? 'Recebeu um convite por email? ' : 'Ja ativou seu convite? '}
+                  {mode === 'login' ? 'Ainda não possui uma conta? ' : 'Já possui uma conta cadastrada? '}
                   <button
                     onClick={() => {
                       setMode(mode === 'login' ? 'register' : 'login');
                     }}
-                    className="font-semibold transition-colors hover:underline"
+                    className="font-semibold transition-colors hover:underline ml-1"
                     style={{ color: 'var(--primary)' }}
                   >
-                    {mode === 'login' ? 'Ativar acesso beta' : 'Fazer login'}
+                    {mode === 'login' ? 'Cadastre-se grátis' : 'Fazer login'}
                   </button>
                 </p>
-                {betaRestricted && (
-                  <p className="mt-2 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
-                    O cadastro por email so fica disponivel depois que um convite valido e reconhecido.
-                  </p>
-                )}
               </div>
 
             </div>
