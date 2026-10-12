@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setFirestoreDocumentWithUserToken } from '@/lib/server/firestoreRest';
+import { resolveBackendApiBaseUrl } from '@/lib/server/backendApi';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -96,11 +97,35 @@ export async function POST(request: NextRequest) {
     const planTier = isApproved ? 'pro' : isRevoked ? 'free' : null;
     const subscriptionStatus = isApproved ? 'active' : isRevoked ? 'canceled' : null;
 
-    // 1. Update Firestore if planTier changed and user ID is identifiable
+    const adminToken = await getAdminIdToken();
+
+    // 1. Audit trail: registra o evento no Firestore para histórico e rastreabilidade
+    if (adminToken) {
+      const logDocId = `hotmart_${body.id || Date.now()}`;
+      setFirestoreDocumentWithUserToken({
+        collection: 'billing_event_logs',
+        documentId: logDocId,
+        data: {
+          event,
+          buyerEmail: buyerEmail || null,
+          buyerPhone: buyerPhone || null,
+          sck: sck || null,
+          planTier: planTier || null,
+          subscriptionStatus: subscriptionStatus || null,
+          provider: 'hotmart',
+          transactionId: purchase.transaction || body.id || null,
+          processedAt: new Date().toISOString(),
+        },
+        idToken: adminToken,
+      }).catch((err) => {
+        console.warn('[Hotmart Webhook] Warning recording audit log:', err);
+      });
+    }
+
+    // 2. Atualiza o user_stats do aluno no Firestore se o UID estiver identificado
     if (planTier && sck) {
-      const adminToken = await getAdminIdToken();
       if (adminToken) {
-        // If sck is likely a Firebase UID (alphanumeric, > 20 chars, no '+' prefix)
+        // Se sck for um UID válido do Firebase (alfanumérico, >= 20 chars)
         const isUid = typeof sck === 'string' && sck.length >= 20 && !sck.startsWith('+');
         if (isUid) {
           const updateResult = await setFirestoreDocumentWithUserToken({
@@ -127,7 +152,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Notify WhatsApp Bot (aprova-mind)
+    // 3. Sincroniza com o Core API em Go (/billing/webhook/hotmart) para atualizar cache de entitlements
+    try {
+      const coreBaseUrl = resolveBackendApiBaseUrl();
+      if (coreBaseUrl) {
+        fetch(`${coreBaseUrl}/billing/webhook/hotmart`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-hotmart-hottok': EXPECTED_HOTTOK,
+          },
+          body: rawBody,
+        }).catch((coreErr) => {
+          console.warn('[Hotmart Webhook] Could not forward to Go core API:', coreErr);
+        });
+      }
+    } catch (coreDispatchErr) {
+      console.warn('[Hotmart Webhook] Error preparing Go core dispatch:', coreDispatchErr);
+    }
+
+    // 4. Notifica o Companion Bot no WhatsApp (aprova-mind)
     const aprovamindUrl =
       process.env.APROVAMIND_API_URL ||
       process.env.NEXT_PUBLIC_APROVAMIND_API_URL ||

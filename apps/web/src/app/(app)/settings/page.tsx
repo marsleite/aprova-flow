@@ -26,6 +26,7 @@ import {
   Calendar,
   AlertCircle,
   Zap,
+  ExternalLink,
 } from 'lucide-react';
 import { fadeUp } from '@/design-system/tokens';
 import { Card, Badge, Button } from '@/components';
@@ -333,7 +334,7 @@ export default function SettingsPage() {
                   </Button>
                 </motion.div>
               ) : showCancelConfirm ? (
-                // Cancellation Confirmation View
+                // Hotmart Cancellation & Management View
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -342,44 +343,40 @@ export default function SettingsPage() {
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="font-sans text-am-body font-bold text-red-500">Tem certeza de que deseja cancelar?</h3>
+                      <h3 className="font-sans text-am-body font-bold text-red-500">Gestão e Cancelamento da Assinatura</h3>
                       <p className="text-am-body-sm text-muted-foreground mt-1 leading-relaxed">
+                        A sua assinatura do AprovaMind Pro é processada com segurança pela <strong className="text-foreground">Hotmart</strong>. O cancelamento ou solicitação de reembolso é realizado diretamente no portal do comprador da Hotmart com apenas 2 cliques:
+                      </p>
+                      <div className="mt-3 p-3 rounded-lg bg-background/60 border border-am-border-subtle text-xs text-muted-foreground space-y-1.5">
+                        <p className="font-semibold text-foreground">Passo a passo rápido na Hotmart:</p>
+                        <p>1. Acesse <span className="font-mono text-primary font-medium">consumer.hotmart.com</span> com o seu e-mail de compra.</p>
+                        <p>2. Clique no produto <strong className="text-foreground">AprovaMind</strong>.</p>
+                        <p>3. Selecione <strong>Configurar pagamento</strong> ➔ <strong>Cancelar assinatura</strong> (ou <em>Solicitar reembolso</em> se dentro dos 7 dias do CDC).</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
                         {isWithinCDC 
-                          ? 'Você está dentro do prazo de garantia de 7 dias (CDC). O cancelamento realizará o estorno automático e imediato do seu pagamento no Mercado Pago. Seu acesso Pro será encerrado imediatamente.'
-                          : `Sua assinatura Pro não será renovada ao final do ciclo contratado. Nenhuma nova cobrança será realizada no Mercado Pago e você continuará com acesso total a todos os recursos Pro até ${formatDate(userStats?.billingPeriodEnd)}.`}
+                          ? '🛡️ Você está dentro do prazo de 7 dias de garantia legal (CDC). O cancelamento na Hotmart realiza o reembolso integral e automático.' 
+                          : `Ao cancelar a renovação, você continuará aproveitando o plano Pro normalmente até ${formatDate(userStats?.billingPeriodEnd)}, sem novas cobranças.`}
                       </p>
                     </div>
                   </div>
 
-                  {cancelError && (
-                    <p className="text-[11px] text-red-500 font-semibold bg-red-500/10 py-1.5 px-3 rounded border border-red-500/20">
-                      {cancelError}
-                    </p>
-                  )}
-
                   <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                    <Button
-                      variant="danger"
-                      disabled={cancelLoading}
-                      onClick={handleCancelSubscription}
-                      className="flex-1 justify-center"
+                    <a
+                      href="https://consumer.hotmart.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium text-sm transition-all shadow-sm"
                     >
-                      {cancelLoading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          Processando...
-                        </>
-                      ) : (
-                        'Confirmar Cancelamento'
-                      )}
-                    </Button>
+                      Ir para a Hotmart para Cancelar
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
                     <Button
                       variant="outline"
-                      disabled={cancelLoading}
                       onClick={() => setShowCancelConfirm(false)}
                       className="flex-1 justify-center border-border hover:bg-muted"
                     >
-                      Manter plano Pro
+                      Voltar / Manter plano Pro
                     </Button>
                   </div>
                 </motion.div>
@@ -432,22 +429,31 @@ export default function SettingsPage() {
 
                       {actualSubStatus === 'canceled' ? (
                         <div className="p-4 bg-amber-500/5 rounded-lg border border-amber-500/20 text-am-body-sm text-muted-foreground leading-relaxed">
-                          Sua assinatura foi cancelada com sucesso. Seu acesso Pro continuará válido até{' '}
-                          <span className="font-semibold text-foreground">{formatDate(userStats?.billingPeriodEnd)}</span>. Após essa data, sua conta voltará ao plano Free e nenhuma nova cobrança será feita.
+                          Sua assinatura foi cancelada na Hotmart. Seu acesso Pro continuará válido até{' '}
+                          <span className="font-semibold text-foreground">{formatDate(userStats?.billingPeriodEnd)}</span>. Após essa data, sua conta retornará ao plano Free e nenhuma nova cobrança será realizada.
                         </div>
                       ) : (
                         <div className="p-4 bg-emerald-500/5 rounded-lg border border-emerald-500/20 text-am-body-sm text-muted-foreground leading-relaxed">
-                          Sua assinatura está ativa e configurada no Mercado Pago. O valor será cobrado de forma recorrente. Para sua tranquilidade, você pode cancelar a qualquer momento sem custos de fidelidade ou taxas extras.
+                          Sua assinatura está ativa e processada com segurança pela <strong className="text-foreground">Hotmart</strong>. O valor é cobrado de forma recorrente e você pode gerenciar pagamentos, notas fiscais ou cancelar a qualquer momento com total autonomia.
                         </div>
                       )}
 
-                      {/* Cancel Subscription Button */}
+                      {/* Manage / Cancel Subscription Actions */}
                       {actualSubStatus === 'active' && (
-                        <div className="pt-2">
+                        <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                          <a
+                            href="https://consumer.hotmart.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-muted/60 border border-am-border-subtle text-foreground hover:bg-muted text-xs font-semibold transition-all"
+                          >
+                            Portal do Comprador Hotmart
+                            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                          </a>
                           <Button
                             variant="danger"
                             onClick={() => setShowCancelConfirm(true)}
-                            className="w-full justify-center bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
+                            className="flex-1 justify-center bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-200 text-xs font-semibold"
                           >
                             Cancelar Assinatura
                           </Button>
