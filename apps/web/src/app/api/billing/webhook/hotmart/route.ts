@@ -221,10 +221,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Notifica o Companion Bot no WhatsApp (aprova-mind)
-    const aprovamindUrl =
-      process.env.APROVAMIND_API_URL ||
-      process.env.NEXT_PUBLIC_APROVAMIND_API_URL ||
-      'http://localhost:8000';
+    const aprovamindUrl = resolveBackendApiBaseUrl();
     const secretKey =
       process.env.INTERNAL_SERVICE_KEY || 'aprovamind-secret-service-key-2026';
 

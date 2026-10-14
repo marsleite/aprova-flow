@@ -45,6 +45,8 @@ export default function WhatsAppPairingModal({
   const [copied, setCopied] = useState<boolean>(false);
   const [showQr, setShowQr] = useState<boolean>(false);
 
+  const hasInitiatedRef = useRef(false);
+
   // Check linking status from API
   const checkStatus = useCallback(async () => {
     if (!userId) return;
@@ -57,15 +59,17 @@ export default function WhatsAppPairingModal({
           setPhone(data.phone || null);
           onSuccess?.();
         }
+        return data.is_linked;
       }
     } catch (err) {
       console.warn('Erro ao verificar status do WhatsApp:', err);
     }
+    return false;
   }, [userId, onSuccess]);
 
   // Generate pairing code
   const handleGenerateCode = useCallback(async () => {
-    if (!userId || generating) return;
+    if (!userId) return;
     setGenerating(true);
     try {
       const res = await fetch('/api/whatsapp/pairing', {
@@ -89,18 +93,24 @@ export default function WhatsAppPairingModal({
     } finally {
       setGenerating(false);
     }
-  }, [userId, userEmail, userName, generating]);
+  }, [userId, userEmail, userName]);
 
-  // Trigger generation when modal opens
+  // Trigger generation once when modal opens
   useEffect(() => {
-    if (isOpen && !isLinked) {
-      checkStatus().then(() => {
-        if (!pairingCode) {
+    if (!isOpen) {
+      hasInitiatedRef.current = false;
+      return;
+    }
+
+    if (isOpen && !hasInitiatedRef.current) {
+      hasInitiatedRef.current = true;
+      checkStatus().then((linked) => {
+        if (!linked) {
           handleGenerateCode();
         }
       });
     }
-  }, [isOpen, isLinked, pairingCode, checkStatus, handleGenerateCode]);
+  }, [isOpen, checkStatus, handleGenerateCode]);
 
   // Polling when modal is open and waiting for user to pair
   useEffect(() => {
