@@ -23,6 +23,7 @@ import {
 } from '@/lib/firebase/sessions';
 import { getTodayISO, formatDuration } from '@/lib/utils';
 import { StudyPlanEdital, PlanVsActual, StudyInsight, StudySession } from '@/types';
+import { auth } from '@/lib/firebase/config';
 import PlanManager from '@/components/PlanManager';
 import PlanCoverageProjectionCard from '@/components/PlanCoverageProjectionCard';
 import PlanEngineSnapshotCard from '@/components/engine/PlanEngineSnapshotCard';
@@ -47,6 +48,8 @@ import {
   Calendar,
   Sparkles,
   BookOpen,
+  RotateCw,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -105,6 +108,59 @@ export default function PlannerPage() {
   // Daily Data
   const [todaySessions, setTodaySessions] = useState<StudySession[]>([]);
   const [insights, setInsights] = useState<StudyInsight[]>([]);
+  const [recalculating, setRecalculating] = useState(false);
+  const [recalculateFeedback, setRecalculateFeedback] = useState<string | null>(null);
+
+  const handleRecalculateRoute = async () => {
+    if (!user) return;
+    setRecalculating(true);
+    setRecalculateFeedback(null);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) return;
+      const res = await fetch('/api/planner-daily', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          userName: user.displayName || user.email?.split('@')[0] || 'Concurseiro',
+          activePlanName: activePlan?.name,
+          weeklyGoalHours: activePlan?.weeklyGoalHours || 20,
+          weeklyTotalHours: todaySessions.reduce((acc, s) => acc + s.duration, 0) / 3600,
+          weeklyProgressPercent: 50,
+          currentStreak: 3,
+          daysStudiedThisWeek: 4,
+          todayTotalMinutes: Math.round(todaySessions.reduce((acc, s) => acc + s.duration, 0) / 60),
+          replanMode: 'recovery',
+          subjectHours: (activePlan?.subjects || []).map((s) => ({ subject: s.subject, hours: 2 })),
+          planVsActual: (activePlan?.subjects || []).map((s) => ({
+            subject: s.subject,
+            plannedPercent: s.weight,
+            actualPercent: s.weight,
+            status: 'on_track',
+          })),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setRecalculateFeedback(
+          data.rationale
+            ? `Rota recalculada: ${data.rationale.slice(0, 110)}...`
+            : 'Rota recalculada com sucesso! Sem culpa: matérias redistribuídas.'
+        );
+        setTimeout(() => setRecalculateFeedback(null), 6000);
+      } else {
+        setRecalculateFeedback('Erro ao recalcular rota. Tente novamente.');
+      }
+    } catch {
+      setRecalculateFeedback('Instabilidade ao recalcular rota.');
+    } finally {
+      setRecalculating(false);
+    }
+  };
 
   const canUseMultiEdital = hasFeature(FeatureCode.MultiEdital);
   const createEditalState = getPlannerCreateEditalState({
@@ -350,11 +406,36 @@ export default function PlannerPage() {
                 </p>
               </div>
 
-              <div className="mt-8 flex items-center gap-4">
+              {recalculateFeedback && (
+                <div className="mt-4 rounded-xl border border-primary/30 bg-primary/10 p-3 text-xs text-primary font-medium animate-fadeIn">
+                  {recalculateFeedback}
+                </div>
+              )}
+
+              <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Button asChild variant="primary" size="lg" className="shadow-[0_4px_24px_var(--color-am-ai-glow)]">
                   <Link href={hasActivePlanContext ? '/engine' : '/planner'}>
                     <Play className="mr-2 h-5 w-5" /> {hasActivePlanContext ? 'Iniciar Otimização' : 'Gerenciar Editais'}
                   </Link>
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={handleRecalculateRoute}
+                  disabled={recalculating || !hasActivePlanContext}
+                  variant="secondary"
+                  size="lg"
+                  className="rounded-xl border border-white/10 text-xs font-semibold"
+                >
+                  {recalculating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" /> Recalibrando...
+                    </>
+                  ) : (
+                    <>
+                      <RotateCw className="mr-2 h-4 w-4 text-primary" /> ⚡ Recalcular Rota com IA
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

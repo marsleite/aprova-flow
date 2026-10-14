@@ -27,6 +27,9 @@ import {
   FileUp,
   Check,
   Search,
+  Sparkles,
+  Layers,
+  Sparkle,
 } from 'lucide-react';
 import {
   StudyPlanEdital,
@@ -36,6 +39,216 @@ import {
   DEFAULT_SUBJECTS,
   PLAN_COLORS,
 } from '@/types';
+
+export interface ReadyMadeTemplate {
+  id: string;
+  name: string;
+  area: string;
+  badge: string;
+  color: string;
+  weeklyGoalHours: number;
+  careerTier: string;
+  suggestedIntensity: string;
+  jevConfidence: number;
+  subjects: { subject: string; weight: number }[];
+  verticalizedTopics: { subject: string; topics: string[] }[];
+}
+
+export const READY_MADE_TEMPLATES: ReadyMadeTemplate[] = [
+  {
+    id: 'pge-sp',
+    name: 'PGE-SP 2026 (Procuradoria do Estado)',
+    area: 'Jurídico Elite',
+    badge: 'Procuradoria',
+    color: '#6366F1', // Indigo
+    weeklyGoalHours: 24,
+    careerTier: 'carreira_juridica_elite',
+    suggestedIntensity: 'alta_intensidade',
+    jevConfidence: 0.98,
+    subjects: [
+      { subject: 'Direito Administrativo', weight: 25 },
+      { subject: 'Direito Constitucional', weight: 20 },
+      { subject: 'Direito Tributário', weight: 20 },
+      { subject: 'Processo Civil', weight: 15 },
+      { subject: 'Direito Civil & Empresarial', weight: 10 },
+      { subject: 'Direito Financeiro & Ambiental', weight: 10 },
+    ],
+    verticalizedTopics: [
+      {
+        subject: 'Direito Administrativo',
+        topics: [
+          'Regime Jurídico Administrativo e Princípios',
+          'Atos Administrativos: elementos, atributos e extinção',
+          'Nova Lei de Licitações (Lei nº 14.133/2021) e Contratos',
+          'Processo Administrativo e Prescrição (Lei 9.784/99)',
+          'Responsabilidade Civil do Estado e Danos Nucleares/Gerais',
+          'Improbidade Administrativa reformada (Lei 8.429/92 com Lei 14.230)',
+        ],
+      },
+      {
+        subject: 'Direito Constitucional',
+        topics: [
+          'Controle de Constitucionalidade Concentrado e Difuso',
+          'Direitos e Garantias Fundamentais na Jurisprudência STF',
+          'Organização do Estado e Repartição de Competências',
+          'Funções Essenciais à Justiça e Advocacia Pública',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'magistratura-enam',
+    name: 'Magistratura Estadual (ENAM / TJ)',
+    area: 'Jurídico Elite',
+    badge: 'Magistratura',
+    color: '#8B5CF6', // Purple
+    weeklyGoalHours: 28,
+    careerTier: 'carreira_juridica_elite',
+    suggestedIntensity: 'maxima_precisao',
+    jevConfidence: 0.99,
+    subjects: [
+      { subject: 'Direito Civil', weight: 20 },
+      { subject: 'Processo Civil', weight: 20 },
+      { subject: 'Direito Penal', weight: 15 },
+      { subject: 'Processo Penal', weight: 15 },
+      { subject: 'Direito Constitucional', weight: 15 },
+      { subject: 'Formação Humanística & Ética', weight: 15 },
+    ],
+    verticalizedTopics: [
+      {
+        subject: 'Direito Civil',
+        topics: [
+          'LINDB e Teoria Geral do Direito Privado',
+          'Direito das Obrigações e Responsabilidade Civil Objetiva/Subjetiva',
+          'Contratos em Espécie e Teoria Geral dos Contratos',
+          'Direito das Coisas: Posse, Propriedade e Direitos Reais',
+        ],
+      },
+      {
+        subject: 'Formação Humanística & Ética',
+        topics: [
+          'Sociologia do Direito e Filosofia Jurídica',
+          'Psicologia Judiciária e Tomada de Decisão',
+          'Código de Ética da Magistratura Nacional (CNJ)',
+          'Direitos Humanos e Controle de Convencionalidade',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'analista-tribunais',
+    name: 'Analista Judiciário (TRF / TRT / TJ)',
+    area: 'Tribunais',
+    badge: 'Tribunais',
+    color: '#06B6D4', // Cyan
+    weeklyGoalHours: 18,
+    careerTier: 'tribunais_judiciario',
+    suggestedIntensity: 'medio_alto',
+    jevConfidence: 0.96,
+    subjects: [
+      { subject: 'Direito Constitucional', weight: 20 },
+      { subject: 'Direito Administrativo', weight: 20 },
+      { subject: 'Língua Portuguesa', weight: 20 },
+      { subject: 'Processo Civil / Trabalho', weight: 20 },
+      { subject: 'Raciocínio Lógico & Informática', weight: 10 },
+      { subject: 'Regimento Interno & Normas', weight: 10 },
+    ],
+    verticalizedTopics: [
+      {
+        subject: 'Língua Portuguesa',
+        topics: [
+          'Interpretação e Compreensão Textual Avançada FGV/Cebraspe',
+          'Sintaxe de Regência, Concordância e Emprego do Sinal de Crase',
+          'Pontuação e Reescrita de Frases com Equivalência Semântica',
+        ],
+      },
+      {
+        subject: 'Direito Constitucional',
+        topics: [
+          'Poder Judiciário: Estrutura, Garantias e Competências',
+          'Remédios Constitucionais e Direitos Fundamentais',
+          'Administração Pública na CF/88 (Art. 37 ao 41)',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'delegado-policia',
+    name: 'Delegado de Polícia Civil / Federal',
+    area: 'Policial',
+    badge: 'Policial',
+    color: '#EF4444', // Red
+    weeklyGoalHours: 25,
+    careerTier: 'seguranca_publica_policial',
+    suggestedIntensity: 'alto_volume_questoes',
+    jevConfidence: 0.97,
+    subjects: [
+      { subject: 'Direito Penal', weight: 25 },
+      { subject: 'Processo Penal', weight: 25 },
+      { subject: 'Legislação Penal Especial', weight: 20 },
+      { subject: 'Direito Constitucional', weight: 15 },
+      { subject: 'Direito Administrativo', weight: 10 },
+      { subject: 'Medicina Legal & Criminologia', weight: 5 },
+    ],
+    verticalizedTopics: [
+      {
+        subject: 'Direito Penal',
+        topics: [
+          'Teoria do Crime: Fato Típico, Ilicitude e Culpabilidade',
+          'Crimes contra a Pessoa e o Patrimônio',
+          'Crimes contra a Dignidade Sexual e Administração Pública',
+        ],
+      },
+      {
+        subject: 'Legislação Penal Especial',
+        topics: [
+          'Lei de Drogas (Lei 11.343/06) e Procedimentos',
+          'Crimes Hediondos (Lei 8.072/90) e Execução da Pena',
+          'Organizações Criminosas (Lei 12.850/13) e Meios de Obtenção de Prova',
+          'Estatuto do Desarmamento e Lei Maria da Penha',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'auditor-fiscal',
+    name: 'Auditor Fiscal (Receita Federal / SEFAZ)',
+    area: 'Fiscal & Controle',
+    badge: 'Fiscal',
+    color: '#10B981', // Emerald
+    weeklyGoalHours: 30,
+    careerTier: 'fiscal_e_controle_elite',
+    suggestedIntensity: 'alta_complexidade',
+    jevConfidence: 0.99,
+    subjects: [
+      { subject: 'Direito Tributário', weight: 25 },
+      { subject: 'Contabilidade Geral & Avançada', weight: 25 },
+      { subject: 'Legislação Tributária & Aduaneira', weight: 15 },
+      { subject: 'Auditoria Fiscal', weight: 15 },
+      { subject: 'Direito Administrativo & Constitucional', weight: 10 },
+      { subject: 'Fluência em Dados & Raciocínio Lógico', weight: 10 },
+    ],
+    verticalizedTopics: [
+      {
+        subject: 'Direito Tributário',
+        topics: [
+          'Sistema Tributário Nacional e Competência Tributária',
+          'Limitações ao Poder de Tributar (Imunidades e Princípios)',
+          'Crédito Tributário: Constituição, Suspensão, Extinção e Exclusão',
+          'Obrigação Tributária e Responsabilidade Tributária Solidária/Subsidiária',
+        ],
+      },
+      {
+        subject: 'Contabilidade Geral & Avançada',
+        topics: [
+          'Estrutura Conceitual Básica dos Pronunciamentos Contábeis (CPC 00)',
+          'Balanço Patrimonial, DRE, DFC e DMPL',
+          'Depreciação, Amortização e Redução ao Valor Recuperável (Impairment)',
+        ],
+      },
+    ],
+  },
+];
 import { useEntitlements } from '@/hooks/useEntitlements';
 import { usePlanContext } from '@/contexts/PlanContext';
 import {
@@ -221,6 +434,29 @@ export default function PlanManager({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [activeTopicsPreview, setActiveTopicsPreview] = useState<{ subject: string; topics: string[] }[] | null>(null);
+  const [aiAnalysisMeta, setAiAnalysisMeta] = useState<{
+    careerTier?: string;
+    suggestedIntensity?: string;
+    jevConfidence?: number;
+  } | null>(null);
+
+  const applyTemplate = (tpl: ReadyMadeTemplate) => {
+    setSelectedTemplateId(tpl.id);
+    setName(tpl.name);
+    setColor(tpl.color);
+    setWeeklyGoalHours(tpl.weeklyGoalHours);
+    setSubjects([...tpl.subjects]);
+    setActiveTopicsPreview(tpl.verticalizedTopics);
+    setAiAnalysisMeta({
+      careerTier: tpl.careerTier,
+      suggestedIntensity: tpl.suggestedIntensity,
+      jevConfidence: tpl.jevConfidence,
+    });
+    setImportSuccess(`Template ${tpl.name} aplicado com sucesso!`);
+    setTimeout(() => setImportSuccess(null), 4000);
+  };
 
   // PDF Import
   const [importing, setImporting] = useState(false);
@@ -351,6 +587,13 @@ export default function PlanManager({
       }
       if (data.examDate && !examDate) {
         setExamDate(data.examDate);
+      }
+      if (data.careerTier || data.suggestedIntensity || data.jevConfidence) {
+        setAiAnalysisMeta({
+          careerTier: data.careerTier,
+          suggestedIntensity: data.suggestedIntensity,
+          jevConfidence: data.jevConfidence,
+        });
       }
 
       setImportSuccess(
@@ -535,6 +778,81 @@ export default function PlanManager({
             </div>
 
             <div className="space-y-5 p-6">
+              {/* Ready-made Templates Selector (Time-to-Value in 60s) */}
+              {!isEditing && (
+                <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/20 text-primary">
+                        <Sparkles className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-foreground">
+                          Templates Prontos em 1 Clique (Time-to-Value)
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground">
+                          Selecione sua carreira e comece a estudar em 30 segundos com pesos calibrados.
+                        </p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                      TypeSafe Jev
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+                    {READY_MADE_TEMPLATES.map((tpl) => {
+                      const isSelected = selectedTemplateId === tpl.id;
+                      return (
+                        <button
+                          key={tpl.id}
+                          type="button"
+                          onClick={() => applyTemplate(tpl)}
+                          className={`flex flex-col items-start rounded-xl border p-2.5 text-left transition-all ${
+                            isSelected
+                              ? 'border-primary bg-primary/20 shadow-md shadow-primary/10'
+                              : 'border-border/60 bg-muted/40 hover:border-primary/40 hover:bg-muted/70'
+                          }`}
+                        >
+                          <div className="mb-1.5 flex w-full items-center justify-between">
+                            <span
+                              className="h-2 w-2 rounded-full"
+                              style={{ backgroundColor: tpl.color }}
+                            />
+                            <span className="text-[10px] font-medium text-muted-foreground">
+                              {tpl.weeklyGoalHours}h/sem
+                            </span>
+                          </div>
+                          <span className="text-xs font-semibold leading-tight text-foreground line-clamp-1">
+                            {tpl.badge}
+                          </span>
+                          <span className="mt-0.5 text-[10px] text-muted-foreground line-clamp-1">
+                            {tpl.area}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* AI Calibration Badge if template applied or PDF parsed */}
+              {aiAnalysisMeta && (
+                <div className="flex flex-wrap items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-400">
+                  <Sparkle className="h-4 w-4 shrink-0 text-emerald-400" />
+                  <span>
+                    Calibração TypeSafe Jev Ativa:{' '}
+                    <strong>{aiAnalysisMeta.careerTier || 'Carreira Jurídica'}</strong> • Intensidade:{' '}
+                    <strong>{aiAnalysisMeta.suggestedIntensity || 'Alta Precisão'}</strong>
+                    {aiAnalysisMeta.jevConfidence && (
+                      <span className="ml-1 opacity-80">
+                        (Confiança: {Math.round(aiAnalysisMeta.jevConfidence * 100)}%)
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
+
               {/* Nome */}
               <div>
                 <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-300">
@@ -872,6 +1190,39 @@ export default function PlanManager({
                   existingSubjects={existingSubjectNames}
                   onAdd={addSubject}
                 />
+
+                {/* Verticalized Topics Preview (Se houver tópicos do template) */}
+                {activeTopicsPreview && activeTopicsPreview.length > 0 && (
+                  <div className="mt-4 rounded-xl border border-border/80 bg-muted/40 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                        <Layers className="h-3.5 w-3.5 text-primary" />
+                        <span>Edital Verticalizado (Tópicos Estruturados)</span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">
+                        Base para o Modo Execução
+                      </span>
+                    </div>
+
+                    <div className="space-y-2.5 max-h-[160px] overflow-y-auto pr-1">
+                      {activeTopicsPreview.map((item, idx) => (
+                        <div key={idx} className="rounded-lg border border-border/60 bg-card/60 p-2.5 text-xs">
+                          <span className="font-semibold text-primary block mb-1">
+                            {item.subject}
+                          </span>
+                          <ul className="space-y-1 pl-1">
+                            {item.topics.map((t, tIdx) => (
+                              <li key={tIdx} className="flex items-start gap-1.5 text-muted-foreground text-[11px]">
+                                <span className="mt-1 h-1 w-1 rounded-full bg-primary/70 shrink-0" />
+                                <span>{t}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

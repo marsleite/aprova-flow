@@ -39,7 +39,9 @@ import {
   Flame,
   Play,
   LayoutDashboard,
+  Share2,
 } from 'lucide-react';
+import ShareCardModal from '@/components/ShareCardModal';
 
 // New RDS Components
 import { KPICard, ChartCard, Button, Badge, EmptyState } from '@/components';
@@ -63,6 +65,7 @@ export default function DashboardPage() {
 
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
   const [planManagerOpen, setPlanManagerOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const [summary, setSummary] = useState<StudySummary>({ totalToday: 0, totalWeek: 0, totalMonth: 0 });
   const [subjectData, setSubjectData] = useState<SubjectHours[]>([]);
@@ -167,6 +170,15 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            onClick={() => setShareModalOpen(true)}
+            variant="secondary"
+            className="rounded-full px-4 text-xs font-semibold"
+          >
+            <Share2 className="mr-1.5 h-3.5 w-3.5" /> Compartilhar Meu Ritmo
+          </Button>
+
           <Button asChild variant="primary" className="rounded-full px-6">
             <a href="/engine">
               <Play className="mr-2 h-4 w-4" fill="currentColor" /> Iniciar
@@ -327,6 +339,16 @@ export default function DashboardPage() {
           refreshPlans();
           fetchData();
         }}
+      />
+
+      <ShareCardModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        userName={user.displayName || user.email?.split('@')[0] || 'Concurseiro(a)'}
+        planName={activePlan?.name}
+        weeklyHours={weeklyData.reduce((acc, d) => acc + d.hours, 0)}
+        streakDays={consistency?.currentStreak || 0}
+        accuracyPercent={avgAccuracy}
       />
     </div>
   );

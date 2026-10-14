@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { resolveBackendApiBaseUrl } from '@/lib/server/backendApi';
 
-const BOT_API_URL =
-  process.env.APROVAMIND_API_URL ||
-  process.env.NEXT_PUBLIC_APROVAMIND_API_URL ||
-  'http://localhost:8000';
+const BOT_API_URL = resolveBackendApiBaseUrl();
 
 export async function GET(req: NextRequest) {
   try {

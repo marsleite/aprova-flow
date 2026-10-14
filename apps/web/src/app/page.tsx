@@ -23,6 +23,9 @@ import {
   Send,
 } from 'lucide-react';
 import AprovaMindLogo from '@/components/brand/AprovaMindLogo';
+import { MultiAreaEditalShowcase } from '@/components/landing/MultiAreaEditalShowcase';
+import { OmnichannelFeatureShowcase } from '@/components/landing/OmnichannelFeatureShowcase';
+import { LandingFaq } from '@/components/landing/LandingFaq';
 
 export const metadata: Metadata = {
   title: 'AprovaMind | Cockpit Web e Tutor 24/7 no WhatsApp para Concursos',
@@ -172,7 +175,7 @@ export default function LandingPage() {
                     </div>
                     <div className="flex items-center gap-3 p-2.5 rounded-xl bg-primary/10 text-primary font-semibold text-sm border border-primary/20">
                       <Timer className="w-4 h-4" />
-                      <span>Estudar Agora</span>
+                      <span>Modo Execução (Engine)</span>
                     </div>
                     <div className="flex items-center gap-3 p-2.5 rounded-xl text-muted-foreground text-sm hover:text-foreground transition-colors">
                       <LayoutDashboard className="w-4 h-4" />
@@ -212,16 +215,19 @@ export default function LandingPage() {
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-xl border border-border bg-muted/10 flex items-center justify-between">
+                      <div className="p-4 rounded-xl border border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
                             <Brain className="w-5 h-5" />
                           </div>
                           <div>
-                            <p className="text-xs font-semibold text-foreground">Radar Pedagógico Ativo</p>
-                            <p className="text-[11px] text-muted-foreground">Reforço prioritário indicado em Direito Tributário (Imunidades).</p>
+                            <p className="text-xs font-semibold text-foreground">Sua retenção em Contratos Administrativos caiu 12%</p>
+                            <p className="text-[11px] text-muted-foreground">Reforço prioritário indicado no próximo bloco de execução.</p>
                           </div>
                         </div>
+                        <span className="text-[10px] text-zinc-400 bg-muted/60 border border-border px-2.5 py-1 rounded-full font-mono shrink-0">
+                          ⚡ Alimentado em 5s (Questões Feitas vs. Acertos) + Simulados WhatsApp
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -402,56 +408,27 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Section: PARSE DE EDITAL PDF ── */}
+        {/* ── Section: PARSE DE EDITAL PDF & DEMONSTRADOR MULTI-ÁREA ── */}
         <section id="parse-edital" className="border-b border-border py-28 bg-muted/5">
           <div className="max-w-7xl mx-auto px-6">
             <div className="max-w-3xl mx-auto text-center mb-16">
               <span className="text-xs font-semibold tracking-widest uppercase text-primary border border-primary/20 bg-primary/10 px-4 py-1.5 rounded-full mb-4 inline-block">
-                Inteligência de Edital
+                Inteligência de Edital Verticalizado
               </span>
               <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-6">
-                Suba o PDF do edital.<br />
-                O plano se monta sozinho em 30 segundos.
+                Importe o edital. O plano se monta sozinho em 30 segundos.
               </h2>
               <p className="text-muted-foreground font-light text-lg leading-relaxed">
-                Nossa IA lê o anexo de conteúdo programático, extrai matérias, estima relevância e sugere a meta semanal com base no tempo até o dia da prova.
+                Nossa IA lê o anexo de conteúdo programático, extrai matérias, estima pesos por relevância e sugere a meta semanal com base no tempo até a prova. Selecione sua área abaixo para testar:
               </p>
             </div>
 
-            <div className="max-w-2xl mx-auto border border-border bg-card rounded-2xl overflow-hidden shadow-xl">
-              <div className="p-6 border-b border-border bg-muted/20 flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-primary mb-1">Exemplo de Extração Automática</p>
-                  <h3 className="text-lg font-bold text-foreground">Magistratura Estadual — Tribunal de Justiça</h3>
-                  <p className="text-xs text-muted-foreground mt-1">14 matérias mapeadas · 120 tópicos organizados</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono">Meta Recomendada</p>
-                  <p className="text-2xl font-bold text-primary">24h/sem</p>
-                </div>
-              </div>
-              <div className="p-6 space-y-3">
-                {[
-                  { subject: 'Direito Constitucional', weight: 18 },
-                  { subject: 'Direito Civil', weight: 16 },
-                  { subject: 'Direito Processual Civil', weight: 14 },
-                  { subject: 'Direito Penal', weight: 12 },
-                  { subject: 'Direito Administrativo', weight: 10 },
-                ].map((s) => (
-                  <div key={s.subject}>
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-medium text-foreground">{s.subject}</span>
-                      <span className="text-primary font-semibold">{s.weight}%</span>
-                    </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: `${s.weight}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <MultiAreaEditalShowcase />
           </div>
         </section>
+
+        {/* ── Section: O DIFERENCIAL OMNICANAL (WHATSAPP + WEB) & FECHAMENTO DO DIA ── */}
+        <OmnichannelFeatureShowcase />
 
         {/* ── Section: PRICING (Planos Transparentes) ── */}
         <section id="precos" className="border-b border-border py-28 bg-background">
@@ -573,6 +550,9 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* ── Section: FAQ ESTRATÉGICO (OBJEÇÕES) ── */}
+        <LandingFaq />
 
         {/* ── Bottom CTA ── */}
         <section className="py-24 bg-muted/5 border-b border-border text-center">
