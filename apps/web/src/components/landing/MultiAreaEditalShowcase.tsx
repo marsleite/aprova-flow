@@ -37,6 +37,132 @@ interface EditalArea {
 
 const EDITAL_AREAS: EditalArea[] = [
   {
+    id: 'tribunais',
+    tabLabel: 'Tribunais (TRF/TRT)',
+    title: 'Analista Judiciário — TRF / TRT',
+    subtitle: 'Tribunais Federais e do Trabalho — Velocidade na resolução, literalidade da lei e alta retenção.',
+    badge: 'Média-Alta Complexidade (TypeSafe Jev)',
+    recommendedHours: 22,
+    complexity: 'Média-Alta Complexidade',
+    icon: Landmark,
+    subjects: [
+      {
+        name: 'Língua Portuguesa (FGV / FCC)',
+        weight: 20,
+        topics: ['Interpretação e Tipologia Textual Avançada', 'Sintaxe de Regência, Concordância e Crase', 'Reescrita de Frases e Equivalência Semântica'],
+      },
+      {
+        name: 'Direito Constitucional',
+        weight: 18,
+        topics: ['Organização e Competências do Poder Judiciário', 'Funções Essenciais à Justiça', 'Direitos e Garantias Fundamentais (Art. 5º)'],
+      },
+      {
+        name: 'Direito Administrativo',
+        weight: 18,
+        topics: ['Regime Jurídico Único (Lei 8.112/90)', 'Atos e Poderes Administrativos', 'Nova Lei de Licitações (Lei 14.133/21)'],
+      },
+      {
+        name: 'Direito Processual Civil',
+        weight: 16,
+        topics: ['Prazos Processuais e Atos de Comunicação', 'Procedimento Comum e Tutelas de Urgência', 'Recursos e Precedentes Qualificados'],
+      },
+      {
+        name: 'Raciocínio Lógico-Matemático',
+        weight: 14,
+        topics: ['Lógica Proposicional e Tabela Verdade', 'Equivalências Lógicas e Leis de De Morgan', 'Problemas Aritméticos e Análise Combinatória'],
+      },
+      {
+        name: 'Noções de Informática & TI',
+        weight: 14,
+        topics: ['Segurança da Informação e Criptografia', 'Redes de Computadores e Nuvem', 'Ferramentas de Produtividade e Navegação'],
+      },
+    ],
+  },
+  {
+    id: 'policial',
+    tabLabel: 'Carreira Policial',
+    title: 'Agente / Escrivão / Delegado (PF e PC)',
+    subtitle: 'Foco em Direito Penal, Processual Penal, Informática Avançada e Língua Portuguesa.',
+    badge: 'Alta Complexidade (Operações)',
+    recommendedHours: 26,
+    complexity: 'Alta Complexidade',
+    icon: ShieldAlert,
+    subjects: [
+      {
+        name: 'Língua Portuguesa (Cebraspe)',
+        weight: 20,
+        topics: ['Interpretação e Tipologia Textual Cebraspe', 'Reescrita e Coesão Textual', 'Ortografia, Crase e Pontuação'],
+      },
+      {
+        name: 'Informática & Tecnologia da Informação',
+        weight: 20,
+        topics: ['Redes e Arquitetura TCP/IP', 'Segurança da Informação e Malware', 'Banco de Dados, Big Data e Python/R'],
+      },
+      {
+        name: 'Direito Penal & Processual Penal',
+        weight: 18,
+        topics: ['Teoria Geral do Crime e Tipicidade', 'Prisões Cautelares e Inquérito Policial', 'Cadeia de Custódia e Meios de Obtenção de Prova'],
+      },
+      {
+        name: 'Legislação Penal Especial',
+        weight: 16,
+        topics: ['Organizações Criminosas (Lei 12.850/13)', 'Lei de Drogas (Lei 11.343/06)', 'Abuso de Autoridade e Armas'],
+      },
+      {
+        name: 'Direito Constitucional & Humanos',
+        weight: 14,
+        topics: ['Segurança Pública (Art. 144 CF/88)', 'Poder de Polícia e Limites da Discricionariedade', 'Inviolabilidade Domiciliar e Tratados Internacionais'],
+      },
+      {
+        name: 'Raciocínio Lógico & Estatística',
+        weight: 12,
+        topics: ['Proposições, Tautologias e Negações', 'Probabilidade e Distribuição Amostral'],
+      },
+    ],
+  },
+  {
+    id: 'fiscal',
+    tabLabel: 'Fiscal & Controle',
+    title: 'Auditor Fiscal da Receita / SEFAZ / TCU',
+    subtitle: 'Domínio de legislação tributária, contabilidade analítica, TI e administração financeira.',
+    badge: 'Alta Complexidade (Finanças & Controle)',
+    recommendedHours: 30,
+    complexity: 'Alta Complexidade',
+    icon: Coins,
+    subjects: [
+      {
+        name: 'Direito Tributário & Legislação',
+        weight: 20,
+        topics: ['Código Tributário Nacional (CTN)', 'Lançamento e Suspensão do Crédito Tributário', 'Impostos Estaduais (ICMS) e Federais (IR, PIS/Cofins)'],
+      },
+      {
+        name: 'Contabilidade Geral & Avançada',
+        weight: 20,
+        topics: ['Pronunciamentos Técnicos CPCs aplicados', 'Balanço Patrimonial, DRE, DFC e DVA', 'Consolidação de Balanços e Avaliação de Investimentos'],
+      },
+      {
+        name: 'Auditoria Fiscal & Digital',
+        weight: 16,
+        topics: ['Procedimentos de Auditoria e Testes Substantivos', 'Amostragem em Auditoria e Risco de Distorção Relevante', 'SPED Fiscal e Escrituração Contábil Digital (ECD/ECF)'],
+      },
+      {
+        name: 'Tecnologia da Informação & Python/SQL',
+        weight: 16,
+        topics: ['Consultas SQL e Álgebra Relacional', 'Data Warehousing e Business Intelligence', 'Lógica de Programação e Análise de Dados'],
+      },
+      {
+        name: 'Administração Financeira e Orçamentária (AFO)',
+        weight: 14,
+        topics: ['Lei de Responsabilidade Fiscal (LRF)', 'Orçamento Público e Lei 4.320/64', 'Despesas, Receitas e Restos a Pagar'],
+      },
+      {
+        name: 'Língua Portuguesa (FGV)',
+        weight: 14,
+        topics: ['Interpretação Semântica e Implícitos FGV', 'Reescrita e Regência Nominal/Verbal', 'Coesão Referencial e Conectivos'],
+      },
+    ],
+  },
+  {
     id: 'juridico',
     tabLabel: 'Jurídico Elite',
     title: 'PGE-SP / Magistratura Estadual',
@@ -83,136 +209,10 @@ const EDITAL_AREAS: EditalArea[] = [
       },
     ],
   },
-  {
-    id: 'tribunais',
-    tabLabel: 'Tribunais (TRF/TRT)',
-    title: 'Analista Judiciário — Área Judiciária',
-    subtitle: 'Tribunais Regionais Federais e do Trabalho — Velocidade na resolução e literalidade da lei.',
-    badge: 'Média-Alta Complexidade',
-    recommendedHours: 22,
-    complexity: 'Média-Alta Complexidade',
-    icon: Landmark,
-    subjects: [
-      {
-        name: 'Direito Processual Civil',
-        weight: 22,
-        topics: ['Prazos Processuais e Atos de Comunicação', 'Procedimento Comum e Fases Instrutórias', 'Juizados Especiais Federais (Lei 10.259)'],
-      },
-      {
-        name: 'Direito Constitucional',
-        weight: 20,
-        topics: ['Organização e Competências do Poder Judiciário', 'Funções Essenciais à Justiça', 'Remédios Constitucionais'],
-      },
-      {
-        name: 'Direito Administrativo',
-        weight: 18,
-        topics: ['Regime Jurídico dos Servidores Federais (Lei 8.112/90)', 'Atos Administrativos e Requisitos de Validade', 'Poderes Administrativos'],
-      },
-      {
-        name: 'Língua Portuguesa & Discursiva',
-        weight: 16,
-        topics: ['Interpretação e Tipologia Textual FGV/FCC', 'Sintaxe de Regência, Concordância e Crase', 'Coesão Referencial e Sequencial'],
-      },
-      {
-        name: 'Direito Previdenciário ou do Trabalho',
-        weight: 14,
-        topics: ['Benefícios em Espécie da Previdência Social', 'Contrato Individual de Trabalho e Verbas Rescisórias'],
-      },
-      {
-        name: 'Raciocínio Lógico-Matemático',
-        weight: 10,
-        topics: ['Lógica Proposicional e Conectivos', 'Equivalências Lógicas e Negação de Proposições'],
-      },
-    ],
-  },
-  {
-    id: 'policial',
-    tabLabel: 'Carreira Policial',
-    title: 'Delegado de Polícia Civil / PF',
-    subtitle: 'Liderança de inquérito, medidas cautelares invasivas e tipificação penal estrita.',
-    badge: 'Alta Complexidade (Operações)',
-    recommendedHours: 26,
-    complexity: 'Alta Complexidade',
-    icon: ShieldAlert,
-    subjects: [
-      {
-        name: 'Direito Penal',
-        weight: 22,
-        topics: ['Teoria Geral do Crime (Fato Típico, Ilicitude e Culpabilidade)', 'Crimes contra a Vida e contra o Patrimônio', 'Lavagem de Capitais (Lei 9.613/98)'],
-      },
-      {
-        name: 'Direito Processual Penal',
-        weight: 22,
-        topics: ['Inquérito Policial e Papel da Autoridade Policial (Lei 12.830/13)', 'Prisões Cautelares (Preventiva, Temporária e em Flagrante)', 'Interceptação Telefônica e Meios Extraordinários de Obtenção de Prova'],
-      },
-      {
-        name: 'Legislação Penal Especial',
-        weight: 18,
-        topics: ['Organizações Criminosas (Lei 12.850/13)', 'Lei de Drogas (Lei 11.343/06)', 'Estatuto do Desarmamento e Abuso de Autoridade (Lei 13.869/19)'],
-      },
-      {
-        name: 'Direito Constitucional & Humanos',
-        weight: 16,
-        topics: ['Segurança Pública (Art. 144 da CF/88)', 'Pacto de San José da Costa Rica e Jurisprudência da Corte IDH', 'Inviolabilidade de Domicílio e Busca e Apreensão'],
-      },
-      {
-        name: 'Direito Administrativo',
-        weight: 12,
-        topics: ['Poder de Polícia e Limites da Discricionariedade', 'Regime Disciplinar Policial e Responsabilidade Administrativa'],
-      },
-      {
-        name: 'Criminologia & Medicina Legal',
-        weight: 10,
-        topics: ['Tanatologia e Lesonologia Forense', 'Escolas Criminológicas e Vitimologia'],
-      },
-    ],
-  },
-  {
-    id: 'fiscal',
-    tabLabel: 'Fiscal & Controle',
-    title: 'Auditor Fiscal da Receita / SEFAZ',
-    subtitle: 'Domínio de legislação tributária, contabilidade societária analítica e auditoria de dados.',
-    badge: 'Alta Complexidade (Finanças)',
-    recommendedHours: 30,
-    complexity: 'Alta Complexidade',
-    icon: Coins,
-    subjects: [
-      {
-        name: 'Direito Tributário & Legislação',
-        weight: 22,
-        topics: ['Código Tributário Nacional (CTN)', 'Lançamento e Suspensão do Crédito Tributário', 'Impostos Estaduais (ICMS, IPVA, ITCMD) ou Federais (IR, PIS/Cofins)'],
-      },
-      {
-        name: 'Contabilidade Geral & Avançada',
-        weight: 20,
-        topics: ['Pronunciamentos Técnicos CPCs aplicados', 'Balanço Patrimonial, DRE, DFC e DVA', 'Consolidação de Balanços e Avaliação de Investimentos'],
-      },
-      {
-        name: 'Auditoria Fiscal & Digital',
-        weight: 16,
-        topics: ['Procedimentos de Auditoria e Testes Substantivos', 'Amostragem em Auditoria e Risco de Distorção Relevante', 'SPED Fiscal e Escrituração Contábil Digital (ECD/ECF)'],
-      },
-      {
-        name: 'Tecnologia da Informação & SQL',
-        weight: 16,
-        topics: ['Consultas SQL e Álgebra Relacional', 'Modelagem de Dados e Data Warehousing', 'Lógica de Programação e Python para Análise de Dados'],
-      },
-      {
-        name: 'Direito Constitucional & Administrativo',
-        weight: 14,
-        topics: ['Sistema Tributário Nacional e Repartição de Receitas', 'Controle da Administração Pública e Tribunal de Contas'],
-      },
-      {
-        name: 'Raciocínio Lógico & Estatística',
-        weight: 12,
-        topics: ['Estatística Inferencial e Testes de Hipótese', 'Matemática Financeira e VPL/TIR'],
-      },
-    ],
-  },
 ];
 
 export function MultiAreaEditalShowcase() {
-  const [activeAreaId, setActiveAreaId] = useState<string>('juridico');
+  const [activeAreaId, setActiveAreaId] = useState<string>('tribunais');
   const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
 
   const activeArea = EDITAL_AREAS.find((a) => a.id === activeAreaId) || EDITAL_AREAS[0];

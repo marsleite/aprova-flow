@@ -582,7 +582,7 @@ export default function ResumosDiariosPage() {
                             }`}
                           >
                             <AlertTriangle className="h-3.5 w-3.5" />
-                            <span>Lei Seca & Pegadinhas</span>
+                            <span>Regras, Lei Seca & Pegadinhas</span>
                           </button>
 
                           {digest.video_recommendations && digest.video_recommendations.length > 0 && (
@@ -825,12 +825,12 @@ export default function ResumosDiariosPage() {
                               </div>
                             )}
 
-                            {/* Lei Seca */}
+                            {/* Fundamentos, Regras & Lei Seca */}
                             {digest.law_articles && digest.law_articles.length > 0 && (
                               <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-4">
                                 <div className="flex items-center gap-2 text-sm font-semibold text-sky-400">
                                   <Scale className="h-4 w-4" />
-                                  <span>Dispositivos de Lei Seca para Leitura</span>
+                                  <span>Fundamentos, Regras & Lei Seca</span>
                                 </div>
                                 <div className="mt-2.5 flex flex-wrap gap-2">
                                   {digest.law_articles.map((art, idx) => {

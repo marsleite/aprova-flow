@@ -32,7 +32,7 @@ export function OmnichannelFeatureShowcase() {
             Exclusivo AprovaMind
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
-            O único ecossistema omnicanal com IA e RAG Jurídico.
+            O único ecossistema omnicanal com IA e Base Oficial de Concursos.
           </h2>
           <p className="text-lg text-muted-foreground font-light leading-relaxed">
             Seu estudo não para quando você levanta da mesa. Do áudio no WhatsApp ao cockpit no computador, todas as suas dúvidas viram um caderno de revisão inteligente.
@@ -77,11 +77,11 @@ export function OmnichannelFeatureShowcase() {
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-foreground">Áudio com Whisper & Correção Fonética</h3>
-                    <p className="text-xs text-muted-foreground">Transcrição instantânea calibrada para o Direito</p>
+                    <p className="text-xs text-muted-foreground">Transcrição instantânea calibrada para Concursos</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Envie áudios na rua ou no trânsito de até 60 segundos. Nossa IA corrige termos jurídicos clássicos (*"dolo eventual"*, *"antijuridicidade"*, *"excludente de ilicitude"*) e responde de imediato com precisão técnica.
+                  Envie áudios na rua ou no trânsito de até 60 segundos. Nossa IA reconhece termos técnicos de todas as matérias (de 'oração subordinada' e 'tautologia' a 'dolo eventual' e 'restos a pagar') e responde na hora.
                 </p>
               </div>
 
@@ -91,12 +91,12 @@ export function OmnichannelFeatureShowcase() {
                     <Scale className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-foreground">RAG em Legislação & Jurisprudência</h3>
-                    <p className="text-xs text-muted-foreground">Base oficial indexada com busca vetorial</p>
+                    <h3 className="text-base font-bold text-foreground">RAG em Legislação + Professor de Bancas</h3>
+                    <p className="text-xs text-muted-foreground">Base oficial indexada com resolução passo a passo</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Busca semântica no banco de dados vetorial em milhares de artigos da CF/88, Código Civil, Código Penal, Leis Especiais e Súmulas Vinculantes do STF e STJ antes de formular a resposta.
+                  Combina busca vetorial em milhares de artigos da CF/88, códigos e súmulas do STF/STJ com resolução passo a passo de Português, Raciocínio Lógico, Informática e Contabilidade.
                 </p>
               </div>
 
@@ -149,14 +149,14 @@ export function OmnichannelFeatureShowcase() {
 
                 {/* Response with RAG */}
                 <div className="bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-2xl rounded-tl-sm p-3.5 space-y-2 leading-relaxed">
-                  <p>
-                    ⚖️ *Dolo Eventual vs. Culpa Consciente (Art. 18 do Código Penal)*
+                  <p className="font-semibold text-zinc-100">
+                    ⚖️ Dolo Eventual vs. Culpa Consciente (Art. 18 do Código Penal)
                   </p>
                   <p className="text-zinc-400">
-                    Na *culpa consciente*, o agente prevê o resultado, mas confia sinceramente em suas habilidades para evitá-lo. Já no *dolo eventual*, o agente assume o risco de produzi-lo (*"dane-se se acontecer"*).
+                    Na <strong className="text-zinc-200 font-medium">culpa consciente</strong>, o agente prevê o resultado, mas confia sinceramente em suas habilidades para evitá-lo. Já no <strong className="text-zinc-200 font-medium">dolo eventual</strong>, o agente assume o risco de produzi-lo (<strong className="text-white font-semibold">"dane-se se acontecer"</strong>).
                   </p>
                   <div className="p-2 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300">
-                    🔍 *Dispositivo RAG:* Art. 18, I, in fine, CP + Súmula 246 do STJ.
+                    🔍 <strong className="text-emerald-400 font-semibold">Dispositivo RAG:</strong> Art. 18, I, in fine, CP + Súmula 246 do STJ.
                   </div>
                   <p className="text-emerald-400 text-[10px] font-semibold">
                     ✅ Registrado no seu Caderno de Fechamento do Dia!

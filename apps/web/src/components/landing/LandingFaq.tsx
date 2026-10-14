@@ -27,7 +27,7 @@ const FAQS: FaqItem[] = [
   {
     question: 'O que é o Multi-Edital e como ele me ajuda a conciliar mais de uma prova?',
     answer:
-      'Se você estuda para dois ou mais concursos (por exemplo, Magistratura TJ e Procuradoria PGE), o AprovaMind cruza os conteúdos programáticos, identifica matérias comuns e aloca suas horas para maximizar o aproveitamento compartilhado sem sobrecarregar sua rotina.',
+      'Se você estuda para dois ou mais concursos (por exemplo, Analista de Tribunais e Polícia Federal, ou TJ e PGE), o AprovaMind cruza os conteúdos programáticos, identifica matérias comuns e aloca suas horas para maximizar o aproveitamento compartilhado sem sobrecarregar sua rotina.',
   },
   {
     question: 'Posso cancelar a assinatura a qualquer momento?',

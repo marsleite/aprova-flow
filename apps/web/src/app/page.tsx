@@ -129,7 +129,7 @@ export default function LandingPage() {
               </h1>
 
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed mb-10 font-light">
-                O único ecossistema que une <strong>tracking fiel de horas líquidas</strong> e planejamento de edital na Web com um <strong>Tutor de Concursos 24/7 no seu WhatsApp</strong> para tirar dúvidas de jurisprudência (STF/STJ) e enviar simulados diários no almoço.
+                O único ecossistema que une <strong>tracking fiel de horas líquidas</strong> e planejamento de edital na Web com um <strong>Tutor de Concursos 24/7 no seu WhatsApp</strong> para dominar todas as matérias do seu edital (Direito, Português, Raciocínio Lógico, TI e Específicas), tirar dúvidas por áudio e treinar com simulados diários no almoço.
               </p>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -193,7 +193,7 @@ export default function LandingPage() {
                       <div className="flex items-center justify-between mb-6">
                         <div>
                           <p className="text-xs font-medium uppercase tracking-widest text-primary">Contexto Ativo</p>
-                          <h3 className="text-2xl font-bold text-foreground">Magistratura Estadual — TJSP</h3>
+                          <h3 className="text-2xl font-bold text-foreground">Analista Judiciário & Policial — Edital Ativo</h3>
                         </div>
                         <span className="px-3 py-1 text-xs font-semibold rounded-full bg-secondary text-foreground border border-border">
                           Meta: 24h/semana
@@ -215,19 +215,19 @@ export default function LandingPage() {
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-xl border border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+                      <div className="p-4 rounded-xl border border-border bg-muted/10">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400 shrink-0 mt-0.5">
                             <Brain className="w-5 h-5" />
                           </div>
-                          <div>
+                          <div className="flex flex-col max-w-xl">
                             <p className="text-xs font-semibold text-foreground">Sua retenção em Contratos Administrativos caiu 12%</p>
                             <p className="text-[11px] text-muted-foreground">Reforço prioritário indicado no próximo bloco de execução.</p>
+                            <span className="mt-2 inline-flex w-fit text-[10px] text-zinc-400 bg-muted/60 border border-border px-2.5 py-1 rounded-full font-mono">
+                              ⚡ Alimentado em 5s (Questões Feitas vs. Acertos) + Simulados WhatsApp
+                            </span>
                           </div>
                         </div>
-                        <span className="text-[10px] text-zinc-400 bg-muted/60 border border-border px-2.5 py-1 rounded-full font-mono shrink-0">
-                          ⚡ Alimentado em 5s (Questões Feitas vs. Acertos) + Simulados WhatsApp
-                        </span>
                       </div>
                     </div>
                   </div>
@@ -254,13 +254,13 @@ export default function LandingPage() {
 
                 <div className="py-3 space-y-2.5 text-[11px]">
                   <div className="bg-zinc-900 border border-border/40 text-muted-foreground rounded-2xl rounded-tl-sm p-3 leading-relaxed">
-                    ☀️ *Pílula do Dia:* O STF fixou a tese do Tema 1.046 confirmando a prevalência do negociado sobre o legislado, resguardados direitos absolutamente indisponíveis.
+                    ☀️ <strong className="text-zinc-200 font-semibold">Pílula do Dia (08h):</strong> O STF fixou a tese do Tema 1.046 confirmando a prevalência do negociado sobre o legislado, resguardados direitos absolutamente indisponíveis.
                   </div>
                   <div className="bg-emerald-950/60 border border-emerald-500/30 text-emerald-200 rounded-2xl rounded-tr-sm p-3 ml-auto max-w-[85%] leading-relaxed">
-                    🎯 *Simulado de Almoço:* Respondi a letra <strong>B</strong>!
+                    🎯 <strong className="text-emerald-300 font-semibold">Simulado de Almoço:</strong> Respondi a letra <strong>B</strong>!
                   </div>
                   <div className="bg-zinc-900 border border-border/40 text-foreground rounded-2xl rounded-tl-sm p-3 leading-relaxed">
-                    🎉 *Parabéns! Resposta Correta (B).* 🚀<br />
+                    🎉 <strong className="text-emerald-400 font-semibold">Parabéns! Resposta Correta (B).</strong> 🚀<br />
                     Pontuou +1 acerto em Direito do Trabalho no seu Dashboard Web.
                   </div>
                 </div>
@@ -281,7 +281,7 @@ export default function LandingPage() {
                 O estudo que acompanha sua rotina real no WhatsApp.
               </h2>
               <p className="text-lg text-muted-foreground font-light leading-relaxed">
-                Você não estuda apenas quando está sentado na frente do computador. O AprovaMind coloca um tutor especializado em bancas e jurisprudência no seu bolso, sem precisar baixar nenhum aplicativo novo.
+                Você não estuda apenas quando está sentado na frente do computador. O AprovaMind coloca um tutor especialista na sua banca (FGV, Cebraspe, FCC) e em todas as matérias do seu edital direto no seu bolso, sem precisar baixar nenhum aplicativo novo.
               </p>
             </div>
 
@@ -308,9 +308,9 @@ export default function LandingPage() {
                   <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <Brain className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground mb-2">Tira-Dúvidas Jurídicas</h3>
+                  <h3 className="text-lg font-bold text-foreground mb-2">Tira-Dúvidas de Qualquer Matéria</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Ficou em dúvida entre duas alternativas ou não entendeu um artigo? Pergunte por áudio ou texto e receba explicações didáticas com citações de julgados do STF e STJ.
+                    Travou em uma questão de Direito, Português, Raciocínio Lógico, Informática ou Contabilidade? Pergunte por áudio ou texto e receba a explicação passo a passo com foco na sua banca.
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-border/50 text-[11px] font-semibold text-emerald-400">
@@ -326,11 +326,11 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-lg font-bold text-foreground mb-2">Pílulas Matinais</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Comece o dia com 1 insight cirúrgico da sua carreira: prazos processuais críticos, súmulas vinculantes recentes e teses repetitivas que mais caem em prova.
+                    Comece o dia com 1 insight cirúrgico da sua carreira: regras de Português da FGV, bizus de Raciocínio Lógico, artigos de lei seca e jurisprudência que mais caem em prova.
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-border/50 text-[11px] font-semibold text-emerald-400">
-                  Todas as manhãs às 07h
+                  Todas as manhãs às 08h
                 </div>
               </div>
 
@@ -473,7 +473,7 @@ export default function LandingPage() {
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span><strong>5 dúvidas jurídicas/mês</strong> com o Tutor WhatsApp</span>
+                      <span><strong>5 dúvidas/mês</strong> com o Tutor IA no WhatsApp (qualquer matéria)</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -505,10 +505,10 @@ export default function LandingPage() {
                       Completo
                     </span>
                   </div>
-                  <div className="mb-6 flex items-baseline gap-2">
-                    <span className="text-4xl font-extrabold text-foreground">R$ 29,90</span>
-                    <span className="text-xs text-muted-foreground font-medium">/mês no plano anual</span>
-                    <span className="text-[11px] text-muted-foreground">(ou R$ 34,90 no mensal)</span>
+                  <div className="mb-6 flex flex-wrap items-baseline gap-2">
+                    <span className="text-4xl font-extrabold text-foreground whitespace-nowrap">R$ 29,90</span>
+                    <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">/mês no plano anual</span>
+                    <span className="text-[11px] text-muted-foreground whitespace-nowrap">(ou R$ 34,90 no mensal)</span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-6">
                     Acesso total e irrestrito ao Cockpit Web e ao Tutor diário no WhatsApp.
@@ -516,7 +516,7 @@ export default function LandingPage() {
                   <ul className="space-y-3 text-xs text-muted-foreground mb-8">
                     <li className="flex items-center gap-2 font-medium text-foreground">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span><strong>200 dúvidas jurídicas/mês</strong> com IA e STF/STJ no WhatsApp</span>
+                      <span><strong>200 dúvidas/mês</strong> no Tutor WhatsApp (Direito, Português, RLM, TI e Específicas)</span>
                     </li>
                     <li className="flex items-center gap-2 font-medium text-foreground">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -524,7 +524,7 @@ export default function LandingPage() {
                     </li>
                     <li className="flex items-center gap-2 font-medium text-foreground">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span><strong>Pílulas matinais diárias</strong> às 07h no WhatsApp</span>
+                      <span><strong>Pílulas matinais diárias</strong> às 08h no WhatsApp</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0" />

@@ -26,9 +26,9 @@ interface ChatMessage {
 }
 
 const QUICK_PROMPTS = [
-  'O que é excludente de ilicitude e quais são as espécies?',
-  'Quais são as principais pegadinhas da banca FGV em Direito Constitucional?',
-  'Com base no meu edital ativo, o que devo priorizar nos estudos hoje?',
+  'Qual a regra prática de crase antes de pronomes na banca FGV?',
+  'Como resolver equivalência da condicional (P -> Q) em Raciocínio Lógico?',
+  'Quais são as principais pegadinhas da banca em Direito Administrativo?',
   'Gere um simulado rápido de 2 questões estilo Certo/Errado com gabarito fundamentado.',
 ];
 
@@ -135,7 +135,7 @@ export default function MentoringPage() {
       setMessages([
         {
           role: 'assistant',
-          content: `Olá, ${userName}! Sou seu Mentor IA no AprovaMind. 🎯\n\nTodas as dúvidas que você me enviar aqui ou no WhatsApp (+55 71 98135-6297) ficam unificadas neste painel. À meia-noite, também consolido seu "Fechamento do Dia" com flashcards e alertas de banca.\n\nEm que matéria ou conceito jurídico posso te apoiar agora?`,
+          content: `Olá, ${userName}! Sou seu Mentor IA no AprovaMind. 🎯\n\nTodas as dúvidas que você me enviar aqui ou no WhatsApp (+55 71 98135-6297) ficam unificadas neste painel. À meia-noite, também consolido seu "Fechamento do Dia" com flashcards e alertas de banca.\n\nEm qual matéria do seu edital posso te apoiar agora? (Direito, Português, RLM, Informática, Contabilidade ou AFO)`,
           channel: 'web',
         },
       ]);
@@ -372,7 +372,7 @@ export default function MentoringPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Digite sua dúvida de edital ou lei seca..."
+              placeholder="Digite sua dúvida de edital ou matéria (Direito, Português, RLM, TI...)..."
               disabled={loading}
               className="flex-1 rounded-xl border border-border bg-muted/40 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all disabled:opacity-50"
             />

@@ -173,7 +173,7 @@ export default function WhatsAppTutorCard({
                 <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                 Pílula Matinal (08h)
               </span>
-              <p className="text-muted-foreground text-[11px]">Áudios com informativos recentes STF/STJ da sua carreira.</p>
+              <p className="text-muted-foreground text-[11px]">Áudios com bizus, regras da sua banca e jurisprudência.</p>
             </div>
             <div className="p-2.5 rounded-lg bg-card/60 border border-border/50 text-xs">
               <span className="font-semibold text-foreground flex items-center gap-1.5 mb-1">
@@ -187,7 +187,7 @@ export default function WhatsAppTutorCard({
                 <MessageSquare className="h-3.5 w-3.5 text-emerald-400" />
                 Tira-Dúvidas 24/7
               </span>
-              <p className="text-muted-foreground text-[11px]">Mande texto ou áudio com dúvidas da lei seca.</p>
+              <p className="text-muted-foreground text-[11px]">Mande texto ou áudio com dúvidas de qualquer matéria.</p>
             </div>
           </div>
         </div>

@@ -178,7 +178,7 @@ export default function WhatsAppPairingModal({
                   WhatsApp Conectado com Sucesso! 🎉
                 </h3>
                 <p className="mt-1.5 text-xs text-muted-foreground max-w-sm mx-auto">
-                  Seu tutor de IA agora está ativo no número <span className="font-mono text-emerald-400 font-semibold">{phone || 'cadastrado'}</span>. Você já pode enviar dúvidas de lei seca ou receber seus simulados diários.
+                  Seu tutor de IA agora está ativo no número <span className="font-mono text-emerald-400 font-semibold">{phone || 'cadastrado'}</span>. Você já pode enviar dúvidas de qualquer matéria ou receber seus simulados diários.
                 </p>
               </div>
 
