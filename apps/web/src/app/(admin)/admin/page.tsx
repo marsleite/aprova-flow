@@ -98,10 +98,10 @@ export default function AdminOverviewPage() {
   };
 
   const services = data?.services || [
-    { name: 'Web Next.js 16', url: 'https://aprovamind.com.br', status: 'healthy', latencyMs: 12 },
+    { name: 'Web (Next.js 16)', url: 'https://aprovamind.com.br', status: 'healthy', latencyMs: 12 },
     { name: 'Go Core API', url: 'https://core.aprovamind.com.br', status: 'healthy', latencyMs: 45 },
-    { name: 'Python Engine', url: 'https://engine.aprovamind.com.br', status: 'healthy', latencyMs: 78 },
-    { name: 'Evolution WhatsApp', url: 'https://whats.aprovamind.com.br', status: 'healthy', latencyMs: 120 },
+    { name: 'Supabase DB & RAG', url: 'https://supabase.aprovamind.com.br', status: 'healthy', latencyMs: 18 },
+    { name: 'Evolution WhatsApp', url: 'https://whats.aprovamind.com.br', status: 'healthy', latencyMs: 80 },
   ];
 
   const history = data?.registrationHistory || [];

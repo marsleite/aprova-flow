@@ -100,14 +100,14 @@ export default function AdminAiObservatoryPage() {
   }, []);
 
   const summary = data?.summary || {
-    totalTokensMonth: 4106100,
-    totalCostUsdMonth: 1.72,
-    totalCostBrlMonth: 10.06,
-    tokensToday: 382400,
-    costUsdToday: 0.27,
-    costBrlToday: 1.58,
-    avgLatencyMs: 512,
-    fallbackRatePercent: 0.4,
+    totalTokensMonth: 0,
+    totalCostUsdMonth: 0,
+    totalCostBrlMonth: 0,
+    tokensToday: 0,
+    costUsdToday: 0,
+    costBrlToday: 0,
+    avgLatencyMs: 0,
+    fallbackRatePercent: 0,
   };
 
   const models = data?.models || [];
@@ -157,11 +157,15 @@ export default function AdminAiObservatoryPage() {
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-2xl font-bold text-emerald-400 font-mono">
-                R$ {summary.costBrlToday.toFixed(2)}
+                {loading ? '—' : `R$ ${summary.costBrlToday.toFixed(2)}`}
               </span>
-              <span className="text-xs text-zinc-500 font-mono">(${summary.costUsdToday.toFixed(2)})</span>
+              <span className="text-xs text-zinc-500 font-mono">
+                {loading ? '' : `($${summary.costUsdToday.toFixed(2)})`}
+              </span>
             </div>
-            <p className="text-[11px] text-zinc-500 mt-1">Tokens: {summary.tokensToday.toLocaleString('pt-BR')}</p>
+            <p className="text-[11px] text-zinc-500 mt-1">
+              {loading ? 'Carregando...' : `Tokens: ${summary.tokensToday.toLocaleString('pt-BR')}`}
+            </p>
           </Card>
 
           <Card className="p-4 bg-[#0B0F17]/90 border-zinc-800/80">
@@ -171,11 +175,15 @@ export default function AdminAiObservatoryPage() {
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-2xl font-bold text-zinc-100 font-mono">
-                R$ {summary.totalCostBrlMonth.toFixed(2)}
+                {loading ? '—' : `R$ ${summary.totalCostBrlMonth.toFixed(2)}`}
               </span>
-              <span className="text-xs text-zinc-500 font-mono">(${summary.totalCostUsdMonth.toFixed(2)})</span>
+              <span className="text-xs text-zinc-500 font-mono">
+                {loading ? '' : `($${summary.totalCostUsdMonth.toFixed(2)})`}
+              </span>
             </div>
-            <p className="text-[11px] text-zinc-500 mt-1">Total: {summary.totalTokensMonth.toLocaleString('pt-BR')} tokens</p>
+            <p className="text-[11px] text-zinc-500 mt-1">
+              {loading ? 'Carregando...' : `Total: ${summary.totalTokensMonth.toLocaleString('pt-BR')} tokens`}
+            </p>
           </Card>
 
           <Card className="p-4 bg-[#0B0F17]/90 border-zinc-800/80">
@@ -184,7 +192,9 @@ export default function AdminAiObservatoryPage() {
               <Clock className="w-4 h-4 text-amber-400" />
             </div>
             <div className="mt-2">
-              <span className="text-2xl font-bold text-amber-400 font-mono">{summary.avgLatencyMs} ms</span>
+              <span className="text-2xl font-bold text-amber-400 font-mono">
+                {loading ? '—' : `${summary.avgLatencyMs} ms`}
+              </span>
             </div>
             <p className="text-[11px] text-zinc-500 mt-1">TTFT médio dos gateways</p>
           </Card>
@@ -195,7 +205,9 @@ export default function AdminAiObservatoryPage() {
               <Layers className="w-4 h-4 text-purple-400" />
             </div>
             <div className="mt-2">
-              <span className="text-2xl font-bold text-zinc-200 font-mono">{summary.fallbackRatePercent}%</span>
+              <span className="text-2xl font-bold text-zinc-200 font-mono">
+                {loading ? '—' : `${summary.fallbackRatePercent}%`}
+              </span>
             </div>
             <p className="text-[11px] text-zinc-500 mt-1">Disparos de redundância</p>
           </Card>

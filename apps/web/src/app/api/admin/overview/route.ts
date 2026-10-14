@@ -12,12 +12,12 @@ interface ServiceHealth {
   latencyMs: number;
 }
 
-async function pingService(name: string, url: string): Promise<ServiceHealth> {
+async function pingService(name: string, url: string, headers?: Record<string, string>): Promise<ServiceHealth> {
   const start = Date.now();
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3500);
-    const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+    const res = await fetch(url, { signal: controller.signal, cache: 'no-store', headers });
     clearTimeout(timeout);
     return {
       name,
@@ -41,10 +41,20 @@ export async function GET(request: NextRequest) {
 
   // 1. Healthcheck dos serviços em paralelo
   const coreBase = resolveBackendApiBaseUrl();
-  const [goCoreHealth, engineHealth, whatsappHealth] = await Promise.all([
+  const [goCoreHealth, supabaseHealth, whatsappHealth] = await Promise.all([
     pingService('Go Core API', `${coreBase}/health`),
-    pingService('Python Engine', 'https://engine.aprovamind.com.br/health'),
-    pingService('Evolution WhatsApp', 'https://whats.aprovamind.com.br/instance/fetchInstances'),
+    pingService(
+      'Supabase DB & RAG',
+      process.env.SUPABASE_URL
+        ? `${process.env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/`
+        : 'http://aprovamindwhatsapp-pre0225supabase-ef999f-144-22-193-41.sslip.io/rest/v1/',
+      process.env.SUPABASE_KEY ? { apikey: process.env.SUPABASE_KEY } : undefined
+    ),
+    pingService(
+      'Evolution WhatsApp',
+      `${process.env.EVOLUTION_API_URL || 'https://whats.aprovamind.com.br'}/instance/connectionState/${process.env.EVOLUTION_INSTANCE_NAME || 'aprovamind'}`,
+      process.env.EVOLUTION_API_KEY ? { apikey: process.env.EVOLUTION_API_KEY } : undefined
+    ),
   ]);
 
   const webHealth: ServiceHealth = {
@@ -54,7 +64,7 @@ export async function GET(request: NextRequest) {
     latencyMs: 12,
   };
 
-  const services = [webHealth, goCoreHealth, engineHealth, whatsappHealth];
+  const services = [webHealth, goCoreHealth, supabaseHealth, whatsappHealth];
 
   // 2. Busca resumo de telemetria beta do Go Core
   let betaSignals = {
